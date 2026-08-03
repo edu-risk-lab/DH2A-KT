@@ -1,2 +1,0 @@
-dataset,model,graph_construction,eval_split,n_folds,n_eval,status,note,auc,auc_ci_low,auc_ci_high,acc,acc_ci_low,acc_ci_high,nll,nll_ci_low,nll_ci_high
-xes3g5m,gkt,train_only,valid+test,3,5766014,pykt_checkpoint,pyKT `gkt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.,0.8370950010986645,0.8328044059809493,0.8401807672969944,0.841560226886137,0.839665955677669,0.8426137327478566,0.36278389153090873,0.35985710710478996,0.36830217854492736

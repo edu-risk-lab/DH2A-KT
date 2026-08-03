@@ -1,3 +1,0 @@
-model_pair,delta_auc,ci_lower,ci_upper,n_learners,n_rows,method
-GKT vs \textit{simpleKT},-0.04107563622467877,-0.044231968443206676,-0.03791930400615086,,,paired_t_fold
-GIKT vs \textit{simpleKT},0.003131630698617031,0.003062922116494588,0.0032003392807394737,,,paired_t_fold
