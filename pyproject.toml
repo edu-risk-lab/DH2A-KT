@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dh2a-kt"
+version = "0.1.0"
+description = "Idea D: Dynamic Heterogeneous Hypergraph + Agentic Knowledge Tracing, built on the P0 leakage-controlled audit protocol"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools]
+packages = ["dh2a_kt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

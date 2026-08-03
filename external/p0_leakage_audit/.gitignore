@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------------------
+# Data (download separately under each provider's terms of use)
+# ---------------------------------------------------------------------------
+data/raw/**
+!data/raw/.gitkeep
+data/processed/**
+!data/processed/.gitkeep
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+.venv/
+venv/
+*.egg-info/
+*.ipynb_checkpoints
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# ---------------------------------------------------------------------------
+# Experiment caches / large local artefacts (keep verified tables/figures)
+# ---------------------------------------------------------------------------
+results/pykt_work/
+results/cache/
+results/predictions/
+logs/
+paper/results/
+
+# ---------------------------------------------------------------------------
+# Local tooling and private working documents
+# ---------------------------------------------------------------------------
+tools/basic-miktex-25.12-x64.exe
+tools/miktex/
+Checklist/
+docs/internal/
+paper/TAI LIEU THAM KHAO_APIN/
+paper/*GS*
+paper/*Review*
+audit/20*/
+*.zip
+
+# ---------------------------------------------------------------------------
+# LaTeX build by-products (keep named release PDF, source, bibliography, and BBL)
+# ---------------------------------------------------------------------------
+*.aux
+*.log
+*.out
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.toc
+*.lof
+*.lot
+paper/submission_APIN/main_APIN.pdf
+
+# ---------------------------------------------------------------------------
+# OS / IDE
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.cursor/
+
+# ---------------------------------------------------------------------------
+# Transient audit helpers (keep curated public reports if tracked)
+# ---------------------------------------------------------------------------
+audit/**/_*.txt
+audit/**/_*.png
+audit/**/*_page*.png
+
+# Secrets / local env
+.env
+.env.*
+*.pem

@@ -1,0 +1,57 @@
+% Auto-derived from results/tables/ddr_downstream.csv (GKT multi-seed merge)
+% XES3G5M: seeds 42/17/1234 x 3 folds (n=6); ASSIST2012: seed-42 grid (+ anchors).
+% AUC drop = mean decrease in test AUC vs. the unperturbed (DDR=0) baseline.
+% Caption scopes: r_core n=54; r_all/rho_all n=66; global pooled r~0.75 is Fig S3 only.
+\begin{table}[t]
+\centering
+\caption{\DDR{}$\to$downstream AUC for the graph-reliant backbone GKT, with a
+positive control. For each dataset the prerequisite graph $\Epre$ is perturbed
+by each operator at strength $p$; \emph{AUC drop} is the mean decrease in test
+AUC relative to the unperturbed (\DDR{}$=0$) baseline across folds (baselines:
+XES3G5M $0.8346$, ASSISTments $0.9630$; XES3G5M pooled over
+3 seeds $\times$ 3 folds). The bottom block reports the
+manipulation-check anchors ($p{=}0.90$, near-total graph destruction). On
+XES3G5M/GKT, \DDR{} tracks AUC drop with distinct estimands: Pearson
+$r{=}0.95$ on the $p{\le}0.3$ core ($n{=}54$); Pearson
+$r{=}0.99$ on the full pool including anchors ($n{=}66$); Spearman
+$\rho{=}0.96$ on that same full pool ($n{=}66$). These are not
+interchangeable with the global pooled Pearson $r{\approx}0.75$ ($n{=}186$)
+annotated on Fig.~S3. At matched budget,
+\texttt{prereq\_preserve} degrades AUC least and \texttt{node\_drop} most. On
+ASSISTments the same total destruction moves GKT by ${\le}0.003$, so this cell
+(like DGEKT in Table~\ref{tab:ddr-downstream}) is a \emph{low-reliance anchor}
+whose correlation is not practically meaningful.}
+\label{tab:ddr-downstream-gkt}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{} >{\RaggedRight\arraybackslash}p{0.13\linewidth} >{\RaggedRight\arraybackslash}p{0.20\linewidth} c *{3}{>{\centering\arraybackslash}X} @{}}
+\toprule
+Dataset & Operator & $p$ & Mean \DDR{} & Mean AUC & AUC drop \\
+\midrule
+XES3G5M & \texttt{edge\_drop} & 0.10 & 0.096 & 0.8312 & 0.0032 \\
+XES3G5M & \texttt{edge\_drop} & 0.20 & 0.206 & 0.8270 & 0.0075 \\
+XES3G5M & \texttt{edge\_drop} & 0.30 & 0.299 & 0.8226 & 0.0118 \\
+XES3G5M & \texttt{node\_drop} & 0.10 & 0.193 & 0.8210 & 0.0134 \\
+XES3G5M & \texttt{node\_drop} & 0.20 & 0.397 & 0.8051 & 0.0293 \\
+XES3G5M & \texttt{node\_drop} & 0.30 & 0.551 & 0.7921 & 0.0423 \\
+XES3G5M & \texttt{prereq\_preserve} & 0.10 & 0.076 & 0.8317 & 0.0027 \\
+XES3G5M & \texttt{prereq\_preserve} & 0.20 & 0.168 & 0.8274 & 0.0070 \\
+XES3G5M & \texttt{prereq\_preserve} & 0.30 & 0.242 & 0.8246 & 0.0098 \\
+ASSIST2012 & \texttt{edge\_drop} & 0.10 & 0.086 & 0.9630 & -0.0000 \\
+ASSIST2012 & \texttt{edge\_drop} & 0.20 & 0.221 & 0.9629 & 0.0002 \\
+ASSIST2012 & \texttt{edge\_drop} & 0.30 & 0.304 & 0.9627 & 0.0003 \\
+ASSIST2012 & \texttt{node\_drop} & 0.10 & 0.199 & 0.9626 & 0.0004 \\
+ASSIST2012 & \texttt{node\_drop} & 0.20 & 0.460 & 0.9619 & 0.0012 \\
+ASSIST2012 & \texttt{node\_drop} & 0.30 & 0.553 & 0.9619 & 0.0011 \\
+ASSIST2012 & \texttt{prereq\_preserve} & 0.10 & 0.075 & 0.9630 & 0.0000 \\
+ASSIST2012 & \texttt{prereq\_preserve} & 0.20 & 0.187 & 0.9629 & 0.0001 \\
+ASSIST2012 & \texttt{prereq\_preserve} & 0.30 & 0.255 & 0.9628 & 0.0003 \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{Manipulation-check anchors (near-total destruction)}}\\
+XES3G5M & \texttt{edge\_drop} & 0.90 & 0.901 & 0.7636 & 0.0708 \\
+XES3G5M & \texttt{node\_drop} & 0.90 & 0.991 & 0.7468 & 0.0876 \\
+ASSIST2012 & \texttt{edge\_drop} & 0.90 & 0.906 & 0.9612 & 0.0018 \\
+ASSIST2012 & \texttt{node\_drop} & 0.90 & 0.995 & 0.9610 & 0.0021 \\
+\bottomrule
+\end{tabularx}
+\end{table}

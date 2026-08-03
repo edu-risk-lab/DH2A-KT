@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Data (gigabytes; follow external/p0_leakage_audit/README.md section 3 to fetch)
+external/p0_leakage_audit/data/raw/*
+external/p0_leakage_audit/data/processed/*
+!external/p0_leakage_audit/data/raw/.gitkeep
+!external/p0_leakage_audit/data/processed/.gitkeep
+data/
+
+# Stray artefacts from failed `git submodule add` / filesystem-probe attempts
+# in the authoring environment (mounted filesystem does not support unlink)
+# — harmless, kept instead of deleted because this environment cannot remove
+# files either. Safe to delete by hand on an unrestricted machine.
+external/_failed_submodule_gitlink.txt
+external/_writetest2.txt
+external/p0_leakage_audit/.p0_vendored_commit.txt
+/_rmtest.txt
+/_rmtest2.txt
+
+# Logs / results scratch
+logs/*
+!logs/.gitkeep
+*.log
+.pytest_cache/
+
+# Model checkpoints and generated result artefacts (large / non-reproducible
+# binaries — regenerate via scripts/03_train_tier1.py etc. on the GPU server,
+# do not commit weights to GitHub). Keep directory skeletons via .gitkeep.
+checkpoints/*
+!checkpoints/.gitkeep
+results/*
+!results/tables/
+!results/figures/
+results/tables/*
+!results/tables/.gitkeep
+results/figures/*
+!results/figures/.gitkeep
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+
+# Local Python virtual environment created by scripts/00_setup_p0_submodule.sh
+.venv/

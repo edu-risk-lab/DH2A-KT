@@ -1,0 +1,10 @@
+model,codebase,graph_input,epochs,batch_size,lr,hp_search_budget,split_seed,graph_construction,data_loader_notes,n_parameters,early_stopping_patience,selection_metric,checkpoint_rule,mean_runtime_minutes,gpu_type
+bkt,scipy_lbfgs,None,30,64,0.001,0,42,train_only / full_log,native,Various,N/A,NLL,N/A,<0.1h,CPU
+dkt,pykt_stock,None,30,64,0.001,0,42,train_only / full_log,pykt format,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+simplekt,pykt_stock,None,30,64,0.001,0,42,train_only / full_log,pykt format,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+akt,pykt_stock,None,30,64,0.001,0,42,train_only / full_log,pykt format,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+gkt,pykt_stock,E_pre + E_sim,10,4,0.001,0,42,train_only / full_log,pykt format,Various,5,AUC,Best Valid AUC,~2-4h,NVIDIA RTX 3090 24GB
+gikt,native_src_models,E_pre + E_sim,10,8,0.001,0,42,train_only / full_log,native,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+skt,native_src_models,E_pre + E_sim,10,8,0.001,0,42,train_only / full_log,native,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+dygkt,native_src_models,E_pre + E_sim,10,8,0.001,0,42,train_only / full_log,native,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB
+dgekt,native_src_models,E_pre + E_sim,10,8,0.001,0,42,train_only / full_log,native,Various,5,AUC,Best Valid AUC,~0.5-3h,NVIDIA RTX 3090 24GB

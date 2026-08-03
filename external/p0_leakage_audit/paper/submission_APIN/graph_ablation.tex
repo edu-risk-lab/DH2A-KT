@@ -1,0 +1,24 @@
+% Main-manuscript summary: max train-only vs.\ full-log shifts per dataset.
+% Full per-model tables are in graph_ablation_full.tex (Supplementary Material).
+
+\begin{table}[t]
+\centering
+\caption{Train-only versus full-log graph ablation summary (fold~0).
+Columns report the largest absolute $\Delta$AUC and $\Delta$ACC
+(full-log minus train-only) across GKT, GIKT, SKT, DyGKT, and DGEKT.
+Per-model train-only/full-log pairs are in Supplementary Tables~S6--S10.}
+\label{tab:graph-ablation}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{} >{\RaggedRight\arraybackslash}p{0.22\linewidth} >{\centering\arraybackslash}X >{\centering\arraybackslash}X >{\RaggedRight\arraybackslash}p{0.34\linewidth} @{}}
+\toprule
+Dataset & max $|\Delta$AUC| & max $|\Delta$ACC| & Largest shift (model) \\
+\midrule
+Junyi Academy & 0.003 & 0.008 & SKT ($\Delta$AUC${=}{-}0.003$) \\
+ASSISTments 2012 & 0.000 & 0.000 & all models $\approx 0$ \\
+XES3G5M & 0.003 & 0.001 & DyGKT ($\Delta$AUC${=}{-}0.003$) \\
+Synthetic C2 & 0.001 & 0.001 & GKT/DGEKT \\
+Synthetic C5 & 0.002 & 0.002 & GKT ($\Delta$AUC${=}{+}0.002$); GIKT ($\Delta$ACC${=}{-}0.002$) \\
+\bottomrule
+\end{tabularx}
+\end{table}

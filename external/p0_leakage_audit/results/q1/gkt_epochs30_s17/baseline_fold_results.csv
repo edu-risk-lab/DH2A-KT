@@ -1,0 +1,4 @@
+dataset,fold,split_seed,model,graph_construction,eval_split,auc,acc,nll,n_eval,status,note,experiment_tag,split_base_seed
+xes3g5m,0,17,gkt,train_only,valid+test,0.8422173236026003,0.8470733902388579,0.3524157578843413,1919582,pykt_checkpoint,pyKT `gkt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.,gkt_epochs30_s17,17
+xes3g5m,1,18,gkt,train_only,valid+test,0.8435369316502014,0.8468609727602533,0.3527448331731821,1917041,pykt_checkpoint,pyKT `gkt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.,gkt_epochs30_s17,17
+xes3g5m,2,19,gkt,train_only,valid+test,0.8448232263658406,0.8481829920678842,0.3498334948577747,1923384,pykt_checkpoint,pyKT `gkt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.,gkt_epochs30_s17,17

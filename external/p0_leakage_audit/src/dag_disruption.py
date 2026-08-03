@@ -1,0 +1,388 @@
+"""DAG disruption probes for train-only prerequisite edge sets."""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import random
+from pathlib import Path
+from typing import Sequence
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from src.io_utils import dump_csv, load_yaml
+from src.split_checker import fold_seeds
+
+logger = logging.getLogger(__name__)
+
+
+def _rng(seed: int) -> np.random.Generator:
+    random.seed(seed)
+    np.random.seed(seed)
+    return np.random.default_rng(seed)
+
+
+def apply_node_drop(edges: pd.DataFrame, p: float, seed: int) -> pd.DataFrame:
+    """Drop edges incident to a sampled set of nodes."""
+    logger.info("Applying node_drop edges_shape=%s p=%s seed=%s", edges.shape, p, seed)
+    if edges.empty or p <= 0:
+        return edges.copy()
+    rng = _rng(seed)
+    nodes = np.array(sorted(set(edges["src_kc"]) | set(edges["dst_kc"])))
+    drop_nodes = set(nodes[rng.random(len(nodes)) < p])
+    result = edges[~edges["src_kc"].isin(drop_nodes) & ~edges["dst_kc"].isin(drop_nodes)].reset_index(drop=True)
+    logger.info("node_drop result_shape=%s", result.shape)
+    return result
+
+
+def apply_edge_drop(edges: pd.DataFrame, p: float, seed: int) -> pd.DataFrame:
+    """Drop a sampled set of edges."""
+    logger.info("Applying edge_drop edges_shape=%s p=%s seed=%s", edges.shape, p, seed)
+    if edges.empty or p <= 0:
+        return edges.copy()
+    rng = _rng(seed)
+    keep = rng.random(len(edges)) >= p
+    result = edges.loc[keep].reset_index(drop=True)
+    logger.info("edge_drop result_shape=%s", result.shape)
+    return result
+
+
+def apply_attribute_mask(edges: pd.DataFrame, p: float, seed: int) -> pd.DataFrame:
+    """Mask non-structural edge attributes while preserving DAG endpoints."""
+    logger.info("Applying attr_mask edges_shape=%s p=%s seed=%s", edges.shape, p, seed)
+    result = edges.copy()
+    if result.empty or p <= 0:
+        return result
+    rng = _rng(seed)
+    mask = rng.random(len(result)) < p
+    for col in [c for c in result.columns if c not in {"src_kc", "dst_kc"}]:
+        if pd.api.types.is_numeric_dtype(result[col]):
+            result.loc[mask, col] = np.nan
+        else:
+            result.loc[mask, col] = "masked"
+    logger.info("attr_mask result_shape=%s", result.shape)
+    return result
+
+
+def apply_subgraph_sampling(edges: pd.DataFrame, p: float, seed: int) -> pd.DataFrame:
+    """Keep a random-walk-grown node-induced subgraph."""
+    logger.info("Applying subgraph edges_shape=%s p=%s seed=%s", edges.shape, p, seed)
+    if edges.empty or p <= 0:
+        return edges.copy()
+    rng = _rng(seed)
+    nodes = np.array(sorted(set(edges["src_kc"]) | set(edges["dst_kc"])))
+    target_size = min(len(nodes), max(1, int(np.ceil((1.0 - p) * len(nodes)))))
+
+    adjacency = {node: set() for node in nodes}
+    for src, dst in edges[["src_kc", "dst_kc"]].itertuples(index=False, name=None):
+        adjacency[src].add(dst)
+        adjacency[dst].add(src)
+
+    start = rng.choice(nodes)
+    keep_nodes = {start}
+    frontier = [start]
+    while len(keep_nodes) < target_size:
+        if not frontier:
+            remaining = np.array([node for node in nodes if node not in keep_nodes])
+            if len(remaining) == 0:
+                break
+            start = rng.choice(remaining)
+            keep_nodes.add(start)
+            frontier.append(start)
+            continue
+        current = rng.choice(np.array(frontier))
+        candidates = np.array(sorted(adjacency[current] - keep_nodes))
+        if len(candidates) == 0:
+            frontier.remove(current)
+            continue
+        nxt = rng.choice(candidates)
+        keep_nodes.add(nxt)
+        frontier.append(nxt)
+
+    result = edges[edges["src_kc"].isin(keep_nodes) & edges["dst_kc"].isin(keep_nodes)].reset_index(drop=True)
+    logger.info("subgraph result_shape=%s", result.shape)
+    return result
+
+
+def _reachable_sets(adj: dict[object, set]) -> dict[object, set]:
+    """Transitive closure (descendants) per node, assuming the edge set is a DAG
+    (the retained acyclic E_pre). Iterative DFS with memoisation."""
+    desc: dict[object, set] = {}
+    for root in adj:
+        if root in desc:
+            continue
+        stack = [(root, iter(adj.get(root, ())))]
+        seen_on_stack = {root}
+        while stack:
+            node, it = stack[-1]
+            advanced = False
+            for child in it:
+                if child in desc:
+                    continue
+                if child in seen_on_stack:
+                    continue  # cycle guard (defensive; E_pre is pruned acyclic)
+                stack.append((child, iter(adj.get(child, ()))))
+                seen_on_stack.add(child)
+                advanced = True
+                break
+            if not advanced:
+                node, _ = stack.pop()
+                seen_on_stack.discard(node)
+                acc: set = set()
+                for child in adj.get(node, ()):
+                    acc.add(child)
+                    acc |= desc.get(child, set())
+                desc[node] = acc
+    return desc
+
+
+def apply_prereq_preserve(edges: pd.DataFrame, p: float, seed: int) -> pd.DataFrame:
+    """Prerequisite-preserving edge perturbation.
+
+    A structure-aware augmentation: with the same per-edge budget ``p`` as
+    ``edge_drop``, edges are selected for removal, but only those that are
+    *transitively redundant* (an alternate directed path src->...->dst exists)
+    are actually dropped. Edges in the transitive-reduction backbone are
+    protected, so every reachability/precedence relation in E_pre is preserved.
+    DDR is therefore bounded by ``p`` times the redundant-edge fraction and is
+    data-dependent rather than fixed by construction."""
+    logger.info("Applying prereq_preserve edges_shape=%s p=%s seed=%s", edges.shape, p, seed)
+    if edges.empty or p <= 0:
+        return edges.copy()
+    rng = _rng(seed)
+
+    adj: dict[object, set] = {}
+    for src, dst in edges[["src_kc", "dst_kc"]].itertuples(index=False, name=None):
+        adj.setdefault(src, set()).add(dst)
+        adj.setdefault(dst, set())
+    desc = _reachable_sets(adj)
+
+    def _is_redundant(u: object, v: object) -> bool:
+        for w in adj.get(u, ()):
+            if w == v:
+                continue
+            if v in desc.get(w, set()):
+                return True
+        return False
+
+    selected = rng.random(len(edges)) < p
+    src_arr = edges["src_kc"].to_numpy()
+    dst_arr = edges["dst_kc"].to_numpy()
+    drop_mask = np.zeros(len(edges), dtype=bool)
+    for i in range(len(edges)):
+        if selected[i] and _is_redundant(src_arr[i], dst_arr[i]):
+            drop_mask[i] = True
+    result = edges.loc[~drop_mask].reset_index(drop=True)
+    logger.info("prereq_preserve result_shape=%s dropped=%s", result.shape, int(drop_mask.sum()))
+    return result
+
+
+def reachability_pairs(edges: pd.DataFrame) -> set[tuple]:
+    """All ordered (u, v) pairs such that v is reachable from u in the DAG
+    induced by ``edges`` (transitive closure, including direct edges)."""
+    if edges.empty:
+        return set()
+    adj: dict[object, set] = {}
+    for src, dst in edges[["src_kc", "dst_kc"]].itertuples(index=False, name=None):
+        adj.setdefault(src, set()).add(dst)
+        adj.setdefault(dst, set())
+    desc = _reachable_sets(adj)
+    return {(u, v) for u, vs in desc.items() for v in vs}
+
+
+def reachability_f1(original: pd.DataFrame, perturbed: pd.DataFrame) -> float:
+    """F1 between the reachability (precedence) relations of two edge sets.
+
+    Treats the original closure as ground truth. ``1 - reachability_f1`` is the
+    *reachability disruption*: how much of the precedence structure a model could
+    care about is destroyed, complementary to the edge-level DDR."""
+    orig = reachability_pairs(original)
+    if not orig:
+        return 1.0
+    pert = reachability_pairs(perturbed)
+    if not pert:
+        return 0.0
+    inter = len(orig & pert)
+    precision = inter / len(pert)
+    recall = inter / len(orig)
+    if precision + recall == 0:
+        return 0.0
+    return 2.0 * precision * recall / (precision + recall)
+
+
+def compute_dag_disruption_rate(original: pd.DataFrame, augmented: pd.DataFrame) -> float:
+    """Compute DDR = |E_pre lost or reversed| / |E_pre|."""
+    logger.info("Computing DDR original_shape=%s augmented_shape=%s", original.shape, augmented.shape)
+    original_edges = set(original[["src_kc", "dst_kc"]].itertuples(index=False, name=None))
+    if not original_edges:
+        return 0.0
+    augmented_edges = set(augmented[["src_kc", "dst_kc"]].itertuples(index=False, name=None))
+    lost = original_edges - augmented_edges
+    reversed_edges = {(src, dst) for src, dst in original_edges if (dst, src) in augmented_edges and (src, dst) not in augmented_edges}
+    ddr = len(lost | reversed_edges) / len(original_edges)
+    logger.info("DDR=%s", ddr)
+    return ddr
+
+
+def sweep_ddr(
+    edges: pd.DataFrame,
+    augmentations: Sequence[str] = ("node_drop", "edge_drop", "attr_mask", "subgraph", "prereq_preserve"),
+    ps: Sequence[float] = (0.05, 0.10, 0.20, 0.30),
+    seeds: Sequence[int] = (42,),
+) -> pd.DataFrame:
+    """Run DDR probes for configured augmentations."""
+    logger.info("Sweeping DDR edges_shape=%s augmentations=%s ps=%s seeds=%s", edges.shape, augmentations, ps, seeds)
+    fns = {
+        "node_drop": apply_node_drop,
+        "edge_drop": apply_edge_drop,
+        "attr_mask": apply_attribute_mask,
+        "subgraph": apply_subgraph_sampling,
+        "prereq_preserve": apply_prereq_preserve,
+    }
+    rows = []
+    for aug in augmentations:
+        if aug not in fns:
+            raise ValueError(f"Unknown augmentation: {aug}")
+        for p in ps:
+            for seed in seeds:
+                augmented = fns[aug](edges, float(p), int(seed))
+                rows.append({"augmentation": aug, "p": float(p), "seed": int(seed), "ddr": compute_dag_disruption_rate(edges, augmented)})
+    result = pd.DataFrame(rows)
+    logger.info("DDR sweep shape=%s", result.shape)
+    return result
+
+
+def _bootstrap_mean_ci(values: Sequence[float], seed: int, n_bootstrap: int = 1000) -> tuple[float, float]:
+    arr = np.asarray(values, dtype=float)
+    arr = arr[~np.isnan(arr)]
+    if len(arr) == 0:
+        return np.nan, np.nan
+    if len(arr) == 1:
+        return float(arr[0]), float(arr[0])
+    rng = np.random.default_rng(seed)
+    samples = rng.choice(arr, size=(n_bootstrap, len(arr)), replace=True).mean(axis=1)
+    low, high = np.quantile(samples, [0.025, 0.975])
+    return float(low), float(high)
+
+
+def _resolve_run_config(config: Path | None, edges: Path | None, seed: int) -> tuple[str, list[tuple[int, Path]], Sequence[str], Sequence[float], Sequence[int], int]:
+    if config is None:
+        return "default", [(0, edges or Path("data/processed/junyi/fold_0/e_pre_train_only.csv"))], ("node_drop", "edge_drop", "attr_mask", "subgraph"), (0.05, 0.10, 0.20, 0.30), (seed,), 1000
+    cfg = load_yaml(config)
+    dataset = cfg["dataset"]
+    augmentation = cfg.get("augmentation", {})
+    split_cfg = cfg.get("split", {})
+    fold_paths = (
+        [(0, edges)]
+        if edges is not None
+        else [(fold, Path("data/processed") / dataset / f"fold_{fold}" / "e_pre_train_only.csv") for fold, _ in enumerate(fold_seeds(split_cfg, seed))]
+    )
+    return (
+        dataset,
+        fold_paths,
+        tuple(augmentation.get("methods", ["node_drop", "edge_drop", "attr_mask", "subgraph"])),
+        tuple(float(p) for p in augmentation.get("ps", [0.05, 0.10, 0.20, 0.30])),
+        tuple(int(s) for s in augmentation.get("seeds", [seed])),
+        int(augmentation.get("n_bootstrap", 1000)),
+    )
+
+
+# J05: color + marker + linestyle so operators remain separable in grayscale.
+_DDR_OP_STYLE = {
+    "attr_mask": {"color": "#937860", "marker": "o", "linestyle": "-"},
+    "edge_drop": {"color": "#4C72B0", "marker": "s", "linestyle": "--"},
+    "node_drop": {"color": "#C44E52", "marker": "^", "linestyle": "-."},
+    "prereq_preserve": {"color": "#55A868", "marker": "D", "linestyle": ":"},
+    "subgraph": {"color": "#8172B2", "marker": "v", "linestyle": (0, (3, 1, 1, 1))},
+}
+
+
+def _plot_ddr_figure(dataset: str, summary: pd.DataFrame, fig_path: Path) -> None:
+    """Line plot of mean DDR vs perturbation strength (paper-facing PDF)."""
+    # Compact canvas + large type so labels stay ≥~7 pt after 0.82\linewidth include.
+    fs_title, fs_axis, fs_tick, fs_legend = 16, 14, 12, 12
+    fig, ax = plt.subplots(figsize=(5.4, 3.6))
+    if not summary.empty:
+        # Stable legend order
+        order = [a for a in _DDR_OP_STYLE if a in set(summary["augmentation"])]
+        order += sorted(set(summary["augmentation"]) - set(order))
+        for aug in order:
+            part = summary.loc[summary["augmentation"] == aug].sort_values("p")
+            style = _DDR_OP_STYLE.get(aug, {"color": "#555555", "marker": "o", "linestyle": "-"})
+            ax.plot(
+                part["p"],
+                part["ddr_mean"],
+                label=aug,
+                color=style["color"],
+                marker=style["marker"],
+                linestyle=style["linestyle"],
+                markersize=7,
+                linewidth=1.8,
+            )
+        ax.set_xlabel("$p$", fontsize=fs_axis)
+        ax.set_ylabel("Mean DDR", fontsize=fs_axis)
+        ax.set_title(f"DDR sweep: {dataset}", fontsize=fs_title)
+        ax.tick_params(axis="both", labelsize=fs_tick)
+        ax.legend(fontsize=fs_legend, frameon=False)
+    fig.tight_layout()
+    fig.savefig(fig_path)
+    plt.close(fig)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run DAG disruption probes")
+    parser.add_argument("--config", type=Path, required=False)
+    parser.add_argument("--edges", type=Path, default=None)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--log-level", default="INFO")
+    args = parser.parse_args()
+    logging.basicConfig(level=getattr(logging, args.log_level.upper()))
+    dataset, fold_paths, augmentations, ps, seeds, n_bootstrap = _resolve_run_config(args.config, args.edges, args.seed)
+    frames = []
+    for fold, edges_path in fold_paths:
+        edges = pd.read_csv(edges_path) if edges_path.exists() else pd.DataFrame(columns=["src_kc", "dst_kc", "weight"])
+        fold_result = sweep_ddr(edges, augmentations=augmentations, ps=ps, seeds=seeds)
+        fold_result.insert(0, "fold", fold)
+        frames.append(fold_result)
+    result = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=["fold", "augmentation", "p", "seed", "ddr"])
+    result.insert(0, "dataset", dataset)
+    summary_rows = []
+    for (augmentation, p), part in result.groupby(["augmentation", "p"]):
+        ci_low, ci_high = _bootstrap_mean_ci(part["ddr"], seed=args.seed, n_bootstrap=n_bootstrap)
+        summary_rows.append({
+            "dataset": dataset,
+            "augmentation": augmentation,
+            "p": p,
+            "ddr_mean": float(part["ddr"].mean()),
+            "ddr_std": float(part["ddr"].std(ddof=1)) if len(part) > 1 else 0.0,
+            "ddr_ci_low": ci_low,
+            "ddr_ci_high": ci_high,
+            "n": len(part),
+        })
+    summary = pd.DataFrame(summary_rows)
+    dataset_table = Path("results/tables") / f"{dataset}_dag_disruption.csv"
+    dump_csv(result, dataset_table)
+    dump_csv(summary, Path("results/tables") / f"{dataset}_dag_disruption_summary.csv")
+    combined_table = Path("results/tables/dag_disruption.csv")
+    combined = result
+    if combined_table.exists():
+        previous = pd.read_csv(combined_table)
+        previous = previous[previous["dataset"] != dataset]
+        combined = pd.concat([previous, result], ignore_index=True)
+    dump_csv(combined.sort_values(["dataset", "fold", "augmentation", "p", "seed"]), combined_table)
+    combined_summary_table = Path("results/tables/dag_disruption_summary.csv")
+    combined_summary = summary
+    if combined_summary_table.exists():
+        previous_summary = pd.read_csv(combined_summary_table)
+        previous_summary = previous_summary[previous_summary["dataset"] != dataset]
+        combined_summary = pd.concat([previous_summary, summary], ignore_index=True)
+    dump_csv(combined_summary.sort_values(["dataset", "augmentation", "p"]), combined_summary_table)
+    fig_path = Path("results/figures") / f"fig_ddr_{dataset}.pdf"
+    fig_path.parent.mkdir(parents=True, exist_ok=True)
+    _plot_ddr_figure(dataset, summary, fig_path)
+
+
+if __name__ == "__main__":
+    main()

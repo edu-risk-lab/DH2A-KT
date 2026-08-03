@@ -1,0 +1,36 @@
+# DH2A-KT config for XES3G5M — P0's primary benchmark, kept as Idea D's
+# primary too (docs/idea-D-plan.md section 5: low KC-repeat, non-saturated
+# AUC, clearest backbone separation in P0's results).
+p0_config: external/p0_leakage_audit/configs/xes3g5m.yaml
+dataset: xes3g5m
+role: primary
+
+# Data layout, split protocol, e_pre/e_sim construction params all inherited
+# from p0_config above — do not duplicate/fork them here (docs/idea-D-plan.md
+# section 10 risk: "Preprocessing cua D khong khop chinh xac voi P0").
+
+hyperedge:
+  concept_prerequisite:
+    enabled: true
+    min_chain_len: 3
+    max_chain_len: 8
+    source: p0_e_pre   # built from P0's audited, acyclic E_pre (Pha 1)
+  session:
+    enabled: false      # TODO Pha 1 (docs/idea-D-plan.md section 5): needs
+                         # Hint/Video-bearing logs XES3G5M does not provide.
+    session_gap_seconds: 1800
+  discussion_thread:
+    enabled: false       # Tier 2 case-study scope only
+  teacher_intervention:
+    enabled: false       # Tier 2 case-study scope only
+
+manipulation_check:
+  p: 0.90
+  operator: node_drop
+  seed: 42
+
+baselines_reused:
+  path: baselines/p0_reused/baseline_results.csv
+  fold_path: baselines/p0_reused/baseline_fold_results.csv
+  graph_construction: train_only   # never full_log for headline comparisons
+  models: [bkt, akt, dkt, simplekt, gkt, gikt, skt, dygkt, dgekt]

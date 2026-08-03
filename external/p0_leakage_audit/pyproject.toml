@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "p0-kc-graph-protocol"
+version = "0.1.0"
+description = "Leakage-controlled knowledge-component graph audit protocol for knowledge tracing (companion research software)"
+requires-python = ">=3.10"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Tuan Dao Minh", email = "tuanymc@utehy.edu.vn" },
+  { name = "Khanh-Trinh Nguyen", email = "trinhnk@utehy.edu.vn" },
+  { name = "Duong Nguyen Tien", email = "duongnt@utehy.edu.vn" },
+  { name = "Quoc Khanh Ngo", email = "quockhanhngo.official@gmail.com" },
+  { name = "Van-Hau Nguyen", email = "nvhau66@gmail.com" },
+  { name = "Le Hoang Son", email = "sonlh@vnu.edu.vn" },
+]
+keywords = [
+  "knowledge-tracing",
+  "concept-graphs",
+  "data-leakage",
+  "reproducibility",
+  "educational-data-mining",
+]
+urls = { Homepage = "https://github.com/edu-risk-lab/leakage-controlled-kt-audit", Repository = "https://github.com/edu-risk-lab/leakage-controlled-kt-audit" }
+
+[tool.setuptools]
+packages = ["src"]
+
+[project.scripts]
+p0-preprocess = "src.preprocess:main"
+p0-split-check = "src.split_checker:main"
+p0-graph-build = "src.graph_builder:main"
+p0-dag-audit = "src.dag_audit:main"
+p0-dag-disrupt = "src.dag_disruption:main"
+p0-cold-start = "src.cold_start_report:main"
+p0-baseline = "src.baseline_runner:main"
+p0-export-full-log-graph = "src.export_full_log_graph:main"
+
+[project.optional-dependencies]
+pykt = [
+  "torch>=2.1",
+  "scipy>=1.10",
+  # Install the pinned submodule after: git submodule update --init --recursive
+  #   pip install -e third_party/pykt-toolkit
+  # (absolute local file:// paths are intentionally avoided for portability)
+]

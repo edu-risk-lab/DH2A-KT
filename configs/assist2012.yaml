@@ -1,0 +1,31 @@
+# DH2A-KT config for ASSISTments 2012 — secondary benchmark (docs/idea-D-plan.md
+# section 5). Single-skill Q-matrix => E_sim is empty under P0's Jaccard rule
+# (already known from P0 Section 4.8) — do not spend time debugging an
+# "empty E_sim" as if it were a bug.
+p0_config: external/p0_leakage_audit/configs/assist2012.yaml
+dataset: assist2012
+role: secondary
+
+hyperedge:
+  concept_prerequisite:
+    enabled: true
+    min_chain_len: 3
+    max_chain_len: 8
+    source: p0_e_pre
+  session:
+    enabled: false
+  discussion_thread:
+    enabled: false
+  teacher_intervention:
+    enabled: false
+
+manipulation_check:
+  p: 0.90
+  operator: node_drop
+  seed: 42
+
+baselines_reused:
+  path: baselines/p0_reused/baseline_results.csv
+  fold_path: baselines/p0_reused/baseline_fold_results.csv
+  graph_construction: train_only
+  models: [bkt, akt, dkt, simplekt, gkt, gikt, skt, dygkt, dgekt]

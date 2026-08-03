@@ -1,0 +1,4 @@
+Model,Clean AUC,Leak 5% AUC,Leak 20% AUC,clean_status,leak5_status,leak20_status
+simplekt,0.8744411161851224,0.8748062187440604,0.874757595363675,verified,verified,verified
+gkt,0.8345570064591779,0.8254861938058292,0.8243386245981265,verified,verified,verified
+gikt,0.8775823299875001,0.8777681921579212,0.8777681921579212,verified,verified,verified

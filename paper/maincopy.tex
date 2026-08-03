@@ -1,0 +1,427 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------------------
+% Draft-only helper: visually flags unfinished content so nothing pending is
+% mistaken for a finished claim. Remove this package/command before final
+% submission (do NOT leave \todo markers in a submitted manuscript).
+% ---------------------------------------------------------------------------
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+\begin{document}
+
+\title{DH$^2$A-KT: Dynamic Heterogeneous Hypergraph and Agentic Knowledge
+Tracing with Leakage-Controlled Graph Construction}
+
+\author{Tuan~Dao~Minh, Khanh-Trinh~Nguyen, Duong~Nguyen~Tien, Quoc~Khanh~Ngo,
+Van-Hau~Nguyen, and~Le~Hoang~Son
+\thanks{T. Dao Minh, K.-T. Nguyen, D. N. Tien, and V.-H. Nguyen are with the
+Department of Quality Assurance and Testing, Hung Yen University of
+Technology and Education, Hung Yen, Vietnam (e-mail: tuanymc@utehy.edu.vn;
+trinhnk@utehy.edu.vn; duongnt@utehy.edu.vn; nvhau66@gmail.com).}
+\thanks{Q. K. Ngo is with the Advanced International Research Center on
+Applied Artificial Intelligence, Information Technology Institute, Vietnam
+National University, Hanoi, Vietnam (e-mail: quockhanhngo.official@gmail.com).}
+\thanks{L. H. Son is with the Information Technology Institute, Vietnam
+National University, 144 Xuan Thuy Street, Cau Giay, Hanoi, Vietnam. He is
+the corresponding author (e-mail: sonlh@vnu.edu.vn).
+\todo{Manuscript received/revised dates -- fill at submission time.}}}
+
+\markboth{IEEE Transactions on Learning Technologies}%
+{Dao \MakeLowercase{\textit{et al.}}: DH$^2$A-KT}
+
+\maketitle
+
+\begin{abstract}
+Graph-augmented knowledge tracing (KT) models student mastery by propagating
+information over auxiliary concept graphs, but two gaps limit current
+practice. First, most graph-KT architectures represent only pairwise
+knowledge-component relations and omit heterogeneous entities -- teachers,
+hints, forum discussions, instructional videos -- that plausibly shape a
+learner's trajectory. Second, when graph-augmented KT models are evaluated
+without auditing whether the auxiliary graph was itself built without
+leakage, reported accuracy gains are difficult to attribute to genuine
+structural signal versus held-out information reaching the model through the
+graph channel. We present DH$^2$A-KT, a two-tier architecture that addresses
+both gaps while remaining computationally tractable on a single consumer
+GPU. Tier 1 (DH$^2$-KT) extends a leakage-controlled, train-only concept
+graph construction and audit protocol -- released with a companion paper,
+P0 -- from pairwise prerequisite/similarity edges to heterogeneous
+hyperedges (session, concept-prerequisite, discussion-thread,
+teacher-intervention), and adds a propensity-score causal-effect layer to
+separate genuine intervention effects from spurious correlation. We extend
+P0's four-diagnostic leakage taxonomy with three hyperedge-specific leakage
+classes -- group-membership, cross-modal, and intervention-timing leakage --
+that a pairwise audit cannot detect. Tier 2 (AgentDG-KT) is a
+deliberately-scoped pilot in which a small team of LLM agents
+(Diagnostician, Tutor/Hint, Critic) reads Tier 1's frozen output to produce
+natural-language explanations, gated by a mandatory Critic agent rather than
+benchmarked at the same quantitative scale as Tier 1. We reuse P0's already
+audited, leakage-controlled baseline results on XES3G5M, ASSISTments 2012,
+and Junyi Academy as the Tier 1 comparison column, avoiding redundant
+retraining of nine baseline knowledge-tracing models.
+\todo{Replace this sentence with the actual Tier 1/Tier 2 headline result
+once M5/M6/M9 (see docs/execution-plan.md) are complete -- do not
+pre-announce a number before it exists.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Knowledge tracing, hypergraph neural networks, heterogeneous graphs, large
+language model agents, causal inference, data leakage, educational data
+mining.
+\end{IEEEkeywords}
+
+% =============================================================================
+\section{Introduction}
+% =============================================================================
+
+Knowledge tracing (KT) estimates a learner's latent mastery of knowledge
+components (KCs) from interaction history, supporting adaptive practice,
+intelligent tutoring, and curriculum recommendation. The field has
+progressed from probabilistic and sequence models
+\cite{piech2015dkt} to graph-augmented models that propagate information
+over auxiliary concept graphs \cite{nakagawa2019gkt,yang2021gikt}, and, most
+recently, toward hypergraph representations that capture higher-order
+relations among knowledge components \cite{thmn2025,hgkt2025,htkt2025} and
+dynamic, temporally-evolving graph structure \cite{dygkt2024}.
+
+\todo{Full introduction to be written once the Tier 1 quantitative results
+exist (docs/execution-plan.md M5). Draft the gap/motivation/contribution
+narrative from docs/idea-D-plan.md sections 1-2 below as a starting
+skeleton; do not submit with placeholder contribution claims.}
+
+\subsection{Motivation}
+Three concrete gaps motivate this work:
+
+\begin{itemize}
+  \item \textbf{Heterogeneous relations are absent from graph-KT.}
+  Hypergraph-KT models \cite{thmn2025,hgkt2025,htkt2025} group multiple
+  knowledge components into a single hyperedge, but the hyperedge always
+  contains only KC nodes. Teacher intervention, hint content, peer
+  discussion, and instructional video -- entities with documented influence
+  on learning outcomes -- are not represented as graph nodes in any
+  published graph-KT model we are aware of.
+  \item \textbf{Graph provenance is rarely audited.} \cite{daominh2026p0}
+  shows that pooling a knowledge-component graph from the full interaction
+  log before a learner-based train/test split lets held-out information
+  reach a graph-augmented KT model even when the sequence optimizer itself
+  trains only on the training fold. \cite{daominh2026p0}'s protocol audits
+  this channel for \emph{pairwise} prerequisite/similarity edges; no
+  published audit protocol currently covers \emph{hyperedges} spanning
+  heterogeneous entity types.
+  \item \textbf{Causal claims about pedagogical intervention are rare.} Most
+  graph-KT models report predictive accuracy only, without attempting to
+  separate a hint or teacher action's causal effect on subsequent
+  correctness from confounded correlation.
+\end{itemize}
+
+\subsection{Contributions}
+\begin{itemize}
+  \item \textbf{C1.} A heterogeneous hypergraph construction procedure
+  (Section~\ref{sec:tier1-graph}) that groups \cite{daominh2026p0}'s
+  already leakage-audited, acyclic prerequisite edges into
+  concept-prerequisite hyperedges, and defines (interface-complete;
+  data-blocked, see Section~\ref{sec:limitations}) session,
+  discussion-thread, and teacher-intervention hyperedge types.
+  \item \textbf{C2.} A hyperedge-level extension of \cite{daominh2026p0}'s
+  four-diagnostic leakage taxonomy, adding three classes --
+  group-membership, cross-modal, and intervention-timing leakage -- that a
+  pairwise audit structurally cannot detect (Section~\ref{sec:leakage-ext}).
+  \item \textbf{C3.} A causal-effect layer (Section~\ref{sec:causal})
+  estimating the treatment effect of a hint or teacher intervention via
+  inverse-propensity weighting, as a design-target starting point before a
+  more elaborate causal architecture is attempted.
+  \item \textbf{C4.} Direct reuse of \cite{daominh2026p0}'s published,
+  leakage-controlled baseline results (BKT, DKT, AKT, simpleKT, GKT, GIKT,
+  SKT, DyGKT, DGEKT on XES3G5M/ASSISTments~2012/Junyi Academy) as the Tier~1
+  comparison column, avoiding redundant baseline retraining under matched
+  protocol and split seeds.
+  \item \textbf{C5.} A deliberately-scoped Tier~2 pilot (AgentDG-KT,
+  Section~\ref{sec:tier2}) demonstrating that an LLM-agent interpretability
+  layer reading Tier~1's frozen output -- rather than re-inferring knowledge
+  state from scratch -- is tractable on a single consumer GPU, gated by a
+  mandatory Critic agent.
+\end{itemize}
+
+\todo{Once results exist, add a C6 sentence stating the headline empirical
+finding (or its absence/negative result) -- P0's own Introduction models
+this pattern (see its C5) and it should be mirrored here honestly, including
+if Tier 1's hypergraph gain turns out to be small or backbone-specific.}
+
+% =============================================================================
+\section{Related Work}
+% =============================================================================
+
+\subsection{Graph- and hypergraph-based knowledge tracing}
+\todo{Expand from docs/idea-D-plan.md and Phien ban A section 1 comparison
+table. Cite nakagawa2019gkt, yang2021gikt, dygkt2024, thmn2025, hgkt2025,
+htkt2025, psykt2024, hhskt2023.}
+
+\subsection{LLM agents in education and graph-augmented LLM agents}
+\todo{Cite agentcat2026, llmedu2025, graphaugmentedllm2025, graphrag2025.
+Distinguish AgentDG-KT's ``agent reads frozen Tier-1 output'' design from
+prior work where an LLM agent infers knowledge state end-to-end.}
+
+\subsection{Leakage-controlled evaluation in knowledge tracing}
+\todo{This section should summarize daominh2026p0 in enough detail that a
+reader unfamiliar with the companion paper can still follow
+Sections~\ref{sec:tier1-graph}--\ref{sec:leakage-ext} of this paper.}
+
+\subsection{Causal inference in educational data mining}
+\todo{Position the propensity-score layer (Section~\ref{sec:causal})
+against prior causal-KT / causal-EDM work once identified during the
+Related Work pass.}
+
+% =============================================================================
+\section{Preliminaries}
+% =============================================================================
+
+Let $\mathcal{D} = \{(u, t, q, c, y)\}$ be a KT interaction log with learner
+$u$, timestamp $t$, item $q$, knowledge component $c$, and correctness label
+$y \in \{0, 1\}$, following \cite{daominh2026p0}'s notation. A learner-based
+temporal split $\mathcal{F} = (\mathcal{F}_{\mathrm{train}},
+\mathcal{F}_{\mathrm{val}}, \mathcal{F}_{\mathrm{test}})$ assigns each
+learner to exactly one fold (ratios $0.7/0.1/0.2$, three folds with split
+seeds $42$/$43$/$44$, matching \cite{daominh2026p0}'s protocol so results
+remain directly comparable, see Section~\ref{sec:reuse}).
+
+We extend this notation with a \emph{hyperedge} $h = (\kappa,
+\{(\tau_i, e_i)\}_{i=1}^{k}, f)$: a kind label $\kappa \in
+\{\text{concept-prerequisite}, \text{session}, \text{discussion-thread},
+\text{teacher-intervention}\}$, a set of $k$ typed member entities
+$(\tau_i, e_i)$ with entity type $\tau_i \in \{\text{student, exercise,
+concept, teacher, hint, forum, discussion, video}\}$, and a fold identifier
+$f$. A heterogeneous hypergraph $\mathcal{H}_f = (\mathcal{V}_f,
+\mathcal{E}_f^{\mathrm{hyper}})$ for fold $f$ is a set of such hyperedges
+over the typed node set $\mathcal{V}_f$.
+
+\subsection{Design goal}
+For each fold $f$, the goal is a hypergraph $\mathcal{H}_f$ constructed
+using only $\mathcal{F}_f^{\mathrm{train}}$ evidence, audited for the
+leakage classes in Table~\ref{tab:leakage-taxonomy}
+(Section~\ref{sec:leakage-ext}), that a downstream Tier~1 encoder consumes
+to predict $y$ for held-out interactions.
+
+% =============================================================================
+\section{Tier 1: DH$^2$-KT}
+% =============================================================================
+
+\subsection{Heterogeneous hypergraph construction}
+\label{sec:tier1-graph}
+
+\todo{Describe build\_concept\_prerequisite\_hyperedges() precisely
+(Algorithm~\ref*{alg:concept-hyperedge} below is a first draft matching
+dh2a\_kt/hyperedge/construction.py -- keep this in sync with the actual code
+as it is implemented per docs/execution-plan.md M1-M2).}
+
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} audited, acyclic prerequisite edges
+$E_{\mathrm{pre}}^f$ from \cite{daominh2026p0}'s Algorithm~2; chain length
+bounds $[\ell_{\min}, \ell_{\max}]$
+\STATE \textbf{Output:} concept-prerequisite hyperedge set
+$\mathcal{E}^{\mathrm{cprereq}}_f$
+\STATE Build directed graph $G$ from $E_{\mathrm{pre}}^f$
+\FOR{each root $r$ with in-degree 0 in $G$}
+  \FOR{each simple path $p$ from $r$ with $\ell_{\min} \le |p| \le
+  \ell_{\max}$}
+    \STATE emit hyperedge with members $\{(\text{concept}, c) : c \in p\}$
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\label{alg:concept-hyperedge}
+
+Session, discussion-thread, and teacher-intervention hyperedges are
+specified with the same interface but are \emph{data-blocked}: no public KT
+benchmark studied by \cite{daominh2026p0} (XES3G5M, ASSISTments~2012, Junyi
+Academy) ships Hint, Forum, or Teacher-action logs synchronized to the
+interaction stream. \todo{State the final resolution once
+docs/execution-plan.md M2 is attempted -- either wired against ES-KT-24
+\cite{esk2024} for the Video/Hint case, or explicitly scoped to Tier~2
+case-study only (Section~\ref{sec:tier2}), per docs/idea-D-plan.md
+section~5.}
+
+\subsection{Hyperedge-level leakage audit}
+\label{sec:leakage-ext}
+
+\cite{daominh2026p0} audits five leakage classes at the level of pairwise
+edge provenance (structural, edge, target, temporal, cold-start
+neighbourhood) using four scalar diagnostics: $\mathrm{ECR}^{\mathrm{flag}}$,
+$\mathrm{ECR}^{\mathrm{overlap}}$, $|\rho|$, and $\mathrm{TBMR}$. These
+diagnostics are reused unmodified (Section~\ref{sec:reuse}) on the pairwise
+projection of a hyperedge set. Table~\ref{tab:leakage-taxonomy} adds three
+classes that a pairwise audit cannot express because they require a
+\emph{group} of heterogeneous members, not a single edge.
+
+\begin{table}[!t]
+\caption{Hyperedge-level leakage taxonomy (extends \cite{daominh2026p0}
+Table~1)}
+\label{tab:leakage-taxonomy}
+\centering
+\begin{tabular}{@{}p{2.1cm}p{2.9cm}p{2.4cm}@{}}
+\toprule
+Class & Source & Diagnostic \\
+\midrule
+Group-membership & A hyperedge with $\ge 1$ member drawn from a held-out
+interaction while other members are train-only & $\mathrm{compute\_group\_}$ $\mathrm{membership\_}$ $\mathrm{leakage}$ \\
+Cross-modal & A Forum/Video embedding pooled over content timestamped after
+the prediction cutoff & $\mathrm{compute\_cross\_}$ $\mathrm{modal\_leakage}$ \\
+Intervention-timing & A Teacher/Hint hyperedge whose content was effectively
+chosen using knowledge of the student's later correctness & $\mathrm{compute\_intervention\_}$ $\mathrm{timing\_leakage}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\todo{Report actual leakage rates here once docs/execution-plan.md M1 runs
+on real XES3G5M fold data -- Table~\ref{tab:leakage-taxonomy} currently
+documents the diagnostic definitions only, not measured values.}
+
+\subsection{Encoding and hypergraph attention}
+\todo{Section pending docs/execution-plan.md M3 (dh2a\_kt/models/dh2\_kt.py
+DH2KT.forward() implementation). Do not describe the attention mechanism in
+past tense until it exists and has passed the sanity overfit test in M3's
+Definition of Done.}
+
+\subsection{Causal-effect layer}
+\label{sec:causal}
+We estimate the average treatment effect (ATE) of a binary intervention
+(e.g., hint given) on next-step correctness via inverse-propensity
+weighting, following the identification assumption that intervention
+assignment is unconfounded given observed features -- a strong assumption on
+observational KT data that we report as a limitation rather than a proven
+property (Section~\ref{sec:limitations}). Given confounders $X$, treatment
+$T \in \{0,1\}$, and outcome $Y$, the propensity score $\hat{e}(X) =
+P(T=1\mid X)$ is estimated by logistic regression, and
+\begin{equation}
+\widehat{\mathrm{ATE}} = \frac{\sum_i T_i Y_i / \hat{e}(X_i)}{\sum_i T_i /
+\hat{e}(X_i)} - \frac{\sum_i (1-T_i) Y_i / (1-\hat{e}(X_i))}{\sum_i (1-T_i) /
+(1-\hat{e}(X_i))}.
+\label{eq:ate}
+\end{equation}
+\todo{Report propensity-overlap diagnostics alongside any ATE number, per
+the warning already implemented in dh2a\_kt/models/causal\_layer.py -- an
+ATE without an overlap check is not publishable on its own.}
+
+% =============================================================================
+\section{Tier 2: AgentDG-KT pilot}
+\label{sec:tier2}
+% =============================================================================
+
+Tier~2 is deliberately scoped as a pilot, not a benchmark at Tier~1's
+quantitative rigor (docs/idea-D-plan.md, following the feasibility analysis
+in the accompanying project discussion: a full multi-agent LLM re-inference
+pipeline over millions of interactions is not tractable on a single
+consumer GPU within a realistic project timeline). Three agents operate on
+Tier~1's \emph{frozen} output rather than re-inferring knowledge state:
+
+\begin{itemize}
+  \item \textbf{Diagnostician Agent} produces a natural-language rationale
+  for a given Tier-1 prediction, explicitly instructed not to override the
+  given probability.
+  \item \textbf{Tutor/Hint Agent} proposes the next hint/exercise and writes
+  a new session hyperedge back into the graph (the agentic closed loop).
+  \item \textbf{Critic Agent} is a \emph{mandatory} quality gate that flags
+  any Diagnostician output contradicting or ignoring the Tier-1 number it
+  was meant to explain, before anything is treated as ground truth in a
+  case study.
+\end{itemize}
+
+\todo{Report pilot results (sample size, hallucination/flag rate, human
+evaluation if collected) here once docs/execution-plan.md M8-M9 complete.
+Do not report Tier 2 metrics using Tier 1's AUC/ACC framing -- the two tiers
+use different evaluation standards by design (Section~\ref{sec:eval}).}
+
+% =============================================================================
+\section{Experimental setup}
+% =============================================================================
+
+\subsection{Datasets}
+\label{sec:reuse}
+Following \cite{daominh2026p0}'s benchmark-role assignment, XES3G5M
+\cite{liu2023xes3g5m} (18{,}066 learners, 7{,}652 items, 865 KCs,
+6{,}413{,}353 interactions) is the \emph{primary} benchmark: low
+consecutive-KC-repeat rate, non-saturated headline AUC, and the clearest
+graph-backbone separation among the corpora \cite{daominh2026p0} studied.
+ASSISTments~2012 is secondary (single-skill Q-matrix; leakage-ablation
+sanity). Junyi Academy provides the ground-truth cross-validation role via
+its expert-curated prerequisite annotation.
+
+\subsection{Baselines reused from P0}
+We reuse \cite{daominh2026p0}'s published baseline results
+(\texttt{baselines/p0\_reused/}, pinned to commit
+\texttt{5e3d6a0}\todo{confirm final vendored commit at submission time}) for
+BKT, DKT, AKT, simpleKT, GKT, GIKT, SKT, DyGKT, and DGEKT under train-only,
+leakage-controlled graph construction, rather than retraining these nine
+models. Reuse is valid only if our preprocessing exactly matches P0's (same
+hashed \texttt{kc\_id} space, same Q-matrix); \todo{report the verification
+performed via scripts/01\_verify\_p0\_preprocessing\_match.py here.}
+
+\subsection{Manipulation check}
+Following \cite{daominh2026p0}'s Section~4.7 reasoning, we do not interpret
+any ablation result as evidence of hypergraph benefit unless DH$^2$-KT first
+passes a manipulation check: AUC must move meaningfully under near-total
+($p=0.90$) destruction of the constructed hyperedge set. A backbone whose
+AUC does not move under total destruction is \emph{graph-inert}, and its
+ablation numbers carry no interpretable meaning about graph benefit.
+\todo{Report pass/fail and $\Delta$AUC here once
+docs/execution-plan.md M6 runs.}
+
+\label{sec:eval}
+
+% =============================================================================
+\section{Results}
+% =============================================================================
+\todo{This entire section is empty by design (docs/execution-plan.md
+M5-M9 not yet run at the time this skeleton was drafted). Populate with:
+(1) Tier-1 AUC/ACC/NLL vs.\ reused P0 baselines, with 95\% CI; (2) ablation
+table (per-node-type, hypergraph-vs-pairwise, static-vs-dynamic,
+with/without causal layer); (3) manipulation-check result; (4) ground-truth
+cross-validation F1 on Junyi; (5) Tier-2 pilot qualitative table. Do not
+fabricate placeholder numbers -- leave this section unwritten until real
+results exist, per the anti-pattern warned against in every prior planning
+document for this project.}
+
+% =============================================================================
+\section{Discussion}
+% =============================================================================
+
+\subsection{Threats to validity}
+\todo{Adapt from docs/idea-D-plan.md section 10 risk table once results
+exist to discuss.}
+
+\subsection{Limitations}
+\label{sec:limitations}
+\begin{itemize}
+  \item Session, discussion-thread, and teacher-intervention hyperedges
+  remain data-blocked on all three core benchmarks; Tier~1's quantitative
+  claims are scoped to Student-Exercise-Concept(-Hint-Video) unless
+  Section~\ref{sec:tier1-graph}'s ES-KT-24 integration is completed.
+  \item The causal-effect layer's identification assumption (no unmeasured
+  confounding given observed features) is stated, not proven, on
+  observational KT data.
+  \item The hyperedge leakage audit's pairwise-projection approximation
+  (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
+  hyperedge-native statistic is future work.
+\end{itemize}
+
+% =============================================================================
+\section{Conclusion and future work}
+% =============================================================================
+\todo{Write after Results/Discussion are complete.}
+
+\section*{Acknowledgment}
+\todo{Funding, compute resources (RTX 3090 24GB), and any human evaluators
+for Tier 2 (Section~\ref{sec:tier2}) to acknowledge.}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
