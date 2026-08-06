@@ -1,9 +1,10 @@
 """Wire DH2KT sequence embeddings into PropensityScoreATE (M4).
 
-Until Hint/Video logs exist (M2), treatment is proxied by concept-prerequisite
-structure: an interaction is "treated" when its KC is the downstream end of
-at least one audited ``E_pre`` edge (a concept with incoming prerequisites).
-Outcome is next-step correctness on the train split.
+Default treatment proxy (XES3G5M / no hint logs): an interaction is "treated"
+when its KC is the downstream end of at least one audited ``E_pre`` edge.
+On FoundationalASSIST (and similar), use ``build_hint_causal_dataset`` with
+real ``hint_used`` / ``hint_count`` as treatment and *next-step* correctness
+as outcome (same-step ``discrete_score`` is mechanically tied to hint use).
 """
 
 from __future__ import annotations
@@ -33,6 +34,174 @@ class CausalDataset:
     confounders: np.ndarray
     treatment: np.ndarray
     outcome: np.ndarray
+
+
+def build_hint_causal_dataset(
+    interactions: pd.DataFrame,
+    *,
+    max_users: int | None = None,
+    max_seq_len: int | None = 200,
+    seed: int = 42,
+) -> CausalDataset:
+    """Observational hint ATE rows: treatment=hint at t, outcome=correct at t+1.
+
+    Required columns: ``user_id``, ``item_id``, ``kc_id``, ``timestamp``,
+    ``correct``, and either ``hint_used`` or ``hint_count``.
+
+    Confounders are *pre-treatment* summaries from steps ``< t`` only:
+    prior accuracy, log prior attempts, same-KC prior accuracy, position.
+    """
+    required = {"user_id", "item_id", "kc_id", "timestamp", "correct"}
+    missing = required - set(interactions.columns)
+    if missing:
+        raise ValueError(f"interactions missing columns: {sorted(missing)}")
+    df = interactions.copy()
+    if "hint_used" not in df.columns:
+        if "hint_count" not in df.columns:
+            raise ValueError("need hint_used or hint_count")
+        df["hint_used"] = (df["hint_count"].fillna(0).astype(int) > 0).astype(int)
+
+    user_ids = df["user_id"].astype(int).unique()
+    if max_users is not None and len(user_ids) > max_users:
+        rng = np.random.default_rng(seed)
+        user_ids = rng.choice(user_ids, size=max_users, replace=False)
+
+    confounder_rows: list[list[float]] = []
+    treatment_rows: list[int] = []
+    outcome_rows: list[int] = []
+
+    for user_id in user_ids:
+        seq = df[df["user_id"] == user_id].sort_values("timestamp")
+        if max_seq_len is not None:
+            seq = seq.head(max_seq_len)
+        if len(seq) < 2:
+            continue
+
+        correct = seq["correct"].astype(int).to_numpy()
+        hints = seq["hint_used"].astype(int).to_numpy()
+        kcs = seq["kc_id"].astype(int).to_numpy()
+
+        for t in range(len(seq) - 1):
+            n_prior = t
+            prior_acc = float(correct[:t].mean()) if t > 0 else 0.5
+            same_kc_mask = kcs[:t] == kcs[t]
+            same_kc_acc = (
+                float(correct[:t][same_kc_mask].mean()) if same_kc_mask.any() else prior_acc
+            )
+            confounder_rows.append(
+                [
+                    prior_acc,
+                    float(np.log1p(n_prior)),
+                    same_kc_acc,
+                    float(t) / max(len(seq) - 1, 1),
+                    float(np.log1p(int(seq["item_id"].iloc[t]))),
+                ]
+            )
+            treatment_rows.append(int(hints[t]))
+            outcome_rows.append(int(correct[t + 1]))
+
+    if not confounder_rows:
+        raise ValueError("No valid user sequences for hint causal dataset")
+
+    return CausalDataset(
+        confounders=np.asarray(confounder_rows, dtype=float),
+        treatment=np.asarray(treatment_rows, dtype=int),
+        outcome=np.asarray(outcome_rows, dtype=int),
+    )
+
+
+def estimate_hint_ate(
+    causal_data: CausalDataset,
+    *,
+    clip_propensity: tuple[float, float] = (0.05, 0.95),
+    trim_quantiles: tuple[float, float] | None = (0.1, 0.9),
+    n_bootstrap: int = 200,
+    seed: int = 42,
+) -> tuple[float, dict]:
+    """IPW ATE of hint_used_t on correct_{t+1}, plus naive / trimmed / bootstrap CI."""
+    ate, diagnostics = estimate_ate_with_dh2kt_confounders(
+        causal_data, clip_propensity=clip_propensity
+    )
+    treated = causal_data.treatment == 1
+    control = causal_data.treatment == 0
+    naive = float(
+        causal_data.outcome[treated].mean() - causal_data.outcome[control].mean()
+    ) if treated.any() and control.any() else float("nan")
+
+    trimmed_ate = float("nan")
+    n_trimmed = 0
+    if trim_quantiles is not None and treated.any() and control.any():
+        est = PropensityScoreATE(clip_propensity=clip_propensity)
+        p = est.fit(causal_data.confounders, causal_data.treatment).propensity_scores(
+            causal_data.confounders
+        )
+        lo, hi = np.quantile(p, trim_quantiles)
+        keep = (p >= lo) & (p <= hi)
+        n_trimmed = int(keep.sum())
+        if keep.sum() > 10 and causal_data.treatment[keep].sum() > 0 and (
+            (1 - causal_data.treatment[keep]).sum() > 0
+        ):
+            trimmed = CausalDataset(
+                confounders=causal_data.confounders[keep],
+                treatment=causal_data.treatment[keep],
+                outcome=causal_data.outcome[keep],
+            )
+            trimmed_ate, _ = estimate_ate_with_dh2kt_confounders(
+                trimmed, clip_propensity=clip_propensity
+            )
+
+    boot_ats: list[float] = []
+    if n_bootstrap > 0:
+        rng = np.random.default_rng(seed)
+        n = len(causal_data.outcome)
+        # Subsample large corpora so bootstrap stays tractable.
+        boot_n = min(n, 50_000)
+        for _ in range(n_bootstrap):
+            idx = rng.choice(n, size=boot_n, replace=True)
+            sample = CausalDataset(
+                confounders=causal_data.confounders[idx],
+                treatment=causal_data.treatment[idx],
+                outcome=causal_data.outcome[idx],
+            )
+            if sample.treatment.sum() == 0 or (1 - sample.treatment).sum() == 0:
+                continue
+            try:
+                b_ate, _ = estimate_ate_with_dh2kt_confounders(
+                    sample, clip_propensity=clip_propensity
+                )
+            except Exception:  # pragma: no cover — rare singular fits
+                continue
+            if np.isfinite(b_ate):
+                boot_ats.append(float(b_ate))
+    ci_lo = float(np.quantile(boot_ats, 0.025)) if boot_ats else float("nan")
+    ci_hi = float(np.quantile(boot_ats, 0.975)) if boot_ats else float("nan")
+
+    diagnostics = {
+        **diagnostics,
+        "naive_mean_diff": naive,
+        "trimmed_ate_ipw": trimmed_ate,
+        "trim_quantiles": list(trim_quantiles) if trim_quantiles else None,
+        "n_trimmed_rows": n_trimmed,
+        "bootstrap_n": len(boot_ats),
+        "bootstrap_ci95": [ci_lo, ci_hi],
+        "bootstrap_subsample": min(len(causal_data.outcome), 50_000) if n_bootstrap else 0,
+        "treatment": "hint_used_t",
+        "outcome": "correct_t_plus_1",
+        "n_rows": int(len(causal_data.outcome)),
+        "identification": (
+            "IPW under no unmeasured confounding given pre-t summaries; "
+            "observational KT — report as limited evidence, not proven causal effect"
+        ),
+    }
+    logger.info(
+        "hint ATE=%.4f naive_diff=%.4f trimmed=%.4f CI95=[%.4f, %.4f]",
+        ate,
+        naive,
+        trimmed_ate,
+        ci_lo,
+        ci_hi,
+    )
+    return ate, diagnostics
 
 
 def build_entity_maps(

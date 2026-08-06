@@ -83,21 +83,25 @@ Pass manipulation check & \\textbf{{Yes}} \\\\
 
 def export_leakage() -> None:
     a = json.loads((RESULTS / "xes3g5m_fold0_hyperedge_audit.json").read_text())
+    n_he = f"{a['n_hyperedges']:,}".replace(",", "{,}")
     body = f"""% Auto-derived from results/tables/xes3g5m_fold0_hyperedge_audit.json
 \\begin{{table}}[!t]
-\\caption{{Concept-prerequisite hyperedge audit on XES3G5M fold~0. Pairwise TBMR/$|\\rho|$ skipped when projection exceeds cap (noted in audit JSON).}}
+\\caption{{Concept-prerequisite hyperedge audit on XES3G5M fold~0.
+Pairwise TBMR/$|\\rho|$ are skipped when the pairwise projection exceeds the
+implementation cap of $100{{,}}000$ pairs (11{{,}}568{{,}}053 projected pairs in
+this fold; see audit notes).}}
 \\label{{tab:leakage-measured}}
 \\centering
 \\begin{{tabular}}{{@{{}}lc@{{}}}}
 \\toprule
 Metric & Value \\\\
 \\midrule
-Hyperedges & {a['n_hyperedges']:,} \\\\
+Hyperedges & {n_he} \\\\
 $\\mathrm{{ECR}}^{{\\mathrm{{flag}}}}$ & {a['ecr_flag']} \\\\
 Group-membership leak rate & {a['group_membership_leak_rate']} \\\\
 \\bottomrule
 \\end{{tabular}}
-\\end{{table}}""".replace(",", "{,}")
+\\end{{table}}"""
     _write("table_leakage_audit.tex", body)
 
 

@@ -377,6 +377,7 @@ if _TORCH_AVAILABLE:
         hidden_dim: int = 128,
         n_hypergraph_layers: int = 2,
         dropout: float = 0.2,
+        hyperedge_kinds: tuple[str, ...] = ("concept_prerequisite",),
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -385,7 +386,7 @@ if _TORCH_AVAILABLE:
             embed_dim=hidden_dim,
             n_hypergraph_layers=n_hypergraph_layers,
             dropout=dropout,
-            hyperedge_kinds=("concept_prerequisite",),
+            hyperedge_kinds=hyperedge_kinds,
         )
         return DH2KT(config)
 
@@ -404,10 +405,13 @@ def train_fold(
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     hyperedge_spec: ConceptPrerequisiteSpec | None = None,
+    session_hyperedges: list[Hyperedge] | None = None,
     max_users: int | None = None,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
+
+    from dh2a_kt.hyperedge.indexing import select_session_hyperedges_for_training
 
     device = torch.device(device)
     if max_users is not None:
@@ -433,18 +437,29 @@ def train_fold(
         min_chain_len=spec.min_chain_len,
         max_chain_len=spec.max_chain_len,
     )
+    kinds: list[str] = ["concept_prerequisite"]
+    if session_hyperedges:
+        selected = select_session_hyperedges_for_training(session_hyperedges)
+        clean_hyperedges = list(clean_hyperedges) + list(selected)
+        kinds.append("session")
+        logger.info(
+            "Added %d session hyperedges (concept projection) for training",
+            len(selected),
+        )
     hyperedge_index = hyperedge_index_from_list(clean_hyperedges, kc_to_idx)
     model = build_model(
         len(kc_to_idx),
         len(item_to_idx),
         hidden_dim=hidden_dim,
         n_hypergraph_layers=n_hypergraph_layers,
+        hyperedge_kinds=tuple(kinds),
     ).to(device)
     logger.info(
-        "train_fold: concepts=%d exercises=%d hyperedges=%d device=%s",
+        "train_fold: concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
         len(kc_to_idx),
         len(item_to_idx),
         len(clean_hyperedges),
+        kinds,
         device,
     )
 
@@ -498,6 +513,7 @@ def train_and_evaluate_fold(
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     hyperedge_spec: ConceptPrerequisiteSpec | None = None,
+    session_hyperedges: list[Hyperedge] | None = None,
     max_users: int | None = None,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
@@ -516,6 +532,7 @@ def train_and_evaluate_fold(
         graph_sensitivity_margin=graph_sensitivity_margin,
         graph_sensitivity_p=graph_sensitivity_p,
         hyperedge_spec=hyperedge_spec,
+        session_hyperedges=session_hyperedges,
         max_users=max_users,
     )
     auc, n_predictions = evaluate_auc(
@@ -540,45 +557,81 @@ def write_comparison_table(
     dh2_mean = float(np.mean(dh2_aucs)) if dh2_aucs else float("nan")
     comparison_type = "matched" if budget.matched_p0 else "observational"
 
-    for fold_result in results:
-        for model in comparison_models:
-            p0_row = load_p0_baseline_summary(dataset, model=model, graph_construction="train_only")
-            p0_auc = float(p0_row.iloc[0]["auc"]) if not p0_row.empty else float("nan")
+    if not comparison_models:
+        # Secondary corpora (e.g. FoundationalASSIST) have no P0-reused baselines.
+        for fold_result in results:
             rows.append(
                 {
                     "dataset": dataset,
                     "fold": fold_result.fold,
-                    "reference_model": model,
-                    "p0_auc": p0_auc,
+                    "reference_model": "none",
+                    "p0_auc": float("nan"),
                     "dh2_kt_auc": fold_result.auc,
-                    "delta_auc": fold_result.auc - p0_auc if np.isfinite(fold_result.auc) else float("nan"),
+                    "delta_auc": float("nan"),
+                    "budget_reference": budget.reference_model,
+                    "batch_size": budget.batch_size,
+                    "epochs": budget.epochs,
+                    "comparison_type": comparison_type,
+                    "budget_note": budget.note or "no_p0_baseline",
+                    "n_predictions": fold_result.n_predictions,
+                }
+            )
+        rows.append(
+            {
+                "dataset": dataset,
+                "fold": "mean",
+                "reference_model": "none",
+                "p0_auc": float("nan"),
+                "dh2_kt_auc": dh2_mean,
+                "delta_auc": float("nan"),
+                "budget_reference": budget.reference_model,
+                "batch_size": budget.batch_size,
+                "epochs": budget.epochs,
+                "comparison_type": comparison_type,
+                "budget_note": budget.note or "no_p0_baseline",
+                "n_predictions": sum(r.n_predictions for r in results),
+            }
+        )
+    else:
+        for fold_result in results:
+            for model in comparison_models:
+                p0_row = load_p0_baseline_summary(dataset, model=model, graph_construction="train_only")
+                p0_auc = float(p0_row.iloc[0]["auc"]) if not p0_row.empty else float("nan")
+                rows.append(
+                    {
+                        "dataset": dataset,
+                        "fold": fold_result.fold,
+                        "reference_model": model,
+                        "p0_auc": p0_auc,
+                        "dh2_kt_auc": fold_result.auc,
+                        "delta_auc": fold_result.auc - p0_auc if np.isfinite(fold_result.auc) else float("nan"),
+                        "budget_reference": budget.reference_model,
+                        "batch_size": budget.batch_size,
+                        "epochs": budget.epochs,
+                        "comparison_type": comparison_type,
+                        "budget_note": budget.note,
+                        "n_predictions": fold_result.n_predictions,
+                    }
+                )
+
+        for model in comparison_models:
+            cmp = compare_against_p0(dh2_mean, dataset, model=model)
+            rows.append(
+                {
+                    "dataset": dataset,
+                    "fold": "mean",
+                    "reference_model": model,
+                    "p0_auc": cmp["p0_auc"],
+                    "dh2_kt_auc": dh2_mean,
+                    "delta_auc": cmp["delta_auc"],
                     "budget_reference": budget.reference_model,
                     "batch_size": budget.batch_size,
                     "epochs": budget.epochs,
                     "comparison_type": comparison_type,
                     "budget_note": budget.note,
-                    "n_predictions": fold_result.n_predictions,
+                    "n_predictions": sum(r.n_predictions for r in results),
                 }
             )
-
-    for model in comparison_models:
-        cmp = compare_against_p0(dh2_mean, dataset, model=model)
-        rows.append(
-            {
-                "dataset": dataset,
-                "fold": "mean",
-                "reference_model": model,
-                "p0_auc": cmp["p0_auc"],
-                "dh2_kt_auc": dh2_mean,
-                "delta_auc": cmp["delta_auc"],
-                "budget_reference": budget.reference_model,
-                "batch_size": budget.batch_size,
-                "epochs": budget.epochs,
-                "comparison_type": comparison_type,
-                "budget_note": budget.note,
-                "n_predictions": sum(r.n_predictions for r in results),
-            }
-        )
 
     df = pd.DataFrame(rows)
     output_path.parent.mkdir(parents=True, exist_ok=True)

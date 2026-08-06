@@ -1,0 +1,44 @@
+# FoundationalASSIST — secondary corpus with synchronized hint_count
+# (P2: session hyperedges + optional ATE). Not interchangeable with P0 ASSIST2012.
+p0_config: configs/p0_foundational_assist.yaml
+dataset: foundational_assist
+role: secondary_hint
+extended_processed_path: external/p0_leakage_audit/data/processed/foundational_assist_extended.parquet
+
+hyperedge:
+  concept_prerequisite:
+    enabled: true
+    min_chain_len: 3
+    max_chain_len: 8
+    source: p0_e_pre
+  session:
+    enabled: true
+    session_gap_seconds: 1800
+  discussion_thread:
+    enabled: false
+  teacher_intervention:
+    enabled: false
+
+manipulation_check:
+  p: 0.90
+  operator: node_drop
+  seed: 42
+
+training:
+  # No P0 GKT budget for this corpus — use explicit local defaults.
+  budget_reference: local_default
+  lr: 0.001
+  max_seq_len: 200
+  hidden_dim: 128
+  n_hypergraph_layers: 2
+  graph_dropout: 0.15
+  graph_sensitivity_weight: 1.0
+  graph_sensitivity_margin: 0.08
+  graph_sensitivity_p: 0.9
+  comparison_models: []   # no P0-reused baselines for this corpus
+
+baselines_reused:
+  path: baselines/p0_reused/baseline_results.csv
+  fold_path: baselines/p0_reused/baseline_fold_results.csv
+  graph_construction: train_only
+  models: []

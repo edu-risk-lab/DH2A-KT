@@ -87,11 +87,13 @@ Mean Tier-1 P(correct) on pilot samples: 0.746 (v1), **0.753** (v2). The Critic 
 
 **Graph–accuracy tradeoff.** Graph-only interaction reduces AUC ~8.2 points vs GKT but enables a passing manipulation check. For APIN-style claims, graph reliance should be reported alongside predictive metrics.
 
-**Tier 2.** Under a strict Critic (v1), the local 7B model showed a 12.4% flag rate—mostly format mismatch (% vs decimal), not numeric hallucination. After Critic calibration (v2), flag_rate dropped to **0%** on 500 samples, suggesting the pipeline is faithful at pilot scale; human evaluation remains future work (Pha 5 in idea-D-plan).
+**Tier 2 / C-Human (A1+B1).** Faithfulness **4.01±1.07**, usefulness **3.53±0.71** (n=40×2). Spearman 0.71 / 0.58; within±1 92.5% / 97.5%. Summary: `results/tables/tier2_human_eval/human_eval_summary.json`.
+
+**P2 / FoundationalASSIST (6–7 Aug 2026).** Session+Hint hyperedges: 308{,}670 (11.6% with Hint). Fold-0 DH²-KT AUC **0.7196**. Hint ATE (IPW, next-step correct): **−0.207** (naive −0.255); propensity `[0.05, 0.219]` — weak overlap, report as limited observational evidence only.
 
 **Limitations.**
-- Session / forum / teacher hyperedges not built (M2 skipped — no ES-KT-24).
-- Single primary predictive benchmark fully trained (XES3G5M only).
+- Discussion / teacher hyperedges still blocked; session+Hint on FoundationalASSIST only.
+- FoundationalASSIST AUC observational (no P0-reused baseline column).
 - Critic v1 sensitivity to response format inflated flags; v2 calibration resolves this on the 500-sample pilot.
 - Windows + single RTX 3090 reproduction environment.
 

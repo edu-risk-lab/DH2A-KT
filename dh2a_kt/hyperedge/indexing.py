@@ -71,21 +71,70 @@ def hyperedge_index_from_list(
     if not _TORCH_AVAILABLE:
         raise ImportError("hyperedge_index_from_list requires PyTorch")
 
-    node_rows: list[int] = []
-    edge_rows: list[int] = []
-    for he_id, he in enumerate(hyperedges):
-        for member_type, kc in he.members:
-            if member_type != "concept":
-                continue
-            idx = kc_to_idx.get(int(kc))
-            if idx is None:
-                continue
-            node_rows.append(idx)
-            edge_rows.append(he_id)
-    if not node_rows:
+    by_kind: dict[str, list[Hyperedge]] = {}
+    for he in hyperedges:
+        by_kind.setdefault(he.kind, []).append(he)
+
+    out: dict[str, torch.Tensor] = {}
+    for kind, hes in by_kind.items():
+        node_rows: list[int] = []
+        edge_rows: list[int] = []
+        for he_id, he in enumerate(hes):
+            for member_type, entity_id in he.members:
+                if member_type != "concept":
+                    continue
+                idx = kc_to_idx.get(int(entity_id))
+                if idx is None:
+                    continue
+                node_rows.append(idx)
+                edge_rows.append(he_id)
+        if not node_rows:
+            out[kind] = torch.empty((2, 0), dtype=torch.long)
+        else:
+            out[kind] = torch.tensor([node_rows, edge_rows], dtype=torch.long)
+    if not out:
         return {"concept_prerequisite": torch.empty((2, 0), dtype=torch.long)}
-    index = torch.tensor([node_rows, edge_rows], dtype=torch.long)
-    return {"concept_prerequisite": index}
+    return out
+
+
+def select_session_hyperedges_for_training(
+    session_hyperedges: list[Hyperedge],
+    *,
+    min_concepts: int = 2,
+    prefer_hint: bool = True,
+    max_hyperedges: int | None = 20_000,
+    seed: int = 42,
+) -> list[Hyperedge]:
+    """Keep multi-concept session HEs (concept projection) for Tier-1 training."""
+    import numpy as np
+
+    eligible: list[Hyperedge] = []
+    for he in session_hyperedges:
+        n_concepts = sum(1 for t, _ in he.members if t == "concept")
+        if n_concepts >= min_concepts:
+            eligible.append(he)
+    if prefer_hint:
+        eligible.sort(
+            key=lambda he: (
+                0 if any(t == "hint" for t, _ in he.members) else 1,
+                -sum(1 for t, _ in he.members if t == "concept"),
+            )
+        )
+    if max_hyperedges is not None and len(eligible) > max_hyperedges:
+        rng = np.random.default_rng(seed)
+        hinted = [he for he in eligible if any(t == "hint" for t, _ in he.members)]
+        hinted_ids = {he.hyperedge_id for he in hinted}
+        plain = [he for he in eligible if he.hyperedge_id not in hinted_ids]
+        if len(hinted) >= max_hyperedges:
+            idx = rng.choice(len(hinted), size=max_hyperedges, replace=False)
+            eligible = [hinted[i] for i in idx]
+        else:
+            n_plain = max_hyperedges - len(hinted)
+            if len(plain) > n_plain:
+                idx = rng.choice(len(plain), size=n_plain, replace=False)
+                plain = [plain[i] for i in idx]
+            eligible = hinted + plain
+    return eligible
 
 
 def destroyed_hyperedge_index(

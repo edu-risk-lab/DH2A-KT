@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from typing import Sequence
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -139,19 +140,126 @@ def build_session_hyperedges(
     *,
     fold: int,
     session_gap_seconds: float = 1800.0,
+    train_only: bool = True,
 ) -> list[Hyperedge]:
-    """Group {Student, Exercise, Hint, Video} co-occurring within one session.
+    """Group {Student, Exercise, Concept, Hint?} co-occurring within one session.
 
-    TODO (Pha 1, docs/idea-D-plan.md): requires interaction logs carrying
-    hint_id / video_id columns, which public KT benchmarks studied by P0
-    (XES3G5M, ASSISTments2012, Junyi) do not provide natively. Wire this up
-    against ES-KT-24 (has video) first; treat Hint as optional per-row column
-    until a benchmark with real hint logs is sourced.
+    Sessions are contiguous per-``user_id`` runs where successive
+    ``timestamp`` gaps are ≤ ``session_gap_seconds``. When ``hint_count`` or
+    ``hint_used`` is present and positive on a row, a ``("hint", item_id)``
+    member is included (FoundationalASSIST / similar hint-bearing corpora).
+    Optional ``video_id`` columns are included the same way when present.
+
+    Requires columns: ``user_id``, ``item_id``, ``kc_id``, ``timestamp``.
     """
-    raise NotImplementedError(
-        "Session hyperedge construction needs Hint/Video-bearing interaction "
-        "logs not present in P0's three core datasets. See docs/idea-D-plan.md "
-        "section 5 (Pham vi du lieu) — wire against ES-KT-24 first."
+    required = {"user_id", "item_id", "kc_id", "timestamp"}
+    missing = required - set(interactions.columns)
+    if missing:
+        raise ValueError(f"interactions missing columns: {sorted(missing)}")
+
+    df = interactions.sort_values(["user_id", "timestamp"]).reset_index(drop=True)
+    has_hint_count = "hint_count" in df.columns
+    has_hint_used = "hint_used" in df.columns
+    has_video = "video_id" in df.columns
+
+    user = df["user_id"].to_numpy()
+    ts = df["timestamp"].to_numpy(dtype=float)
+    new_user = np.empty(len(df), dtype=bool)
+    new_user[0] = True
+    if len(df) > 1:
+        new_user[1:] = user[1:] != user[:-1]
+    gap_break = np.zeros(len(df), dtype=bool)
+    if len(df) > 1:
+        gap_break[1:] = (ts[1:] - ts[:-1]) > session_gap_seconds
+    session_id = np.cumsum(new_user | gap_break)
+
+    hyperedges: list[Hyperedge] = []
+    for sid, rows in df.groupby(session_id, sort=False):
+        he = _session_hyperedge_from_rows(
+            rows,
+            fold=fold,
+            session_idx=int(sid),
+            train_only=train_only,
+            has_hint_count=has_hint_count,
+            has_hint_used=has_hint_used,
+            has_video=has_video,
+        )
+        if he is not None:
+            hyperedges.append(he)
+
+    logger.info(
+        "Built %d session hyperedges (fold=%s gap=%ss)",
+        len(hyperedges),
+        fold,
+        session_gap_seconds,
+    )
+    return hyperedges
+
+
+def _session_hyperedge_from_rows(
+    rows: pd.DataFrame,
+    *,
+    fold: int,
+    session_idx: int,
+    train_only: bool,
+    has_hint_count: bool,
+    has_hint_used: bool,
+    has_video: bool,
+) -> Hyperedge | None:
+    if rows.empty:
+        return None
+    user_id = int(rows["user_id"].iloc[0])
+    members: list[tuple[str, int]] = [("student", user_id)]
+    seen: set[tuple[str, int]] = {("student", user_id)}
+    n_hints = 0
+
+    for item_id, kc_id in zip(
+        rows["item_id"].astype(int).tolist(),
+        rows["kc_id"].astype(int).tolist(),
+        strict=True,
+    ):
+        for key in (("exercise", item_id), ("concept", kc_id)):
+            if key not in seen:
+                seen.add(key)
+                members.append(key)
+
+    if has_hint_count:
+        hint_mask = rows["hint_count"].fillna(0).astype(int) > 0
+    elif has_hint_used:
+        hint_mask = rows["hint_used"].fillna(0).astype(int) > 0
+    else:
+        hint_mask = None
+    if hint_mask is not None and hint_mask.any():
+        for item_id in rows.loc[hint_mask, "item_id"].astype(int).tolist():
+            hint_key = ("hint", int(item_id))
+            if hint_key not in seen:
+                seen.add(hint_key)
+                members.append(hint_key)
+                n_hints += 1
+
+    if has_video:
+        for vid in rows["video_id"].dropna().tolist():
+            video_key = ("video", int(vid))
+            if video_key not in seen:
+                seen.add(video_key)
+                members.append(video_key)
+
+    if len(members) < 2:
+        return None
+    t0 = float(rows["timestamp"].min())
+    t1 = float(rows["timestamp"].max())
+    return Hyperedge(
+        hyperedge_id=f"session_f{fold}_{session_idx}_u{user_id}",
+        kind="session",
+        members=members,
+        fold=fold,
+        train_only=train_only,
+        timestamp_range=(t0, t1),
+        provenance={
+            "source": "session_gap",
+            "n_interactions": int(len(rows)),
+            "n_hint_members": n_hints,
+        },
     )
 
 

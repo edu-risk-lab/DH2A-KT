@@ -1,0 +1,23 @@
+# P0-compatible shim for FoundationalASSIST (new corpus; not classic ASSIST2012).
+# Lives in the DH2A-KT repo (not the P0 submodule). Paths below are relative
+# to external/p0_leakage_audit/ (see dh2a_kt.hyperedge.p0_inputs.p0_path).
+dataset: foundational_assist
+processed_path: data/processed/foundational_assist.parquet
+has_dag: false
+split:
+  type: learner_temporal
+  ratios: [0.7, 0.1, 0.2]
+  seed: 42
+  n_folds: 3
+graph:
+  e_pre_source: inferred
+  e_pre_support_quantile: 0.90
+  e_pre_top_k_per_node: 10
+  e_pre_max_edges: 5000
+pykt:
+  max_seq_len: 200
+baselines:
+  - name: local_default
+    hyperparams:
+      batch_size: 4
+      epochs: 10

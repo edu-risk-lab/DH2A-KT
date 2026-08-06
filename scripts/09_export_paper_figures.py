@@ -33,7 +33,8 @@ fig, ax = plt.subplots(figsize=(4.2, 3.2))
 colors = ["#9e9e9e", "#2a6f97"]
 bars = ax.bar(labels, auc_drops, color=colors, width=0.55, edgecolor="black", linewidth=0.6)
 
-ax.axhline(0.003, color="#c1121f", linestyle="--", linewidth=1.0, label="Pass threshold (illustrative)")
+ax.axhline(0.003, color="#c1121f", linestyle="--", linewidth=1.0,
+           label=r"Illustrative floor ($\approx$10$\times$ inert noise)")
 ax.set_ylabel(r"Manipulation $\Delta$AUC ($p{=}0.9$ node-drop)")
 ax.set_ylim(0, 0.045)
 ax.set_title("XES3G5M fold 0 — graph reliance gate")

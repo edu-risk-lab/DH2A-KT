@@ -1,0 +1,31 @@
+\begin{table}[!t]
+\caption{FoundationalASSIST secondary corpus (fold~0). Session hyperedges use a
+30-minute gap; Hint members appear when \texttt{hint\_count}$>0$. Predictive AUC
+is observational (no P0-reused GKT/simpleKT column). Hint ATE is IPW of
+\texttt{hint\_used}$_t$ on \texttt{correct}$_{t+1}$ under pre-$t$ confounders;
+propensity mass hits the clip floor --- treat as limited observational evidence.}
+\label{tab:foundational-assist}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Interactions (canonical) & 1{,}740{,}987 \\
+Learners / items / KCs & 5{,}000 / 3{,}359 / 209 \\
+Hint-use rate & 0.052 \\
+Train-only $E_{\mathrm{pre}}$ edges (after cycle prune) & 280 \\
+Concept-prerequisite chain hyperedges & 5{,}840 \\
+Session hyperedges (train users) & 308{,}670 \\
+\quad with $\ge$1 Hint member & 35{,}752 (11.6\%) \\
+Session hyperedge $\mathrm{ECR}^{\mathrm{flag}}$ / group leak & 0 / 0 \\
+DH$^2$-KT fold~0 AUC (concept-prereq) & 0.720 \\
+\quad + session HE (20k, Hint-prefer) & 0.722 ($\Delta{+}0.002$) \\
+\quad $n$ next-step predictions & 298{,}500 \\
+Hint ATE (IPW) / naive mean diff & $-0.207$ / $-0.255$ \\
+\quad trimmed IPW (propensity 10--90\%) & $-0.211$ \\
+\quad bootstrap 95\% CI (subsample) & $[-0.230,\,-0.187]$ \\
+\quad $n$ treated / control (train transitions) & 36{,}151 / 660{,}321 \\
+\quad propensity $[\min,\max]$ & $[0.05,\,0.219]$ \\
+\bottomrule
+\end{tabular}
+\end{table}

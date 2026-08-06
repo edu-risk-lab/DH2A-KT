@@ -39,59 +39,74 @@ Y.~Yang, J.~Shen, Y.~Qu, Y.~Liu, K.~Wang, Y.~Zhu, W.~Zhang, and Y.~Yu,
   2021, pp. 299--315.
 
 \bibitem{thmn2025}
-{Author list to verify}, ``Knowledge tracing with a temporal hypergraph memory
-  network,'' in \emph{Artificial Intelligence in Education (AIED 2025)}.\hskip
-  1em plus 0.5em minus 0.4em\relax Springer, 2025, author names not confirmed
-  from the source consulted -- verify before submission.
+M.~Mohammadi, K.~Berahmand, S.~Sadiq, and H.~Khosravi, ``Knowledge tracing with
+  a temporal hypergraph memory network,'' in \emph{Artificial Intelligence in
+  Education. Posters and Late Breaking Results, Workshops and Tutorials,
+  Industry and Innovation Tracks, Practitioners, Doctoral Consortium, Blue Sky,
+  and WideAIED}, ser. Communications in Computer and Information Science, vol.
+  2592.\hskip 1em plus 0.5em minus 0.4em\relax Springer, 2025, pp. 77--85.
 
 \bibitem{hgkt2025}
-------, ``Hypergraph-driven high-order knowledge tracing with a dual-gated
-  dynamic mechanism,'' \emph{Applied Sciences}, vol.~15, no.~15, p. 8617, 2025,
-  author names not confirmed from the source consulted -- verify before
-  submission.
+F.~Ma, C.~Zhu, and P.~Lei, ``Hypergraph-driven high-order knowledge tracing
+  with a dual-gated dynamic mechanism,'' \emph{Applied Sciences}, vol.~15,
+  no.~15, p. 8617, 2025.
 
 \bibitem{htkt2025}
-------, ``{HTKT}: Knowledge tracing based on hypergraph transformer,''
-  \emph{IEEE Access (or venue TBD)}, 2025, iEEE Xplore document 10885089 --
-  verify exact venue/volume/author list before submission.
+X.~Guo, X.~Chang, X.~Zhang, K.~Liang, Y.~Shang, and Y.~Zhang, ``{HTKT}:
+  Knowledge tracing based on hypergraph transformer,'' in \emph{IEEE
+  International Symposium on Parallel and Distributed Processing with
+  Applications (ISPA)}.\hskip 1em plus 0.5em minus 0.4em\relax IEEE, 2024, pp.
+  1472--1477.
 
 \bibitem{dygkt2024}
-K.~Cheng \emph{et~al.}, ``{DyGKT}: Dynamic graph learning for knowledge
-  tracing,'' arXiv:2407.20824, 2024.
+K.~Cheng, L.~Peng, P.~Wang, J.~Ye, L.~Sun, and B.~Du, ``{DyGKT}: Dynamic graph
+  learning for knowledge tracing,'' in \emph{Proceedings of the 30th ACM SIGKDD
+  Conference on Knowledge Discovery and Data Mining (KDD)}, 2024, pp. 409--420.
 
 \bibitem{daominh2026p0}
 D.~M. Tuan, K.-T. Nguyen, D.~N. Tien, Q.~K. Ngo, V.-H. Nguyen, and L.~H. Son,
   ``Leakage-controlled concept graph construction and cold-start diagnostic
   protocol for knowledge tracing,'' 2026, submitted to Applied Intelligence
-  (APIN).
+  (APIN); code and artefacts at
+  \url{https://github.com/edu-risk-lab/leakage-controlled-kt-audit}.
+
+\bibitem{foundationalassist2026}
+{ASSISTments Foundation}, ``{FoundationalASSIST}: An educational dataset for
+  foundational knowledge tracing and pedagogical grounding of {LLMs},''
+  arXiv:2602.00070, 2026, hugging Face dataset:
+  \url{https://huggingface.co/datasets/ASSISTments/FoundationalASSIST}.
 
 \bibitem{psykt2024}
-{Author list to verify}, ``Psychological factors enhanced heterogeneous
-  learning interactive graph knowledge tracing,'' \emph{Frontiers in
-  Psychology}, vol.~15, 2024, author names not confirmed from the source
-  consulted -- verify before submission.
+Z.~Wang, W.~Wu, C.~Zeng, H.~Luo, and J.~Sun, ``Psychological factors enhanced
+  heterogeneous learning interactive graph knowledge tracing for understanding
+  the learning process,'' \emph{Frontiers in Psychology}, vol.~15, p. 1359199,
+  2024.
 
 \bibitem{hhskt2023}
-------, ``{HHSKT}: A learner--question interactions based heterogeneous graph
-  neural network model for knowledge tracing,'' \emph{Expert Systems with
-  Applications}, 2023, scienceDirect S0957417422023521 -- verify exact
-  volume/pages/author list before submission.
+Q.~Ni, T.~Wei, J.~Zhao, L.~He, and C.~Zheng, ``{HHSKT}: A learner--question
+  interactions based heterogeneous graph neural network model for knowledge
+  tracing,'' \emph{Expert Systems with Applications}, vol. 215, p. 119334,
+  2023.
 
 \bibitem{llmedu2025}
-``{LLM} agents for education: Advances and applications,'' arXiv:2503.11733,
-  2025.
+Z.~Chu, S.~Wang, J.~Xie, T.~Zhu, Y.~Yan, J.~Ye, A.~Zhong, X.~Hu, J.~Liang,
+  P.~S. Yu, and Q.~Wen, ``{LLM} agents for education: Advances and
+  applications,'' arXiv:2503.11733, 2025.
 
 \bibitem{agentcat2026}
-``{AgentCAT}: Simulating computerized adaptive testing via multi-agent
-  {LLMs},'' arXiv:2606.21832, 2026.
+W.~Zhou, H.~Ma, X.~Yu, C.~Wang, S.~Yang, and X.~Zhang, ``{AgentCAT}: Simulating
+  computerized adaptive testing via multi-agent large language models,''
+  arXiv:2606.21832, 2026.
 
 \bibitem{graphaugmentedllm2025}
-``Graph-augmented large language model agents: Current progress and future
-  prospects,'' arXiv:2507.21407, 2025.
+Y.~Liu, G.~Zhang, K.~Wang, S.~Li, and S.~Pan, ``Graph-augmented large language
+  model agents: Current progress and future prospects,'' arXiv:2507.21407,
+  2025.
 
 \bibitem{graphrag2025}
-``{GraphRAG}-induced dual knowledge structure graphs for personalized learning
-  path recommendation,'' arXiv:2506.22303, 2025.
+X.~Cheng, Z.~Zhang, J.~Wang, L.~Fang, C.~He, Q.~Guan, S.~Pan, and W.~Luo,
+  ``{GraphRAG}-induced dual knowledge structure graphs for personalized
+  learning path recommendation,'' arXiv:2506.22303, 2025.
 
 \bibitem{kaur2019causal}
 P.~Kaur, A.~Polyzou, and G.~Karypis, ``Causal inference in higher education:
@@ -108,15 +123,13 @@ N.~A. Kumar, W.~Feng, J.~Lee, H.~McNichols, A.~Ghosh, and A.~Lan, ``A
 S.~Minn, J.-J. Vie, K.~Takeuchi, H.~Kashima, and F.~Zhu, ``Interpretable
   knowledge tracing: Simple and efficient student modeling with causal
   relations,'' in \emph{Proceedings of the AAAI Conference on Artificial
-  Intelligence}, vol.~36, 2022, pp. 12\,810--12\,818, author order and page
-  range per secondary citation (Kumar et al., EDM 2023) -- verify against
-  primary source before submission.
+  Intelligence}, vol.~36, no.~11, 2022, pp. 12\,810--12\,818.
 
 \bibitem{esk2024}
-{Author list to verify}, ``{ES-KT-24}: A multimodal knowledge tracing benchmark
-  dataset with educational game playing video and synthetic text generation,''
-  arXiv:2409.10244, 2024, author names not confirmed from the source consulted
-  -- verify before submission.
+D.~Kim, U.~Lee, S.~Lee, J.~Bae, T.~Ahn, J.~Park, G.~Lee, and H.~Kim,
+  ``{ES-KT-24}: A multimodal knowledge tracing benchmark dataset with
+  educational game playing video and synthetic text generation,''
+  arXiv:2409.10244, 2024.
 
 \bibitem{liu2023xes3g5m}
 Z.~Liu, Q.~Liu, T.~Guo, J.~Chen, S.~Huang, X.~Zhao, J.~Tang, W.~Luo, and
