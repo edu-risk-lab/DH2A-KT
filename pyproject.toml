@@ -14,3 +14,6 @@ packages = ["dh2a_kt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "slow: needs real P0 processed data or long-running integration checks",
+]

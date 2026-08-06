@@ -15,7 +15,10 @@ Nguồn: [Scimago — Applied Intelligence](https://www.scimagojr.com/journalsea
 
 ## Cấu trúc file
 
-- `main.tex` — khung bản thảo đầy đủ, dùng `\documentclass[journal]{IEEEtran}` (chuẩn nộp IEEE Transactions). Có `\todo{}` (chữ đỏ) đánh dấu rõ mọi chỗ còn thiếu số liệu thật — **không được xoá `\todo` bằng cách tự bịa số**, chỉ điền khi `docs/execution-plan.md` M5-M9 đã chạy xong.
+- `main.tex` — bản thảo IEEE Transactions; Results/Discussion/Conclusion + Fig. 1–2 đã điền (6 Aug 2026). Còn `\todo` duy nhất: ngày nộp bài.
+- `tables/` — 5 bảng LaTeX, regenerate bằng `python scripts/08_export_paper_tables.py`.
+- `figures/` — Fig. 1 TikZ architecture; Fig. 2 M6 sweep (`python scripts/09_export_paper_figures.py`).
+- `main.pdf` — biên dịch local ~7 trang.
 - `references.bib` — 18 mục, gồm P0 và các công trình đã tổng hợp trong `docs/idea-D-plan.md`. 4 mục (`thmn2025`, `hgkt2025`, `htkt2025`, `hhskt2023`, `esk2024`) có ghi chú "verify author list before submission" — tôi chỉ xác nhận được title/DOI/venue qua tìm kiếm, chưa xác nhận được đầy đủ danh sách tác giả, nên không tự điền để tránh trích dẫn sai.
 
 ## Đã kiểm tra biên dịch

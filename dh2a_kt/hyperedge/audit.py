@@ -20,6 +20,13 @@ from dh2a_kt.p0_bridge import compute_ecr_flag, compute_rho_edge_outcome, comput
 
 logger = logging.getLogger(__name__)
 
+# Concept-prerequisite chains on real benchmarks can enumerate hundreds of
+# thousands of hyperedges; flattening them all for P0's pairwise TBMR/|rho|
+# becomes prohibitive and duplicates signal anyway. Skip those two diagnostics
+# when the projection exceeds this row cap — ECR_flag and group-membership
+# remain the M1 acceptance checks (see docs/execution-plan.md M1 gate).
+_PAIRWISE_DIAGNOSTIC_MAX_ROWS = 100_000
+
 
 @dataclass
 class HyperedgeLeakageReport:
@@ -70,6 +77,11 @@ def compute_group_membership_leakage(
     without showing up in a pairwise check.
     """
     if not hyperedges:
+        return 0.0
+    all_supporting_ids: set[int] = set()
+    for iids in member_to_interaction_id.values():
+        all_supporting_ids.update(iids)
+    if all_supporting_ids.isdisjoint(held_out_interaction_ids):
         return 0.0
     tainted = 0
     for he in hyperedges:
@@ -148,23 +160,39 @@ def audit_hyperedges(
         )
 
     kind = hyperedges[0].kind
-    pairwise = _flatten_to_pairwise(hyperedges)
-    notes.append(
-        "ECR_flag/TBMR/|rho| computed on the pairwise projection of the hyperedge set "
-        "(P0's diagnostics are pairwise-native, and compute_rho_edge_outcome expects a "
-        "'weight' column that hyperedges do not natively have); this is an approximation "
-        "with all projected pairs weighted equally (weight=1.0) — see _flatten_to_pairwise "
-        "docstring and Idea D section 2 for why a hyperedge-native statistic is future work."
-    )
+    n_pairwise = sum(len(he.members) * (len(he.members) - 1) // 2 for he in hyperedges)
+    if n_pairwise <= _PAIRWISE_DIAGNOSTIC_MAX_ROWS:
+        pairwise = _flatten_to_pairwise(hyperedges)
+    else:
+        pairwise = pd.DataFrame(columns=["src_kc", "dst_kc", "hyperedge_id", "fold"])
+        notes.append(
+            f"Pairwise projection not materialised ({n_pairwise} pairs > cap "
+            f"{_PAIRWISE_DIAGNOSTIC_MAX_ROWS}); TBMR/|rho| skipped"
+        )
+
+    if n_pairwise <= _PAIRWISE_DIAGNOSTIC_MAX_ROWS:
+        notes.append(
+            "ECR_flag/TBMR/|rho| computed on the pairwise projection of the hyperedge set "
+            "(P0's diagnostics are pairwise-native, and compute_rho_edge_outcome expects a "
+            "'weight' column that hyperedges do not natively have); this is an approximation "
+            "with all projected pairs weighted equally (weight=1.0) — see _flatten_to_pairwise "
+            "docstring and Idea D section 2 for why a hyperedge-native statistic is future work."
+        )
 
     ecr_flag = compute_ecr_flag(splits)
-    tbmr = compute_tbvr(train_df, pairwise[["src_kc", "dst_kc"]]) if not pairwise.empty else 0.0
 
+    tbmr = 0.0
     rho = None
-    if test_df is not None and not pairwise.empty:
-        pairwise_weighted = pairwise.assign(weight=1.0)
-        empty_sim = pd.DataFrame(columns=["src_kc", "dst_kc", "weight"])
-        rho = compute_rho_edge_outcome(pairwise_weighted, empty_sim, test_df)
+    if pairwise.empty and n_pairwise == 0:
+        tbmr = 0.0
+    elif n_pairwise > _PAIRWISE_DIAGNOSTIC_MAX_ROWS:
+        pass
+    elif not pairwise.empty:
+        tbmr = compute_tbvr(train_df, pairwise[["src_kc", "dst_kc"]])
+        if test_df is not None:
+            pairwise_weighted = pairwise.assign(weight=1.0)
+            empty_sim = pd.DataFrame(columns=["src_kc", "dst_kc", "weight"])
+            rho = compute_rho_edge_outcome(pairwise_weighted, empty_sim, test_df)
 
     group_leak = 0.0
     if held_out_interaction_ids is not None and member_to_interaction_id is not None:

@@ -1,0 +1,45 @@
+% Fig. 1 — Two-tier DH$^2$A-KT architecture (TikZ)
+\begin{figure*}[!t]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize\sffamily,
+  >=Stealth,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=5pt,
+              minimum height=1.05cm, fill=white},
+  tierbox/.style={draw, thick, rounded corners=3pt, inner sep=8pt},
+]
+% ===== Tier 1 row =====
+\node[box, minimum width=2.7cm] (p0) {P0 audited\\$E_{\mathrm{pre}}$};
+\node[box, minimum width=2.9cm, right=0.35cm of p0] (he) {Chain hyperedges\\+ leakage audit};
+\node[box, minimum width=3.0cm, right=0.35cm of he] (enc) {HypergraphConv$\times$2\\graph-only $x_t$};
+\node[box, minimum width=3.0cm, right=0.35cm of enc] (out) {Frozen $P(\mathrm{correct})$\\+ concept state};
+\draw[->, thick] (p0) -- (he);
+\draw[->, thick] (he) -- (enc);
+\draw[->, thick] (enc) -- (out);
+% Tier 1 frame
+\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out),
+      label={[font=\small\bfseries]above:Tier 1 --- DH$^2$-KT (quantitative)}] {};
+
+% ===== Freeze =====
+\node[below=1.15cm of enc] (frz) {\textit{freeze after training}};
+\draw[->, thick, densely dashed] (enc.south) -- ++(0,-0.35) -| (frz.north);
+
+% ===== Tier 2 row =====
+\node[box, minimum width=2.6cm, below=0.55cm of frz] (diag) {Diagnostician};
+\node[box, minimum width=2.4cm, left=0.35cm of diag] (crit) {Critic gate};
+\node[box, minimum width=2.6cm, right=0.35cm of diag] (tut) {Tutor / Hint};
+\node[box, minimum width=3.2cm, below=0.4cm of diag] (sess) {Session hyperedge write-back};
+\draw[->, thick] (frz.south) -- (diag.north);
+\draw[->, thick] (diag) -- (crit);
+\draw[->, thick] (diag) -- (tut);
+\draw[->, thick] (tut.south) |- (sess.east);
+% Tier 2 frame
+\node[tierbox, fill=orange!5, fit=(crit)(diag)(tut)(sess),
+      label={[font=\small\bfseries]below:Tier 2 --- AgentDG-KT (pilot)}] {};
+\end{tikzpicture}
+\caption{Two-tier DH$^2$A-KT architecture. Tier~1 consumes P0's leakage-audited
+prerequisite edges as chain hyperedges, encodes them with graph-only interaction,
+and freezes predictions. Tier~2 agents explain and gate those frozen outputs;
+the Tutor writes session hyperedges back into the graph at pilot scale.}
+\label{fig:architecture}
+\end{figure*}

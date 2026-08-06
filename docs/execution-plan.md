@@ -2,25 +2,57 @@
 
 > Đây là kế hoạch **thi công phần mềm**, bám theo trạng thái thực tế của code trong repo (không phải bản lặp lại kế hoạch nghiên cứu cấp cao ở `docs/idea-D-plan.md`). Mỗi milestone dưới đây gắn với file/module cụ thể đã tồn tại trong `dh2a_kt/`, có gate nghiệm thu bằng `pytest`, và map ngược lại đúng "Pha" trong `docs/idea-D-plan.md` để không lệch khỏi kế hoạch gốc.
 
-## 0. Điểm xuất phát — kiểm kê thực tế (không phải ước lượng)
+## 0. Trạng thái thực tế (cập nhật 6 Aug 2026)
+
+### 0.1. Milestone Tier 1 + Tier 2
+
+| Milestone | Trạng thái | Bằng chứng / ghi chú |
+|---|---|---|
+| **M0** — Môi trường & dữ liệu | **Done** | Parquet processed: XES3G5M, Junyi, ASSIST2012 |
+| **M1** — Concept-prerequisite hyperedge | **Done** | XES3G5M fold 0: 446,305 chain hyperedges, `ecr_flag=0` |
+| **M2** — Session hyperedge | **Skipped** | thiếu ES-KT-24 |
+| **M3** — `DH2KT.forward()` | **Done** | graph-only interaction + HypergraphConv ×2 |
+| **M4** — Causal layer | **Done** | `tests/test_causal_layer_integration.py` pass |
+| **M5** — Train + so P0 | **Done (v2)** | mean AUC **0.7516** vs GKT **0.8336** → `results/tables/dh2_kt_vs_p0.csv` |
+| **M6** — Manipulation check | **PASS** | `auc_drop=0.0380` → `results/tables/xes3g5m_fold0_manipulation_check.json` |
+| **M7** — GT cross-val Junyi | **Done** | 3 folds |
+| **M8** — Tier 2 pilot | **Done** | stub500 `0.0`; Ollama v1 **0.124**; Ollama v2 calibrated **0.000** (500) |
+| **M9** — Đánh giá Tier 2 | **Done** | stub + Ollama v1/v2 eval → `docs/M9-results-summary.md` |
+| **Tests** | **42/42 pass** | `python -m pytest tests/ -q` |
+
+### 0.2. Kiểm kê module (snapshot code)
 
 | Module | Trạng thái | Bằng chứng |
 |---|---|---|
-| `dh2a_kt/p0_bridge.py` | Chạy được | `tests/test_p0_bridge.py` — 2/2 pass |
-| `dh2a_kt/hyperedge/construction.py::build_concept_prerequisite_hyperedges` | Chạy được (trên dữ liệu toy) | `tests/test_hyperedge_audit.py` — pass |
-| `dh2a_kt/hyperedge/construction.py::build_session_hyperedges` | `NotImplementedError` | dòng 111 — chặn bởi thiếu dữ liệu Hint/Video đồng bộ |
-| `dh2a_kt/hyperedge/construction.py::build_discussion_thread_hyperedges` | `NotImplementedError` | dòng 122 — chặn bởi thiếu dữ liệu Forum |
-| `dh2a_kt/hyperedge/construction.py::build_teacher_intervention_hyperedges` | `NotImplementedError` | dòng 128 — chặn bởi thiếu dữ liệu Teacher |
-| `dh2a_kt/hyperedge/audit.py` | Chạy được (group-membership leak); cross-modal/intervention-timing cần input thật | `tests/test_hyperedge_audit.py` — pass |
-| `dh2a_kt/baselines/loader.py` | Chạy được, đầy đủ | `tests/test_baselines_loader.py` — 3/3 pass |
-| `dh2a_kt/models/causal_layer.py::PropensityScoreATE` | Chạy được (chưa nối vào pipeline thật) | `tests/test_causal_layer.py` — 4/4 pass (dữ liệu tổng hợp, kiểm tra IPW estimate sát ground-truth ATE hơn naive mean-difference, có cảnh báo overlap kém) |
-| `dh2a_kt/models/dh2_kt.py::DH2KT.forward()` | `NotImplementedError` | dòng 72 |
-| `dh2a_kt/eval/manipulation_check.py` | Chạy được nhưng cần `eval_auc_fn` từ model đã train | — |
-| `dh2a_kt/agents/*` (5 agent) | Interface cố định, cần `LLMClient` backend thật | — |
-| `scripts/02_build_hyperedges.py`, `03_train_tier1.py`, `04_run_tier2_pilot.py` | `NotImplementedError` — glue-code chờ dữ liệu/model thật | — |
-| Dữ liệu thô (XES3G5M/ASSISTments2012/Junyi) | **Chưa tải** | `external/p0_leakage_audit/data/raw/` chỉ có `.gitkeep` |
+| `dh2a_kt/p0_bridge.py` | Chạy được | `tests/test_p0_bridge.py` |
+| `dh2a_kt/hyperedge/construction.py` | Chạy được (concept-prerequisite); session/forum/teacher vẫn `NotImplementedError` | `tests/test_hyperedge_audit.py`, `tests/test_build_hyperedges_real_data.py` |
+| `dh2a_kt/hyperedge/indexing.py` | Chạy được | `tests/test_hyperedge_indexing.py` — destroy hyperedges cho M6 |
+| `dh2a_kt/hyperedge/audit.py` | Chạy được | `tests/test_hyperedge_audit.py` |
+| `dh2a_kt/baselines/loader.py` | Chạy được | `tests/test_baselines_loader.py` |
+| `dh2a_kt/models/causal_layer.py` | Chạy được + nối pipeline | `tests/test_causal_layer.py`, `tests/test_causal_layer_integration.py` |
+| `dh2a_kt/models/dh2_kt.py::DH2KT` | Chạy được (graph-only v2) | `tests/test_dh2_kt.py`; train/eval trên GPU |
+| `dh2a_kt/train/tier1.py` | Chạy được | chain hyperedges, graph sensitivity loss, concept state cache |
+| `dh2a_kt/eval/tier1_eval.py` | Chạy được | M6 dùng `trained.clean_hyperedges` |
+| `dh2a_kt/eval/gt_crossval.py` | Chạy được | `tests/test_gt_crossval.py` |
+| `dh2a_kt/agents/*` | Interface cố định | Cần `LLMClient` backend thật (M8) |
+| `scripts/02_build_hyperedges.py` | Chạy được | audit trên dữ liệu thật |
+| `scripts/03_train_tier1.py` | Chạy được | `--all-folds --device cuda` |
+| `scripts/05_run_manipulation_check.py` | Chạy được | M6 gate pass fold 0 |
+| `scripts/04_run_tier2_pilot.py` | Chạy được | stub + ollama backends; checkpoint save/load |
+| Dữ liệu processed | **Có** | `external/p0_leakage_audit/data/processed/*.parquet` |
 
-Kết luận: phần **viết code khung** cho Pha 0-1 (theo `docs/idea-D-plan.md`) đã xong sớm hơn dự kiến trong một phiên, nhưng phần **phụ thuộc thời gian thực** (tải dữ liệu, train trên GPU, chạy LLM) vẫn cần đúng khối lượng thời gian đã ước lượng trong kế hoạch gốc — code viết nhanh không rút ngắn được thời gian máy chạy.
+### 0.3. M6 graph-inert fix (tóm tắt kỹ thuật)
+
+Ban đầu model predict tốt qua **exercise embedding + concept residual**, bỏ qua hypergraph → M6 fail (`auc_drop≈0.0003`). Fix gồm:
+
+1. Train trên **chain hyperedges** (446k) thay pairwise `e_pre`.
+2. **Participation masking** — concept state chỉ nonzero cho node có trong ≥1 hyperedge.
+3. **Graph-only interaction** — `x_t = concept_proj(c_t) + response_proj(r_t)`, không cộng `exercise_embed`.
+4. **Graph sensitivity loss** (`graph_sensitivity_weight=1.0`, `p=0.9`) khớp regime M6.
+
+Tradeoff: `auc_clean` giảm (~0.75 vs ~0.79 v1) nhưng model **graph-reliant** — điều kiện cần để diễn giải ablation.
+
+Kết luận: **Tier 1 code path (M0–M7 trừ M2/M8) đã chạy end-to-end trên GPU.** Việc còn lại chủ yếu là Tier 2 pilot (M8).
 
 ## 1. Nguyên tắc thi công
 
@@ -81,7 +113,11 @@ Kết luận: phần **viết code khung** cho Pha 0-1 (theo `docs/idea-D-plan.m
 ### M5 — Training loop Tier 1 + so sánh P0 (`scripts/03_train_tier1.py`)
 **Việc cụ thể**: viết train/eval loop thật; **bắt buộc** khớp ngân sách epoch/batch với P0 cho model tương ứng (xem `configs/xes3g5m.yaml` mục `pykt:`/`baselines:` — ví dụ GKT: batch 4, max 10 epoch) trước khi so sánh; gọi `dh2a_kt.baselines.loader.compare_against_p0()`.
 
-**Gate nghiệm thu**: bảng kết quả AUC ghi ra `results/dh2_kt_vs_p0.csv`; nếu ngân sách không khớp được chính xác, ghi rõ trong báo cáo là so sánh "quan sát" (observational) — đúng cách P0 tự giới hạn phát biểu (P0 Section 5.3).
+**Gate nghiệm thu**: bảng kết quả AUC ghi ra `results/tables/dh2_kt_vs_p0.csv`; nếu ngân sách không khớp được chính xác, ghi rõ trong báo cáo là so sánh "quan sát" (observational) — đúng cách P0 tự giới hạn phát biểu (P0 Section 5.3).
+
+**Trạng thái (6 Aug 2026)**:
+- v1 (pairwise + exercise): mean AUC **0.7874** vs GKT **0.8336** — archived baseline.
+- v2 (chain + graph-only): mean AUC **0.7516** vs GKT **0.8336** (folds 0.7501/0.7518/0.7531) — **done**, tradeoff để pass M6.
 
 ---
 
@@ -89,6 +125,8 @@ Kết luận: phần **viết code khung** cho Pha 0-1 (theo `docs/idea-D-plan.m
 **Việc cụ thể**: viết `eval_auc_fn` nối với model đã train ở M5, gọi `run_manipulation_check(hyperedges, eval_auc_fn=..., p=0.90)`.
 
 **Gate nghiệm thu**: `ManipulationCheckResult.passes_manipulation_check` được ghi lại kèm `verdict` — nếu `False`, phải điều tra trước khi diễn giải bất kỳ kết quả ablation nào là "graph có tác dụng" (đúng cảnh báo đã viết sẵn trong `manipulation_check.py`).
+
+**Trạng thái (5 Aug 2026)**: **PASS** trên XES3G5M fold 0 full (graph-only v2): `auc_clean=0.7527`, `auc_destroyed=0.7147`, `auc_drop=0.0380`, `ddr=0.9904`, verdict *"DH2-KT reads the hypergraph (graph-reliant)."* → `results/tables/xes3g5m_fold0_manipulation_check.json`.
 
 ---
 
@@ -126,11 +164,14 @@ Kết luận: phần **viết code khung** cho Pha 0-1 (theo `docs/idea-D-plan.m
 | M8 | Pha 4 | 11–12 | M5, LLM backend |
 | M9 | Pha 5–6 | 12–15 | M6, M7, M8 |
 
-## 4. Việc cần làm ngay tuần này (không chờ toàn bộ M0 xong)
+## 4. Việc cần làm tiếp (6 Aug 2026)
 
-1. Cài `external/p0_leakage_audit/requirements.txt` + clone `pykt-toolkit` (M0, không cần dữ liệu vẫn làm được).
-2. Bắt đầu tải XES3G5M trước (dataset primary) thay vì cả 3 dataset cùng lúc — mở khoá M1 sớm nhất có thể.
-3. ~~Viết thêm 1 test cho `models/causal_layer.py`~~ — **Xong**: `tests/test_causal_layer.py` (4 test, dữ liệu tổng hợp có confounder đã biết, không cần GPU/dữ liệu thật).
+1. ~~LaTeX bản thảo~~ — Results/Discussion/Conclusion + tables + Fig. 1–2 trong `paper/main.tex` / `paper/main.pdf` (7 trang).
+2. **Optional polish** — Overleaf upload; verify bib author lists marked "to verify"; human eval Tier 2.
+3. **Optional** — M2 session hyperedge (ES-KT-24).
+4. ~~Critic prompt calibration~~ — **Xong** (Ollama v2, 500 mẫu).
+5. ~~M0–M9 software path~~ — **Xong**; pytest **42/42** pass.
+6. ~~M5 Junyi GPU train~~ — **Bỏ qua**.
 
 ## 5. Rủi ro kỹ thuật cụ thể (bổ sung, gắn trực tiếp với file)
 

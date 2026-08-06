@@ -20,7 +20,7 @@ hyperedge:
     enabled: false
 
 ground_truth_crossval:
-  expert_dag_path: external/p0_leakage_audit/data/raw/junyi/junyi_dag.csv
+  expert_dag_path: external/p0_leakage_audit/data/raw/junyi/relationship_annotation_training.csv
   prereq_threshold: 0.5
   top_k_list: [200, 500, 800, 1200, 1800, 2500, 3500, 5000]
 

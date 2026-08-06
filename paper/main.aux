@@ -1,19 +1,5 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
-\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
-\global\let\oldcontentsline\contentsline
-\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
-\global\let\oldnewlabel\newlabel
-\gdef\newlabel#1#2{\newlabelxx{#1}#2}
-\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
-\AtEndDocument{\ifx\hyper@anchor\@undefined
-\let\contentsline\oldcontentsline
-\let\newlabel\oldnewlabel
-\fi}
-\fi}
-\global\let\hyper@last\relax 
-\gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{piech2015dkt}
@@ -58,6 +44,7 @@
 \citation{daominh2026p0}
 \citation{daominh2026p0}
 \citation{daominh2026p0}
+\citation{daominh2026p0}
 \citation{esk2024}
 \citation{daominh2026p0}
 \citation{daominh2026p0}
@@ -71,6 +58,17 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Hyperedge-level leakage audit}{3}{subsection.4.2}\protected@file@percent }
 \newlabel{sec:leakage-ext}{{\mbox  {IV-B}}{3}{Hyperedge-level leakage audit}{subsection.4.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Encoding and hypergraph attention}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Two-tier DH$^2$A-KT architecture. Tier~1 consumes P0's leakage-audited prerequisite edges as chain hyperedges, encodes them with graph-only interaction, and freezes predictions. Tier~2 agents explain and gate those frozen outputs; the Tutor writes session hyperedges back into the graph at pilot scale.}}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{4}{Two-tier DH$^2$A-KT architecture. Tier~1 consumes P0's leakage-audited prerequisite edges as chain hyperedges, encodes them with graph-only interaction, and freezes predictions. Tier~2 agents explain and gate those frozen outputs; the Tutor writes session hyperedges back into the graph at pilot scale}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Hyperedge-level leakage taxonomy (extends \cite  {daominh2026p0} Table~1)}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:leakage-taxonomy}{{I}{4}{Hyperedge-level leakage taxonomy (extends \cite {daominh2026p0} Table~1)}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Concept-prerequisite hyperedge audit on XES3G5M fold~0. Pairwise TBMR/$|\rho |$ skipped when projection exceeds cap (noted in audit JSON).}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:leakage-measured}{{II}{4}{Concept-prerequisite hyperedge audit on XES3G5M fold~0. Pairwise TBMR/$|\rho |$ skipped when projection exceeds cap (noted in audit JSON)}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Causal-effect layer}{4}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:causal}{{\mbox  {IV-D}}{4}{Causal-effect layer}{subsection.4.4}{}}
+\newlabel{eq:ate}{{1}{4}{Causal-effect layer}{equation.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Tier 2: AgentDG-KT pilot}{4}{section.5}\protected@file@percent }
+\newlabel{sec:tier2}{{V}{4}{Tier 2: AgentDG-KT pilot}{section.5}{}}
 \citation{daominh2026p0}
 \citation{liu2023xes3g5m}
 \citation{daominh2026p0}
@@ -79,21 +77,26 @@
 \citation{daominh2026p0}
 \citation{daominh2026p0}
 \citation{daominh2026p0}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Hyperedge-level leakage taxonomy (extends \cite  {daominh2026p0} Table\nobreakspace  {}1)}}{4}{table.1}\protected@file@percent }
-\newlabel{tab:leakage-taxonomy}{{I}{4}{Hyperedge-level leakage taxonomy (extends \cite {daominh2026p0} Table~1)}{table.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Causal-effect layer}{4}{subsection.4.4}\protected@file@percent }
-\newlabel{sec:causal}{{\mbox  {IV-D}}{4}{Causal-effect layer}{subsection.4.4}{}}
-\newlabel{eq:ate}{{1}{4}{Causal-effect layer}{equation.4.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Tier 2: AgentDG-KT pilot}{4}{section.5}\protected@file@percent }
-\newlabel{sec:tier2}{{V}{4}{Tier 2: AgentDG-KT pilot}{section.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {VI}Experimental setup}{4}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Datasets}{4}{subsection.6.1}\protected@file@percent }
-\newlabel{sec:reuse}{{\mbox  {VI-A}}{4}{Datasets}{subsection.6.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Baselines reused from P0}{4}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Manipulation check}{4}{subsection.6.3}\protected@file@percent }
-\newlabel{sec:eval}{{\mbox  {VI-C}}{4}{Manipulation check}{subsection.6.3}{}}
 \citation{daominh2026p0}
 \citation{daominh2026p0}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Tier~2 agent faithfulness pilot (XES3G5M fold~0, $n{=}500$, seed 42, Qwen2.5-7B via Ollama). Flag rate = fraction of Diagnostician outputs flagged by the mandatory Critic. v2 applies probability-format calibration (\texttt  {critic\_calibration.py}).}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:tier2}{{III}{5}{Tier~2 agent faithfulness pilot (XES3G5M fold~0, $n{=}500$, seed 42, Qwen2.5-7B via Ollama). Flag rate = fraction of Diagnostician outputs flagged by the mandatory Critic. v2 applies probability-format calibration (\texttt {critic\_calibration.py})}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Experimental setup}{5}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Datasets}{5}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:reuse}{{\mbox  {VI-A}}{5}{Datasets}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Baselines reused from P0}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Test AUC on XES3G5M under matched training budget (batch 4, 10 epochs, max seq.\ len.\ 200). P0 baseline AUC reused from \cite  {daominh2026p0}; DH$^2$-KT v2 uses chain concept-prerequisite hyperedges and graph-only interaction.}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:auc-xes3g5m}{{IV}{5}{Test AUC on XES3G5M under matched training budget (batch 4, 10 epochs, max seq.\ len.\ 200). P0 baseline AUC reused from \cite {daominh2026p0}; DH$^2$-KT v2 uses chain concept-prerequisite hyperedges and graph-only interaction}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Manipulation check on XES3G5M fold~0 (DH$^2$-KT v2, graph-only). Near-total hypergraph destruction ($p{=}0.9$ node-drop) must move AUC meaningfully; a graph-inert backbone fails this gate.}}{5}{table.5}\protected@file@percent }
+\newlabel{tab:manipulation}{{V}{5}{Manipulation check on XES3G5M fold~0 (DH$^2$-KT v2, graph-only). Near-total hypergraph destruction ($p{=}0.9$ node-drop) must move AUC meaningfully; a graph-inert backbone fails this gate}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Manipulation check}{5}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:eval}{{\mbox  {VI-C}}{5}{Manipulation check}{subsection.6.3}{}}
+\newlabel{sec:results}{{\mbox  {VI-C}}{5}{Manipulation check}{subsection.6.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Results}{5}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-A}}Predictive performance (RQ1)}{5}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-B}}Manipulation check (RQ2)}{5}{subsection.7.2}\protected@file@percent }
+\newlabel{sec:manipulation-result}{{\mbox  {VII-B}}{5}{Manipulation check (RQ2)}{subsection.7.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-C}}Ground-truth cross-validation (Junyi, RQ5)}{5}{subsection.7.3}\protected@file@percent }
 \citation{daominh2026p0}
 \citation{daominh2026p0}
 \bibstyle{IEEEtran}
@@ -103,6 +106,18 @@
 \bibcite{yang2021gikt}{3}
 \bibcite{thmn2025}{4}
 \bibcite{hgkt2025}{5}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Manipulation-check $\Delta $AUC on XES3G5M fold~0 under $p{=}0.9$ node-drop. An early pairwise$+$exercise-embedding backbone is graph-inert ($\Delta $AUC$\approx 0.0003$); the chain$+$graph-only redesign passes ($\Delta $AUC$=0.038$). Source: \texttt  {results/tables/xes3g5m\_fold0\_manipulation\_check.json} and the archived graph-inert diagnostic in \texttt  {docs/execution-plan.md}.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:manipulation-sweep}{{2}{6}{Manipulation-check $\Delta $AUC on XES3G5M fold~0 under $p{=}0.9$ node-drop. An early pairwise$+$exercise-embedding backbone is graph-inert ($\Delta $AUC$\approx 0.0003$); the chain$+$graph-only redesign passes ($\Delta $AUC$=0.038$). Source: \texttt {results/tables/xes3g5m\_fold0\_manipulation\_check.json} and the archived graph-inert diagnostic in \texttt {docs/execution-plan.md}}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Ground-truth cross-validation on Junyi Academy (fold~0, top-$K{=}|$expert$|{=}1131$). Hyperedge chain slightly underlaps pairwise $E_{\mathrm  {pre}}$ but remains the same order of magnitude.}}{6}{table.6}\protected@file@percent }
+\newlabel{tab:junyi-gt}{{VI}{6}{Ground-truth cross-validation on Junyi Academy (fold~0, top-$K{=}|$expert$|{=}1131$). Hyperedge chain slightly underlaps pairwise $E_{\mathrm {pre}}$ but remains the same order of magnitude}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VII-D}}Tier~2 faithfulness pilot}{6}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Discussion}{6}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Threats to validity}{6}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Graph--accuracy tradeoff and Tier~2 faithfulness}{6}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-C}}Limitations}{6}{subsection.8.3}\protected@file@percent }
+\newlabel{sec:limitations}{{\mbox  {VIII-C}}{6}{Limitations}{subsection.8.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion and future work}{6}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.2}\protected@file@percent }
 \bibcite{htkt2025}{6}
 \bibcite{dygkt2024}{7}
 \bibcite{daominh2026p0}{8}
@@ -115,13 +130,6 @@
 \bibcite{kaur2019causal}{15}
 \bibcite{kumar2023causal}{16}
 \bibcite{minn2022interpretable}{17}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Results}{5}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {VIII}Discussion}{5}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-A}}Threats to validity}{5}{subsection.8.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VIII-B}}Limitations}{5}{subsection.8.2}\protected@file@percent }
-\newlabel{sec:limitations}{{\mbox  {VIII-B}}{5}{Limitations}{subsection.8.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {IX}Conclusion and future work}{5}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{5}{section*.2}\protected@file@percent }
 \bibcite{esk2024}{18}
 \bibcite{liu2023xes3g5m}{19}
-\gdef \@abspage@last{6}
+\gdef \@abspage@last{7}

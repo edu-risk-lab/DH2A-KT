@@ -69,29 +69,69 @@ def build_concept_prerequisite_hyperedges(
 
     hyperedges: list[Hyperedge] = []
     seen_chains: set[tuple[int, ...]] = set()
-    for root in [n for n in graph.nodes if graph.in_degree(n) == 0]:
-        for target in graph.nodes:
-            if target == root:
-                continue
-            for path in nx.all_simple_paths(graph, root, target, cutoff=max_chain_len):
-                if len(path) < min_chain_len:
-                    continue
+    roots = [n for n in graph.nodes if graph.in_degree(n) == 0]
+    # DFS from each DAG root — equivalent to all_simple_paths on an acyclic
+    # E_pre graph but avoids O(|V|^2) NetworkX calls on large benchmarks.
+    for root in roots:
+        stack: list[tuple[object, list[int]]] = [(root, [int(root)])]
+        while stack:
+            node, path = stack.pop()
+            if len(path) >= min_chain_len:
                 key = tuple(path)
-                if key in seen_chains:
-                    continue
-                seen_chains.add(key)
-                hyperedges.append(
-                    Hyperedge(
-                        hyperedge_id=f"cprereq_f{fold}_{'_'.join(map(str, path))}",
-                        kind="concept_prerequisite",
-                        members=[("concept", kc) for kc in path],
-                        fold=fold,
-                        train_only=True,
-                        provenance={"source": "p0_e_pre_chain", "chain_len": len(path)},
+                if key not in seen_chains:
+                    seen_chains.add(key)
+                    hyperedges.append(
+                        Hyperedge(
+                            hyperedge_id=f"cprereq_f{fold}_{'_'.join(map(str, path))}",
+                            kind="concept_prerequisite",
+                            members=[("concept", kc) for kc in path],
+                            fold=fold,
+                            train_only=True,
+                            provenance={"source": "p0_e_pre_chain", "chain_len": len(path)},
+                        )
                     )
-                )
+            if len(path) >= max_chain_len:
+                continue
+            for succ in graph.successors(node):
+                stack.append((succ, path + [int(succ)]))
     logger.info("Built %d concept-prerequisite hyperedges (fold=%s)", len(hyperedges), fold)
     return hyperedges
+
+
+def hyperedges_from_e_pre_pairwise(e_pre: pd.DataFrame, *, fold: int = 0) -> list[Hyperedge]:
+    """One 2-node hyperedge per audited ``E_pre`` pair — fast graph for M6 checks."""
+    return [
+        Hyperedge(
+            hyperedge_id=f"prepair_f{fold}_{i}",
+            kind="concept_prerequisite",
+            members=[("concept", int(row.src_kc)), ("concept", int(row.dst_kc))],
+            fold=fold,
+            train_only=True,
+            provenance={"source": "p0_e_pre_pair"},
+        )
+        for i, row in enumerate(e_pre.itertuples(index=False))
+    ]
+
+
+def resolve_concept_prerequisite_hyperedges(
+    e_pre: pd.DataFrame,
+    *,
+    fold: int = 0,
+    source: str = "chain",
+    min_chain_len: int = 3,
+    max_chain_len: int = 8,
+) -> list[Hyperedge]:
+    """Build training/eval hyperedge set from audited ``E_pre``."""
+    if source == "pairwise":
+        return hyperedges_from_e_pre_pairwise(e_pre, fold=fold)
+    if source == "chain":
+        return build_concept_prerequisite_hyperedges(
+            e_pre,
+            fold=fold,
+            min_chain_len=min_chain_len,
+            max_chain_len=max_chain_len,
+        )
+    raise ValueError(f"Unsupported hyperedge source {source!r}; use 'chain' or 'pairwise'")
 
 
 def build_session_hyperedges(

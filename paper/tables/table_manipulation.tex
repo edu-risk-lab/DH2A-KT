@@ -1,0 +1,17 @@
+% Auto-derived from results/tables/xes3g5m_fold0_manipulation_check.json
+\begin{table}[!t]
+\caption{Manipulation check on XES3G5M fold~0 (DH$^2$-KT v2, graph-only). Near-total hypergraph destruction ($p{=}0.9$ node-drop) must move AUC meaningfully; a graph-inert backbone fails this gate.}
+\label{tab:manipulation}
+\centering
+\begin{tabular}{@{}lc@{}}
+\toprule
+Condition & Test AUC \\
+\midrule
+Clean hypergraph & 0.7527 \\
+Destroyed ($p{=}0.9$ node-drop) & 0.7147 \\
+$\Delta$AUC & \textbf{0.0380} \\
+DDR & 0.990 \\
+Pass manipulation check & \textbf{Yes} \\
+\bottomrule
+\end{tabular}
+\end{table}

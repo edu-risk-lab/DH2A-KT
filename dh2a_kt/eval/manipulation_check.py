@@ -21,6 +21,7 @@ from typing import Callable
 import pandas as pd
 
 from dh2a_kt.hyperedge.construction import Hyperedge
+from dh2a_kt.hyperedge.indexing import destroy_hyperedges, hyperedges_to_pairwise_edges
 from dh2a_kt.p0_bridge import apply_node_drop, apply_edge_drop, compute_dag_disruption_rate
 
 logger = logging.getLogger(__name__)
@@ -40,13 +41,7 @@ class ManipulationCheckResult:
 
 
 def _hyperedges_to_pairwise_edges(hyperedges: list[Hyperedge]) -> pd.DataFrame:
-    rows = []
-    for he in hyperedges:
-        ids = [m[1] for m in he.members]
-        for i in range(len(ids)):
-            for j in range(i + 1, len(ids)):
-                rows.append({"src_kc": ids[i], "dst_kc": ids[j], "weight": 1.0})
-    return pd.DataFrame(rows, columns=["src_kc", "dst_kc", "weight"])
+    return hyperedges_to_pairwise_edges(hyperedges)
 
 
 def run_manipulation_check(
@@ -80,14 +75,7 @@ def run_manipulation_check(
 
     ddr = compute_dag_disruption_rate(edges, destroyed_edges)
 
-    kept_ids = set(zip(destroyed_edges["src_kc"], destroyed_edges["dst_kc"]))
-    destroyed_hyperedges = [
-        he for he in hyperedges
-        if any(
-            (he.members[i][1], he.members[j][1]) in kept_ids or (he.members[j][1], he.members[i][1]) in kept_ids
-            for i in range(len(he.members)) for j in range(i + 1, len(he.members))
-        )
-    ]
+    destroyed_hyperedges = destroy_hyperedges(hyperedges, p=p, seed=seed, operator=operator)
     auc_destroyed = eval_auc_fn(destroyed_hyperedges)
     auc_drop = auc_clean - auc_destroyed
 

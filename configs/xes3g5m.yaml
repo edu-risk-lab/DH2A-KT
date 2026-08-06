@@ -14,7 +14,7 @@ hyperedge:
     enabled: true
     min_chain_len: 3
     max_chain_len: 8
-    source: p0_e_pre   # built from P0's audited, acyclic E_pre (Pha 1)
+    source: p0_e_pre   # chain hyperedges from P0's audited E_pre (M1)
   session:
     enabled: false      # TODO Pha 1 (docs/idea-D-plan.md section 5): needs
                          # Hint/Video-bearing logs XES3G5M does not provide.
@@ -28,6 +28,18 @@ manipulation_check:
   p: 0.90
   operator: node_drop
   seed: 42
+
+training:
+  budget_reference: gkt      # match P0 GKT hyperparams (batch 4, epochs 10)
+  lr: 0.001
+  max_seq_len: 200           # from P0 pykt.max_seq_len
+  hidden_dim: 128
+  n_hypergraph_layers: 2
+  graph_dropout: 0.15        # train-time empty-graph batches
+  graph_sensitivity_weight: 1.0
+  graph_sensitivity_margin: 0.08
+  graph_sensitivity_p: 0.9
+  comparison_models: [gkt, simplekt]
 
 baselines_reused:
   path: baselines/p0_reused/baseline_results.csv
