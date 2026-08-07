@@ -119,6 +119,37 @@ Three concrete gaps motivate this work:
   ATE estimation even when public logs do not yet support reporting numbers.
 \end{itemize}
 
+\subsection{Research Questions}
+\label{sec:rqs}
+This work is motivated by a broader question: \emph{how can a
+heterogeneous hypergraph -- with student, exercise, concept, teacher,
+hint, forum, discussion, and video as node types
+(Section~\ref{sec:prelim}) -- improve knowledge tracing beyond pairwise
+student--concept--exercise graphs?} We decompose this into five questions
+answered with evidence below, plus one this paper does not answer:
+\begin{itemize}
+  \item \textbf{RQ1} (\S\ref{sec:results}): Does a leakage-controlled
+  concept-prerequisite hypergraph yield competitive KT accuracy under a
+  graph-only encoder?
+  \item \textbf{RQ2} (\S\ref{sec:manipulation-result}): Does the resulting
+  model demonstrably rely on the constructed hypergraph, and is that
+  reliance unique relative to reused graph-KT baselines?
+  \item \textbf{RQ3} (\S\ref{sec:junyi-gt}): Does concept-prerequisite
+  hyperedge construction preserve structural fidelity with an
+  expert-curated prerequisite DAG?
+  \item \textbf{RQ4} (\S\ref{sec:tier2-faithfulness-result}): Can a
+  Critic-gated LLM-agent layer read frozen Tier~1 predictions and produce
+  faithful, useful explanations at pilot scale?
+  \item \textbf{RQ5} (\S\ref{sec:foundational-assist}): Can session+Hint
+  hyperedges and a hint ATE be instantiated on a hint-bearing corpus, and
+  what do propensity diagnostics reveal about identification?
+\end{itemize}
+Interactions involving \emph{teacher}, \emph{forum/discussion}, and
+\emph{video} nodes are defined in the schema
+(Section~\ref{sec:prelim}) but remain data-blocked on every corpus we use
+(Section~\ref{sec:limitations}): this paper establishes an interface for
+those entities, not empirical evidence of how they improve KT.
+
 \subsection{Contributions}
 \begin{itemize}
   \item \textbf{C1.} A hypergraph construction procedure
@@ -261,6 +292,7 @@ identification-assumption caveat in Section~\ref{sec:limitations}.
 
 % =============================================================================
 \section{Preliminaries}
+\label{sec:prelim}
 % =============================================================================
 
 Let $\mathcal{D} = \{(u, t, q, c, y)\}$ be a KT interaction log with learner
@@ -572,6 +604,7 @@ DH$^2$-KT training on Junyi (25M interactions) was not run.
 \input{tables/table_junyi_gt}
 
 \subsection{Tier~2 faithfulness pilot}
+\label{sec:tier2-faithfulness-result}
 See Table~\ref{tab:tier2} and Section~\ref{sec:tier2}. The Tutor wrote 500
 session hyperedges at pilot scale. From the calibrated Ollama v2 run we
 drew a fixed 40-sample pack (seed 42) for two independent raters (A1, B1)
