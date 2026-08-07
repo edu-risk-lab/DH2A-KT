@@ -94,7 +94,20 @@ Verification review (`paper/review2_DH2A-KT_IEEE-TLT.docx`): **MINOR REVISION**.
 | Manipulation check cho GKT (reuse P0 DDR) + simpleKT N/A | **Xong** — `table_manipulation.tex`; thảo luận reframed |
 | Mean±SD / paired Δ cho AUC chính | **Xong** — `table_auc_xes3g5m.tex`; `scripts/17_export_review2_stats.py` |
 | Cover letter Short Paper + FoundationalASSIST access note | **Xong** — `paper/cover_letter_tlt_short.md`; Acknowledgment |
-| Push bản review-2 | ⬜ khi tác giả yêu cầu |
+| Push bản review-2 | **Xong** (`162113e`) |
+
+---
+
+## Phase E / Review-3 follow-ups (7 Aug 2026)
+
+Re-review (`paper/review3_DH2A-KT_IEEE-TLT.docx`): **MINOR REVISION**.
+
+| Mục | Trạng thái |
+|-----|------------|
+| Định vị lại DH²-KT sau khi rút unique graph-reliance (audit + dị thể + ATE + Tier2) | **Xong** — §\ref{sec:auc-tradeoff} viết lại |
+| Intro: forum/teacher không phải “limited evidence” | **Xong** — khớp Abstract (data-blocked) |
+| Fig. 1 fill đè chữ (TikZ backgrounds) | **Xong** — `backgrounds` + `\pgfonlayer` (reviewer đã patch; xác nhận compile) |
+| Frozen-weight GKT (optional) | **Không làm** trước Short Paper |
 
 ---
 
@@ -107,7 +120,8 @@ Verification review (`paper/review2_DH2A-KT_IEEE-TLT.docx`): **MINOR REVISION**.
 - [x] Fig. 2 threshold được định nghĩa trong text
 - [x] `main.pdf` biên dịch; **≤8 trang** Short Paper
 - [x] Cover letter draft (`paper/cover_letter_tlt_short.md`)
-- [ ] Push GitHub bản nộp (review-2 fixes)
+- [x] Review-3 positioning + Intro scope fix
+- [ ] Push GitHub bản review-3 (khi tác giả yêu cầu)
 ---
 
 ## Mapping file chính
@@ -131,3 +145,4 @@ Verification review (`paper/review2_DH2A-KT_IEEE-TLT.docx`): **MINOR REVISION**.
 - Không đánh đồng FoundationalASSIST với ASSIST2012 / tái dùng GKT P0.
 - Không diễn giải ATE âm như “cấm hint” (weak overlap).
 - Không phóng đại ΔAUC session (+0.002) thành win lớn.
+- Không bắt buộc frozen-weight GKT trước Short Paper (optional Review-3).

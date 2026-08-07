@@ -82,10 +82,10 @@ dynamic, temporally-evolving graph structure \cite{dygkt2024}.
 This paper builds on -- rather than replacing -- \cite{daominh2026p0}'s
 leakage-control protocol. Empirically, Tier~1 evaluates
 \emph{concept-prerequisite} chain hyperedges under a graph-only encoder
-and a manipulation check; heterogeneous session/forum/teacher hyperedges
-and causal ATE estimates are reported only as limited observational
-evidence on FoundationalASSIST (weak propensity overlap;
-Sections~\ref{sec:tier1-graph}--\ref{sec:causal}).
+and a manipulation check. Discussion-thread and teacher-intervention
+hyperedges remain data-blocked; only session+Hint hyperedges and a limited
+observational hint ATE are demonstrated on FoundationalASSIST (weak
+propensity overlap; Sections~\ref{sec:tier1-graph}--\ref{sec:causal}).
 Section~\ref{sec:leakage-ext} extends P0's diagnostics to the hyperedge
 setting. Tier~2 (Section~\ref{sec:tier2}) is a deliberately-scoped pilot
 showing that an LLM-agent layer can read Tier~1's frozen output without
@@ -619,35 +619,34 @@ configs are pinned to P0's vendored commit. DH$^2$-KT mean AUC is
 $0.7516{\pm}0.0015$ vs.\ GKT $0.8336{\pm}0.0010$ (paired
 $\Delta{=}{-}0.082{\pm}0.003$ over three folds). Both DH$^2$-KT and GKT
 pass strong graph-destruction checks; the AUC gap therefore cannot be read
-as ``DH$^2$-KT uniquely buys graph-reliance.'' Primary XES3G5M claims remain
-scoped to concept-prerequisite hyperedges;
-FoundationalASSIST adds session+Hint construction and a secondary AUC
-(Section~\ref{sec:foundational-assist}) without claiming matched GKT
-deltas. The manipulation check is necessary but not sufficient: passing it
-confirms graph use for that backbone, not that a specific hyperedge kind
-drives predictive gain.
+as ``DH$^2$-KT uniquely buys graph-reliance.'' Section~\ref{sec:auc-tradeoff}
+repositions value around audit, heterogeneous/causal interfaces, and Tier~2
+rather than exclusive graph sensitivity. Primary claims remain scoped to
+concept-prerequisite hyperedges on XES3G5M; FoundationalASSIST is secondary
+(Section~\ref{sec:foundational-assist}). Passing destruction confirms graph
+use for a backbone, not that a specific hyperedge kind drives predictive gain.
 
-\subsection{When is lower AUC with graph reliance preferable?}
+\subsection{What justifies DH$^2$-KT if graph-reliance is not unique?}
 \label{sec:auc-tradeoff}
-For learning-technology deployment, predictive AUC and graph reliance answer
-different questions. Importantly, Table~\ref{tab:manipulation} shows that
-\textbf{GKT already passes} a strong destruction check on XES3G5M while
-retaining higher clean AUC than DH$^2$-KT v2; graph-reliance alone therefore
-does \emph{not} uniquely justify choosing DH$^2$-KT. \textbf{Prefer a
-high-AUC sequence or graph baseline} (e.g., reused simpleKT/GKT) when
-next-item ranking or mastery prediction is the sole product objective.
-\textbf{Prefer DH$^2$-KT v2} when stakeholders additionally need
-(i)~a \emph{hypergraph-native} manipulation check tied to
-leakage-controlled concept-prerequisite chains, (ii)~Tier~2 Critic-gated
-explanations over frozen $P(\mathrm{correct})$, or (iii)~secondary
-session+Hint / observational ATE analyses on hint-bearing corpora such as
-FoundationalASSIST. In that regime, the $\approx$8~point AUC gap versus GKT
-($-0.082{\pm}0.003$ over three folds; Table~\ref{tab:auc-xes3g5m}) is the
-cost of the graph-only interaction path that prevents exercise-embedding
-shortcuts from masking a destroyed hypergraph in \emph{our} architecture ---
-not a claim that GKT is graph-inert. We report AUC mean$\pm$SD and
-$\Delta$AUC for both DH$^2$-KT and GKT and do not market v2 as a drop-in
-replacement for maximum-accuracy ITS rankers.
+Because GKT also passes destruction while beating DH$^2$-KT on clean AUC
+(Table~\ref{tab:manipulation}), the remaining case for DH$^2$-KT is what
+reused GKT does \emph{not} provide: (i)~hyperedge-level leakage diagnostics
+beyond pairwise $E_{\mathrm{pre}}$ (Table~\ref{tab:leakage-taxonomy});
+(ii)~a shared schema for heterogeneous members (session/Hint/teacher/forum/
+video), exercised for session+Hint on FoundationalASSIST while
+discussion-thread and teacher types stay data-blocked;
+(iii)~an inverse-propensity ATE layer for pedagogical interventions
+(Section~\ref{sec:causal}; limited observational hint ATE on
+FoundationalASSIST); and (iv)~a Critic-gated explanation loop over frozen
+$P(\mathrm{correct})$ (Section~\ref{sec:tier2}). Protocol note: DH$^2$-KT
+$\Delta$AUC is frozen-weight re-evaluation; P0 GKT $\Delta$AUC retrains on
+the destroyed pairwise graph --- complementary, not apple-to-apple.
+\textbf{Prefer high-AUC baselines} when ranking alone is the product goal;
+\textbf{prefer DH$^2$-KT} when stakeholders need higher-order auditability,
+an extensible heterogeneous/causal interface, and/or Critic-gated
+explanations, accepting the $\approx$8~point AUC gap versus GKT
+($-0.082{\pm}0.003$; Table~\ref{tab:auc-xes3g5m}) as the cost of our
+graph-only path --- not a claim that GKT is graph-inert.
 
 \subsection{Tier~2 faithfulness}
 Tier~2's 12.4\% v1 flag rate was largely a Critic prompt artifact
