@@ -21,9 +21,12 @@
 % Optional FoundationalASSIST path (session+Hint / observational ATE)
 \node[dashbox, minimum width=2.6cm, below=0.42cm of he] (fa) {FoundationalASSIST\\session+Hint / ATE};
 \draw[->, densely dashed, thick] (fa) -- (enc);
-% Tier 1 frame
+% Tier 1 frame (drawn on the background layer so its fill does not paint
+% over the child boxes placed above; see \pgfonlayer{background} below)
+\begin{pgfonlayer}{background}
 \node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(fa),
       label={[font=\small\bfseries]above:Tier 1 --- DH$^2$-KT (quantitative)}] {};
+\end{pgfonlayer}
 
 % ===== Freeze =====
 \node[below=1.55cm of enc] (frz) {\textit{freeze after training}};
@@ -38,9 +41,11 @@
 \draw[->, thick] (diag) -- (crit);
 \draw[->, thick] (crit) -- (tut);
 \draw[->, thick] (tut.south) |- (sess.east);
-% Tier 2 frame
+% Tier 2 frame (background layer, same reason as the Tier 1 frame above)
+\begin{pgfonlayer}{background}
 \node[tierbox, fill=orange!5, fit=(diag)(crit)(tut)(sess),
       label={[font=\small\bfseries]below:Tier 2 --- AgentDG-KT (pilot)}] {};
+\end{pgfonlayer}
 \end{tikzpicture}
 \caption{Two-tier DH$^2$A-KT architecture. Tier~1 consumes P0's leakage-audited
 prerequisite edges as chain hyperedges (solid path; quantitative core on
