@@ -1,17 +1,18 @@
-% Auto-derived from results/tables/xes3g5m_fold0_manipulation_check.json
 \begin{table}[!t]
-\caption{Manipulation check on XES3G5M fold~0 (DH$^2$-KT v2, graph-only). Near-total hypergraph destruction ($p{=}0.9$ node-drop) must move AUC meaningfully; a graph-inert backbone fails this gate.}
+\caption{Manipulation check at node-drop $p{=}0.9$ on XES3G5M. DH$^2$-KT:
+train on clean hyperedges, re-evaluate frozen weights on destroyed
+hyperedges (fold~0). GKT: P0 DDR-downstream mean $\Delta$AUC over $n{=}9$
+fold--seed runs (\cite{daominh2026p0}; retrain on destroyed pairwise graph).
+simpleKT has no concept-graph input, so graph destruction is undefined.}
 \label{tab:manipulation}
 \centering
-\begin{tabular}{@{}lc@{}}
+\begin{tabular}{@{}lccc@{}}
 \toprule
-Condition & Test AUC \\
+Model & $\Delta$AUC ($p{=}0.9$) & DDR & Pass? \\
 \midrule
-Clean hypergraph & 0.7527 \\
-Destroyed ($p{=}0.9$ node-drop) & 0.7147 \\
-$\Delta$AUC & \textbf{0.0380} \\
-DDR & 0.990 \\
-Pass manipulation check & \textbf{Yes} \\
+DH$^2$-KT v2 (fold~0) & 0.0380 & 0.990 & Yes \\
+GKT (P0, mean$\pm$SD) & $0.0877{\pm}0.0009$ & 0.990 & Yes \\
+simpleKT (P0) & N/A & --- & N/A \\
 \bottomrule
 \end{tabular}
 \end{table}

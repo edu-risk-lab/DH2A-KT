@@ -85,31 +85,16 @@ Bản thảo hiện tại: ~7 trang, 2 cột.
 
 ---
 
-## Phase D — Quyết định venue & độ dài
+## Phase D / Review-2 follow-ups (7 Aug 2026)
 
-| Lựa chọn | Hành động | Ghi chú |
-|----------|-----------|---------|
-| **Short Paper TLT (≤8 trang)** | Giữ 8 trang hiện tại; cắt Abstract nếu editor yêu cầu | **Ứng viên mặc định** — PDF đang **8 trang** |
-| **Regular Paper (≤14 trang)** | Thêm 2–4 trang: sâu hơn P0 self-contained, ATE sensitivity prose, case study human | Chỉ nếu muốn mở rộng |
+Verification review (`paper/review2_DH2A-KT_IEEE-TLT.docx`): **MINOR REVISION**.
 
-**Còn lại trước nộp:**
-- [ ] Cover letter: Short vs Regular; nêu rõ FoundationalASSIST ≠ ASSIST2012
-- [ ] (Tuỳ chọn) P0 PDF supplementary
-- [ ] Eye-check PDF + `git commit` / push khi tác giả sẵn sàng
-- [ ] (Tuỳ chọn) Rater C hoặc n human lớn hơn — không bắt buộc cho pilot
-
----
-
-## Lịch làm việc đề xuất (tuần)
-
-```text
-Ngày 1     A1 + A2 (bib verify) + compile clean PDF          ✅
-Ngày 1–2   A3 self-contained P0 prose                      ✅
-Ngày 2–3   B1–B4 rewrite Abstract/C/Discussion               ✅
-Ngày 3     B5–B6 polish captions + PDF eye-check             ✅
-Ngày 4+    Phase C: FoundationalASSIST + C-Human + ATE       ✅
-Ngày cuối  Cover letter + quyết định Short/Regular + push    ⬜
-```
+| Mục | Trạng thái |
+|-----|------------|
+| Manipulation check cho GKT (reuse P0 DDR) + simpleKT N/A | **Xong** — `table_manipulation.tex`; thảo luận reframed |
+| Mean±SD / paired Δ cho AUC chính | **Xong** — `table_auc_xes3g5m.tex`; `scripts/17_export_review2_stats.py` |
+| Cover letter Short Paper + FoundationalASSIST access note | **Xong** — `paper/cover_letter_tlt_short.md`; Acknowledgment |
+| Push bản review-2 | ⬜ khi tác giả yêu cầu |
 
 ---
 
@@ -117,13 +102,12 @@ Ngày cuối  Cover letter + quyết định Short/Regular + push    ⬜
 
 - [x] Không còn `[TODO]` / note “verify before submission” trong PDF
 - [x] References: không còn verify/TBD trong `references.bib`
-- [x] Abstract khớp phạm vi **hiện tại**: primary XES3G5M; Junyi GT-only; FoundationalASSIST secondary (session/ATE); Tier2 pilot + dual-rater; không SOTA AUC
-- [x] Manipulation check + Limitations giữ tinh thần tự phê phán (ATE overlap yếu; human n=40/2 raters; session ΔAUC nhỏ)
+- [x] Abstract khớp phạm vi **hiện tại**: primary XES3G5M; Junyi GT-only; FoundationalASSIST secondary; Tier2 pilot + dual-rater; GKT cũng pass destruction
+- [x] Manipulation check + Limitations giữ tinh thần tự phê phán (GKT ΔAUC lớn hơn; ATE overlap yếu; human n=40/2 raters)
 - [x] Fig. 2 threshold được định nghĩa trong text
-- [x] `main.pdf` biên dịch; **8 trang** (đúng trần Short Paper)
-- [ ] Cover letter + (nếu cần) P0 supplementary PDF
-- [ ] Push GitHub bản nộp
-
+- [x] `main.pdf` biên dịch; **≤8 trang** Short Paper
+- [x] Cover letter draft (`paper/cover_letter_tlt_short.md`)
+- [ ] Push GitHub bản nộp (review-2 fixes)
 ---
 
 ## Mapping file chính

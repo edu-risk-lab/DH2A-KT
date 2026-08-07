@@ -49,7 +49,8 @@ Critic, and Tutor agents read Tier~1's \emph{frozen} outputs. On XES3G5M, DH$^2$
 v2 (chain hyperedges, graph-only interaction) achieves mean test AUC
 0.752 versus reused GKT 0.834 under matched budget, while passing a
 hypergraph manipulation check ($\Delta$AUC$=0.038$ at $p{=}0.9$
-node-drop). Junyi is used only for structural ground-truth overlap (not
+node-drop); P0 GKT also passes destruction at the same anchor with a
+larger mean drop, so reliance is not unique to DH$^2$-KT. Junyi is used only for structural ground-truth overlap (not
 full model training). A 500-sample Tier~2 pilot with Qwen2.5-7B (Ollama)
 yields Critic flag rates of 12.4\% under a strict prompt and 0\% after
 probability-format calibration; a 40-sample dual-rater study rates
@@ -150,10 +151,11 @@ Three concrete gaps motivate this work:
   classroom RCT.
   \item \textbf{C6.} Empirical evidence on XES3G5M that (i) a graph-only
   DH$^2$-KT backbone passes a hypergraph manipulation check
-  ($\Delta$AUC$=0.038$) while remaining below reused GKT AUC under matched
-  budget (mean 0.752 vs.\ 0.834), and (ii) the local 7B Tier~2 pilot
-  reaches 0\% Critic flag rate after probability-format calibration
-  (Section~\ref{sec:results}).
+  ($\Delta$AUC$=0.038$ on fold~0) while remaining below reused GKT AUC
+  (mean $0.752{\pm}0.002$ vs.\ $0.834{\pm}0.001$), noting that P0 GKT
+  \emph{also} passes destruction at $p{=}0.9$ with a larger mean drop, and
+  (ii) the local 7B Tier~2 pilot reaches 0\% Critic flag rate after
+  probability-format calibration (Section~\ref{sec:results}).
 \end{itemize}
 
 % =============================================================================
@@ -525,24 +527,33 @@ $\Delta$AUC $\approx 0.0003$, motivating the graph-only redesign.
 Table~\ref{tab:auc-xes3g5m} reports test AUC on XES3G5M under a training
 budget matched to \cite{daominh2026p0}'s GKT (batch 4, 10 epochs). DH$^2$-KT
 v2 mean AUC is 0.7516 versus reused GKT 0.8336 and simpleKT 0.8747. We do
-not claim SOTA predictive performance; the deliberate graph-only interaction
-path trades AUC for demonstrable hypergraph reliance (Section~\ref{sec:manipulation-result}).
+not claim SOTA predictive performance; mean$\pm$SD over three folds is
+$0.7516{\pm}0.0015$ vs.\ GKT $0.8336{\pm}0.0010$
+(Table~\ref{tab:auc-xes3g5m}). The graph-only path is designed so that
+\emph{our} hypergraph check is interpretable; GKT separately also passes
+P0's destruction check (Section~\ref{sec:manipulation-result}).
 \input{tables/table_auc_xes3g5m}
 
 \subsection{Manipulation check (RQ2)}
 \label{sec:manipulation-result}
 Table~\ref{tab:manipulation} and Fig.~\ref{fig:manipulation-sweep} summarize
-the fold~0 manipulation check. Near-total node-drop destruction ($p{=}0.9$)
-reduces AUC by 0.038, confirming the model reads the constructed hypergraph
-rather than bypassing it via exercise-specific shortcuts. An earlier
-pairwise$+$exercise-embedding backbone failed this gate
-($\Delta$AUC$\approx 0.0003$), motivating the graph-only redesign.
+graph-destruction evidence at the shared P0 anchor ($p{=}0.9$ node-drop).
+DH$^2$-KT v2 (fold~0) loses $\Delta$AUC$=0.038$ when frozen weights are
+re-evaluated on a destroyed hypergraph, confirming hypergraph use under our
+protocol (an earlier pairwise$+$exercise-embedding backbone failed this gate,
+$\Delta$AUC$\approx 0.0003$). Reused P0 DDR-downstream results show that
+\textbf{GKT also passes} the same operator/strength on XES3G5M, with a
+\emph{larger} mean drop ($0.0877{\pm}0.0009$, $n{=}9$ fold--seed runs) after
+retraining on the destroyed pairwise graph. Protocol differences matter
+(DH$^2$-KT freezes weights; P0 GKT retrains), but either way graph-reliance
+is \emph{not} unique to DH$^2$-KT. simpleKT has no concept-graph adjacency,
+so $\Delta$AUC under graph destruction is undefined (N/A).
 Fig.~\ref{fig:manipulation-sweep} draws an \emph{illustrative} horizontal
 line at $\Delta$AUC$=0.003$: roughly an order of magnitude above the
 observed graph-inert noise floor ($\approx 3{\times}10^{-4}$), not a formal
 hypothesis test from \cite{daominh2026p0}. We treat a backbone as
 graph-reliant when its destruction $\Delta$AUC clearly exceeds that floor
-(here $0.038$).
+(here $0.038$ for DH$^2$-KT; $\approx 0.088$ for GKT).
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
 
@@ -604,33 +615,39 @@ penalty of giving hints. Table~\ref{tab:foundational-assist} summarizes.
 \subsection{Threats to validity}
 Our XES3G5M comparison uses \cite{daominh2026p0}'s reused baselines under
 matched batch/epoch budget (Table~\ref{tab:auc-xes3g5m}); preprocessing
-configs are pinned to P0's vendored commit. The graph--accuracy tradeoff
-materialized as designed: graph-only interaction reduced mean AUC by 0.082
-versus GKT but enabled a passing manipulation check ($\Delta$AUC$=0.038$).
-Primary XES3G5M claims remain scoped to concept-prerequisite hyperedges;
+configs are pinned to P0's vendored commit. DH$^2$-KT mean AUC is
+$0.7516{\pm}0.0015$ vs.\ GKT $0.8336{\pm}0.0010$ (paired
+$\Delta{=}{-}0.082{\pm}0.003$ over three folds). Both DH$^2$-KT and GKT
+pass strong graph-destruction checks; the AUC gap therefore cannot be read
+as ``DH$^2$-KT uniquely buys graph-reliance.'' Primary XES3G5M claims remain
+scoped to concept-prerequisite hyperedges;
 FoundationalASSIST adds session+Hint construction and a secondary AUC
 (Section~\ref{sec:foundational-assist}) without claiming matched GKT
 deltas. The manipulation check is necessary but not sufficient: passing it
-confirms hypergraph use, not that a specific hyperedge kind drives any
-predictive gain.
+confirms graph use for that backbone, not that a specific hyperedge kind
+drives predictive gain.
 
 \subsection{When is lower AUC with graph reliance preferable?}
 \label{sec:auc-tradeoff}
 For learning-technology deployment, predictive AUC and graph reliance answer
-different questions. \textbf{Prefer a high-AUC sequence or graph baseline}
-(e.g., reused simpleKT/GKT) when the product objective is next-item ranking
-or mastery prediction alone and the graph is only an optional feature.
-\textbf{Prefer a graph-reliant backbone such as DH$^2$-KT v2} when
-stakeholders must (i)~audit that curriculum structure actually influences
-predictions (manipulation check), (ii)~align explanations with a
-train-only, leakage-controlled prerequisite graph, or (iii)~debug whether
-a reported ``graph-augmented'' gain is graph-inert. In that regime, an
-$\approx$8~point AUC gap versus GKT is the cost of refusing exercise-embedding
-shortcuts that would otherwise mask a destroyed hypergraph. Tier~2 then
-explains the \emph{frozen} $P(\mathrm{correct})$ to teachers; its value
-hinges on Critic faithfulness (flag rate), not on recovering the lost AUC.
-We therefore report AUC and $\Delta$AUC together and do not market v2 as a
-drop-in replacement for maximum-accuracy ITS rankers.
+different questions. Importantly, Table~\ref{tab:manipulation} shows that
+\textbf{GKT already passes} a strong destruction check on XES3G5M while
+retaining higher clean AUC than DH$^2$-KT v2; graph-reliance alone therefore
+does \emph{not} uniquely justify choosing DH$^2$-KT. \textbf{Prefer a
+high-AUC sequence or graph baseline} (e.g., reused simpleKT/GKT) when
+next-item ranking or mastery prediction is the sole product objective.
+\textbf{Prefer DH$^2$-KT v2} when stakeholders additionally need
+(i)~a \emph{hypergraph-native} manipulation check tied to
+leakage-controlled concept-prerequisite chains, (ii)~Tier~2 Critic-gated
+explanations over frozen $P(\mathrm{correct})$, or (iii)~secondary
+session+Hint / observational ATE analyses on hint-bearing corpora such as
+FoundationalASSIST. In that regime, the $\approx$8~point AUC gap versus GKT
+($-0.082{\pm}0.003$ over three folds; Table~\ref{tab:auc-xes3g5m}) is the
+cost of the graph-only interaction path that prevents exercise-embedding
+shortcuts from masking a destroyed hypergraph in \emph{our} architecture ---
+not a claim that GKT is graph-inert. We report AUC mean$\pm$SD and
+$\Delta$AUC for both DH$^2$-KT and GKT and do not market v2 as a drop-in
+replacement for maximum-accuracy ITS rankers.
 
 \subsection{Tier~2 faithfulness}
 Tier~2's 12.4\% v1 flag rate was largely a Critic prompt artifact
@@ -667,9 +684,11 @@ teacher-facing judgments.
 % =============================================================================
 We presented DH$^2$A-KT, a two-tier framework combining leakage-controlled
 hypergraph knowledge tracing (DH$^2$-KT) with a frozen-core LLM agent pilot.
-On XES3G5M, graph-only DH$^2$-KT passes a hypergraph manipulation check
-while trading AUC versus reused GKT baselines; quantitative claims are
-scoped to concept-prerequisite chain hyperedges. On Junyi, those hyperedges
+On XES3G5M, graph-only DH$^2$-KT and reused GKT both pass strong
+destruction checks; DH$^2$-KT remains below GKT AUC
+($0.752{\pm}0.002$ vs.\ $0.834{\pm}0.001$) under a graph-only interaction
+path. Quantitative claims are scoped to concept-prerequisite chain
+hyperedges. On Junyi, those hyperedges
 show structural overlap with the expert DAG (edge-F1 $\approx 0.17$) without
 full-model training. Tier~2 demonstrates a Critic-gated loop at 500-sample
 scale with 0\% flag rate after calibration and dual-rater Likert means of
@@ -683,7 +702,9 @@ statistics.
 \section*{Acknowledgment}
 All Tier~1 experiments in this paper are designed to run on a single
 consumer-grade NVIDIA RTX~3090 (24GB), matching the compute budget already
-validated by \cite{daominh2026p0} on the same benchmarks.
+validated by \cite{daominh2026p0} on the same primary benchmarks.
+FoundationalASSIST~\cite{foundationalassist2026} was accessed under the
+Hugging Face dataset's Responsible Use Guidelines for this study.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

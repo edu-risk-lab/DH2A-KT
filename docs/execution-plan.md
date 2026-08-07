@@ -170,7 +170,8 @@ Kết luận: **Tier 1 code path (M0–M7 trừ M2/M8) đã chạy end-to-end tr
 2. **Bổ sung theo review TLT** — xem [`docs/paper-revision-plan-tlt.md`](paper-revision-plan-tlt.md) (MAJOR REVISION):
    - ~~**P0 / Phase A**~~ — **Xong** (6 Aug 2026): xóa `[TODO]`; bib sạch (0 verify/TBD); §P0 self-contained + note supplementary.
    - ~~**P1 / Phase B**~~ — **Xong** (6 Aug 2026): Abstract/C khớp phạm vi; discussion AUC vs graph-reliance; Junyi GT-only + F1 underlap; Fig.2 threshold; leakage cap caption.
-   - **P2 / Phase C** — **Xong** (7 Aug 2026): FoundationalASSIST session+Hint + AUC/ablation + limited ATE + C-Human A1/B1. Còn Phase D: cover letter + Short/Regular + commit/push.
+   - **P2 / Phase C** — **Xong** (7 Aug 2026): FoundationalASSIST session+Hint + AUC/ablation + limited ATE + C-Human A1/B1.
+   - **Review-2 (MINOR)** — **Xong prose/tables** (7 Aug 2026): GKT ΔAUC reused from P0 DDR; AUC mean±SD; cover letter; claim reframed (GKT cũng pass destruction). Còn push commit nếu cần.
 3. ~~Optional — M2 session hyperedge~~ — **Xong** trên FoundationalASSIST (`build_session_hyperedges`, 308k HE, 11.6% có Hint).
 4. ~~Critic prompt calibration~~ — **Xong** (Ollama v2, 500 mẫu).
 5. ~~M0–M9 software path~~ — **Xong**; pytest session tests thêm.
