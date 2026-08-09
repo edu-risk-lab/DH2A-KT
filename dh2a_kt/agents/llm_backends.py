@@ -14,6 +14,19 @@ from dataclasses import dataclass
 
 
 _PROB_RE = re.compile(r"P\(correct\)=([\d.]+)")
+_CONCEPT_RE = re.compile(r"concept\s+(\d+)", re.IGNORECASE)
+_HISTORY_KC_RE = re.compile(r"\bkc\s+(\d+)\b", re.IGNORECASE)
+
+
+def _stub_grounded_kcs(user_prompt: str) -> str:
+    ids: list[str] = []
+    m = _CONCEPT_RE.search(user_prompt)
+    if m:
+        ids.append(m.group(1))
+    for kc in _HISTORY_KC_RE.findall(user_prompt):
+        if kc not in ids:
+            ids.append(kc)
+    return "[" + ", ".join(ids) + "]" if ids else "[]"
 
 
 class StubLLMClient:
@@ -22,6 +35,7 @@ class StubLLMClient:
     def complete(self, system_prompt: str, user_prompt: str, *, max_tokens: int = 512) -> str:
         prob_match = _PROB_RE.search(user_prompt)
         prob = prob_match.group(1) if prob_match else "unknown"
+        grounded = _stub_grounded_kcs(user_prompt)
 
         if "Critic Agent" in system_prompt:
             explanation = user_prompt.split("Diagnostician explanation:", 1)[-1].strip()
@@ -38,9 +52,16 @@ class StubLLMClient:
                 f"(current P(correct)={prob}) before the next graded item."
             )
 
+        if "no Tier-1 probability" in system_prompt:
+            return (
+                "Based only on recent history, the student may need more practice "
+                f"on this concept.\nGroundedKCs: {grounded}"
+            )
+
         return (
             f"The Tier-1 model estimates P(correct)={prob} for this student on this concept. "
-            "Review recent attempts in the history summary and check for slipping prerequisites."
+            "Review recent attempts in the history summary and check for slipping prerequisites.\n"
+            f"GroundedKCs: {grounded}"
         )
 
 

@@ -76,8 +76,50 @@ def test_stub_llm_agents_roundtrip():
     verdict = CriticAgent(llm).review(tier1, explanation)
     hint = TutorHintAgent(llm).propose_hint(tier1)
     assert "0.615" in explanation
+    assert "GroundedKCs:" in explanation
     assert verdict.flagged is False
     assert hint.text
+
+
+def test_diagnostician_ig_omits_probability():
+    llm = StubLLMClient()
+    tier1 = _tier1_output(0.615)
+    explanation = DiagnosticianAgent(llm).explain(tier1, omit_tier1_prob=True)
+    assert "0.615" not in explanation
+    assert "GroundedKCs:" in explanation
+
+
+def test_run_tier2_pilot_ig_ablation():
+    samples = [
+        Tier1Output(
+            student_id="7",
+            concept_id="3",
+            predicted_correct_prob=0.615,
+            causal_hint_effect=None,
+            recent_history_summary="item 1 kc 2 correct; item 4 kc 3 incorrect",
+        ),
+        Tier1Output(
+            student_id="8",
+            concept_id="5",
+            predicted_correct_prob=0.42,
+            causal_hint_effect=None,
+            recent_history_summary="item 2 kc 5 correct",
+        ),
+    ]
+    records, _ = run_tier2_pilot(samples, StubLLMClient(), fold=0, ablation="ig")
+    assert len(records) == 2
+    assert all("GroundedKCs:" in r.diagnostician_explanation for r in records)
+    assert all("0.615" not in r.diagnostician_explanation for r in records)
+    assert all("0.42" not in r.diagnostician_explanation for r in records)
+    # Critic still sees true P(correct); stub IG text without that number is flagged.
+    assert all(r.critic_flagged for r in records)
+
+
+def test_run_tier2_pilot_skip_critic():
+    samples = [_tier1_output(0.5), _tier1_output(0.6)]
+    records, _ = run_tier2_pilot(samples, StubLLMClient(), fold=0, skip_critic=True)
+    assert all(not r.critic_flagged for r in records)
+    assert all("SKIPPED" in r.critic_reason for r in records)
 
 
 def test_stub_critic_flags_missing_probability():
@@ -99,20 +141,25 @@ def test_run_tier2_pilot_toy():
         max_seq_len=8,
         matched_p0=True,
     )
-    trained = train_fold(
-        train_df,
-        eval_df,
-        e_pre,
-        budget,
-        device="cpu",
-        hidden_dim=16,
-    )
+    try:
+        trained = train_fold(
+            train_df,
+            eval_df,
+            e_pre,
+            budget,
+            device="cpu",
+            hidden_dim=16,
+        )
+    except ImportError as exc:
+        if "torch_geometric" in str(exc):
+            pytest.skip("torch_geometric not installed")
+        raise
     samples = sample_tier1_outputs(trained, eval_df, sample_size=5, max_seq_len=8, seed=0)
     records, hyperedges = run_tier2_pilot(samples, StubLLMClient(), fold=0)
     assert len(records) == len(samples)
     assert len(hyperedges) == len(samples)
     assert all(not r.critic_flagged for r in records)
-
+    assert all("GroundedKCs:" in r.diagnostician_explanation for r in records)
 
 def test_checkpoint_roundtrip(tmp_path: Path):
     train_df = _synthetic_logs(n_users=8, seq_len=8)
@@ -126,7 +173,12 @@ def test_checkpoint_roundtrip(tmp_path: Path):
         max_seq_len=8,
         matched_p0=True,
     )
-    trained = train_fold(train_df, eval_df, e_pre, budget, device="cpu", hidden_dim=16)
+    try:
+        trained = train_fold(train_df, eval_df, e_pre, budget, device="cpu", hidden_dim=16)
+    except ImportError as exc:
+        if "torch_geometric" in str(exc):
+            pytest.skip("torch_geometric not installed")
+        raise
     ckpt = tmp_path / "fold0.pt"
     save_trained_fold(ckpt, trained)
     loaded = load_trained_fold(ckpt, device="cpu")

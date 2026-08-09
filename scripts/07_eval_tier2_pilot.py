@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""M9 driver: evaluate Tier-2 pilot logs (Critic flag rate + case-study excerpts).
+"""M9 driver: evaluate Tier-2 pilot logs (flag rate + ID-anchored KC-Jaccard).
 
 Usage:
     python scripts/07_eval_tier2_pilot.py results/tables/xes3g5m_fold0_tier2_pilot_summary.json
+    python scripts/07_eval_tier2_pilot.py ... --e-pre external/p0_leakage_audit/data/processed/xes3g5m/fold_0/e_pre_train_only.csv
 """
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+
+import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
@@ -35,6 +38,18 @@ def main() -> int:
         default=None,
         help="Output eval JSON (default: *_tier2_eval.json next to summary)",
     )
+    parser.add_argument(
+        "--e-pre",
+        type=Path,
+        default=None,
+        help="Optional audited E_pre CSV (src_kc,dst_kc) for 1-hop support expansion",
+    )
+    parser.add_argument(
+        "--faithfulness-output",
+        type=Path,
+        default=None,
+        help="Optional path for faithfulness-only JSON (default: *_faithfulness.json)",
+    )
     parser.add_argument("--case-study-n", type=int, default=3)
     args = parser.parse_args()
 
@@ -60,10 +75,33 @@ def main() -> int:
             )
         )
 
-    report = evaluate_tier2_pilot(summary_path, records_path, case_study_n=args.case_study_n)
+    if args.faithfulness_output is not None:
+        faith_path = args.faithfulness_output.resolve()
+    else:
+        faith_path = summary_path.with_name(
+            summary_path.name.replace("_summary.json", "_faithfulness.json").replace(
+                "_tier2_pilot_summary.json", "_tier2_faithfulness.json"
+            )
+        )
+
+    e_pre = None
+    if args.e_pre is not None:
+        e_pre = pd.read_csv(args.e_pre)
+
+    report = evaluate_tier2_pilot(
+        summary_path,
+        records_path,
+        case_study_n=args.case_study_n,
+        e_pre=e_pre,
+        faithfulness_output=faith_path,
+    )
     write_tier2_eval_report(report, output_path)
     print(f"Wrote Tier-2 eval: {output_path}")
-    print(f"  flag_rate={report.flag_rate:.4f} n_samples={report.n_samples} backend={report.llm_backend}")
+    print(
+        f"  flag_rate={report.flag_rate:.4f} mean_kc_jaccard={report.mean_kc_jaccard:.4f} "
+        f"n_samples={report.n_samples} backend={report.llm_backend}"
+    )
+    print(f"  faithfulness: {faith_path}")
     return 0
 
 

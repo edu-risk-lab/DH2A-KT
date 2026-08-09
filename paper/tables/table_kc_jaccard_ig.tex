@@ -1,0 +1,23 @@
+% Auto-derived / harness-validated; replace Ollama rows after scripts/18_run_kbs_faithfulness_suite.py --mode ollama
+\begin{table}[!t]
+\caption{Tier~2 explanation faithfulness: grounded Diagnostician vs.\ independent
+generation (IG). ID-anchored KC-Jaccard (JC) measures overlap between
+\texttt{GroundedKCs} trailer IDs and the support set
+$\{\mathrm{target}\}\cup\mathrm{history}\cup 1$-hop $E_{\mathrm{pre}}$.
+IG omits frozen $P(\mathrm{correct})$ from the Diagnostician prompt; the Critic
+still sees the true Tier-1 score. Stub harness ($n{=}20$) validates the
+pipeline; Ollama $n{=}500$ rows are filled after the GPU re-run
+(\texttt{docs/kbs-gpu-runbook.md}).}
+\label{tab:kc-jaccard-ig}
+\centering
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Arm & Backend & $n$ & Flag rate & Mean JC \\
+\midrule
+Grounded & StubLLM (harness) & 20 & 0.000 & 0.567 \\
+IG & StubLLM (harness) & 20 & 1.000 & 0.567 \\
+Grounded & qwen2.5:7b (Ollama) & 500 & --- & --- \\
+IG & qwen2.5:7b (Ollama) & 500 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

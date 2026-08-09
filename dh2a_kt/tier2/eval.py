@@ -1,10 +1,17 @@
-"""M9: summarize Tier-2 pilot logs (Critic flag rate, case-study samples)."""
+"""M9: summarize Tier-2 pilot logs (Critic flag rate, KC-Jaccard, case studies)."""
 
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
+import pandas as pd
+
+from dh2a_kt.eval.explanation_faithfulness import (
+    evaluate_explanation_faithfulness,
+    write_faithfulness_report,
+)
 
 
 @dataclass
@@ -17,10 +24,14 @@ class Tier2EvalReport:
     flag_rate: float
     n_session_hyperedges: int
     mean_predicted_prob: float
+    mean_kc_jaccard: float | None
+    median_kc_jaccard: float | None
+    n_empty_grounded: int | None
     case_study_flagged: list[dict]
     case_study_passed: list[dict]
     source_summary: str
     source_records: str
+    faithfulness_report: str | None = None
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -38,6 +49,8 @@ def evaluate_tier2_pilot(
     records_path: Path,
     *,
     case_study_n: int = 3,
+    e_pre: pd.DataFrame | None = None,
+    faithfulness_output: Path | None = None,
 ) -> Tier2EvalReport:
     summary = json.loads(Path(summary_path).read_text(encoding="utf-8"))
     records = _read_jsonl(Path(records_path))
@@ -48,6 +61,13 @@ def evaluate_tier2_pilot(
     passed = [r for r in records if not r.get("critic_flagged")]
     probs = [float(r["predicted_correct_prob"]) for r in records if "predicted_correct_prob" in r]
     mean_prob = sum(probs) / len(probs) if probs else float("nan")
+
+    faith = evaluate_explanation_faithfulness(
+        records, e_pre=e_pre, source_records=str(records_path)
+    )
+    faith_path = None
+    if faithfulness_output is not None:
+        faith_path = str(write_faithfulness_report(faith, Path(faithfulness_output)))
 
     def _preview(row: dict) -> dict:
         return {
@@ -68,10 +88,14 @@ def evaluate_tier2_pilot(
         flag_rate=float(summary.get("flag_rate", len(flagged) / len(records))),
         n_session_hyperedges=int(summary.get("n_session_hyperedges", len(records))),
         mean_predicted_prob=mean_prob,
+        mean_kc_jaccard=faith.mean_kc_jaccard,
+        median_kc_jaccard=faith.median_kc_jaccard,
+        n_empty_grounded=faith.n_empty_grounded,
         case_study_flagged=[_preview(r) for r in flagged[:case_study_n]],
         case_study_passed=[_preview(r) for r in passed[:case_study_n]],
         source_summary=str(summary_path),
         source_records=str(records_path),
+        faithfulness_report=faith_path,
     )
 
 

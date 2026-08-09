@@ -50,6 +50,9 @@ class PilotSummary:
     llm_backend: str
     fold: int
     dataset: str
+    ablation: str = "none"
+    skip_critic: bool = False
+    ollama_model: str = ""
 
 
 def _history_summary(rows: pd.DataFrame) -> str:
@@ -145,7 +148,18 @@ if _TORCH_AVAILABLE:
         llm,
         *,
         fold: int,
+        ablation: str | None = None,
+        skip_critic: bool = False,
     ) -> tuple[list[PilotRecord], list[Hyperedge]]:
+        """Run Diagnostician → Critic → Tutor over Tier-1 samples.
+
+        ``ablation="ig"``: Independent Generation — Diagnostician does not see
+        frozen ``P(correct)``; Critic still reviews against the true Tier-1 score.
+        ``skip_critic``: accept every rationale (ablation for faithfulness tables).
+        """
+        if ablation not in (None, "ig"):
+            raise ValueError(f"unknown ablation {ablation!r}; expected None or 'ig'")
+        omit_tier1_prob = ablation == "ig"
         diagnostician = DiagnosticianAgent(llm)
         critic = CriticAgent(llm)
         tutor = TutorHintAgent(llm)
@@ -153,8 +167,14 @@ if _TORCH_AVAILABLE:
         hyperedges: list[Hyperedge] = []
 
         for i, tier1_output in enumerate(samples):
-            explanation = diagnostician.explain(tier1_output)
-            verdict = critic.review(tier1_output, explanation)
+            explanation = diagnostician.explain(
+                tier1_output, omit_tier1_prob=omit_tier1_prob
+            )
+            if skip_critic:
+                flagged, reason = False, "SKIPPED (ablation w/o Critic)"
+            else:
+                verdict = critic.review(tier1_output, explanation)
+                flagged, reason = verdict.flagged, verdict.reason
             hint = tutor.propose_hint(tier1_output)
             session_he = tutor.write_session_hyperedge(hint, tier1_output, fold=fold)
             hyperedges.append(session_he)
@@ -166,8 +186,8 @@ if _TORCH_AVAILABLE:
                     actual_correct=float("nan"),
                     recent_history_summary=tier1_output.recent_history_summary,
                     diagnostician_explanation=explanation,
-                    critic_flagged=verdict.flagged,
-                    critic_reason=verdict.reason,
+                    critic_flagged=flagged,
+                    critic_reason=reason,
                     hint_text=hint.text,
                     session_hyperedge_id=session_he.hyperedge_id,
                 )

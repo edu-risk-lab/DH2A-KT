@@ -1,6 +1,7 @@
-\documentclass[journal]{IEEEtran}
+\documentclass[review,12pt]{elsarticle}
+% Camera-ready (after acceptance): switch to
+% \documentclass[final,3p,times,twocolumn]{elsarticle}
 
-\usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
@@ -12,26 +13,33 @@
 \usetikzlibrary{arrows.meta,fit,positioning,backgrounds}
 \usepackage{hyperref}
 
+\journal{Knowledge-Based Systems}
+
 \begin{document}
 
-\title{DH$^2$A-KT: Dynamic Heterogeneous Hypergraph and Agentic Knowledge
-Tracing with Leakage-Controlled Graph Construction}
+\begin{frontmatter}
 
-\author{Tuan~Dao~Minh, Khanh-Trinh~Nguyen, Duong~Nguyen~Tien, Quoc~Khanh~Ngo,
-Van-Hau~Nguyen, and~Le~Hoang~Son
-\thanks{T. Dao Minh, K.-T. Nguyen, D. N. Tien, and V.-H. Nguyen are with the
-Department of Quality Assurance and Testing, Hung Yen University of
-Technology and Education, Hung Yen, Vietnam (e-mail: tuanymc@utehy.edu.vn;
-trinhnk@utehy.edu.vn; duongnt@utehy.edu.vn; nvhau66@gmail.com).}
-\thanks{Q. K. Ngo and L. H. Son are with the Artificial Intelligence Research
-Center, VNU Information Technology Institute, Vietnam National University,
-Hanoi, Vietnam (e-mail: quockhanhngo.official@gmail.com; sonlh@vnu.edu.vn).
-L. H. Son is the corresponding author.}}
+\title{DH$^2$A-KT: Diagnostic Heterogeneous Hypergraph and Agentic
+Knowledge Tracing with Leakage-Controlled Graph Construction}
 
-\markboth{IEEE Transactions on Learning Technologies}%
-{Dao \MakeLowercase{\textit{et al.}}: DH$^2$A-KT}
+\author[utehy]{Tuan Dao Minh}
+\author[utehy]{Khanh-Trinh Nguyen}
+\author[utehy]{Duong Nguyen Tien}
+\author[vnu]{Quoc Khanh Ngo}
+\author[utehy]{Van-Hau Nguyen}
+\author[vnu]{Le Hoang Son\corref{cor1}}
+\ead{sonlh@vnu.edu.vn}
+\cortext[cor1]{Corresponding author.}
 
-\maketitle
+\affiliation[utehy]{organization={Department of Quality Assurance and
+Testing, Hung Yen University of Technology and Education},
+city={Hung Yen},
+country={Vietnam}}
+
+\affiliation[vnu]{organization={Artificial Intelligence Research Center,
+VNU Information Technology Institute, Vietnam National University},
+city={Hanoi},
+country={Vietnam}}
 
 \begin{abstract}
 Graph-augmented knowledge tracing (KT) often lacks leakage audits of its
@@ -59,11 +67,13 @@ FoundationalASSIST supplies session+Hint hyperedges and a limited
 observational hint ATE (Section~\ref{sec:foundational-assist}).
 \end{abstract}
 
-\begin{IEEEkeywords}
-Knowledge tracing, hypergraph neural networks, heterogeneous graphs, large
-language model agents, causal inference, data leakage, educational data
-mining.
-\end{IEEEkeywords}
+\begin{keyword}
+Knowledge tracing \sep hypergraph neural networks \sep heterogeneous graphs
+\sep large language model agents \sep causal inference \sep data leakage
+\sep educational data mining
+\end{keyword}
+
+\end{frontmatter}
 
 % =============================================================================
 \section{Introduction}
@@ -227,16 +237,21 @@ the test administrator and the examinee. Outside education,
 \cite{graphaugmentedllm2025} surveys how LLM agents can read from and write
 to an external graph as working memory, and \cite{graphrag2025} applies a
 graph-retrieval-augmented-generation pattern to recommend personalized
-learning paths over a dual knowledge-structure graph. AgentDG-KT
-(Section~\ref{sec:tier2}) differs from this pattern in one specific way:
-none of the above agents are gated by a design in which the graph -- and the
-quantitative model that reads it -- is frozen before the agent acts, with
-the agent limited to producing a natural-language artifact (rationale,
-hint, session hyperedge) that a separate Critic agent must approve before it
-is treated as anything more than a proposal. We adopt this
-frozen-core-plus-pilot-agent split specifically because a full multi-agent
-LLM pipeline that re-infers knowledge state end to end over millions of
-interactions is not tractable on a single consumer GPU
+learning paths over a dual knowledge-structure graph.
+Closest in scope to our Tier~2 pilot is \cite{ni2026ikteia}, which aligns
+LLM-generated mastery reports with implicit DLKT states (IKT-EIA) and
+evaluates explanation faithfulness with a corpus-wide KC-Jaccard metric,
+an independent-generation negative control, and paired predictive /
+faithfulness ablations on three large KT benchmarks. AgentDG-KT
+(Section~\ref{sec:tier2}) complements that line rather than competing
+head-to-head on the same datasets: we audit the auxiliary graph for
+train/test leakage before explanation, gate rationales with a mandatory
+Critic over a \emph{frozen} Tier~1 $P(\mathrm{correct})$, and measure
+ID-anchored KC-Jaccard plus an independent-generation control adapted to
+our numeric-ID schema (XES3G5M lacks a synonym KC vocabulary in-repo).
+We adopt the frozen-core-plus-pilot-agent split specifically because a
+full multi-agent LLM pipeline that re-infers knowledge state end to end
+over millions of interactions is not tractable on a single consumer GPU
 (Section~\ref{sec:tier2}), not because we believe agentic re-inference is
 undesirable in principle.
 
@@ -486,7 +501,12 @@ Tier~1's \emph{frozen} output rather than re-inferring knowledge state:
 
 We ran a 500-sample pilot on XES3G5M fold~0 (seed 42) with Tier~1 frozen
 (checkpoint from graph-only v2 training) and Qwen2.5-7B (Ollama 0.32.6).
-Table~\ref{tab:tier2} reports Critic flag rates; v1's 12.4\% flags were
+The Diagnostician is instructed to end each rationale with a structured
+\texttt{GroundedKCs: $[\ldots]$} trailer used for ID-anchored KC-Jaccard
+(Section~\ref{sec:tier2-faithfulness-result}); an Independent Generation
+ablation omits frozen $P(\mathrm{correct})$ from that prompt while the
+Critic still receives the true Tier~1 score. Table~\ref{tab:tier2} reports
+Critic flag rates; v1's 12.4\% flags were
 predominantly probability \emph{format} mismatches (e.g., ``69.3\%''
 vs.\ $P{=}0.693$), resolved in v2 by \texttt{critic\_calibration.py} and an
 updated Critic prompt. The Tutor agent wrote 500 session hyperedges back to
@@ -606,13 +626,25 @@ DH$^2$-KT training on Junyi (25M interactions) was not run.
 \subsection{Tier~2 faithfulness pilot}
 \label{sec:tier2-faithfulness-result}
 See Table~\ref{tab:tier2} and Section~\ref{sec:tier2}. The Tutor wrote 500
-session hyperedges at pilot scale. From the calibrated Ollama v2 run we
+session hyperedges at pilot scale. Following \cite{ni2026ikteia}'s use of a
+corpus-wide KC-overlap faithfulness metric and an independent-generation
+negative control, we additionally compute \emph{ID-anchored KC-Jaccard}
+over Diagnostician outputs: the model must emit a structured
+\texttt{GroundedKCs: $[\ldots]$} trailer; support is the target concept,
+KCs in the recent history window, and their 1-hop neighbors on audited
+train-only $E_{\mathrm{pre}}$. The IG arm uses the same history but omits
+frozen $P(\mathrm{correct})$ from the Diagnostician prompt while the Critic
+still sees the true Tier~1 score (Table~\ref{tab:kc-jaccard-ig}). StubLLM
+harness rows validate the pipeline; Ollama $n{=}500$ grounded vs.\ IG cells
+are completed on the GPU host per the project runbook once checkpoints and
+Ollama are available. From the calibrated Ollama v2 run we
 drew a fixed 40-sample pack (seed 42) for two independent raters (A1, B1)
 on Likert faithfulness and usefulness (1--5). Pooled means are
 $4.01{\pm}1.07$ (faithfulness) and $3.53{\pm}0.71$ (usefulness);
 pairwise Spearman $\rho{=}0.71$ / $0.58$ and within-$\pm$1 rates of
 92.5\% / 97.5\% (Table~\ref{tab:human-eval}). A third rater was optional
 and not required for this pilot report.
+\input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
 
 \subsection{Secondary corpus: FoundationalASSIST (session+Hint)}
@@ -731,6 +763,36 @@ richer confounders / sensitivity analysis for ATE, a third rater or larger
 human sample, ES-KT-24 Video wiring, and hyperedge-native leakage
 statistics.
 
+\section*{CRediT authorship contribution statement}
+% [CẦN TÁC GIẢ XÁC NHẬN LẠI] — see docs/kbs-author-gate.md. Roles below are
+% inferred placeholders, not co-author-confirmed declarations.
+\textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
+Investigation, Writing -- original draft, Visualization.
+\textbf{Khanh-Trinh Nguyen:} Validation, Data curation, Writing -- review \&
+editing.
+\textbf{Duong Nguyen Tien:} Validation, Data curation, Writing -- review \&
+editing.
+\textbf{Quoc Khanh Ngo:} Investigation, Resources, Writing -- review \&
+editing.
+\textbf{Van-Hau Nguyen:} Validation, Resources.
+\textbf{Le Hoang Son:} Conceptualization, Supervision, Project
+administration, Funding acquisition, Writing -- review \& editing.
+
+\section*{Declaration of competing interest}
+% [CẦN TÁC GIẢ XÁC NHẬN] — see docs/kbs-author-gate.md.
+The authors declare that they have no known competing financial interests
+or personal relationships that could have appeared to influence the work
+reported in this paper.
+
+\section*{Data availability}
+% [CẦN TÁC GIẢ XÁC NHẬN] — see docs/kbs-author-gate.md for repo URL gate.
+Code for DH$^2$A-KT will be made available on request. P0's audited
+prerequisite edges and reused baseline results are vendored under
+\cite{daominh2026p0}'s own release terms (pinned commit, Section
+\ref{sec:baselines-reuse}); FoundationalASSIST~\cite{foundationalassist2026}
+must be obtained directly from Hugging Face under its Responsible Use
+Guidelines and cannot be redistributed by the authors.
+
 \section*{Acknowledgment}
 All Tier~1 experiments in this paper are designed to run on a single
 consumer-grade NVIDIA RTX~3090 (24GB), matching the compute budget already
@@ -738,7 +800,7 @@ validated by \cite{daominh2026p0} on the same primary benchmarks.
 FoundationalASSIST~\cite{foundationalassist2026} was accessed under the
 Hugging Face dataset's Responsible Use Guidelines for this study.
 
-\bibliographystyle{IEEEtran}
+\bibliographystyle{elsarticle-num}
 \bibliography{references}
 
 \end{document}

@@ -92,6 +92,17 @@ def main() -> int:
         default="",
         help="Optional suffix for output files, e.g. 'ollama' -> *_tier2_pilot_ollama.jsonl",
     )
+    parser.add_argument(
+        "--ablation",
+        choices=["none", "ig"],
+        default="none",
+        help="Tier-2 ablation: 'ig' = Independent Generation (Diagnostician omits P(correct))",
+    )
+    parser.add_argument(
+        "--skip-critic",
+        action="store_true",
+        help="Ablation: accept every Diagnostician rationale without Critic gate",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
@@ -176,8 +187,21 @@ def main() -> int:
         max_seq_len=budget.max_seq_len,
         seed=args.seed,
     )
-    logger.info("Running Tier-2 pilot on %d samples (backend=%s)...", len(samples), args.llm_backend)
-    records, hyperedges = run_tier2_pilot(samples, llm, fold=args.fold)
+    logger.info(
+        "Running Tier-2 pilot on %d samples (backend=%s ablation=%s skip_critic=%s)...",
+        len(samples),
+        args.llm_backend,
+        args.ablation,
+        args.skip_critic,
+    )
+    ablation = None if args.ablation == "none" else args.ablation
+    records, hyperedges = run_tier2_pilot(
+        samples,
+        llm,
+        fold=args.fold,
+        ablation=ablation,
+        skip_critic=args.skip_critic,
+    )
 
     n_flagged = sum(1 for r in records if r.critic_flagged)
     summary = PilotSummary(
@@ -188,10 +212,15 @@ def main() -> int:
         llm_backend=args.llm_backend,
         fold=args.fold,
         dataset=dataset,
+        ablation=args.ablation,
+        skip_critic=args.skip_critic,
+        ollama_model=args.ollama_model if args.llm_backend == "ollama" else "",
     )
 
     out_dir = Path(args.output_dir)
     tag = f"_{args.output_tag}" if args.output_tag else ""
+    if args.ablation != "none" and args.ablation not in tag:
+        tag = f"{tag}_{args.ablation}" if tag else f"_{args.ablation}"
     stem = f"{dataset}_fold{args.fold}_tier2_pilot{tag}"
     records_path = out_dir / f"{stem}.jsonl"
     summary_path = out_dir / f"{stem}_summary.json"
@@ -206,6 +235,7 @@ def main() -> int:
     )
 
     print(f"\nTier-2 pilot complete: {len(records)} samples, flag_rate={summary.flag_rate:.3f}")
+    print(f"  ablation:   {summary.ablation}")
     print(f"  records:    {records_path}")
     print(f"  summary:    {summary_path}")
     print(f"  hyperedges: {hyperedges_path}")
