@@ -34,6 +34,12 @@ def main() -> int:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--max-users", type=int, default=None)
     parser.add_argument(
+        "--graph-sensitivity-weight",
+        type=float,
+        default=None,
+        help="Override training.graph_sensitivity_weight (e.g. 0 = w/o L_aux ablation)",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -55,6 +61,8 @@ def main() -> int:
     n_hypergraph_layers = int(train_cfg.get("n_hypergraph_layers", 2))
     graph_dropout = float(train_cfg.get("graph_dropout", 0.0))
     graph_sensitivity_weight = float(train_cfg.get("graph_sensitivity_weight", 0.0))
+    if args.graph_sensitivity_weight is not None:
+        graph_sensitivity_weight = float(args.graph_sensitivity_weight)
     graph_sensitivity_margin = float(train_cfg.get("graph_sensitivity_margin", 0.05))
     graph_sensitivity_p = float(train_cfg.get("graph_sensitivity_p", 0.9))
 
@@ -67,7 +75,8 @@ def main() -> int:
     print(
         f"[fold {args.fold}] manipulation_check p={mc_cfg.get('p', 0.90)} "
         f"operator={mc_cfg.get('operator', 'node_drop')} "
-        f"hyperedge_source={hyperedge_spec.source}"
+        f"hyperedge_source={hyperedge_spec.source} "
+        f"graph_sensitivity_weight={graph_sensitivity_weight}"
     )
     result = run_manipulation_check_for_fold(
         splits["train"],

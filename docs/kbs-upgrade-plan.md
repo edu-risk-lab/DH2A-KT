@@ -6,11 +6,10 @@ converted/rewritten already. This document is the experimental roadmap for
 the remaining evidence gap relative to Ni et al. (interpretable KT + LLM
 explanation).
 
-**Implementation status (2026-08-12 evening):** Items 1–2 **done** on GPU
-(Ollama $n{=}500$ grounded JC 0.152 / flag 0.026; IG JC 0.142 / flag 0.768).
-Manipulation folds 0–2 **all pass** after best-epoch restore
-(ΔAUC 0.038 / 0.043 / 0.047). Tables + cover letter synced. Next: Item 3
-paired ablation table; Item 4 LLM-scale optional; author gate still open.
+**Implementation status (2026-08-13):** Items 1–3 **done**. Ollama JC/IG,
+manip folds 0–2 pass, paired ablation filled (incl.\ w/o $L_{aux}$ fold~0:
+AUC 0.754 / ΔAUC 0.039, still passes). Next: optional Item 4 LLM-scale;
+author gate still open.
 
 **Corrected assumptions (2026-08-09 audit):**
 - `diagnostician_explanation` lives on `PilotRecord` / pilot JSONL, **not**

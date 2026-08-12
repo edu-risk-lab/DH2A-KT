@@ -616,6 +616,18 @@ graph-reliant when its destruction $\Delta$AUC clearly exceeds that floor
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
 
+Table~\ref{tab:paired-ablation} pairs the Tier~1 predictive knobs with Tier~2
+faithfulness knobs. Removing the Critic sets the flag rate to $0$ by
+construction while leaving ID-anchored KC-Jaccard unchanged; IG mainly
+inflates the Critic flag rate ($0.026\rightarrow 0.768$) with only a small JC
+shift. On FoundationalASSIST, adding session+Hint hyperedges yields a small
+AUC gain ($0.720\rightarrow 0.722$). Dropping $L_{\mathrm{aux}}$
+(\texttt{graph\_sensitivity\_weight}${}=0$) on fold~0 still yields clean AUC
+$0.754$ and $\Delta$AUC$=0.039$ (pass), so the graph-only encoder---not the
+auxiliary sensitivity loss alone---is sufficient for the destruction gate on
+this split.
+\input{tables/table_paired_ablation}
+
 \subsection{Ground-truth structural overlap (Junyi)}
 \label{sec:junyi-gt}
 Table~\ref{tab:junyi-gt} compares hyperedge-chain overlap with P0's pairwise

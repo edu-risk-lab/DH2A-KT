@@ -1,0 +1,27 @@
+% Paired ablation: predictive (Tier 1) + faithfulness (Tier 2) knobs.
+% Numbers from results/tables/* (Ollama n=500; FA session ablation; manip folds).
+\begin{table}[!t]
+\caption{Paired ablation of DH$^2$A-KT components. Tier~1 metrics are on
+XES3G5M unless noted; Tier~2 faithfulness uses the fold~0 frozen checkpoint
+and Qwen2.5-7B (Ollama, $n{=}500$) unless noted. ``w/o Critic'' disables the
+gate on the same grounded Diagnostician outputs (flag rate $0$ by construction;
+JC unchanged). Independent generation (IG) strips frozen $P(\mathrm{correct})$
+from the Diagnostician. Session hyperedges are FoundationalASSIST-only.
+``w/o $L_{\mathrm{aux}}$'' sets \texttt{graph\_sensitivity\_weight}${}=0$
+(fold~0 retrain).}
+\label{tab:paired-ablation}
+\centering
+\footnotesize
+\begin{tabular}{@{}llccl@{}}
+\toprule
+Setting & AUC & Manip.\ $\Delta$AUC & Flag & Mean JC \\
+\midrule
+Full (grounded + Critic) & $0.752{\pm}0.002$ & $0.038$--$0.047$ & $0.026$ & $0.152$ \\
+IG (w/o $P$ in Diag.) & --- & --- & $0.768$ & $0.142$ \\
+w/o Critic & --- & --- & $0.000$ & $0.152$ \\
+FA: concept-only & $0.720$ & --- & --- & --- \\
+FA: + session HE & $0.722$ & --- & --- & --- \\
+w/o $L_{\mathrm{aux}}$ (fold~0) & $0.754$ & $0.039$ & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

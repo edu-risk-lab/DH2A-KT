@@ -21,6 +21,7 @@ We submit DH²A-KT for consideration at Knowledge-Based Systems. The manuscript 
    drop; the frozen-weight vs. retrain protocol difference is stated explicitly.
 6. **Research Questions.** An explicit RQ1–RQ5 decomposition (with one question the paper does not answer) states plainly that Teacher/Forum/Discussion/Video interactions are interface-only in the current schema, not empirically demonstrated.
 7. **Explanation faithfulness (KBS bar).** ID-anchored KC-Jaccard plus an Independent Generation (IG) control on Qwen2.5-7B / Ollama ($n{=}500$): grounded flag rate **0.026** / mean JC **0.152**; IG flag rate **0.768** / mean JC **0.142** (Table `tab:kc-jaccard-ig`). StubLLM harness ($n{=}20$) validates the Critic gate (flag 0.0 vs 1.0).
+8. **Paired ablation table.** Predictive + faithfulness knobs side by side (full / IG / w/o Critic / FoundationalASSIST session HE / w/o $L_{\mathrm{aux}}$ on fold 0: AUC 0.754, ΔAUC 0.039, still passes).
 
 **Companion paper P0** is cited as an unpublished submission with public code/artefacts; the manuscript is self-contained (Section on the reused P0 protocol summarizes what is needed to check our results without reading P0). We can attach the P0 PDF as supplementary material on request.
 
