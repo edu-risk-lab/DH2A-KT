@@ -62,9 +62,10 @@ passes destruction at the same anchor with a larger mean drop, so
 reliance is not unique to DH$^2$-KT. Junyi is used only for structural
 ground-truth overlap (not full model training). A 500-sample Tier~2
 pilot with Qwen2.5-7B (Ollama) yields Critic flag rates of 12.4\% under
-a strict prompt and 0\% after probability-format calibration; grounded
-vs.\ independent-generation explanations give flag rates
-$0.026$/$0.768$ and mean ID-anchored KC-Jaccard $0.152$/$0.142$. A
+a strict prompt and 0\% after probability-format calibration; the
+subsequent \texttt{GroundedKCs} faithfulness re-run gives grounded vs.\
+independent-generation flag rates $0.026$/$0.768$ and mean ID-anchored
+KC-Jaccard $0.152$/$0.142$. A
 40-sample dual-rater study rates faithfulness $4.01{\pm}1.07$ and
 usefulness $3.53{\pm}0.71$ (Likert 1--5). FoundationalASSIST supplies
 session+Hint hyperedges and a limited observational hint ATE
@@ -104,9 +105,10 @@ Section~\ref{sec:leakage-ext} extends P0's diagnostics to the hyperedge
 setting. Tier~2 (Section~\ref{sec:tier2}) is a deliberately-scoped pilot
 showing that an LLM-agent layer can read Tier~1's frozen output without
 reopening the leakage question. On XES3G5M, graph-only interaction trades
-$\approx$8.2 AUC points versus GKT for a passing manipulation check;
-Tier~2 faithfulness at pilot scale is sensitive to Critic prompt design
-but reaches 0\% flag rate after calibration (Section~\ref{sec:results}).
+$\approx$8.2 AUC points versus GKT for passing manipulation checks on all
+three folds; Tier~2 faithfulness is measured by Critic flag rate and
+ID-anchored KC-Jaccard under a grounded vs.\ independent-generation control
+(Section~\ref{sec:results}).
 Fig.~\ref{fig:architecture} summarizes the two-tier pipeline.
 
 \subsection{Motivation}
@@ -511,11 +513,12 @@ The Diagnostician is instructed to end each rationale with a structured
 (Section~\ref{sec:tier2-faithfulness-result}); an Independent Generation
 ablation omits frozen $P(\mathrm{correct})$ from that prompt while the
 Critic still receives the true Tier~1 score. Table~\ref{tab:tier2} reports
-Critic flag rates; v1's 12.4\% flags were
-predominantly probability \emph{format} mismatches (e.g., ``69.3\%''
-vs.\ $P{=}0.693$), resolved in v2 by \texttt{critic\_calibration.py} and an
-updated Critic prompt. The Tutor agent wrote 500 session hyperedges back to
-the graph, closing the agentic loop at pilot scale.
+Critic flag rates across runs: v1's 12.4\% flags were predominantly
+probability \emph{format} mismatches (e.g., ``69.3\%'' vs.\ $P{=}0.693$),
+resolved to 0\% in v2 by \texttt{critic\_calibration.py}; the subsequent
+\texttt{GroundedKCs} re-run yields grounded flag rate $0.026$ vs.\ IG
+$0.768$. The Tutor agent wrote 500 session hyperedges back to the graph,
+closing the agentic loop at pilot scale.
 \input{tables/table_tier2}
 
 % =============================================================================
@@ -737,8 +740,13 @@ graph-only path --- not a claim that GKT is graph-inert.
 
 \subsection{Tier~2 faithfulness}
 Tier~2's 12.4\% v1 flag rate was largely a Critic prompt artifact
-(\% vs.\ decimal); calibration reduced it to 0\% on 500 samples without
-changing Tier~1 numbers. Dual-rater scores (Table~\ref{tab:human-eval})
+(\% vs.\ decimal); format calibration reduced it to 0\% on the pre-trailer
+500-sample pack (Table~\ref{tab:tier2}). Under the KBS faithfulness re-run
+with structured \texttt{GroundedKCs}, the Critic still separates grounded
+from independent generation ($0.026$ vs.\ $0.768$ flag rate), while
+ID-anchored KC-Jaccard moves only slightly ($0.152$ vs.\ $0.142$): the gate
+primarily enforces consistency with frozen $P(\mathrm{correct})$, not a
+large rewrite of KC mentions. Dual-rater scores (Table~\ref{tab:human-eval})
 place faithfulness near ``aligned'' ($\approx$4/5) and usefulness in the
 ``somewhat--mostly useful'' band ($\approx$3.5/5), with high within-$\pm$1
 agreement; usefulness Spearman is moderate, reflecting more subjective
@@ -758,11 +766,15 @@ teacher-facing judgments.
   \item The hyperedge leakage audit's pairwise-projection approximation
   (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
   hyperedge-native statistic is future work.
-  \item Tier~2 pilot: one fold, one local 7B LLM; Critic sensitivity to
-  response format required calibration; human ratings use $n{=}40$ and
-  two raters (no third rater; not a classroom deployment study).
+  \item Tier~2 pilot: one fold, one local 7B LLM; human ratings use $n{=}40$
+  and two raters (no third rater; not a classroom deployment study).
+  ID-anchored KC-Jaccard is not synonym-aware (XES3G5M lacks an in-repo KC
+  name vocabulary); the grounded--IG $\Delta$JC is small
+  ($\approx{+}0.010$), so KC-overlap alone is a weak separator relative to
+  Critic flag rate. An LLM-scale sensitivity sweep remains optional future
+  work.
   \item Reproduction environment: Windows workstation, single RTX~3090;
-  42/42 unit tests pass in the released codebase.
+  unit tests pass in the released codebase.
 \end{itemize}
 
 % =============================================================================
@@ -777,13 +789,16 @@ path. Quantitative claims are scoped to concept-prerequisite chain
 hyperedges. On Junyi, those hyperedges
 show structural overlap with the expert DAG (edge-F1 $\approx 0.17$) without
 full-model training. Tier~2 demonstrates a Critic-gated loop at 500-sample
-scale with 0\% flag rate after calibration and dual-rater Likert means of
-$\approx$4.0 / 3.5 for faithfulness / usefulness. On FoundationalASSIST we add
+scale: format calibration reaches 0\% flag rate on the pre-trailer pack,
+while the \texttt{GroundedKCs} re-run yields grounded/IG flag rates
+$0.026$/$0.768$ and mean ID-anchored KC-Jaccard $0.152$/$0.142$, with
+dual-rater Likert means of $\approx$4.0 / 3.5 for faithfulness / usefulness.
+On FoundationalASSIST we add
 session+Hint hyperedges, a secondary fold-0 AUC, and a limited
 observational hint ATE with propensity diagnostics. Future work includes
 richer confounders / sensitivity analysis for ATE, a third rater or larger
-human sample, ES-KT-24 Video wiring, and hyperedge-native leakage
-statistics.
+human sample, LLM-scale sensitivity for Tier~2, ES-KT-24 Video wiring, and
+hyperedge-native leakage statistics.
 
 \section*{CRediT authorship contribution statement}
 % [CẦN TÁC GIẢ XÁC NHẬN LẠI] — see docs/kbs-author-gate.md. Roles below are

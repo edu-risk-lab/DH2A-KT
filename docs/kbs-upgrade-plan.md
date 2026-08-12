@@ -6,10 +6,10 @@ converted/rewritten already. This document is the experimental roadmap for
 the remaining evidence gap relative to Ni et al. (interpretable KT + LLM
 explanation).
 
-**Implementation status (2026-08-13):** Items 1–3 **done**. Ollama JC/IG,
-manip folds 0–2 pass, paired ablation filled (incl.\ w/o $L_{aux}$ fold~0:
-AUC 0.754 / ΔAUC 0.039, still passes). Next: optional Item 4 LLM-scale;
-author gate still open.
+**Implementation status (2026-08-13):** Items 1–3 and manip folds 0–2
+**done** (merged `4cda173` / `7d1d04b`). Ollama JC/IG filled; paired
+ablation includes w/o $L_{aux}$ fold~0 (AUC 0.754 / ΔAUC 0.039, still
+passes). Optional next: Item 4 LLM-scale. Author gate still open.
 
 **Corrected assumptions (2026-08-09 audit):**
 - `diagnostician_explanation` lives on `PilotRecord` / pilot JSONL, **not**
@@ -20,8 +20,8 @@ author gate still open.
 - `dh2a_kt/eval/tier1_eval.py` is the **manipulation-check** driver, not an
   AUC ablation matrix.
 - Headline XES3G5M 3-fold AUCs are **already** in
-  `paper/tables/table_auc_xes3g5m.tex` (0.7501 / 0.7518 / 0.7531). Remaining
-  Tier-1 gap is mainly manipulation check on folds 1–2.
+  `paper/tables/table_auc_xes3g5m.tex` (0.7501 / 0.7518 / 0.7531).
+  Manipulation check on folds 0–2 is **done** (all pass).
 - Diagnostician conditions on frozen `P(correct)` + history IDs only (no
   latent concept-state tensor in the prompt). IG = omit `P(correct)` from
   the Diagnostician prompt; Critic still sees the true Tier-1 score.

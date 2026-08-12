@@ -1,10 +1,17 @@
 # KBS GPU runbook — faithfulness + manipulation folds
 
-**Status 2026-08-12:** This RTX 3090 host now has
-`results/checkpoints/xes3g5m_fold0.pt`, P0 `e_pre_train_only.csv` for folds
-0–2, CUDA, and Ollama `qwen2.5:7b`. Smoke suite ($n{=}20$) passed. Full Ollama
-$n{=}500$ grounded+IG is the next GPU job (`scripts/18_… --mode ollama`); then
-manipulation folds 1–2. Helper: `scripts/19_update_kbs_faithfulness_table.py`.
+**Status 2026-08-13:** Core GPU loop **done** and merged to `main`
+(`4cda173`, `7d1d04b`):
+
+| Item | Result |
+|------|--------|
+| Ollama grounded vs IG ($n{=}500$) | Flag $0.026$ / $0.768$; mean JC $0.152$ / $0.142 |
+| Manipulation folds 0–2 | All pass (ΔAUC $0.038$ / $0.043$ / $0.047`) |
+| Best-epoch train restore | Fixes fold-1 final-epoch collapse |
+| Paired ablation + w/o $L_{aux}$ | Fold-0 AUC $0.754$, ΔAUC $0.039$, still passes |
+
+Optional remaining: LLM-scale sweep (`--run-scale`). Author gate still open
+(`docs/kbs-author-gate.md`).
 
 ## Prerequisites
 
@@ -14,22 +21,20 @@ manipulation folds 1–2. Helper: `scripts/19_update_kbs_faithfulness_table.py`.
   `external/p0_leakage_audit/data/processed/xes3g5m/fold_{0,1,2}/e_pre_train_only.csv`
 - Ollama with `qwen2.5:7b` (and optionally `1.5b` / `14b` for scale)
 
-## 1. Grounded + IG (n=500)
+## 1. Grounded + IG (n=500) — done
 
 ```bash
 python scripts/18_run_kbs_faithfulness_suite.py --mode ollama \
   --load-checkpoint results/checkpoints/xes3g5m_fold0.pt \
   --device cuda --sample-size 500
+python scripts/19_update_kbs_faithfulness_table.py
 ```
 
-Outputs:
+Outputs (gitignored JSONL; numbers synced into paper tables):
 
 - `results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_grounded.jsonl`
 - `results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_ig.jsonl`
 - `results/tables/xes3g5m_fold0_kbs_faithfulness_comparison.json`
-
-Then paste mean JC / flag rates into
-`paper/tables/table_kc_jaccard_ig.tex` (replace `---` Ollama rows).
 
 ## 2. Optional LLM-scale sweep (n=100)
 
@@ -39,23 +44,14 @@ python scripts/18_run_kbs_faithfulness_suite.py --mode ollama \
   --device cuda --run-scale
 ```
 
-## 3. Manipulation check folds 1–2
+## 3. Manipulation check folds 1–2 — done
 
 ```bash
 python scripts/05_run_manipulation_check.py configs/xes3g5m.yaml --fold 1 --device cuda
 python scripts/05_run_manipulation_check.py configs/xes3g5m.yaml --fold 2 --device cuda
 ```
 
-Or via the suite:
-
-```bash
-python scripts/18_run_kbs_faithfulness_suite.py --mode eval-only \
-  --grounded-records results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_grounded.jsonl \
-  --ig-records results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_ig.jsonl \
-  --manipulation-folds 1,2 --device cuda
-```
-
-## 4. Smoke without Ollama (needs E_pre + optional short train)
+## 4. Smoke without Ollama
 
 ```bash
 python scripts/18_run_kbs_faithfulness_suite.py --mode smoke --sample-size 20
@@ -65,8 +61,8 @@ python scripts/18_run_kbs_faithfulness_suite.py --mode smoke --sample-size 20
 
 - StubLLM IG keeps the same `GroundedKCs` trailer construction as grounded
   (history IDs), so **JC delta is not informative under stub**; flag rate is
-  (IG explanations omit `P(correct)` → Critic flags). Real JC separation is
-  an Ollama result.
-- Re-running with the `GroundedKCs` trailer changes the explanation
-  distribution relative to the published n=40 human pack; keep human scores
-  as-is or re-sample after the Ollama re-run.
+  (IG explanations omit `P(correct)` → Critic flags).
+- Ollama grounded--IG ΔJC is small (~0.010); the main IG signal is Critic
+  flag rate. Do not over-claim KC-overlap separation.
+- Human n=40 pack is from the pre-`GroundedKCs` v2 run; distribution differs
+  from the faithfulness re-run.
