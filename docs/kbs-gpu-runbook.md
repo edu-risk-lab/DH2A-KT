@@ -1,10 +1,10 @@
 # KBS GPU runbook — faithfulness + manipulation folds
 
-This machine (dev checkout) had **no** `results/checkpoints/`, **no** P0
-`e_pre_train_only.csv`, and **no** local Ollama at last check. Harness was
-validated with a synthetic StubLLM grounded-vs-IG comparison under
-`results/tables/synthetic_fold0_*`. Run the following on the RTX 3090 host
-that already produced the original Tier-2 Ollama v2 pilot.
+**Status 2026-08-12:** This RTX 3090 host now has
+`results/checkpoints/xes3g5m_fold0.pt`, P0 `e_pre_train_only.csv` for folds
+0–2, CUDA, and Ollama `qwen2.5:7b`. Smoke suite ($n{=}20$) passed. Full Ollama
+$n{=}500$ grounded+IG is the next GPU job (`scripts/18_… --mode ollama`); then
+manipulation folds 1–2. Helper: `scripts/19_update_kbs_faithfulness_table.py`.
 
 ## Prerequisites
 

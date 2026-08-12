@@ -282,6 +282,9 @@ if _TORCH_AVAILABLE:
         p0_log = logging.getLogger("src.dag_disruption")
         prev_p0_level = p0_log.level
         p0_log.setLevel(logging.WARNING)
+        best_state: dict[str, torch.Tensor] | None = None
+        best_epoch_loss = float("inf")
+        best_epoch = -1
         try:
             for epoch in range(budget.epochs):
                 empty_states = precompute_concept_states(
@@ -300,6 +303,7 @@ if _TORCH_AVAILABLE:
 
                 epoch_loss = 0.0
                 n_batches = 0
+                n_skipped = 0
                 for batch in train_loader:
                     lengths = batch["lengths"].to(device)
                     use_empty = graph_dropout > 0.0 and torch.rand(1).item() < graph_dropout
@@ -347,7 +351,12 @@ if _TORCH_AVAILABLE:
                             lengths,
                             margin=graph_sensitivity_margin,
                         )
+                    if not torch.isfinite(loss):
+                        n_skipped += 1
+                        optimizer.zero_grad(set_to_none=True)
+                        continue
                     loss.backward()
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                     optimizer.step()
                     epoch_loss += float(loss.item())
                     n_batches += 1
@@ -360,12 +369,30 @@ if _TORCH_AVAILABLE:
                             len(train_loader),
                             epoch_loss / n_batches,
                         )
+                mean_loss = epoch_loss / max(n_batches, 1)
                 logger.info(
-                    "epoch=%s/%s loss=%.4f batches=%s",
+                    "epoch=%s/%s loss=%.4f batches=%s skipped_nonfinite=%s",
                     epoch + 1,
                     budget.epochs,
-                    epoch_loss / max(n_batches, 1),
+                    mean_loss,
                     n_batches,
+                    n_skipped,
+                )
+                # Keep the best epoch: fold-1 previously collapsed on the final
+                # epoch (loss 0.46 -> 0.76) while earlier epochs were healthy.
+                if n_batches > 0 and mean_loss < best_epoch_loss:
+                    best_epoch_loss = mean_loss
+                    best_epoch = epoch + 1
+                    best_state = {
+                        k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+                    }
+            if best_state is not None:
+                model.load_state_dict(best_state)
+                logger.info(
+                    "restored best epoch=%s train_loss=%.4f (of %s)",
+                    best_epoch,
+                    best_epoch_loss,
+                    budget.epochs,
                 )
         finally:
             p0_log.setLevel(prev_p0_level)

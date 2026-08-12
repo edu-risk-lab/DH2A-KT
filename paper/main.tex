@@ -55,16 +55,20 @@ a limited observational hint ATE are demonstrated on FoundationalASSIST
 (not on XES3G5M). \textbf{Tier~2 (AgentDG-KT)} is a small-scale pilot: Diagnostician,
 Critic, and Tutor agents read Tier~1's \emph{frozen} outputs. On XES3G5M, DH$^2$-KT
 v2 (chain hyperedges, graph-only interaction) achieves mean test AUC
-0.752 versus reused GKT 0.834 under matched budget, while passing a
-hypergraph manipulation check ($\Delta$AUC$=0.038$ at $p{=}0.9$
-node-drop); P0 GKT also passes destruction at the same anchor with a
-larger mean drop, so reliance is not unique to DH$^2$-KT. Junyi is used only for structural ground-truth overlap (not
-full model training). A 500-sample Tier~2 pilot with Qwen2.5-7B (Ollama)
-yields Critic flag rates of 12.4\% under a strict prompt and 0\% after
-probability-format calibration; a 40-sample dual-rater study rates
-faithfulness $4.01{\pm}1.07$ and usefulness $3.53{\pm}0.71$ (Likert 1--5).
-FoundationalASSIST supplies session+Hint hyperedges and a limited
-observational hint ATE (Section~\ref{sec:foundational-assist}).
+0.752 versus reused GKT 0.834 under matched budget, while passing
+hypergraph manipulation checks on all three folds
+($\Delta$AUC$=0.038$--$0.047$ at $p{=}0.9$ node-drop); P0 GKT also
+passes destruction at the same anchor with a larger mean drop, so
+reliance is not unique to DH$^2$-KT. Junyi is used only for structural
+ground-truth overlap (not full model training). A 500-sample Tier~2
+pilot with Qwen2.5-7B (Ollama) yields Critic flag rates of 12.4\% under
+a strict prompt and 0\% after probability-format calibration; grounded
+vs.\ independent-generation explanations give flag rates
+$0.026$/$0.768$ and mean ID-anchored KC-Jaccard $0.152$/$0.142$. A
+40-sample dual-rater study rates faithfulness $4.01{\pm}1.07$ and
+usefulness $3.53{\pm}0.71$ (Likert 1--5). FoundationalASSIST supplies
+session+Hint hyperedges and a limited observational hint ATE
+(Section~\ref{sec:foundational-assist}).
 \end{abstract}
 
 \begin{keyword}
@@ -191,12 +195,13 @@ those entities, not empirical evidence of how they improve KT.
   (Table~\ref{tab:human-eval}) --- scoped as pilot evidence, not a full
   classroom RCT.
   \item \textbf{C6.} Empirical evidence on XES3G5M that (i) a graph-only
-  DH$^2$-KT backbone passes a hypergraph manipulation check
-  ($\Delta$AUC$=0.038$ on fold~0) while remaining below reused GKT AUC
-  (mean $0.752{\pm}0.002$ vs.\ $0.834{\pm}0.001$), noting that P0 GKT
+  DH$^2$-KT backbone passes hypergraph manipulation checks on all three
+  folds ($\Delta$AUC$=0.038$--$0.047$) while remaining below reused GKT
+  AUC (mean $0.752{\pm}0.002$ vs.\ $0.834{\pm}0.001$), noting that P0 GKT
   \emph{also} passes destruction at $p{=}0.9$ with a larger mean drop, and
-  (ii) the local 7B Tier~2 pilot reaches 0\% Critic flag rate after
-  probability-format calibration (Section~\ref{sec:results}).
+  (ii) the local 7B Tier~2 pilot reaches Critic flag rates of $0.026$
+  (grounded) vs.\ $0.768$ (independent generation) with mean ID-anchored
+  KC-Jaccard $0.152$/$0.142$ (Section~\ref{sec:results}).
 \end{itemize}
 
 % =============================================================================
@@ -590,11 +595,13 @@ P0's destruction check (Section~\ref{sec:manipulation-result}).
 \label{sec:manipulation-result}
 Table~\ref{tab:manipulation} and Fig.~\ref{fig:manipulation-sweep} summarize
 graph-destruction evidence at the shared P0 anchor ($p{=}0.9$ node-drop).
-DH$^2$-KT v2 (fold~0) loses $\Delta$AUC$=0.038$ when frozen weights are
-re-evaluated on a destroyed hypergraph, confirming hypergraph use under our
-protocol (an earlier pairwise$+$exercise-embedding backbone failed this gate,
-$\Delta$AUC$\approx 0.0003$). Reused P0 DDR-downstream results show that
-\textbf{GKT also passes} the same operator/strength on XES3G5M, with a
+All three folds pass: $\Delta$AUC$=0.038$/$0.043$/$0.047$ (folds~0/1/2) when
+frozen weights are re-evaluated on a destroyed hypergraph, confirming
+hypergraph use under our protocol (an earlier pairwise$+$exercise-embedding
+backbone failed this gate, $\Delta$AUC$\approx 0.0003$). Training restores
+the best epoch by train loss; fold~1 previously collapsed on the final epoch
+and is reported after that safeguard. Reused P0 DDR-downstream results show
+that \textbf{GKT also passes} the same operator/strength on XES3G5M, with a
 \emph{larger} mean drop ($0.0877{\pm}0.0009$, $n{=}9$ fold--seed runs) after
 retraining on the destroyed pairwise graph. Protocol differences matter
 (DH$^2$-KT freezes weights; P0 GKT retrains), but either way graph-reliance
@@ -605,7 +612,7 @@ line at $\Delta$AUC$=0.003$: roughly an order of magnitude above the
 observed graph-inert noise floor ($\approx 3{\times}10^{-4}$), not a formal
 hypothesis test from \cite{daominh2026p0}. We treat a backbone as
 graph-reliant when its destruction $\Delta$AUC clearly exceeds that floor
-(here $0.038$ for DH$^2$-KT; $\approx 0.088$ for GKT).
+(here $0.038$--$0.047$ across DH$^2$-KT folds; $\approx 0.088$ for GKT).
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
 
@@ -634,16 +641,19 @@ over Diagnostician outputs: the model must emit a structured
 KCs in the recent history window, and their 1-hop neighbors on audited
 train-only $E_{\mathrm{pre}}$. The IG arm uses the same history but omits
 frozen $P(\mathrm{correct})$ from the Diagnostician prompt while the Critic
-still sees the true Tier~1 score (Table~\ref{tab:kc-jaccard-ig}). StubLLM
-harness rows validate the pipeline; Ollama $n{=}500$ grounded vs.\ IG cells
-are completed on the GPU host per the project runbook once checkpoints and
-Ollama are available. From the calibrated Ollama v2 run we
-drew a fixed 40-sample pack (seed 42) for two independent raters (A1, B1)
-on Likert faithfulness and usefulness (1--5). Pooled means are
-$4.01{\pm}1.07$ (faithfulness) and $3.53{\pm}0.71$ (usefulness);
-pairwise Spearman $\rho{=}0.71$ / $0.58$ and within-$\pm$1 rates of
-92.5\% / 97.5\% (Table~\ref{tab:human-eval}). A third rater was optional
-and not required for this pilot report.
+still sees the true Tier~1 score (Table~\ref{tab:kc-jaccard-ig}). On
+Qwen2.5-7B (Ollama, $n{=}500$), grounded explanations have flag rate
+$0.026$ and mean JC $0.152$; IG raises the Critic flag rate to $0.768$
+while mean JC stays near $0.142$ ($\Delta$JC$\approx{+}0.010$), so the
+gate mainly catches probability-ungrounded rationales rather than
+rewriting KC overlap. StubLLM harness rows ($n{=}20$) validate the
+pipeline (flag $0.0$ vs.\ $1.0$ at matched JC). From the calibrated
+Ollama v2 run we drew a fixed 40-sample pack (seed 42) for two
+independent raters (A1, B1) on Likert faithfulness and usefulness (1--5).
+Pooled means are $4.01{\pm}1.07$ (faithfulness) and $3.53{\pm}0.71$
+(usefulness); pairwise Spearman $\rho{=}0.71$ / $0.58$ and within-$\pm$1
+rates of 92.5\% / 97.5\% (Table~\ref{tab:human-eval}). A third rater was
+optional and not required for this pilot report.
 \input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
 

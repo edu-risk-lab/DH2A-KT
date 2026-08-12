@@ -14,9 +14,13 @@ We submit DH²A-KT for consideration at Knowledge-Based Systems. The manuscript 
 2. **Heterogeneous session+Hint evidence.** On FoundationalASSIST (distinct from classic ASSISTments 2012), we construct session hyperedges with Hint members, report leakage diagnostics, and a concept-only vs. +session ablation (AUC 0.720→0.722).
 3. **Causal layer.** Observational IPW ATE of hint use on next-step correctness, with propensity diagnostics, bootstrap CI, and an explicit weak-overlap caveat.
 4. **Tier-2 human rating.** Dual-rater Likert study (n=40): faithfulness 4.01±1.07, usefulness 3.53±0.71.
-5. **Manipulation check.** Table reports P0's GKT ΔAUC at the same node-drop p=0.9 anchor as DH²-KT (GKT also passes, with a larger mean drop); the frozen-weight (DH²-KT) vs. retrain (GKT) protocol difference is stated explicitly rather than presented as an apples-to-apples comparison.
+5. **Manipulation check.** All three XES3G5M folds pass under frozen-weight
+   node-drop $p{=}0.9$ (ΔAUC 0.038 / 0.043 / 0.047; clean AUC ≈0.75). Training
+   restores the best epoch by train loss (fold 1 previously collapsed on the
+   final epoch). P0 GKT also passes at the same anchor with a larger mean
+   drop; the frozen-weight vs. retrain protocol difference is stated explicitly.
 6. **Research Questions.** An explicit RQ1–RQ5 decomposition (with one question the paper does not answer) states plainly that Teacher/Forum/Discussion/Video interactions are interface-only in the current schema, not empirically demonstrated.
-7. **Explanation faithfulness harness (KBS bar).** We implement ID-anchored KC-Jaccard (structured `GroundedKCs` trailer vs. history ∪ 1-hop $E_{pre}$) and an Independent Generation (IG) negative control that strips frozen $P(\mathrm{correct})$ from the Diagnostician while keeping the Critic conditioned on Tier-1. The evaluation suite and GPU runbook are in-repo (`scripts/18_run_kbs_faithfulness_suite.py`, `docs/kbs-gpu-runbook.md`); StubLLM harness results are reported in Table `tab:kc-jaccard-ig`, with Ollama $n{=}500$ grounded vs. IG cells to be filled from the GPU host before camera-ready if not already present at submission.
+7. **Explanation faithfulness (KBS bar).** ID-anchored KC-Jaccard plus an Independent Generation (IG) control on Qwen2.5-7B / Ollama ($n{=}500$): grounded flag rate **0.026** / mean JC **0.152**; IG flag rate **0.768** / mean JC **0.142** (Table `tab:kc-jaccard-ig`). StubLLM harness ($n{=}20$) validates the Critic gate (flag 0.0 vs 1.0).
 
 **Companion paper P0** is cited as an unpublished submission with public code/artefacts; the manuscript is self-contained (Section on the reused P0 protocol summarizes what is needed to check our results without reading P0). We can attach the P0 PDF as supplementary material on request.
 

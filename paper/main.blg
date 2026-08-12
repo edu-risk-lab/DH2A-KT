@@ -1,58 +1,52 @@
 This is BibTeX, Version 0.99e
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
-Reallocating 'name_of_file' (item size: 1) to 9 items.
-The style file: IEEEtran.bst
+Reallocating 'name_of_file' (item size: 1) to 15 items.
+The style file: elsarticle-num.bst
 Reallocating 'name_of_file' (item size: 1) to 11 items.
-Reallocating 'singl_function' (item size: 4) to 100 items.
-Reallocating 'singl_function' (item size: 4) to 100 items.
-Reallocating 'singl_function' (item size: 4) to 100 items.
-Reallocating 'wiz_functions' (item size: 4) to 6000 items.
-Reallocating 'singl_function' (item size: 4) to 100 items.
 Database file #1: references.bib
--- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
--- http://www.michaelshell.org/tex/ieeetran/bibtex/
--- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
-
-Done.
-You've used 20 entries,
-            4087 wiz_defined-function locations,
-            956 strings with 13458 characters,
-and the built_in function-call counts, 18842 in all, are:
-= -- 1465
-> -- 583
-< -- 130
-+ -- 322
-- -- 133
-* -- 985
-:= -- 2742
-add.period$ -- 43
-call.type$ -- 20
-change.case$ -- 22
-chr.to.int$ -- 312
-cite$ -- 20
-duplicate$ -- 1266
-empty$ -- 1486
-format.name$ -- 134
-if$ -- 4380
+Warning--can't use both volume and number fields in graphrag2025
+Warning--empty pages in graphrag2025
+Warning--can't use both volume and number fields in minn2022interpretable
+You've used 21 entries,
+            2952 wiz_defined-function locations,
+            831 strings with 12066 characters,
+and the built_in function-call counts, 10047 in all, are:
+= -- 949
+> -- 396
+< -- 17
++ -- 146
+- -- 125
+* -- 820
+:= -- 1320
+add.period$ -- 41
+call.type$ -- 21
+change.case$ -- 23
+chr.to.int$ -- 0
+cite$ -- 24
+duplicate$ -- 363
+empty$ -- 1067
+format.name$ -- 145
+if$ -- 2585
 int.to.chr$ -- 0
-int.to.str$ -- 20
-missing$ -- 257
-newline$ -- 121
-num.names$ -- 20
-pop$ -- 634
+int.to.str$ -- 21
+missing$ -- 18
+newline$ -- 111
+num.names$ -- 21
+pop$ -- 178
 preamble$ -- 1
 purify$ -- 0
-quote$ -- 2
-skip$ -- 1433
+quote$ -- 0
+skip$ -- 616
 stack$ -- 0
-substring$ -- 834
-swap$ -- 1065
-text.length$ -- 26
+substring$ -- 489
+swap$ -- 193
+text.length$ -- 17
 text.prefix$ -- 0
-top$ -- 5
-type$ -- 20
-warning$ -- 0
-while$ -- 71
-width$ -- 22
-write$ -- 268
+top$ -- 0
+type$ -- 0
+warning$ -- 3
+while$ -- 61
+width$ -- 23
+write$ -- 253
+(There were 3 warnings)

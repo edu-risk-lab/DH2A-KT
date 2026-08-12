@@ -6,13 +6,11 @@ converted/rewritten already. This document is the experimental roadmap for
 the remaining evidence gap relative to Ni et al. (interpretable KT + LLM
 explanation).
 
-**Implementation status (2026-08-09):** Items 1–2 harness code is in-repo
-(`dh2a_kt/eval/explanation_faithfulness.py`, Diagnostician `GroundedKCs`,
-`--ablation ig` / `--skip-critic`, `scripts/18_run_kbs_faithfulness_suite.py`).
-Stub harness comparison written under `results/tables/synthetic_fold0_*`.
-Full Ollama $n{=}500$ + manipulation folds 1–2: see
-`docs/kbs-gpu-runbook.md` (blocked on this checkout: no checkpoint / E_pre /
-Ollama). Author confirmation gate: `docs/kbs-author-gate.md`.
+**Implementation status (2026-08-12 evening):** Items 1–2 **done** on GPU
+(Ollama $n{=}500$ grounded JC 0.152 / flag 0.026; IG JC 0.142 / flag 0.768).
+Manipulation folds 0–2 **all pass** after best-epoch restore
+(ΔAUC 0.038 / 0.043 / 0.047). Tables + cover letter synced. Next: Item 3
+paired ablation table; Item 4 LLM-scale optional; author gate still open.
 
 **Corrected assumptions (2026-08-09 audit):**
 - `diagnostician_explanation` lives on `PilotRecord` / pilot JSONL, **not**

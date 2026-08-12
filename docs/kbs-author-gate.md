@@ -23,9 +23,8 @@ placeholders marked `[CẦN TÁC GIẢ XÁC NHẬN]` in `paper/main.tex`.
   “on request” if that is intentional.
 - [ ] **FoundationalASSIST access** — confirm authorized HF access for all
   authors who need it.
-- [ ] **Cover letter** — update Ollama JC/IG numbers after
-  `docs/kbs-gpu-runbook.md` completes; remove any remaining “planned only”
-  language for completed experiments.
+- [x] **Cover letter** — Ollama JC/IG + 3-fold manipulation numbers filled
+  (`paper/cover_letter_kbs.md`, 2026-08-12).
 - [ ] **Corresponding author email** — confirm `sonlh@vnu.edu.vn`.
 
 When all boxes are checked, remove the Vietnamese `CẦN TÁC GIẢ XÁC NHẬN`
