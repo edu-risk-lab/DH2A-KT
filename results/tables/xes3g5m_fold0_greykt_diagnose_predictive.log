@@ -1,0 +1,39 @@
+python : INFO:src.io_utils:Loading interactions from 
+D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+At C:\Users\EDM\AppData\Local\Temp\ps-script-d734809c-5e10-4a90-9dc5-421415cd486b.ps1:108 char:26
++ ... BUFFERED=1; python scripts/22_run_greykt.py configs/xes3g5m.yaml --fo ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:src.io_uti...xes3g5m.parquet:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+[fold 0] C_B premise diagnostic on 'valid' split signal=predictive (kappa_B=4.0, 5 quantile buckets)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 1806 users (from 640917 interactions)
+collected 359394 predictions over 865 concepts (N_c^train: min=0 median=970 max=105180, 2 concepts unseen in training)
+predictive C_B=|2p-1|: mean=0.516 p05=0.226 p95=0.799
+
+==============================================================================
+C_B PREMISE DIAGNOSTIC -- VERDICT: SUPPORTED
+==============================================================================
+signal=predictive  predictions=359394  kappa_B=nan  strategy=quantile  buckets=5  C_B[p05,p95]=[0.2260,0.7993]
+
+bucket                          n  C_B mean    base     AUC     NLL   Brier     ECE
+-----------------------------------------------------------------------------------
+C_B[0.0000,0.3931]          71879    0.2799   0.745  0.5148  0.6013  0.2053  0.1105
+C_B[0.3931,0.4811]          71879    0.4407   0.768  0.5056  0.5493  0.1813  0.0483
+C_B[0.4811,0.5521]          71878    0.5163   0.782  0.5092  0.5265  0.1713  0.0242
+C_B[0.5521,0.6427]          71879    0.5940   0.794  0.5054  0.5099  0.1641  0.0082
+C_B[0.6427,1.0000]          71879    0.7490   0.803  0.4992  0.5595  0.1670  0.0732
+
+Spearman(C_B, squared error) = -0.5877 (p=0.00e+00, threshold |rho|>=0.05)
+Spearman(C_B, absolute error) = -0.5877
+Brier: lowest-C_B bucket 0.2053 vs highest-C_B bucket 0.1670 (gap +0.0384)
+
+  - C_B tracks black-box error as assumed: rho=-0.5877 (p=0.00e+00), and Brier degrades from 0.1670 in the highest-C_B bucket to 0.2053 in the lowest. The reliability gate has an empirical basis.
+  - AUC is reported per bucket for familiarity but is NOT comparable across buckets (within-group ranking metric, confounded by each bucket's label balance). The verdict rests on NLL/Brier and the per-prediction rank correlation.
+
+ACTION: the gate premise holds on this split. Proceeding to a full GreyKT run is justified; report this diagnostic alongside the results as the empirical warrant for the gate design.
+==============================================================================
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold0_black_confidence_diagnostic_predictive.json

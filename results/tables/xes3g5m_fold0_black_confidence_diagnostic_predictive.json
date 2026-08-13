@@ -1,0 +1,92 @@
+{
+  "verdict": "SUPPORTED",
+  "n_predictions": 359394,
+  "kappa_b": NaN,
+  "strategy": "quantile",
+  "n_buckets": 5,
+  "buckets": [
+    {
+      "label": "C_B[0.0000,0.3931]",
+      "n": 71879,
+      "cb_min": 1.621246337890625e-05,
+      "cb_max": 0.39311766624450684,
+      "cb_mean": 0.27988315617630694,
+      "base_rate": 0.7445846492021314,
+      "auc": 0.5147617723690706,
+      "nll": 0.6013298502734016,
+      "brier": 0.20531880492420929,
+      "ece": 0.11047147744232214
+    },
+    {
+      "label": "C_B[0.3931,0.4811]",
+      "n": 71879,
+      "cb_min": 0.3931177854537964,
+      "cb_max": 0.4811340570449829,
+      "cb_mean": 0.4407349704276454,
+      "base_rate": 0.7675120688935573,
+      "auc": 0.5055598533365285,
+      "nll": 0.5493040195670735,
+      "brier": 0.181278643715386,
+      "ece": 0.04825459053267323
+    },
+    {
+      "label": "C_B[0.4811,0.5521]",
+      "n": 71878,
+      "cb_min": 0.48113441467285156,
+      "cb_max": 0.5520594120025635,
+      "cb_mean": 0.5163041618199277,
+      "base_rate": 0.7817412838420658,
+      "auc": 0.5092217590314931,
+      "nll": 0.5265487470178836,
+      "brier": 0.17132434156643306,
+      "ece": 0.024237261711970635
+    },
+    {
+      "label": "C_B[0.5521,0.6427]",
+      "n": 71879,
+      "cb_min": 0.5520598888397217,
+      "cb_max": 0.6426563262939453,
+      "cb_mean": 0.5939892000190556,
+      "base_rate": 0.79382017000793,
+      "auc": 0.505395108110626,
+      "nll": 0.5098674760551741,
+      "brier": 0.16407239526307982,
+      "ece": 0.008168683096601228
+    },
+    {
+      "label": "C_B[0.6427,1.0000]",
+      "n": 71879,
+      "cb_min": 0.6426608562469482,
+      "cb_max": 1.0,
+      "cb_mean": 0.7490096747769098,
+      "base_rate": 0.8025431628152868,
+      "auc": 0.49920344117467563,
+      "nll": 0.5595233764752316,
+      "brier": 0.1669562269940646,
+      "ece": 0.07318595426542865
+    }
+  ],
+  "signal": "predictive",
+  "confidence_p05": 0.22596442699432373,
+  "confidence_p95": 0.799332755804061,
+  "spearman_cb_vs_squared_error": -0.5877155460456178,
+  "spearman_pvalue": 0.0,
+  "spearman_cb_vs_absolute_error": -0.5877155460456178,
+  "min_effect_size": 0.05,
+  "brier_lowest_cb_bucket": 0.20531880492420929,
+  "brier_highest_cb_bucket": 0.1669562269940646,
+  "brier_gap_low_minus_high": 0.03836257793014469,
+  "base_rate_spread": 0.057958513613155405,
+  "base_rate_confound_warning": false,
+  "notes": [
+    "C_B tracks black-box error as assumed: rho=-0.5877 (p=0.00e+00), and Brier degrades from 0.1670 in the highest-C_B bucket to 0.2053 in the lowest. The reliability gate has an empirical basis.",
+    "AUC is reported per bucket for familiarity but is NOT comparable across buckets (within-group ranking metric, confounded by each bucket's label balance). The verdict rests on NLL/Brier and the per-prediction rank correlation."
+  ],
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "split": "valid",
+  "n_concepts": 865,
+  "n_concepts_unseen_in_training": 2,
+  "max_users": null,
+  "predictive_cb_mean": 0.5159842317537785
+}
