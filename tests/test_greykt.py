@@ -312,6 +312,7 @@ def test_v4a_temperature_preserves_ranking_and_is_identity_at_one():
     )
     torch.manual_seed(0)
     model = GreyKT(config_t1)
+    model.eval()  # dropout would reshuffle logits across the two forwards
     batch = _make_toy_batch(with_train_freq=True)
 
     out_t1 = model(batch)

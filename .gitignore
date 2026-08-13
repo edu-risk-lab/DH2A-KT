@@ -66,6 +66,9 @@ results/tables/*
 !results/tables/xes3g5m_fold1_manipulation_check.retrain.log
 !results/tables/xes3g5m_fold2_manipulation_check.json
 !results/tables/xes3g5m_fold2_manipulation_check.log
+!results/tables/xes3g5m_fold0_black_confidence_diagnostic.json
+!results/tables/xes3g5m_fold0_greykt_diagnose.log
+!results/tables/xes3g5m_fold0_greykt_wrap_attempt.log
 results/figures/*
 !results/figures/.gitkeep
 *.pt
@@ -81,6 +84,8 @@ results/figures/*
 !results/tables/xes3g5m_fold1_manipulation_check.log
 !results/tables/xes3g5m_fold1_manipulation_check.retrain.log
 !results/tables/xes3g5m_fold2_manipulation_check.log
+!results/tables/xes3g5m_fold0_greykt_diagnose.log
+!results/tables/xes3g5m_fold0_greykt_wrap_attempt.log
 # Skip redundant archive if unpacked tree is tracked
 results/tables/tier2_human_eval/distribution.rar
 
