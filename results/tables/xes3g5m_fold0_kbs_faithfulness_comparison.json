@@ -1,0 +1,31 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "mode": "ollama",
+  "e_pre": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\external\\p0_leakage_audit\\data\\processed\\xes3g5m\\fold_0\\e_pre_train_only.csv",
+  "arms": [
+    {
+      "label": "grounded",
+      "records": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\results\\tables\\xes3g5m_fold0_tier2_pilot_kbs_ollama_grounded.jsonl",
+      "n_samples": 500,
+      "mean_kc_jaccard": 0.15249873511102366,
+      "median_kc_jaccard": 0.13840996168582376,
+      "n_empty_grounded": 0,
+      "n_flagged": 13,
+      "flag_rate": 0.026,
+      "faithfulness_json": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\results\\tables\\grounded_faithfulness.json"
+    },
+    {
+      "label": "ig",
+      "records": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\results\\tables\\xes3g5m_fold0_tier2_pilot_kbs_ollama_ig.jsonl",
+      "n_samples": 500,
+      "mean_kc_jaccard": 0.14225974242316897,
+      "median_kc_jaccard": 0.12701612903225806,
+      "n_empty_grounded": 1,
+      "n_flagged": 384,
+      "flag_rate": 0.768,
+      "faithfulness_json": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\results\\tables\\ig_faithfulness.json"
+    }
+  ],
+  "delta_mean_kc_jaccard_grounded_minus_ig": 0.010238992687854692
+}

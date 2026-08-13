@@ -1,0 +1,13 @@
+{
+  "hyperedge_kind": "concept_prerequisite",
+  "n_hyperedges": 5840,
+  "ecr_flag": 0.0,
+  "tbmr": 0.0,
+  "rho": null,
+  "group_membership_leak_rate": 0.0,
+  "cross_modal_leak_rate": null,
+  "intervention_timing_leak_rate": null,
+  "notes": [
+    "Pairwise projection not materialised (115041 pairs > cap 100000); TBMR/|rho| skipped"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "dataset": "foundational_assist",
+  "fold": 0,
+  "session_gap_seconds": 1800.0,
+  "n_session_hyperedges": 308670,
+  "n_with_hint_member": 35752,
+  "hint_member_rate": 0.11582596300255937,
+  "preview": [
+    {
+      "hyperedge_id": "session_f0_1_u122706677570751",
+      "n_members": 3,
+      "member_types": [
+        "concept",
+        "exercise",
+        "student"
+      ],
+      "provenance": {
+        "source": "session_gap",
+        "n_interactions": 1,
+        "n_hint_members": 0
+      }
+    },
+    {
+      "hyperedge_id": "session_f0_2_u122706677570751",
+      "n_members": 5,
+      "member_types": [
+        "concept",
+        "exercise",
+        "student"
+      ],
+      "provenance": {
+        "source": "session_gap",
+        "n_interactions": 2,
+        "n_hint_members": 0
+      }
+    },
+    {
+      "hyperedge_id": "session_f0_3_u122706677570751",
+      "n_members": 7,
+      "member_types": [
+        "concept",
+        "exercise",
+        "student"
+      ],
+      "provenance": {
+        "source": "session_gap",
+        "n_interactions": 3,
+        "n_hint_members": 0
+      }
+    },
+    {
+      "hyperedge_id": "session_f0_4_u122706677570751",
+      "n_members": 8,
+      "member_types": [
+        "concept",
+        "exercise",
+        "student"
+      ],
+      "provenance": {
+        "source": "session_gap",
+        "n_interactions": 6,
+        "n_hint_members": 0
+      }
+    },
+    {
+      "hyperedge_id": "session_f0_5_u122706677570751",
+      "n_members": 9,
+      "member_types": [
+        "concept",
+        "exercise",
+        "student"
+      ],
+      "provenance": {
+        "source": "session_gap",
+        "n_interactions": 5,
+        "n_hint_members": 0
+      }
+    }
+  ]
+}

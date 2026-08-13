@@ -1,0 +1,45 @@
+{
+  "n_ratings": 80,
+  "n_samples": 40,
+  "n_raters": 2,
+  "raters": [
+    "A1",
+    "B1"
+  ],
+  "faithfulness_mean": 4.0125,
+  "faithfulness_sd": 1.0731917379150449,
+  "usefulness_mean": 3.525,
+  "usefulness_sd": 0.7111231978578996,
+  "per_rater": {
+    "A1": {
+      "n": 40,
+      "faithfulness_mean": 3.975,
+      "faithfulness_sd": 1.0974913118048724,
+      "usefulness_mean": 3.675,
+      "usefulness_sd": 0.7298577311314224
+    },
+    "B1": {
+      "n": 40,
+      "faithfulness_mean": 4.05,
+      "faithfulness_sd": 1.0609623111312794,
+      "usefulness_mean": 3.375,
+      "usefulness_sd": 0.6674674677561601
+    }
+  },
+  "agreement": {
+    "pairwise": [
+      {
+        "pair": "A1-vs-B1",
+        "faithfulness_spearman": 0.7102947091511903,
+        "usefulness_spearman": 0.5837003163185306,
+        "faithfulness_within_1": 0.925,
+        "usefulness_within_1": 0.975,
+        "n_paired": 40
+      }
+    ],
+    "faithfulness_spearman_mean": 0.7102947091511903,
+    "usefulness_spearman_mean": 0.5837003163185306,
+    "faithfulness_within_1_mean": 0.925,
+    "usefulness_within_1_mean": 0.975
+  }
+}

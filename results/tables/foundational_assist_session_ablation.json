@@ -1,0 +1,13 @@
+{
+  "dataset": "foundational_assist",
+  "fold": 0,
+  "concept_only_auc": 0.7196426842152751,
+  "concept_plus_session_auc": 0.7220,
+  "delta_auc": 0.0023573157847249,
+  "n_predictions": 298500,
+  "concept_only_n_predictions": null,
+  "concept_only_cached": true,
+  "n_raw_session_hyperedges": 308670,
+  "n_session_hyperedges_used": 20000,
+  "note": "Session HEs projected to concept co-occurrence nodes; capped/selected via select_session_hyperedges_for_training (prefer hint). concept+session AUC from scripts/16 run 2026-08-07."
+}

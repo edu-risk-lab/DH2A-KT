@@ -1,0 +1,10 @@
+{
+  "source": "results\\tables\\xes3g5m_fold0_tier2_pilot_ollama_v2.jsonl",
+  "n": 40,
+  "seed": 42,
+  "n_critic_flagged": 0,
+  "scales": [
+    "faithfulness_1to5",
+    "usefulness_1to5"
+  ]
+}

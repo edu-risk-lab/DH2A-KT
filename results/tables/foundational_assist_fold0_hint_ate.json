@@ -1,0 +1,39 @@
+{
+  "dataset": "foundational_assist",
+  "fold": 0,
+  "ate_ipw": -0.2072213432737786,
+  "n_treated": 36151,
+  "n_control": 660321,
+  "propensity_min": 0.05,
+  "propensity_max": 0.21880830738706863,
+  "propensity_mean": 0.06388408970604369,
+  "mu1_ipw": 0.40708592406079946,
+  "mu0_ipw": 0.6143072673345781,
+  "naive_mean_diff": -0.25533802699914804,
+  "trimmed_ate_ipw": -0.21086791805796262,
+  "trim_quantiles": [
+    0.1,
+    0.9
+  ],
+  "n_trimmed_rows": 626824,
+  "bootstrap_n": 200,
+  "bootstrap_ci95": [
+    -0.22968967483854677,
+    -0.18717220207619492
+  ],
+  "bootstrap_subsample": 50000,
+  "treatment": "hint_used_t",
+  "outcome": "correct_t_plus_1",
+  "n_rows": 696472,
+  "identification": "IPW under no unmeasured confounding given pre-t summaries; observational KT \u2014 report as limited evidence, not proven causal effect",
+  "max_users": null,
+  "max_seq_len": 200,
+  "seed": 42,
+  "confounders": [
+    "prior_accuracy",
+    "log1p_n_prior",
+    "same_kc_prior_accuracy",
+    "normalized_position",
+    "log1p_item_id"
+  ]
+}

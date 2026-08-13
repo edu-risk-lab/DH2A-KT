@@ -1,0 +1,3 @@
+dataset,fold,reference_model,p0_auc,dh2_kt_auc,delta_auc,budget_reference,batch_size,epochs,comparison_type,budget_note,n_predictions
+foundational_assist,0,none,,0.7196426842152751,,local_default,4,10,matched,no_p0_baseline,298500
+foundational_assist,mean,none,,0.7196426842152751,,local_default,4,10,matched,no_p0_baseline,298500

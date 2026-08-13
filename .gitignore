@@ -37,6 +37,24 @@ results/*
 !results/figures/
 results/tables/*
 !results/tables/.gitkeep
+# KBS submission evidence (lean artefacts; not raw datasets / checkpoints)
+!results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_grounded.jsonl
+!results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_grounded_summary.json
+!results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_ig.jsonl
+!results/tables/xes3g5m_fold0_tier2_pilot_kbs_ollama_ig_summary.json
+!results/tables/xes3g5m_fold0_kbs_faithfulness_comparison.json
+!results/tables/kbs_ollama_suite.log
+!results/tables/tier2_human_eval/
+!results/tables/tier2_human_eval/**
+!results/tables/foundational_assist_fold0_hint_ate.json
+!results/tables/foundational_assist_fold0_session_hyperedges.json
+!results/tables/foundational_assist_fold0_session_hyperedge_audit.json
+!results/tables/foundational_assist_fold0_hyperedge_audit.json
+!results/tables/foundational_assist_fold0_concept_prereq_hyperedges.json
+!results/tables/foundational_assist_session_ablation.json
+!results/tables/foundational_assist_fold0_train.log
+!results/tables/foundational_assist_session_ablation.log
+!results/tables/dh2_kt_foundational_assist.csv
 results/figures/*
 !results/figures/.gitkeep
 *.pt
@@ -44,6 +62,12 @@ results/figures/*
 *.ckpt
 *.safetensors
 *.bin
+# Keep evidence logs listed above even though *.log is ignored globally
+!results/tables/kbs_ollama_suite.log
+!results/tables/foundational_assist_fold0_train.log
+!results/tables/foundational_assist_session_ablation.log
+# Skip redundant archive if unpacked tree is tracked
+results/tables/tier2_human_eval/distribution.rar
 
 # Local Python virtual environment created by scripts/00_setup_p0_submodule.sh
 .venv/

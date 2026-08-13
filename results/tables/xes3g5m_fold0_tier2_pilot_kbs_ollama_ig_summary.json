@@ -1,0 +1,12 @@
+{
+  "n_samples": 500,
+  "n_flagged": 384,
+  "flag_rate": 0.768,
+  "n_session_hyperedges": 500,
+  "llm_backend": "ollama",
+  "fold": 0,
+  "dataset": "xes3g5m",
+  "ablation": "ig",
+  "skip_critic": false,
+  "ollama_model": "qwen2.5:7b"
+}

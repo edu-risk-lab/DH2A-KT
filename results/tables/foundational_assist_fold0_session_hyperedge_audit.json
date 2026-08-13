@@ -1,0 +1,14 @@
+{
+  "hyperedge_kind": "session",
+  "n_hyperedges": 308670,
+  "ecr_flag": 0.0,
+  "tbmr": 0.0,
+  "rho": null,
+  "group_membership_leak_rate": 0.0,
+  "cross_modal_leak_rate": null,
+  "intervention_timing_leak_rate": null,
+  "notes": [
+    "Pairwise projection not materialised (9175351 pairs > cap 100000); TBMR/|rho| skipped",
+    "group_membership_leak_rate not computed: missing held-out id inputs"
+  ]
+}
