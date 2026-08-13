@@ -55,6 +55,17 @@ results/tables/*
 !results/tables/foundational_assist_fold0_train.log
 !results/tables/foundational_assist_session_ablation.log
 !results/tables/dh2_kt_foundational_assist.csv
+!results/tables/dh2_kt_vs_p0.csv
+!results/tables/review2_auc_and_manipulation_stats.json
+!results/tables/xes3g5m_fold0_manipulation_check.json
+!results/tables/xes3g5m_fold0_manipulation_check_no_laux.json
+!results/tables/xes3g5m_fold0_no_laux.log
+!results/tables/xes3g5m_fold1_manipulation_check.json
+!results/tables/xes3g5m_fold1_manipulation_check.before_retrain.json
+!results/tables/xes3g5m_fold1_manipulation_check.log
+!results/tables/xes3g5m_fold1_manipulation_check.retrain.log
+!results/tables/xes3g5m_fold2_manipulation_check.json
+!results/tables/xes3g5m_fold2_manipulation_check.log
 results/figures/*
 !results/figures/.gitkeep
 *.pt
@@ -66,6 +77,10 @@ results/figures/*
 !results/tables/kbs_ollama_suite.log
 !results/tables/foundational_assist_fold0_train.log
 !results/tables/foundational_assist_session_ablation.log
+!results/tables/xes3g5m_fold0_no_laux.log
+!results/tables/xes3g5m_fold1_manipulation_check.log
+!results/tables/xes3g5m_fold1_manipulation_check.retrain.log
+!results/tables/xes3g5m_fold2_manipulation_check.log
 # Skip redundant archive if unpacked tree is tracked
 results/tables/tier2_human_eval/distribution.rar
 

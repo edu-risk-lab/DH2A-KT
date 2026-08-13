@@ -1,0 +1,54 @@
+{
+  "dh2_kt_auc_folds": [
+    0.7500679772812409,
+    0.751768143467664,
+    0.7530850710762231
+  ],
+  "dh2_kt_auc_mean": 0.7516403972750426,
+  "dh2_kt_auc_sd": 0.0015125981155703799,
+  "gkt_auc_folds": [
+    0.8345570064591779,
+    0.8337523448899595,
+    0.8326236895029956
+  ],
+  "gkt_auc_mean": 0.833644346950711,
+  "gkt_auc_sd": 0.0009711726311150405,
+  "simplekt_auc_folds": [
+    0.8744411161851224,
+    0.874682387936969,
+    0.8750364454040779
+  ],
+  "simplekt_auc_mean": 0.8747199831753898,
+  "simplekt_auc_sd": 0.000299439929200269,
+  "delta_vs_gkt_folds": [
+    -0.08448902917793699,
+    -0.08198420142229557,
+    -0.07953861842677246
+  ],
+  "delta_vs_gkt_mean": -0.08200394967566833,
+  "delta_vs_gkt_sd": 0.002475264459900156,
+  "delta_vs_simplekt_mean": -0.12307958590034711,
+  "delta_vs_simplekt_sd": 0.0012193191776720704,
+  "manipulation": {
+    "dh2_kt_fold0": {
+      "auc_clean": 0.7526828667326068,
+      "auc_destroyed": 0.714652223711626,
+      "auc_drop": 0.0380306430209808,
+      "ddr": 0.9904476760764186,
+      "protocol": "train_clean_eval_destroyed_hyperedges"
+    },
+    "gkt_p0_xes3g5m_node_drop_p0.9": {
+      "auc_drop_mean": 0.0876757647865875,
+      "auc_drop_std": 0.0009052625112261,
+      "ddr_mean": 0.9901533333333332,
+      "auc_mean_destroyed": 0.7468801534187341,
+      "n": 9,
+      "protocol": "p0_ddr_downstream_retrain_on_destroyed_graph",
+      "source": "external\\p0_leakage_audit\\results\\tables\\ddr_downstream_summary.csv"
+    },
+    "simplekt": {
+      "auc_drop": null,
+      "note": "Sequence model without concept-graph adjacency; graph node-drop destruction is undefined (N/A by architecture)."
+    }
+  }
+}

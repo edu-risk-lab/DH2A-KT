@@ -1,0 +1,13 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "ddr": 0.9904476760764186,
+  "auc_clean": 0.7526828667326068,
+  "auc_destroyed": 0.714652223711626,
+  "auc_drop": 0.0380306430209808,
+  "passes_manipulation_check": true,
+  "verdict": "AUC drop 0.0380 at p=0.9 (node_drop). DH2-KT reads the hypergraph (graph-reliant).",
+  "p": 0.9,
+  "operator": "node_drop",
+  "seed": 42
+}

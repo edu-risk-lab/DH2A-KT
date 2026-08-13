@@ -1,0 +1,105 @@
+python : INFO:src.io_utils:Loading interactions from 
+D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+At C:\Users\EDM\AppData\Local\Temp\ps-script-2dea47c5-d328-4116-8ff8-8ce2e46660b4.ps1:103 char:170
++ ... _check.log; python scripts/05_run_manipulation_check.py configs/xes3g ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:src.io_uti...xes3g5m.parquet:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 4490412, 'valid': 641760, 'test': 1281181}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=44
+INFO:src.split_checker:Created split sizes={'train': 4493120, 'valid': 640606, 'test': 1279627}
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=2
+INFO:dh2a_kt.hyperedge.construction:Built 439891 concept-prerequisite hyperedges (fold=2)
+INFO:dh2a_kt.train.tier1:train_fold: concepts=865 exercises=7652 hyperedges=439891 kinds=['concept_prerequisite'] 
+device=cuda
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 12646 users (from 4493120 interactions)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 users (from 1920233 interactions)
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=500/3162 loss=0.4905
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=1000/3162 loss=0.4866
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=1500/3162 loss=0.4858
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=2000/3162 loss=0.4817
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=2500/3162 loss=0.4809
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=3000/3162 loss=0.4801
+INFO:dh2a_kt.train.tier1:epoch=1/10 loss=0.4797 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=500/3162 loss=0.4724
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=1000/3162 loss=0.4725
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=1500/3162 loss=0.4739
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=2000/3162 loss=0.4750
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=2500/3162 loss=0.4734
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=3000/3162 loss=0.4726
+INFO:dh2a_kt.train.tier1:epoch=2/10 loss=0.4723 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=500/3162 loss=0.4713
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=1000/3162 loss=0.4708
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=1500/3162 loss=0.4695
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=2000/3162 loss=0.4711
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=2500/3162 loss=0.4714
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=3000/3162 loss=0.4699
+INFO:dh2a_kt.train.tier1:epoch=3/10 loss=0.4700 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=500/3162 loss=0.4693
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=1000/3162 loss=0.4700
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=1500/3162 loss=0.4686
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=2000/3162 loss=0.4673
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=2500/3162 loss=0.4671
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=3000/3162 loss=0.4672
+INFO:dh2a_kt.train.tier1:epoch=4/10 loss=0.4671 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=500/3162 loss=0.4620
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=1000/3162 loss=0.4643
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=1500/3162 loss=0.4644
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=2000/3162 loss=0.4648
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=2500/3162 loss=0.4649
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=3000/3162 loss=0.4642
+INFO:dh2a_kt.train.tier1:epoch=5/10 loss=0.4647 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=500/3162 loss=0.4632
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=1000/3162 loss=0.4643
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=1500/3162 loss=0.4643
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=2000/3162 loss=0.4641
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=2500/3162 loss=0.4628
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=3000/3162 loss=0.4629
+INFO:dh2a_kt.train.tier1:epoch=6/10 loss=0.4624 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=500/3162 loss=0.4612
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=1000/3162 loss=0.4617
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=1500/3162 loss=0.4627
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=2000/3162 loss=0.4615
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=2500/3162 loss=0.4608
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=3000/3162 loss=0.4606
+INFO:dh2a_kt.train.tier1:epoch=7/10 loss=0.4606 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=500/3162 loss=0.4567
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=1000/3162 loss=0.4592
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=1500/3162 loss=0.4586
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=2000/3162 loss=0.4586
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=2500/3162 loss=0.4579
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=3000/3162 loss=0.4583
+INFO:dh2a_kt.train.tier1:epoch=8/10 loss=0.4587 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=500/3162 loss=0.4564
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=1000/3162 loss=0.4578
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=1500/3162 loss=0.4561
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=2000/3162 loss=0.4577
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=2500/3162 loss=0.4578
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=3000/3162 loss=0.4575
+INFO:dh2a_kt.train.tier1:epoch=9/10 loss=0.4574 batches=3162
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=500/3162 loss=0.4576
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=1000/3162 loss=0.4562
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=1500/3162 loss=0.4554
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=2000/3162 loss=0.4557
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=2500/3162 loss=0.4563
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=3000/3162 loss=0.4563
+INFO:dh2a_kt.train.tier1:epoch=10/10 loss=0.4562 batches=3162
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11403393, 3) p=0.9 seed=42
+INFO:src.dag_disruption:node_drop result_shape=(123729, 3)
+INFO:src.dag_disruption:Computing DDR original_shape=(11403393, 3) augmented_shape=(123729, 3)
+INFO:src.dag_disruption:DDR=0.9901717579795403
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11403393, 3) p=0.9 seed=42
+INFO:src.dag_disruption:node_drop result_shape=(123729, 3)
+INFO:dh2a_kt.eval.tier1_eval:manipulation_check passes=True auc_drop=0.0469 verdict=AUC drop 0.0469 at p=0.9 
+(node_drop). DH2-KT reads the hypergraph (graph-reliant).
+[fold 2] manipulation_check p=0.9 operator=node_drop hyperedge_source=chain
+passes_manipulation_check=True
+auc_clean=0.7532 auc_destroyed=0.7063 drop=0.0469
+ddr=0.9902
+verdict: AUC drop 0.0469 at p=0.9 (node_drop). DH2-KT reads the hypergraph (graph-reliant).
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold2_manipulation_check.json
