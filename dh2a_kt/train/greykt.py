@@ -55,6 +55,7 @@ def greykt_config_from_dh2(
     use_absolute_backoff: bool = False,
     embed_dim: int | None = None,
     hyperedge_kinds: tuple[str, ...] = ("concept_prerequisite",),
+    black_confidence_mode: str = "frequency",
 ):
     from dh2a_kt.models.greykt import GreyKTConfig
 
@@ -78,6 +79,7 @@ def greykt_config_from_dh2(
         use_absolute_backoff=bool(use_absolute_backoff),
         kappa_r=float(g.get("kappa_r", 1.0)),
         backoff_prob=g.get("backoff_prob"),
+        black_confidence_mode=str(black_confidence_mode),
     )
 
 
@@ -104,6 +106,7 @@ def wrap_trained_fold(
     greykt_cfg: dict | None = None,
     temperature: float = 1.0,
     use_absolute_backoff: bool = False,
+    black_confidence_mode: str = "frequency",
 ):
     from dh2a_kt.models.greykt import GreyKT
 
@@ -121,6 +124,7 @@ def wrap_trained_fold(
         use_absolute_backoff=use_absolute_backoff,
         embed_dim=bb.config.embed_dim,
         hyperedge_kinds=tuple(bb.config.hyperedge_kinds),
+        black_confidence_mode=black_confidence_mode,
     )
     model = GreyKT(cfg)
     model.black_box.load_state_dict(bb.state_dict())

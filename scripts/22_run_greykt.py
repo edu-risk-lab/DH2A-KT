@@ -3,14 +3,14 @@
 
 Run on the RTX 3090 host (torch + torch_geometric + P0 processed data).
 
-    # 1. Frequency C_B already failed on XES3G5M fold 0 (NOT_SUPPORTED, saturated).
-    #    Next: MC-dropout confidence (separate JSON; does not overwrite the frequency artefact).
+    # Frequency and MC-dropout C_B both failed on XES3G5M fold 0.
+    # Next: predictive |2p_B-1| (one eval pass, ~40s). Do not train an ensemble yet.
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 
-    # 2. Wrap only if the *matching* diagnostic is not NOT_SUPPORTED.
+    # 2. Wrap only if the matching diagnostic is not NOT_SUPPORTED.
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode wrap \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 
     # 3. Train GreyKT fold 0 (fused BCELoss, matched GKT budget). Refuses if
     #    diagnostic verdict is NOT_SUPPORTED unless --force.
@@ -116,9 +116,10 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="Ignore NOT_SUPPORTED diagnostic")
     parser.add_argument(
         "--signal",
-        choices=["frequency", "mc_dropout"],
-        default="mc_dropout",
-        help="Black-box C_B. Default mc_dropout: frequency already failed on XES3G5M fold 0.",
+        choices=["frequency", "mc_dropout", "predictive"],
+        default="predictive",
+        help="Black-box C_B. Default predictive: frequency and mc_dropout "
+        "already failed on XES3G5M fold 0.",
     )
     parser.add_argument(
         "--mc-samples",
@@ -200,6 +201,7 @@ def main() -> int:
         greykt_cfg=greykt_cfg,
         temperature=temperature,
         use_absolute_backoff=use_backoff,
+        black_confidence_mode="predictive" if args.signal == "predictive" else "frequency",
     )
 
     if args.mode == "train":

@@ -106,6 +106,22 @@ def test_per_prediction_black_confidence_overrides_frequency_table():
     assert torch.allclose(out.black_confidence, torch.zeros_like(out.black_confidence))
 
 
+def test_predictive_mode_uses_abs_2p_minus_1():
+    config = GreyKTConfig(
+        n_concepts=8,
+        n_exercises=6,
+        hidden_dim=16,
+        embed_dim=16,
+        black_confidence_mode="predictive",
+    )
+    model = GreyKT(config)
+    model.eval()
+    batch = _make_toy_batch(with_train_freq=True)
+    out = model(batch)
+    expected = (2.0 * out.black_probs - 1.0).abs()
+    assert torch.allclose(out.black_confidence, expected)
+
+
 def test_greykt_no_prereqs_and_no_train_freq_falls_back_to_prior_prob():
     """With prereq_edge_index=None (no white-box evidence anywhere) and
     concept_train_freq=None (no black-box confidence data), both C_B and

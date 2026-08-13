@@ -182,6 +182,11 @@ class GreyKTConfig:
     (N_c^train + kappa_b). N_c^train is supplied per batch via
     GreyKTBatch.concept_train_freq (a fixed statistic computed once from
     the training corpus, not learned)."""
+    black_confidence_mode: str = "frequency"
+    """How C_B is computed: ``frequency`` (N_c^train lookup),
+    ``mc_dropout`` (per-timestep tensor on the batch), or ``predictive``
+    (|2 p_B - 1| of the deployed black-box probability). Frequency and
+    MC-dropout are NOT_SUPPORTED on XES3G5M fold 0."""
     gate_eps: float = 1e-6
     """epsilon in g_B = C_B / (C_B + C_W + eps), guards the case where
     both confidences are exactly zero (no white-box evidence and no
@@ -509,7 +514,9 @@ if _TORCH_AVAILABLE:
                 kappa_w=self.config.resolved_kappa_w(),
             )
 
-            if batch.black_confidence is not None:
+            if self.config.black_confidence_mode == "predictive":
+                black_confidence_t = (2.0 * black_probs - 1.0).abs()
+            elif batch.black_confidence is not None:
                 black_confidence_t = batch.black_confidence
             else:
                 black_conf_lookup = black_confidence_table(

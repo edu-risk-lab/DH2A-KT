@@ -188,6 +188,20 @@ def confidence_from_mc_std(std: np.ndarray) -> np.ndarray:
     return np.clip(1.0 - 2.0 * np.maximum(std, 0.0), 0.0, 1.0)
 
 
+def confidence_from_predictive_prob(probs: np.ndarray) -> np.ndarray:
+    """C_B = |2p - 1|: how peaked the *deployed* black-box output is.
+
+    0 at p=0.5 (unconfident), 1 at p in {0, 1}. Rank-equivalent to
+    1 - H(Bernoulli(p))/log(2). This is output-confidence, not epistemic
+    uncertainty: it will look SUPPORTED whenever errors concentrate near
+    p=0.5, and can fail when the model is overconfident (high |2p-1| still
+    wrong). It is the cheap next test after frequency and MC-dropout, not
+    a claim that C_B measures training reliability.
+    """
+    p = np.asarray(probs, dtype=float).reshape(-1)
+    return np.abs(2.0 * p - 1.0)
+
+
 def diagnostic_json_name(dataset: str, fold: int, signal: str = "frequency") -> str:
     if signal == "frequency":
         return f"{dataset}_fold{fold}_black_confidence_diagnostic.json"
@@ -496,15 +510,21 @@ def format_report(diag: BlackConfidenceDiagnostic) -> str:
         lines.append(f"  - {note}")
     lines.append("")
     if diag.verdict == VERDICT_NOT_SUPPORTED:
-        if diag.signal == "mc_dropout":
+        if diag.signal == "predictive":
             next_signal = (
-                "an ensemble of independently trained DH2-KT seeds (disagreement), "
-                "not another arithmetic tweak of the gate"
+                "stop GreyKT on this dataset (frequency, MC-dropout, and "
+                "predictive confidence all failed) — a multi-seed ensemble is "
+                "the same epistemic hypothesis as MC-dropout at much higher cost"
+            )
+        elif diag.signal == "mc_dropout":
+            next_signal = (
+                "predictive confidence C_B = |2p_B - 1| of the eval-mode "
+                "output (one forward, ~40s), not a multi-seed ensemble"
             )
         else:
             next_signal = (
-                "MC-dropout variance or ensemble disagreement, which measure model "
-                "uncertainty directly rather than proxying it by training frequency"
+                "MC-dropout variance or predictive |2p-1|, which measure model "
+                "uncertainty / output confidence rather than training frequency"
             )
         lines.append(
             "ACTION: do not proceed to a full GreyKT run on this basis. The reliability "

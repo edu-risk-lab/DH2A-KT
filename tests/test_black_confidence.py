@@ -8,6 +8,7 @@ import pytest
 from dh2a_kt.diagnostics.black_confidence import (
     VERDICT_SUPPORTED,
     confidence_from_mc_std,
+    confidence_from_predictive_prob,
     diagnostic_json_name,
     stratify_by_black_confidence,
     stratify_confidence_vs_error,
@@ -58,3 +59,13 @@ def test_diagnostic_json_name_keeps_frequency_artefact_stable():
         diagnostic_json_name("xes3g5m", 0, "mc_dropout")
         == "xes3g5m_fold0_black_confidence_diagnostic_mc_dropout.json"
     )
+    assert (
+        diagnostic_json_name("xes3g5m", 0, "predictive")
+        == "xes3g5m_fold0_black_confidence_diagnostic_predictive.json"
+    )
+
+
+def test_predictive_confidence_is_abs_2p_minus_1():
+    p = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+    cb = confidence_from_predictive_prob(p)
+    assert list(cb) == pytest.approx([1.0, 0.5, 0.0, 0.5, 1.0])

@@ -2,62 +2,49 @@
 
 ## Status (fold 0, 2026-08-14)
 
-Frequency C_B is **NOT_SUPPORTED**. ρ(C_B, squared error) = −0.032
-(threshold |ρ| ≥ 0.05). C_B saturates at ~0.997–1.0 because XES3G5M
-concepts have huge N_c^train, so the gate is noise. Artefact:
+Two C_B signals are **NOT_SUPPORTED**. Do not `--force`. Do not wrap/train
+on either of them.
 
-`results/tables/xes3g5m_fold0_black_confidence_diagnostic.json`
+| Signal | ρ(C_B, err²) | Notes | Artefact |
+|--------|--------------|-------|----------|
+| `frequency` | −0.032 | Saturated (~0.997–1.0) | `..._black_confidence_diagnostic.json` |
+| `mc_dropout` | −0.020 | **Not saturated** (std med 0.0425, max 0.479; C_B p05–p95 0.77–0.96). Epistemic graph-dropout variance does not track next-step error. | `..._black_confidence_diagnostic_mc_dropout.json` |
 
-Do **not** `--mode wrap` / `train` on `--signal frequency`. Do **not**
-`--force` that diagnostic. Next signal: MC-dropout (graph-encoder dropout
-only — DualGatedUpdate has no dropout, so each sample must re-encode
-concepts with `model.train()`).
+MC-dropout failing with real dynamic range means a **multi-seed ensemble
+is the same hypothesis at much higher cost** (two extra full DH2-KT
+trains). Do not start that yet.
+
+Next cheap test: **predictive** C_B = |2 p_B − 1| of eval-mode output
+(one forward, ~40s). If this also fails, stop GreyKT on XES3G5M; the
+paper stays DH2-KT.
 
 ```bash
 git pull
 pytest tests/test_greykt.py tests/test_greykt_inputs.py tests/test_greykt_plumbing.py tests/test_black_confidence.py -v
 ```
 
-## 1. MC-dropout diagnostic (do this next)
-
-Reuses `results/checkpoints/xes3g5m_fold0.pt`. Writes a **separate** JSON
-so the frequency artefact is not overwritten. Expect ~5–10 min (8 extra
-graph+sequence forwards on validation).
+## 1. Predictive-confidence diagnostic (do this next)
 
 ```bash
 python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \
-  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
+  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 ```
 
-Writes `results/tables/xes3g5m_fold0_black_confidence_diagnostic_mc_dropout.json`.
+Writes `results/tables/xes3g5m_fold0_black_confidence_diagnostic_predictive.json`.
+
+This signal is output-confidence, not “training reliability”. If it is
+SUPPORTED, a GreyKT write-up must say so. Overconfident errors (high
+|2p−1| still wrong) can make it NOT_SUPPORTED.
 
 | Verdict | Action |
 |---------|--------|
-| SUPPORTED | Wrap, then optional train, still `--signal mc_dropout` |
-| AMBIGUOUS | Inspect std min/median/max in the JSON; wrap is optional |
-| NOT_SUPPORTED | Stop. Next candidate is a **multi-seed ensemble**, not `--force` |
+| SUPPORTED | Wrap/train with `--signal predictive` |
+| AMBIGUOUS | Inspect buckets; do not over-claim |
+| NOT_SUPPORTED | **Stop GreyKT.** Ensemble is not the next step. |
 
-If MC std is itself tiny (graph dropout does not move next-step logits),
-the diagnostic will also report saturation. That means this architecture
-cannot express epistemic uncertainty without retraining (e.g. dropout on
-the prediction head) or an ensemble.
-
-## 2. Wrap (only if MC diagnostic is not NOT_SUPPORTED)
+## 2. Wrap / train (only if predictive is not NOT_SUPPORTED)
 
 ```bash
 python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode wrap \
-  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
+  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 ```
-
-`--signal` defaults to `mc_dropout` in this driver. The frequency JSON
-will **not** unlock wrap.
-
-## 3. Train (same gate)
-
-```bash
-python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \
-  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
-```
-
-MC-dropout C_B is computed under `no_grad` each batch (8 samples). Slow
-but the white-box / gate stay non-learned.

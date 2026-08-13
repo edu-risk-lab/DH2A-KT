@@ -44,6 +44,7 @@ from dh2a_kt.diagnostics.black_confidence import (
     stratify_by_black_confidence,
     stratify_confidence_vs_error,
     confidence_from_mc_std,
+    confidence_from_predictive_prob,
 )
 from dh2a_kt.hyperedge.p0_inputs import (
     get_fold_splits,
@@ -155,10 +156,10 @@ def main() -> int:
     )
     parser.add_argument(
         "--signal",
-        choices=["frequency", "mc_dropout"],
+        choices=["frequency", "mc_dropout", "predictive"],
         default="frequency",
-        help="Black-box confidence to test. frequency is the failed XES3G5M "
-        "proxy; mc_dropout is the next candidate (writes a separate JSON).",
+        help="Black-box confidence to test. frequency and mc_dropout are "
+        "NOT_SUPPORTED on XES3G5M fold 0; predictive is |2p_B-1| (one eval pass).",
     )
     parser.add_argument(
         "--mc-samples",
@@ -264,16 +265,33 @@ def main() -> int:
             f"(N_c^train: min={freq.min():.0f} median={np.median(freq):.0f} max={freq.max():.0f}, "
             f"{int((freq == 0).sum())} concepts unseen in training)"
         )
-        diag = stratify_by_black_confidence(
-            probs,
-            labels,
-            concept_ids,
-            freq,
-            kappa_b=args.kappa_b,
-            n_buckets=args.n_buckets,
-            strategy=args.strategy,
-            min_effect_size=args.min_effect_size,
-        )
+        if args.signal == "predictive":
+            cb = confidence_from_predictive_prob(probs)
+            extra["predictive_cb_mean"] = float(cb.mean())
+            print(
+                f"predictive C_B=|2p-1|: mean={cb.mean():.3f} "
+                f"p05={np.quantile(cb, 0.05):.3f} p95={np.quantile(cb, 0.95):.3f}"
+            )
+            diag = stratify_confidence_vs_error(
+                probs,
+                labels,
+                cb,
+                n_buckets=args.n_buckets,
+                strategy=args.strategy,
+                min_effect_size=args.min_effect_size,
+                signal="predictive",
+            )
+        else:
+            diag = stratify_by_black_confidence(
+                probs,
+                labels,
+                concept_ids,
+                freq,
+                kappa_b=args.kappa_b,
+                n_buckets=args.n_buckets,
+                strategy=args.strategy,
+                min_effect_size=args.min_effect_size,
+            )
 
     print()
     print(format_report(diag))

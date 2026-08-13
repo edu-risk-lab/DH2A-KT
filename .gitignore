@@ -68,6 +68,7 @@ results/tables/*
 !results/tables/xes3g5m_fold2_manipulation_check.log
 !results/tables/xes3g5m_fold0_black_confidence_diagnostic.json
 !results/tables/xes3g5m_fold0_black_confidence_diagnostic_mc_dropout.json
+!results/tables/xes3g5m_fold0_black_confidence_diagnostic_predictive.json
 !results/tables/xes3g5m_fold0_greykt_diagnose.log
 !results/tables/xes3g5m_fold0_greykt_diagnose_mc_dropout.log
 !results/tables/xes3g5m_fold0_greykt_wrap_attempt.log
