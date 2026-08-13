@@ -3,18 +3,13 @@
 
 Run on the RTX 3090 host (torch + torch_geometric + P0 processed data).
 
-    # Frequency and MC-dropout C_B both failed on XES3G5M fold 0.
-    # Next: predictive |2p_B-1| (one eval pass, ~40s). Do not train an ensemble yet.
-    python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
-
-    # 2. Wrap only if the matching diagnostic is not NOT_SUPPORTED.
+    # Predictive C_B is SUPPORTED on XES3G5M fold 0. Wrap frozen DH2-KT first.
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode wrap \\
         --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 
-    # 3. Train GreyKT fold 0 (fused BCELoss, matched GKT budget). Refuses if
-    #    diagnostic verdict is NOT_SUPPORTED unless --force.
-    python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train
+    # Then optional fused train (C_B = |2p-1| is detached).
+    python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \\
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 """
 from __future__ import annotations
 

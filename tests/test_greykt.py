@@ -122,6 +122,23 @@ def test_predictive_mode_uses_abs_2p_minus_1():
     assert torch.allclose(out.black_confidence, expected)
 
 
+def test_predictive_confidence_is_detached_from_logits():
+    """Training must not game the gate by moving p_B to change C_B."""
+    config = GreyKTConfig(
+        n_concepts=8,
+        n_exercises=6,
+        hidden_dim=16,
+        embed_dim=16,
+        black_confidence_mode="predictive",
+    )
+    model = GreyKT(config)
+    model.train()
+    batch = _make_toy_batch(with_train_freq=True)
+    out = model(batch)
+    assert out.black_probs.requires_grad
+    assert not out.black_confidence.requires_grad
+
+
 def test_greykt_no_prereqs_and_no_train_freq_falls_back_to_prior_prob():
     """With prereq_edge_index=None (no white-box evidence anywhere) and
     concept_train_freq=None (no black-box confidence data), both C_B and

@@ -1,11 +1,10 @@
 # GreyKT: Reliability-Aware Hybrid Knowledge Tracing
 
-Status: **Frequency C_B NOT_SUPPORTED** (ρ = −0.032, saturated) **and
-MC-dropout C_B NOT_SUPPORTED** (ρ = −0.020, *not* saturated — std median
-0.0425). Epistemic graph-dropout uncertainty does not track error, so a
-multi-seed ensemble is the same hypothesis at much higher cost. Next:
-`--signal predictive` (C_B = |2 p_B − 1|, one eval pass). See
-`docs/greykt-gpu-runbook.md`. Do not put GreyKT numbers in `paper/main.tex`.
+Status: **Predictive C_B SUPPORTED** on XES3G5M fold 0 (ρ = −0.588,
+C_B = |2 p_B − 1|). Frequency and MC-dropout remain NOT_SUPPORTED. Next:
+`--mode wrap --signal predictive` (frozen DH2-KT), then optional train.
+C_B is output-confidence, not training reliability — say so in any write-up.
+Do not put GreyKT numbers in `paper/main.tex` until wrap exists.
 
 ## Read this first: the premise has not been tested
 
@@ -348,21 +347,13 @@ outputs.
 
 0. ~~Frequency C_B.~~ **NOT_SUPPORTED** (ρ = −0.032, saturated).
 0b. ~~MC-dropout C_B.~~ **NOT_SUPPORTED** (ρ = −0.020, not saturated).
-   Epistemic graph-dropout variance does not track error. Do **not** jump
-   to a multi-seed ensemble (same hypothesis, two extra full trains).
-0c. **Predictive C_B = |2 p_B − 1|** (one eval pass, ~40s):
-
-   ```
-   python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \
-     --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
-   ```
-
-   If this is also NOT_SUPPORTED, stop GreyKT on XES3G5M; the paper stays
-   DH2-KT. If SUPPORTED, wrap/train with `--signal predictive` and state
-   clearly that C_B is output-confidence, not training reliability.
+0c. ~~Predictive C_B = |2 p_B − 1|.~~ **SUPPORTED** (ρ = −0.588). This is
+   output-confidence, not training reliability.
 1. `pytest tests/test_greykt.py tests/test_greykt_inputs.py tests/test_greykt_plumbing.py tests/test_black_confidence.py -v`
-2. ~~Wire E_pre / freq / prior_mean / per-prediction C_B.~~ Done.
+2. ~~Wire E_pre / freq / prior_mean / per-prediction C_B.~~ Done. Predictive
+   C_B is detached so training cannot game the gate.
 3. ~~`max_hops` = chain `ell_max`.~~ Done.
-4. Wrap/train only if a C_B diagnostic is not NOT_SUPPORTED.
-5. Ablation ladder v3 / v4a / v4b / v4a+b after a working C_B.
+4. **Wrap fold 0** (`--mode wrap --signal predictive`), then optional train.
+   The claim to check is fused vs black in the low-C_B / high-C_W cell.
+5. Ablation ladder v3 / v4a / v4b / v4a+b after wrap numbers exist.
 6. Only after 4–5: 3-fold, manipulation check, GreyKT vs DH2-KT in the paper.

@@ -183,10 +183,10 @@ class GreyKTConfig:
     GreyKTBatch.concept_train_freq (a fixed statistic computed once from
     the training corpus, not learned)."""
     black_confidence_mode: str = "frequency"
-    """How C_B is computed: ``frequency`` (N_c^train lookup),
-    ``mc_dropout`` (per-timestep tensor on the batch), or ``predictive``
-    (|2 p_B - 1| of the deployed black-box probability). Frequency and
-    MC-dropout are NOT_SUPPORTED on XES3G5M fold 0."""
+    """How C_B is computed: ``frequency`` (N_c^train lookup; NOT_SUPPORTED
+    on XES3G5M fold 0), ``mc_dropout`` (batch tensor; NOT_SUPPORTED), or
+    ``predictive`` (|2 p_B - 1|, detached; SUPPORTED). Predictive C_B is
+    output-confidence, not training reliability."""
     gate_eps: float = 1e-6
     """epsilon in g_B = C_B / (C_B + C_W + eps), guards the case where
     both confidences are exactly zero (no white-box evidence and no
@@ -515,7 +515,11 @@ if _TORCH_AVAILABLE:
             )
 
             if self.config.black_confidence_mode == "predictive":
-                black_confidence_t = (2.0 * black_probs - 1.0).abs()
+                # Stop-gradient: C_B is a diagnostic function of p_B, not a
+                # learned knob. Leaving it in the graph would let training
+                # push p toward 0.5 (or the extremes) solely to retune the
+                # gate rather than to predict better.
+                black_confidence_t = (2.0 * black_probs - 1.0).abs().detach()
             elif batch.black_confidence is not None:
                 black_confidence_t = batch.black_confidence
             else:
