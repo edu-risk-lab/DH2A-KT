@@ -1,0 +1,39 @@
+python : INFO:src.io_utils:Loading interactions from 
+D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+At C:\Users\EDM\AppData\Local\Temp\ps-script-db031477-2a68-44c0-a85f-58a367a94c38.ps1:108 char:26
++ ... BUFFERED=1; python scripts/22_run_greykt.py configs/xes3g5m.yaml --fo ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:src.io_uti...xes3g5m.parquet:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+[fold 0] C_B premise diagnostic on 'valid' split signal=mc_dropout (kappa_B=4.0, 5 quantile buckets)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 1806 users (from 640917 interactions)
+INFO:dh2a_kt.diagnostics.mc_dropout:MC-dropout n_samples=8 std: min=0.00000 median=0.04250 max=0.47900
+collected 359394 predictions; MC-dropout n_samples=8 std min/median/max=0.00000/0.04250/0.47900
+
+==============================================================================
+C_B PREMISE DIAGNOSTIC -- VERDICT: NOT_SUPPORTED
+==============================================================================
+signal=mc_dropout  predictions=359394  kappa_B=nan  strategy=quantile  buckets=5  C_B[p05,p95]=[0.7703,0.9636]
+
+bucket                          n  C_B mean    base     AUC     NLL   Brier     ECE
+-----------------------------------------------------------------------------------
+C_B[0.0420,0.8619]          71879    0.7938   0.765  0.5321  0.6009  0.1934  0.0817
+C_B[0.8619,0.9022]          71879    0.8845   0.770  0.5287  0.5567  0.1822  0.0542
+C_B[0.9022,0.9257]          71878    0.9147   0.781  0.5289  0.5379  0.1748  0.0510
+C_B[0.9257,0.9452]          71879    0.9355   0.787  0.5424  0.5242  0.1695  0.0399
+C_B[0.9452,1.0000]          71879    0.9578   0.788  0.5433  0.5269  0.1690  0.0375
+
+Spearman(C_B, squared error) = -0.0199 (p=7.25e-33, threshold |rho|>=0.05)
+Spearman(C_B, absolute error) = -0.0199
+Brier: lowest-C_B bucket 0.1934 vs highest-C_B bucket 0.1690 (gap +0.0243)
+
+  - No usable relationship between C_B and black-box error: rho=-0.0199, below the effect-size threshold of 0.05. At n=359394 predictions this is statistically significant (p=7.25e-33) but practically negligible. C_B as currently defined does not carry information about where the black-box branch errs, so a gate driven by it is steering on noise.
+  - AUC is reported per bucket for familiarity but is NOT comparable across buckets (within-group ranking metric, confounded by each bucket's label balance). The verdict rests on NLL/Brier and the per-prediction rank correlation.
+
+ACTION: do not proceed to a full GreyKT run on this basis. The reliability gate needs a different black-box confidence signal (e.g. an ensemble of independently trained DH2-KT seeds (disagreement), not another arithmetic tweak of the gate).
+==============================================================================
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold0_black_confidence_diagnostic_mc_dropout.json
