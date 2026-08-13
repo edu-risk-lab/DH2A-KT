@@ -95,6 +95,17 @@ def test_greykt_probs_gate_and_confidences_in_unit_interval():
     assert (out.white_confidence >= 0.0).all() and (out.white_confidence < 1.0).all()
 
 
+def test_per_prediction_black_confidence_overrides_frequency_table():
+    """MC-dropout (or any per-timestep C_B) must ignore N_c^train lookup."""
+    config = GreyKTConfig(n_concepts=8, n_exercises=6, hidden_dim=16, embed_dim=16)
+    model = GreyKT(config)
+    model.eval()
+    batch = _make_toy_batch(with_train_freq=True)
+    batch.black_confidence = torch.zeros(batch.concept_ids.shape, dtype=torch.float32)
+    out = model(batch)
+    assert torch.allclose(out.black_confidence, torch.zeros_like(out.black_confidence))
+
+
 def test_greykt_no_prereqs_and_no_train_freq_falls_back_to_prior_prob():
     """With prereq_edge_index=None (no white-box evidence anywhere) and
     concept_train_freq=None (no black-box confidence data), both C_B and

@@ -39,8 +39,11 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.config_helpers import concept_prerequisite_spec_from_config
 from dh2a_kt.diagnostics.black_confidence import (
+    diagnostic_json_name,
     format_report,
     stratify_by_black_confidence,
+    stratify_confidence_vs_error,
+    confidence_from_mc_std,
 )
 from dh2a_kt.hyperedge.p0_inputs import (
     get_fold_splits,
@@ -150,6 +153,19 @@ def main() -> int:
         default=None,
         help="Reuse a trained DH2-KT fold instead of retraining (preferred on GPU).",
     )
+    parser.add_argument(
+        "--signal",
+        choices=["frequency", "mc_dropout"],
+        default="frequency",
+        help="Black-box confidence to test. frequency is the failed XES3G5M "
+        "proxy; mc_dropout is the next candidate (writes a separate JSON).",
+    )
+    parser.add_argument(
+        "--mc-samples",
+        type=int,
+        default=None,
+        help="Stochastic graph encodes for --signal mc_dropout (default: greykt.mc_samples or 8).",
+    )
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -177,9 +193,14 @@ def main() -> int:
     hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=args.fold)
 
     split_name = "valid+test" if args.include_test else "valid"
+    mc_samples = (
+        args.mc_samples
+        if args.mc_samples is not None
+        else int(greykt_cfg.get("mc_samples", 8))
+    )
     print(
         f"[fold {args.fold}] C_B premise diagnostic on '{split_name}' split "
-        f"(kappa_B={args.kappa_b}, {args.n_buckets} {args.strategy} buckets)"
+        f"signal={args.signal} (kappa_B={args.kappa_b}, {args.n_buckets} {args.strategy} buckets)"
     )
 
     if args.load_checkpoint is not None:
@@ -208,34 +229,58 @@ def main() -> int:
             max_users=args.max_users,
         )
 
-    probs, labels, concept_ids = collect_predictions_with_concepts(trained)
     freq = concept_training_frequency(splits["train"], trained.kc_to_idx)
-    print(
-        f"collected {len(probs)} predictions over {len(trained.kc_to_idx)} concepts "
-        f"(N_c^train: min={freq.min():.0f} median={np.median(freq):.0f} max={freq.max():.0f}, "
-        f"{int((freq == 0).sum())} concepts unseen in training)"
-    )
+    extra: dict = {}
+    if args.signal == "mc_dropout":
+        from dh2a_kt.diagnostics.mc_dropout import collect_eval_probs_and_mc_std
 
-    diag = stratify_by_black_confidence(
-        probs,
-        labels,
-        concept_ids,
-        freq,
-        kappa_b=args.kappa_b,
-        n_buckets=args.n_buckets,
-        strategy=args.strategy,
-        min_effect_size=args.min_effect_size,
-    )
+        probs, labels, concept_ids, stds = collect_eval_probs_and_mc_std(
+            trained, n_samples=mc_samples
+        )
+        extra = {
+            "mc_samples": mc_samples,
+            "mc_std_min": float(stds.min()) if stds.size else float("nan"),
+            "mc_std_median": float(np.median(stds)) if stds.size else float("nan"),
+            "mc_std_max": float(stds.max()) if stds.size else float("nan"),
+        }
+        print(
+            f"collected {len(probs)} predictions; MC-dropout n_samples={mc_samples} "
+            f"std min/median/max="
+            f"{extra['mc_std_min']:.5f}/{extra['mc_std_median']:.5f}/{extra['mc_std_max']:.5f}"
+        )
+        diag = stratify_confidence_vs_error(
+            probs,
+            labels,
+            confidence_from_mc_std(stds),
+            n_buckets=args.n_buckets,
+            strategy=args.strategy,
+            min_effect_size=args.min_effect_size,
+            signal="mc_dropout",
+        )
+    else:
+        probs, labels, concept_ids = collect_predictions_with_concepts(trained)
+        print(
+            f"collected {len(probs)} predictions over {len(trained.kc_to_idx)} concepts "
+            f"(N_c^train: min={freq.min():.0f} median={np.median(freq):.0f} max={freq.max():.0f}, "
+            f"{int((freq == 0).sum())} concepts unseen in training)"
+        )
+        diag = stratify_by_black_confidence(
+            probs,
+            labels,
+            concept_ids,
+            freq,
+            kappa_b=args.kappa_b,
+            n_buckets=args.n_buckets,
+            strategy=args.strategy,
+            min_effect_size=args.min_effect_size,
+        )
 
     print()
     print(format_report(diag))
 
     dataset = dh2_cfg["dataset"]
     output = args.output or (
-        REPO_ROOT
-        / "results"
-        / "tables"
-        / f"{dataset}_fold{args.fold}_black_confidence_diagnostic.json"
+        REPO_ROOT / "results" / "tables" / diagnostic_json_name(dataset, args.fold, args.signal)
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     payload = diag.as_dict()
@@ -244,9 +289,11 @@ def main() -> int:
             "dataset": dataset,
             "fold": args.fold,
             "split": split_name,
+            "signal": args.signal,
             "n_concepts": int(len(trained.kc_to_idx)),
             "n_concepts_unseen_in_training": int((freq == 0).sum()),
             "max_users": args.max_users,
+            **extra,
         }
     )
     output.write_text(json.dumps(payload, indent=2), encoding="utf-8")

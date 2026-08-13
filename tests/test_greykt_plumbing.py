@@ -18,7 +18,7 @@ REPO = Path(__file__).resolve().parents[1]
 def test_xes3g5m_greykt_block_and_max_hops_inherit_chain_len():
     cfg = yaml.safe_load((REPO / "configs" / "xes3g5m.yaml").read_text(encoding="utf-8"))
     g = cfg["greykt"]
-    for key in ("prior_strength", "kappa_b", "hop_decay", "recency_decay", "kappa_r"):
+    for key in ("prior_strength", "kappa_b", "hop_decay", "recency_decay", "kappa_r", "mc_samples"):
         assert key in g
     assert "max_hops" not in g  # inherit ell_max from chain hyperedges
     spec = concept_prerequisite_spec_from_config(cfg, fold=0)
@@ -49,6 +49,8 @@ def test_enforce_cb_diagnostic_gate(tmp_path: Path):
         "scripts/22_run_greykt.py",
         "dh2a_kt/train/greykt.py",
         "dh2a_kt/train/greykt_inputs.py",
+        "dh2a_kt/diagnostics/mc_dropout.py",
+        "dh2a_kt/diagnostics/black_confidence.py",
     ],
 )
 def test_greykt_sources_parse(rel: str):

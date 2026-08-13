@@ -3,13 +3,14 @@
 
 Run on the RTX 3090 host (torch + torch_geometric + P0 processed data).
 
-    # 1. Premise check (required before wrap/train). Prefer the existing DH2-KT checkpoint.
+    # 1. Frequency C_B already failed on XES3G5M fold 0 (NOT_SUPPORTED, saturated).
+    #    Next: MC-dropout confidence (separate JSON; does not overwrite the frequency artefact).
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
 
-    # 2. Freeze existing DH2-KT, wrap GreyKT, evaluate fused vs black-only.
+    # 2. Wrap only if the *matching* diagnostic is not NOT_SUPPORTED.
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode wrap \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
 
     # 3. Train GreyKT fold 0 (fused BCELoss, matched GKT budget). Refuses if
     #    diagnostic verdict is NOT_SUPPORTED unless --force.
@@ -30,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.config_helpers import concept_prerequisite_spec_from_config
+from dh2a_kt.diagnostics.black_confidence import diagnostic_json_name
 from dh2a_kt.hyperedge.p0_inputs import (
     get_fold_splits,
     load_configs,
@@ -56,8 +58,8 @@ from dh2a_kt.train.tier1 import resolve_training_budget, train_fold
 logger = logging.getLogger(__name__)
 
 
-def _diagnostic_path(dataset: str, fold: int) -> Path:
-    return REPO_ROOT / "results" / "tables" / f"{dataset}_fold{fold}_black_confidence_diagnostic.json"
+def _diagnostic_path(dataset: str, fold: int, signal: str) -> Path:
+    return REPO_ROOT / "results" / "tables" / diagnostic_json_name(dataset, fold, signal)
 
 
 def _enforce_diagnostic(path: Path, *, force: bool) -> str | None:
@@ -112,6 +114,18 @@ def main() -> int:
         help="v3 = relative gate only; v4a = temperature; v4b = absolute backoff",
     )
     parser.add_argument("--force", action="store_true", help="Ignore NOT_SUPPORTED diagnostic")
+    parser.add_argument(
+        "--signal",
+        choices=["frequency", "mc_dropout"],
+        default="mc_dropout",
+        help="Black-box C_B. Default mc_dropout: frequency already failed on XES3G5M fold 0.",
+    )
+    parser.add_argument(
+        "--mc-samples",
+        type=int,
+        default=None,
+        help="MC-dropout samples when --signal mc_dropout (default greykt.mc_samples or 8).",
+    )
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -130,14 +144,28 @@ def main() -> int:
             cmd += ["--max-users", str(args.max_users)]
         if args.load_checkpoint is not None:
             cmd += ["--load-checkpoint", str(args.load_checkpoint)]
+        cmd += ["--signal", args.signal]
+        if args.mc_samples is not None:
+            cmd += ["--mc-samples", str(args.mc_samples)]
         return subprocess.call(cmd)
 
     dh2_cfg, p0_cfg, _ = load_configs(REPO_ROOT / args.config)
     dataset = dh2_cfg["dataset"]
-    verdict = _enforce_diagnostic(_diagnostic_path(dataset, args.fold), force=args.force)
+    verdict = _enforce_diagnostic(
+        _diagnostic_path(dataset, args.fold, args.signal), force=args.force
+    )
 
     train_cfg = dh2_cfg.get("training", {})
     greykt_cfg = dh2_cfg.get("greykt", {})
+    mc_samples = (
+        0
+        if args.signal != "mc_dropout"
+        else (
+            args.mc_samples
+            if args.mc_samples is not None
+            else int(greykt_cfg.get("mc_samples", 8))
+        )
+    )
     budget = resolve_training_budget(
         p0_cfg,
         reference_model=train_cfg.get("budget_reference", "gkt"),
@@ -187,6 +215,7 @@ def main() -> int:
             graph_sensitivity_weight=float(train_cfg.get("graph_sensitivity_weight", 0.0)),
             graph_sensitivity_margin=float(train_cfg.get("graph_sensitivity_margin", 0.05)),
             graph_sensitivity_p=float(train_cfg.get("graph_sensitivity_p", 0.9)),
+            mc_samples=mc_samples,
         )
 
     if args.variant in ("v4a", "v4ab"):
@@ -198,12 +227,15 @@ def main() -> int:
         t = fit_temperature_on_loader(model, trained, valid_loader, prereq, freq_t)
         print(f"fitted temperature T={t:.4f} (v4a, validation only)")
 
-    report = collect_greykt_outputs(model, trained, prereq, freq_t)
+    report = collect_greykt_outputs(model, trained, prereq, freq_t, mc_samples=mc_samples)
     report.fold = args.fold
     report.variant = args.variant
     report.diagnostic_verdict = verdict
     out = args.output or (
-        REPO_ROOT / "results" / "tables" / f"{dataset}_fold{args.fold}_greykt_{args.mode}_{args.variant}.json"
+        REPO_ROOT
+        / "results"
+        / "tables"
+        / f"{dataset}_fold{args.fold}_greykt_{args.mode}_{args.variant}_{args.signal}.json"
     )
     write_greykt_report(report, out)
     print(

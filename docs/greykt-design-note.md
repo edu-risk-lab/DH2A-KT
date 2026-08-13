@@ -1,9 +1,10 @@
 # GreyKT: Reliability-Aware Hybrid Knowledge Tracing
 
-Status: **v3 core + optional v4a/v4b, logic-checked, not yet run on real
-data.** This note records the design decisions, the v1 -> v2 -> v3 -> v4
-revision history, and what remains before any GreyKT number can go in the
-paper.
+Status: **v3 implemented. Frequency C_B premise NOT_SUPPORTED on
+XES3G5M fold 0** (ρ = −0.032, C_B saturated at ~0.997–1.0; artefact
+`results/tables/xes3g5m_fold0_black_confidence_diagnostic.json`). Wrap/train
+correctly refused. Next: MC-dropout C_B (`--signal mc_dropout`); see
+`docs/greykt-gpu-runbook.md`. Do not put GreyKT numbers in `paper/main.tex`.
 
 ## Read this first: the premise has not been tested
 
@@ -44,9 +45,11 @@ choices are documented in that module and worth restating:
   comparison it does not itself perform.
 
 If the verdict is NOT_SUPPORTED, the fix is a different black-box
-confidence signal -- MC-dropout variance or ensemble disagreement, which
-measure model uncertainty directly instead of proxying it by training
-frequency -- not another refinement of the gate arithmetic.
+confidence signal -- MC-dropout variance or ensemble disagreement -- not
+another refinement of the gate arithmetic. **Frequency C_B is that
+NOT_SUPPORTED case on XES3G5M fold 0.** The MC-dropout diagnostic is a
+separate JSON (`--signal mc_dropout`) so the frequency artefact stays as
+the empirical warrant for abandoning N_c^train.
 
 ## v4a / v4b (implemented, OFF by default)
 
@@ -339,29 +342,24 @@ Plumbing for wrap/train is in `scripts/22_run_greykt.py` (see
 put GreyKT numbers in `paper/main.tex` until steps 0 and 4 have real
 outputs.
 
-0. **Run the C_B premise diagnostic first** (GPU host, reuse the DH2-KT
-   checkpoint — do not retrain):
+0. ~~Frequency C_B diagnostic.~~ **NOT_SUPPORTED** on XES3G5M fold 0
+   (ρ = −0.032, C_B ~0.997–1.0). Do not wrap/train on this signal.
+0b. **MC-dropout diagnostic** (graph-encoder dropout; eval-mode p_B for
+   error). Separate JSON; does not overwrite the frequency artefact:
 
    ```
    python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode diagnose \
-     --load-checkpoint results/checkpoints/xes3g5m_fold0.pt
+     --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal mc_dropout
    ```
 
-   Verdict SUPPORTED / AMBIGUOUS / NOT_SUPPORTED. A NOT_SUPPORTED verdict
-   means the gate needs a different confidence signal, not more tuning.
-   `--mode wrap` / `--mode train` refuse NOT_SUPPORTED unless `--force`.
-1. Run `pytest tests/test_greykt.py tests/test_greykt_inputs.py tests/test_greykt_plumbing.py -v`
-   on the GPU host; fix anything the sandbox-side logic check couldn't
-   catch (real tensor dtype/device issues, `torch_geometric` API specifics).
-2. ~~Wire `prereq_edge_index` / `concept_train_freq` / `prior_mean`.~~
-   Done: `dh2a_kt/train/greykt_inputs.py` + `scripts/22_run_greykt.py`.
-3. ~~Set `max_hops` = chain `ell_max`.~~ Done via config inheritance.
-4. Wrap (frozen DH2-KT) then optional train on XES3G5M fold 0 with the
-   matched GKT budget; use `stratified_metrics_2d()` to compare fused vs
-   black-box-alone across the `C_B` x `C_W` grid. If the fused model does
-   not win in the low-`C_B`/high-`C_W` cell, the design's central claim
-   does not hold.
-5. Ablation ladder v3 / v4a / v4b / v4a+b (`--variant`). Fit temperature
-   on validation only (the driver already does this).
-6. Only after steps 4-5 have real results: 3-fold + manipulation check,
-   and whether GreyKT replaces DH2-KT in the main paper.
+   If this is also NOT_SUPPORTED (or std is saturated), the next signal is
+   a multi-seed ensemble, not `--force`.
+1. `pytest tests/test_greykt.py tests/test_greykt_inputs.py tests/test_greykt_plumbing.py tests/test_black_confidence.py -v`
+2. ~~Wire `prereq_edge_index` / `concept_train_freq` / `prior_mean`.~~ Done.
+   Per-prediction `GreyKTBatch.black_confidence` is now the MC-dropout path.
+3. ~~Set `max_hops` = chain `ell_max`.~~ Done.
+4. Wrap/train **only if** the MC diagnostic is not NOT_SUPPORTED, with
+   `--signal mc_dropout`. Test the low-C_B / high-C_W cell.
+5. Ablation ladder v3 / v4a / v4b / v4a+b after a working C_B.
+6. Only after 4–5 have real results: 3-fold, manipulation check, and
+   whether GreyKT belongs in the main paper.

@@ -277,15 +277,12 @@ class GreyKTBatch:
     concept_states: "torch.Tensor | None" = None
     prereq_edge_index: "torch.Tensor | None" = None
     concept_train_freq: "torch.Tensor | None" = None
-    """Optional, shape (n_concepts,), raw non-negative counts N_c^train --
-    how many times concept c appeared in the *training* split (precomputed
-    once, NOT learned via gradient descent). Fed through
-    C_B(c) = N_c^train / (N_c^train + kappa_b) inside the model. If
-    omitted, C_B is treated as 0 everywhere (conservative: the gate then
-    favors the white-box branch unless it is itself un-evidenced, in
-    which case both branches collapse toward the prior) -- callers should
-    supply real training-frequency counts before trusting GreyKT's gate
-    behavior."""
+    """Optional, shape (n_concepts,), raw non-negative counts N_c^train.
+    Used only when ``black_confidence`` is omitted."""
+    black_confidence: "torch.Tensor | None" = None
+    """Optional per-prediction C_B, shape (B, T). Overrides the frequency
+    table. Used for MC-dropout (or any other per-timestep signal). Detached
+    by the caller -- this is not a learned parameter."""
 
     def as_dh2kt_batch(self) -> DH2KTBatch:
         return DH2KTBatch(
@@ -512,13 +509,18 @@ if _TORCH_AVAILABLE:
                 kappa_w=self.config.resolved_kappa_w(),
             )
 
-            black_conf_lookup = black_confidence_table(
-                batch.concept_train_freq,
-                self.config.n_concepts,
-                self.config.kappa_b,
-                black_logits.device,
-            )
-            black_confidence_t = black_conf_lookup[batch.concept_ids.clamp(0, self.config.n_concepts - 1)]
+            if batch.black_confidence is not None:
+                black_confidence_t = batch.black_confidence
+            else:
+                black_conf_lookup = black_confidence_table(
+                    batch.concept_train_freq,
+                    self.config.n_concepts,
+                    self.config.kappa_b,
+                    black_logits.device,
+                )
+                black_confidence_t = black_conf_lookup[
+                    batch.concept_ids.clamp(0, self.config.n_concepts - 1)
+                ]
 
             gate = reliability_gate(black_confidence_t, white_confidence, self.config.gate_eps)
             branch_mixture = gate * black_probs + (1.0 - gate) * white_prob

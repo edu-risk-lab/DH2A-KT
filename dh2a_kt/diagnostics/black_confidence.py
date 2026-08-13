@@ -176,6 +176,24 @@ def black_confidence_from_frequency(
     return freq / (freq + kappa_b)
 
 
+def confidence_from_mc_std(std: np.ndarray) -> np.ndarray:
+    """Map Bernoulli MC-dropout std in [0, 0.5] to C_B in [0, 1].
+
+    ``C_B = clip(1 - 2*std, 0, 1)``. Rank-equivalent to ``-std``, so
+    Spearman(C_B, error) equals Spearman(-std, error). The linear map is
+    only for the gate's *scale* versus C_W; the diagnostic verdict does
+    not depend on it under quantile bucketing.
+    """
+    std = np.asarray(std, dtype=float).reshape(-1)
+    return np.clip(1.0 - 2.0 * np.maximum(std, 0.0), 0.0, 1.0)
+
+
+def diagnostic_json_name(dataset: str, fold: int, signal: str = "frequency") -> str:
+    if signal == "frequency":
+        return f"{dataset}_fold{fold}_black_confidence_diagnostic.json"
+    return f"{dataset}_fold{fold}_black_confidence_diagnostic_{signal}.json"
+
+
 @dataclass
 class BucketStats:
     label: str
@@ -203,6 +221,9 @@ class BlackConfidenceDiagnostic:
     strategy: str
     n_buckets: int
     buckets: list[BucketStats] = field(default_factory=list)
+    signal: str = "frequency"
+    confidence_p05: float = float("nan")
+    confidence_p95: float = float("nan")
 
     spearman_cb_vs_squared_error: float = float("nan")
     spearman_pvalue: float = float("nan")
@@ -223,68 +244,30 @@ class BlackConfidenceDiagnostic:
         return out
 
 
-def stratify_by_black_confidence(
+def stratify_confidence_vs_error(
     probs: np.ndarray,
     labels: np.ndarray,
-    concept_ids: np.ndarray,
-    concept_train_freq: np.ndarray,
+    confidence: np.ndarray,
     *,
-    kappa_b: float = 4.0,
     n_buckets: int = 5,
     strategy: str = "quantile",
     n_ece_bins: int = 10,
     min_effect_size: float = 0.05,
     base_rate_spread_threshold: float = 0.10,
+    signal: str = "frequency",
+    kappa_b: float = float("nan"),
 ) -> BlackConfidenceDiagnostic:
-    """Test whether low C_B predicts higher black-box error.
-
-    Parameters
-    ----------
-    probs, labels
-        Black-box predicted probabilities and binary labels, one per
-        prediction (flattened across students and timesteps; mask out
-        padding before calling).
-    concept_ids
-        Target concept id per prediction, same length as ``probs``.
-    concept_train_freq
-        Per-concept training-split occurrence counts, indexed by concept
-        id (length = n_concepts).
-    kappa_b
-        Pseudo-count in C_B. Should match ``GreyKTConfig.kappa_b``.
-    strategy
-        ``"quantile"`` (default) gives equal-count buckets;
-        ``"equal_width"`` gives equal-width C_B intervals. Quantile is the
-        default deliberately: C_B = N/(N+kappa) saturates toward 1, so on a
-        realistic frequency distribution equal-width bucketing dumps almost
-        every prediction into the top bucket and the diagnostic becomes
-        uninformative.
-    min_effect_size
-        Minimum |Spearman rho| required to call the premise SUPPORTED. At
-        10^5+ predictions, p-values alone certify negligible effects.
-
-    Returns
-    -------
-    BlackConfidenceDiagnostic
-        Per-bucket metrics plus the verdict and its supporting statistics.
-    """
+    """Test whether a per-prediction C_B tracks black-box error."""
     probs = np.asarray(probs, dtype=float).reshape(-1)
     labels = np.asarray(labels, dtype=float).reshape(-1)
-    concept_ids = np.asarray(concept_ids).reshape(-1).astype(int)
-    if not (probs.size == labels.size == concept_ids.size):
+    cb = np.asarray(confidence, dtype=float).reshape(-1)
+    if not (probs.size == labels.size == cb.size):
         raise ValueError(
-            f"probs/labels/concept_ids length mismatch: "
-            f"{probs.size}/{labels.size}/{concept_ids.size}"
+            f"probs/labels/confidence length mismatch: "
+            f"{probs.size}/{labels.size}/{cb.size}"
         )
     if probs.size == 0:
         raise ValueError("no predictions supplied")
-
-    cb_table = black_confidence_from_frequency(concept_train_freq, kappa_b)
-    if concept_ids.max() >= cb_table.size:
-        raise ValueError(
-            f"concept id {concept_ids.max()} out of range for "
-            f"concept_train_freq of length {cb_table.size}"
-        )
-    cb = cb_table[concept_ids]
 
     squared_error = (probs - labels) ** 2
     absolute_error = np.abs(probs - labels)
@@ -364,10 +347,8 @@ def stratify_by_black_confidence(
         notes.append(
             f"Relationship runs BACKWARDS: rho={rho:+.4f} (p={pvalue:.2e}). The premise "
             "requires a negative correlation (lower confidence, higher error), but here "
-            "high-C_B concepts are predicted *worse*. This is a stronger finding than "
-            "mere absence of signal -- training frequency is actively misleading as a "
-            "reliability proxy on this split, and a gate using it would systematically "
-            "trust the wrong branch."
+            "high-C_B predictions are *worse*. A gate using this signal would "
+            "systematically trust the wrong branch."
         )
     elif np.isfinite(brier_gap) and brier_gap <= 0.0:
         verdict = VERDICT_AMBIGUOUS
@@ -391,10 +372,18 @@ def stratify_by_black_confidence(
         "(within-group ranking metric, confounded by each bucket's label balance). The "
         "verdict rests on NLL/Brier and the per-prediction rank correlation."
     )
+    cb_p05 = float(np.quantile(cb, 0.05))
+    cb_p95 = float(np.quantile(cb, 0.95))
+    if cb_p95 - cb_p05 < 0.05:
+        notes.append(
+            f"C_B is nearly saturated for signal={signal!r}: 5th–95th percentile = "
+            f"[{cb_p05:.4f}, {cb_p95:.4f}]. A nearly-constant confidence cannot steer "
+            "the gate even if Spearman is well-defined."
+        )
     if base_rate_confound:
         notes.append(
             f"CONFOUND: base rate varies by {base_rate_spread:.3f} across buckets "
-            f"(> {base_rate_spread_threshold}). Low-C_B concepts may be intrinsically "
+            f"(> {base_rate_spread_threshold}). Low-C_B items may be intrinsically "
             "harder rather than under-trained, so any C_B-error relationship here is "
             "partly difficulty, not purely model reliability. A difficulty-matched "
             "comparison is needed to separate them."
@@ -407,6 +396,9 @@ def stratify_by_black_confidence(
         strategy=strategy,
         n_buckets=len(buckets),
         buckets=buckets,
+        signal=signal,
+        confidence_p05=cb_p05,
+        confidence_p95=cb_p95,
         spearman_cb_vs_squared_error=rho,
         spearman_pvalue=pvalue,
         spearman_cb_vs_absolute_error=rho_abs,
@@ -420,6 +412,49 @@ def stratify_by_black_confidence(
     )
 
 
+def stratify_by_black_confidence(
+    probs: np.ndarray,
+    labels: np.ndarray,
+    concept_ids: np.ndarray,
+    concept_train_freq: np.ndarray,
+    *,
+    kappa_b: float = 4.0,
+    n_buckets: int = 5,
+    strategy: str = "quantile",
+    n_ece_bins: int = 10,
+    min_effect_size: float = 0.05,
+    base_rate_spread_threshold: float = 0.10,
+) -> BlackConfidenceDiagnostic:
+    """Frequency-proxy C_B: look up N_c^train / (N_c^train + kappa_b) per prediction."""
+    probs = np.asarray(probs, dtype=float).reshape(-1)
+    labels = np.asarray(labels, dtype=float).reshape(-1)
+    concept_ids = np.asarray(concept_ids).reshape(-1).astype(int)
+    if not (probs.size == labels.size == concept_ids.size):
+        raise ValueError(
+            f"probs/labels/concept_ids length mismatch: "
+            f"{probs.size}/{labels.size}/{concept_ids.size}"
+        )
+    cb_table = black_confidence_from_frequency(concept_train_freq, kappa_b)
+    if concept_ids.size and concept_ids.max() >= cb_table.size:
+        raise ValueError(
+            f"concept id {concept_ids.max()} out of range for "
+            f"concept_train_freq of length {cb_table.size}"
+        )
+    cb = cb_table[concept_ids]
+    return stratify_confidence_vs_error(
+        probs,
+        labels,
+        cb,
+        n_buckets=n_buckets,
+        strategy=strategy,
+        n_ece_bins=n_ece_bins,
+        min_effect_size=min_effect_size,
+        base_rate_spread_threshold=base_rate_spread_threshold,
+        signal="frequency",
+        kappa_b=kappa_b,
+    )
+
+
 def format_report(diag: BlackConfidenceDiagnostic) -> str:
     """Human-readable report, suitable for a log or a note to a co-author."""
     lines: list[str] = []
@@ -427,8 +462,9 @@ def format_report(diag: BlackConfidenceDiagnostic) -> str:
     lines.append(f"C_B PREMISE DIAGNOSTIC -- VERDICT: {diag.verdict}")
     lines.append("=" * 78)
     lines.append(
-        f"predictions={diag.n_predictions}  kappa_B={diag.kappa_b}  "
-        f"strategy={diag.strategy}  buckets={diag.n_buckets}"
+        f"signal={diag.signal}  predictions={diag.n_predictions}  kappa_B={diag.kappa_b}  "
+        f"strategy={diag.strategy}  buckets={diag.n_buckets}  "
+        f"C_B[p05,p95]=[{diag.confidence_p05:.4f},{diag.confidence_p95:.4f}]"
     )
     lines.append("")
     header = (
@@ -460,11 +496,19 @@ def format_report(diag: BlackConfidenceDiagnostic) -> str:
         lines.append(f"  - {note}")
     lines.append("")
     if diag.verdict == VERDICT_NOT_SUPPORTED:
+        if diag.signal == "mc_dropout":
+            next_signal = (
+                "an ensemble of independently trained DH2-KT seeds (disagreement), "
+                "not another arithmetic tweak of the gate"
+            )
+        else:
+            next_signal = (
+                "MC-dropout variance or ensemble disagreement, which measure model "
+                "uncertainty directly rather than proxying it by training frequency"
+            )
         lines.append(
             "ACTION: do not proceed to a full GreyKT run on this basis. The reliability "
-            "gate needs a different black-box confidence signal (e.g. MC-dropout or "
-            "ensemble variance, which measure model uncertainty directly rather than "
-            "proxying it by training frequency)."
+            f"gate needs a different black-box confidence signal (e.g. {next_signal})."
         )
     elif diag.verdict == VERDICT_AMBIGUOUS:
         lines.append(

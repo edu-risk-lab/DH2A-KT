@@ -49,6 +49,7 @@ greykt:
   hop_decay: 0.5
   recency_decay: 0.98
   kappa_r: 1.0
+  mc_samples: 8
 
 baselines_reused:
   path: baselines/p0_reused/baseline_results.csv

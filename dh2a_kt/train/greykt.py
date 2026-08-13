@@ -185,7 +185,14 @@ def fit_temperature_on_loader(model, trained: "TrainedFold", loader, prereq_edge
     return t
 
 
-def _to_grey_batch(batch: dict, trained: "TrainedFold", prereq_edge_index, concept_train_freq, states):
+def _to_grey_batch(
+    batch: dict,
+    trained: "TrainedFold",
+    prereq_edge_index,
+    concept_train_freq,
+    states,
+    black_confidence=None,
+):
     from dh2a_kt.models.greykt import GreyKTBatch
 
     device = trained.device
@@ -197,7 +204,19 @@ def _to_grey_batch(batch: dict, trained: "TrainedFold", prereq_edge_index, conce
         concept_states=states,
         prereq_edge_index=prereq_edge_index.to(device),
         concept_train_freq=concept_train_freq.to(device),
+        black_confidence=None if black_confidence is None else black_confidence.to(device),
     )
+
+
+def _maybe_mc_confidence(model, batch, trained: "TrainedFold", mc_samples: int):
+    if mc_samples < 2:
+        return None
+    from dh2a_kt.diagnostics.mc_dropout import confidence_from_mc_std_torch, mc_dropout_std_for_batch
+
+    std = mc_dropout_std_for_batch(
+        model.black_box, batch, trained.clean_hyperedge_index, trained.device, mc_samples
+    )
+    return confidence_from_mc_std_torch(std)
 
 
 def next_step_bce(probs, targets, lengths):
@@ -214,7 +233,9 @@ def next_step_bce(probs, targets, lengths):
     return F.binary_cross_entropy(pred[mask].clamp(1e-6, 1.0 - 1e-6), label[mask])
 
 
-def collect_greykt_outputs(model, trained: "TrainedFold", prereq_edge_index, concept_train_freq):
+def collect_greykt_outputs(
+    model, trained: "TrainedFold", prereq_edge_index, concept_train_freq, *, mc_samples: int = 0
+):
     import torch
 
     from dh2a_kt.models.greykt import brier_score, expected_calibration_error, negative_log_likelihood, stratified_metrics_2d
@@ -233,7 +254,17 @@ def collect_greykt_outputs(model, trained: "TrainedFold", prereq_edge_index, con
         states = precompute_concept_states(model.black_box, trained.clean_hyperedge_index, device)
         for batch in trained.eval_loader:
             lengths = batch["lengths"].to(device)
-            out = model(_to_grey_batch(batch, trained, prereq_edge_index, concept_train_freq, states))
+            cb_t = _maybe_mc_confidence(model, batch, trained, mc_samples)
+            out = model(
+                _to_grey_batch(
+                    batch,
+                    trained,
+                    prereq_edge_index,
+                    concept_train_freq,
+                    states,
+                    black_confidence=cb_t,
+                )
+            )
             mask = torch.arange(out.probs.size(1) - 1, device=device).unsqueeze(0) < (
                 lengths.unsqueeze(1) - 1
             )
@@ -301,6 +332,7 @@ def train_greykt_one_fold(
     graph_sensitivity_weight: float = 0.0,
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
+    mc_samples: int = 0,
 ) -> None:
     import torch
 
@@ -337,7 +369,15 @@ def train_greykt_one_fold(
             states = empty_states if use_empty else precompute_concept_states(
                 model.black_box, full_index, device, enable_grad=True
             )
-            grey_batch = _to_grey_batch(batch, trained, prereq_edge_index, concept_train_freq, states)
+            cb_t = _maybe_mc_confidence(model, batch, trained, mc_samples)
+            grey_batch = _to_grey_batch(
+                batch,
+                trained,
+                prereq_edge_index,
+                concept_train_freq,
+                states,
+                black_confidence=cb_t,
+            )
             optimizer.zero_grad()
             out = model(grey_batch)
             loss = next_step_bce(out.probs, batch["correct"].to(device), lengths)
