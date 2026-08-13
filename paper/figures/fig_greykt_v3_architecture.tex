@@ -1,0 +1,99 @@
+% Fig. -- GreyKT-v3: Reliability-Aware Hybrid Knowledge Tracing (TikZ)
+% Same drawing conventions as figures/fig_architecture.tex (box/tierbox/dashbox
+% styles), so this figure is visually consistent with the rest of the paper.
+%
+% REQUIRES: this file additionally needs the `shapes.geometric` TikZ library
+% for the diamond-shaped gate node (main.tex's current preamble only loads
+% arrows.meta,fit,positioning,backgrounds). Before \input-ing this figure,
+% add shapes.geometric to main.tex's \usetikzlibrary{...} line, e.g.:
+%   \usetikzlibrary{arrows.meta,fit,positioning,backgrounds,shapes.geometric}
+% Compiled and visually verified standalone (pdflatex + pdftoppm) in the
+% authoring sandbox; not yet compiled inside the full main.tex (elsarticle.cls
+% was unavailable there) -- do a final visual check after \input-ing.
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\scriptsize\sffamily,
+  >=Stealth,
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=3pt,
+              minimum height=0.85cm, fill=white},
+  tierbox/.style={draw, thick, rounded corners=3pt, inner sep=6pt},
+  dashbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
+                  inner sep=4pt, fill=white},
+  gatebox/.style={draw, thick, diamond, aspect=2.6, align=center,
+                  inner sep=1pt, fill=yellow!15},
+]
+
+% ===== Row 0: shared input =====
+\node[box, minimum width=2.9cm] (seq) at (1.5,0) {Interaction sequence\\$(c_t,e_t,y_t)_{t=1}^{T}$};
+\node[box, minimum width=2.9cm] (epre) at (6.5,0) {Audited $E_{\mathrm{pre}}$\\(P0 leakage-audited)};
+\node[box, minimum width=2.4cm] (trainfreq) at (11.0,0) {Training frequency\\$N_c^{\mathrm{train}}$};
+
+% ===== Column 1: black-box branch =====
+\node[box, minimum width=2.9cm] (bbenc) at (1.5,-1.5) {DH2-KT hypergraph\\encoder + dual gate};
+\node[box, minimum width=2.9cm] (bblogit) at (1.5,-2.9) {$\mathrm{black\_logits}=f_\theta(\cdot)$};
+\node[box, minimum width=2.9cm] (bbprob) at (1.5,-4.3) {$p_B=\sigma(\mathrm{black\_logits})$};
+\draw[->, thick] (seq) -- (bbenc);
+\draw[->, thick] (bbenc) -- (bblogit);
+\draw[->, thick] (bblogit) -- (bbprob);
+\begin{pgfonlayer}{background}
+\node[tierbox, fill=blue!4, fit=(bbenc)(bblogit)(bbprob),
+      label={[font=\scriptsize\bfseries]below:Black-box branch (learned)}] {};
+\end{pgfonlayer}
+
+% ===== Column 2: white-box branch =====
+\node[box, minimum width=3.3cm] (wbhop) at (6.5,-1.5) {Multi-hop lookup, $d\le\ell_{\max}$\\$w_{pc}=\rho^{\,d(p,c)-1}$};
+\node[box, minimum width=3.3cm, text width=3.1cm] (wbewma) at (6.5,-3.0) {EWMA evidence per prereq $p$: $S^{\mathrm{eff}}_{p}{=}\sum_{\tau<t}\lambda^{t-\tau}y_\tau$, $N^{\mathrm{eff}}_{p}{=}\sum_{\tau<t}\lambda^{t-\tau}$};
+\node[box, minimum width=3.3cm, text width=3.1cm] (wbbeta) at (6.5,-4.85) {Beta-Binomial mastery: $M_p{=}\dfrac{\alpha_0+S^{\mathrm{eff}}_p}{\alpha_0+\beta_0+N^{\mathrm{eff}}_p}$, $C_p{=}\dfrac{N^{\mathrm{eff}}_p}{N^{\mathrm{eff}}_p+\kappa_W}$};
+\node[box, minimum width=3.3cm, text width=3.1cm] (wbagg) at (6.5,-6.85) {Confidence-weighted aggregation: $p_W{=}\dfrac{\sum_p w_{pc}C_pM_p}{\sum_p w_{pc}C_p}$, $C_W{=}\dfrac{\sum_p w_{pc}N^{\mathrm{eff}}_p}{\sum_p w_{pc}N^{\mathrm{eff}}_p+\kappa_W}$};
+\draw[->, thick] (epre) -- (wbhop);
+\draw[->, thick] (wbhop) -- (wbewma);
+\draw[->, thick] (wbewma) -- (wbbeta);
+\draw[->, thick] (wbbeta) -- (wbagg);
+\draw[->, thick, densely dotted] (seq.east) -- (wbewma.west);
+\begin{pgfonlayer}{background}
+\node[tierbox, fill=orange!6, fit=(wbhop)(wbewma)(wbbeta)(wbagg),
+      label={[font=\scriptsize\bfseries]below:White-box branch (rule-based)}] {};
+\end{pgfonlayer}
+
+% ===== Column 3: black-box confidence (single node) =====
+\node[box, minimum width=2.4cm, fill=violet!6] (bconf) at (11.0,-1.7) {$C_B(c)=\dfrac{N_c^{\mathrm{train}}}{N_c^{\mathrm{train}}+\kappa_B}$};
+\node[font=\tiny, align=center] at (11.0,-2.35) {black-box confidence (fixed stat.)};
+\draw[->, thick] (trainfreq) -- (bconf);
+
+% ===== Reliability gate + probability-space fusion =====
+\node[gatebox, minimum width=2.6cm] (gate) at (11.0,-9.4) {$g_B=\dfrac{C_B}{C_B+C_W+\epsilon}$};
+\node[box, minimum width=3.2cm] (fusion) at (15.6,-9.4) {Probability-space fusion\\$p_{\mathrm{GreyKT}}=g_B\,p_B+(1{-}g_B)\,p_W$};
+
+\draw[->, thick] (bconf.south) -- (gate.north);
+\draw[->, thick] (wbagg.east) -- ++(0.8,0) |- (gate.west);
+\draw[->, thick] (gate.east) -- (fusion.west);
+\draw[->, thick] (bbprob.east) -- (4.0,-4.3) -- (4.0,-10.9) -| (fusion.south);
+\draw[->, thick] (wbagg.east) -- (9.3,-6.85) -- (9.3,-11.3) -| (fusion.south west);
+
+% ===== Evaluation diagnostics strip =====
+\node[dashbox, text width=15.5cm] (diag) at (8.5,-12.6)
+  {\textbf{Evaluation diagnostics:} AUC, NLL, Brier score, ECE, and a 2D grid
+   stratified jointly by $C_B$ (concept training support) $\times$ $C_W$
+   (prerequisite evidence) --- tests whether GreyKT beats the black-box-alone
+   baseline specifically in the low-$C_B$/high-$C_W$ cold-start cell.};
+\draw[->, densely dashed, thick] (fusion.south) |- (diag.east);
+
+\end{tikzpicture}%
+}
+\caption{GreyKT-v3: reliability-aware hybrid knowledge tracing. The black-box
+branch (DH2-KT, unmodified) and a white-box branch (a zero-learned-parameter
+Beta-Binomial prerequisite-mastery estimator read directly off P0's audited
+$E_{\mathrm{pre}}$) each produce a probability and a confidence. A non-learned
+relative-reliability gate $g_B=C_B/(C_B+C_W+\epsilon)$ weights the two
+branches' probabilities directly in probability space, so $g_B$ is an
+inspectable audit trail for every prediction rather than an opaque blend.
+When $C_B\gg C_W$, $g_B\to1$ (the black-box branch is trusted); when
+$C_W\gg C_B$, $g_B\to0$ (the white-box branch is trusted); when $C_B=C_W$,
+$g_B=0.5$ exactly (genuine shared uncertainty, unlike a $\min(\cdot)$-based
+floor, which would not distinguish this case from either branch alone being
+weak). All quantities other than the black-box branch's own parameters are
+fixed statistics or config constants, not learned via backpropagation.}
+\label{fig:greykt_v3_architecture}
+\end{figure*}

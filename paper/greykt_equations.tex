@@ -1,0 +1,30 @@
+% GreyKT — các công thức mô hình (Mục 2-3 của BaoCaoMoHinhGreyKT.docx)
+% Đã biên dịch kiểm chứng bằng pdflatex (0 lỗi). Yêu cầu: \usepackage{amsmath}
+% Dùng: \input{greykt_equations} trong main.tex, hoặc copy từng khối.
+\begin{align*}
+\mathcal{H}_{u,t} &= \{ (c_1,e_1,y_1), (c_2,e_2,y_2), \dots, (c_t,e_t,y_t) \} \\[6pt]
+\hat{p}_{t+1} &= f\!\left( \mathcal{H}_{u,t}, E_{\mathrm{pre}}, N^{\mathrm{train}} \right)
+  \;\approx\; P\!\left( y_{t+1}=1 \mid c_{t+1}, e_{t+1} \right) \\[6pt]
+x_t &= \mathrm{HypergraphConvStack}(G, c_t) \\
+h_t &= \mathrm{DualGatedUpdate}(h_{t-1},\, x_t + r_t) \\
+z   &= \mathrm{OutputProjection}(h_t) \\
+p_B &= \sigma\!\left( z / T \right) \\[6pt]
+w_{pc} &= \rho^{\, d(p,c) - 1} \\[6pt]
+S^{\mathrm{eff}}_{u,p,t} &= \sum_{\tau < t} \lambda^{\,t-\tau} \, y_\tau
+\qquad
+N^{\mathrm{eff}}_{u,p,t} = \sum_{\tau < t} \lambda^{\,t-\tau} \\[6pt]
+M_{u,p,t} &= \frac{\alpha_0 + S^{\mathrm{eff}}_{u,p,t}}
+                  {\alpha_0 + \beta_0 + N^{\mathrm{eff}}_{u,p,t}}
+\qquad
+C_{u,p,t} = \frac{N^{\mathrm{eff}}_{u,p,t}}
+                 {N^{\mathrm{eff}}_{u,p,t} + \kappa_W} \\[6pt]
+p_W &= \frac{\sum_{p} w_{pc} \, C_{u,p,t} \, M_{u,p,t}}
+            {\sum_{p} w_{pc} \, C_{u,p,t}} \\[6pt]
+C_W &= \frac{\sum_{p} w_{pc} \, N^{\mathrm{eff}}_{u,p,t}}
+            {\sum_{p} w_{pc} \, N^{\mathrm{eff}}_{u,p,t} + \kappa_W} \\[6pt]
+C_B(c) &= \frac{N^{\mathrm{train}}_{c}}{N^{\mathrm{train}}_{c} + \kappa_B} \\[6pt]
+g_B &= \frac{C_B}{C_B + C_W + \epsilon} \\[6pt]
+p_{\mathrm{GreyKT}} &= g_B \, p_B + (1 - g_B) \, p_W \\[6pt]
+R &= C_B + C_W \qquad \alpha = \frac{R}{R + \kappa_R} \\[6pt]
+p &= \alpha \left[ g_B \, p_B + (1-g_B) \, p_W \right] + (1 - \alpha) \, p_{\mathrm{backoff}}
+\end{align*}

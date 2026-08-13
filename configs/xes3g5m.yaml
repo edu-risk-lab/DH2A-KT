@@ -41,6 +41,15 @@ training:
   graph_sensitivity_p: 0.9
   comparison_models: [gkt, simplekt]
 
+greykt:
+  # White-box / gate (fixed statistics; not learned). max_hops defaults to
+  # hyperedge.concept_prerequisite.max_chain_len so both branches share ell_max.
+  prior_strength: 4.0
+  kappa_b: 4.0
+  hop_decay: 0.5
+  recency_decay: 0.98
+  kappa_r: 1.0
+
 baselines_reused:
   path: baselines/p0_reused/baseline_results.csv
   fold_path: baselines/p0_reused/baseline_fold_results.csv
