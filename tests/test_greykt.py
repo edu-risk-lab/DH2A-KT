@@ -466,3 +466,71 @@ def test_stratified_metrics_2d_returns_grid_with_expected_cell_count():
     for cell_stats in results.values():
         for key in ("n", "fused_auc", "black_auc", "fused_nll", "black_nll", "fused_brier", "black_brier"):
             assert key in cell_stats
+
+
+def test_greykt_train_checkpoint_roundtrip(tmp_path):
+    """latest.pt must restore model + optimizer + best-so-far metadata."""
+    from dh2a_kt.train.greykt import (
+        greykt_checkpoint_dir,
+        load_greykt_train_checkpoint,
+        save_greykt_train_checkpoint,
+    )
+
+    torch.manual_seed(0)
+    config = GreyKTConfig(n_concepts=8, n_exercises=6, hidden_dim=8, embed_dim=8, n_hypergraph_layers=1)
+    model = GreyKT(config)
+    optimizer = torch.optim.Adam(model.black_box.parameters(), lr=1e-3)
+    # one dummy step so optimizer state is non-empty
+    loss = model(_make_toy_batch(with_train_freq=True)).probs.mean()
+    loss.backward()
+    optimizer.step()
+    best = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+
+    ckpt_dir = greykt_checkpoint_dir(
+        dataset="toy", fold=0, variant="v3", signal="predictive", root=tmp_path
+    )
+    path = save_greykt_train_checkpoint(
+        ckpt_dir / "latest.pt",
+        model=model,
+        optimizer=optimizer,
+        epoch=3,
+        best_epoch=2,
+        best_loss=0.42,
+        best_state=best,
+        meta={"fold": 0},
+    )
+    assert path.exists()
+
+    model2 = GreyKT(config)
+    opt2 = torch.optim.Adam(model2.black_box.parameters(), lr=1e-3)
+    payload = load_greykt_train_checkpoint(path, model2, opt2, device="cpu")
+    assert payload["epoch"] == 3
+    assert payload["best_epoch"] == 2
+    assert payload["best_loss"] == pytest.approx(0.42)
+    for k, v in model.state_dict().items():
+        assert torch.allclose(v, model2.state_dict()[k])
+
+
+def test_cached_whitebox_matches_live_forward():
+    """Cached white-box tensors must reproduce an on-the-fly forward."""
+    torch.manual_seed(0)
+    config = GreyKTConfig(n_concepts=8, n_exercises=6, hidden_dim=16, embed_dim=16, dropout=0.0)
+    model = GreyKT(config)
+    model.eval()
+    batch = _make_toy_batch(with_train_freq=True)
+    live = model(batch)
+    cached = model(
+        GreyKTBatch(
+            concept_ids=batch.concept_ids,
+            exercise_ids=batch.exercise_ids,
+            responses=batch.responses,
+            hyperedge_index=batch.hyperedge_index,
+            prereq_edge_index=batch.prereq_edge_index,
+            concept_train_freq=batch.concept_train_freq,
+            white_prob=live.white_prob.detach().clone(),
+            white_confidence=live.white_confidence.detach().clone(),
+        )
+    )
+    assert torch.allclose(live.white_prob, cached.white_prob)
+    assert torch.allclose(live.white_confidence, cached.white_confidence)
+    assert torch.allclose(live.probs, cached.probs, atol=1e-5)

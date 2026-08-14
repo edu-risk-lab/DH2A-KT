@@ -7,9 +7,11 @@ Run on the RTX 3090 host (torch + torch_geometric + P0 processed data).
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode wrap \\
         --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
 
-    # Then optional fused train (C_B = |2p-1| is detached).
+    # Then optional fused train (C_B = |2p-1| is detached). Checkpoints
+    # latest.pt / best.pt under results/checkpoints/greykt_* each epoch;
+    # re-run with --resume after a crash.
     python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \\
-        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
+        --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive --resume
 """
 from __future__ import annotations
 
@@ -38,7 +40,9 @@ from dh2a_kt.train.greykt import (
     collect_greykt_outputs,
     enforce_cb_diagnostic,
     fit_temperature_on_loader,
+    greykt_checkpoint_dir,
     make_sequence_loader,
+    make_whitebox_cached_loader,
     train_greykt_one_fold,
     wrap_trained_fold,
     write_greykt_report,
@@ -123,6 +127,42 @@ def main() -> int:
         help="MC-dropout samples when --signal mc_dropout (default greykt.mc_samples or 8).",
     )
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--checkpoint-dir",
+        type=Path,
+        default=None,
+        help="Dir for GreyKT latest.pt / best.pt (default: results/checkpoints/greykt_<dataset>_foldN_<variant>_<signal>).",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume train from checkpoint-dir/latest.pt if present.",
+    )
+    parser.add_argument(
+        "--resume-from",
+        type=Path,
+        default=None,
+        help="Explicit GreyKT train checkpoint (.pt) to resume from.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=None,
+        help="Override GreyKT train batch size (default: matched GKT budget, 4). "
+        "Larger batches are faster but are not a matched-budget comparison.",
+    )
+    parser.add_argument(
+        "--amp",
+        action="store_true",
+        help="Mixed-precision (fp16) GreyKT train. Frees activation VRAM for larger batches.",
+    )
+    parser.add_argument(
+        "--freeze-hypergraph",
+        action="store_true",
+        help="Encode concept graph once per epoch (no graph backward). Dual-gate "
+        "still trains. Uses leftover VRAM on larger sequence batches instead of "
+        "rebuilding 400k hyperedges every step.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
@@ -168,6 +208,17 @@ def main() -> int:
         lr=float(train_cfg.get("lr", 0.001)),
         max_seq_len=train_cfg.get("max_seq_len"),
     )
+    if args.batch_size is not None:
+        from dataclasses import replace
+
+        budget = replace(
+            budget,
+            batch_size=int(args.batch_size),
+            matched_p0=False,
+            note=(budget.note + " " if budget.note else "")
+            + f"GreyKT train batch_size override={args.batch_size} (not matched GKT=4).",
+        )
+        print(f"NOTE: {budget.note}")
     hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=args.fold)
     max_hops = int(greykt_cfg.get("max_hops", hyperedge_spec.max_chain_len))
     use_backoff = args.variant in ("v4b", "v4ab")
@@ -200,7 +251,30 @@ def main() -> int:
     )
 
     if args.mode == "train":
-        train_loader = make_sequence_loader(train_df, trained, budget, shuffle=True)
+        train_loader = make_whitebox_cached_loader(
+            train_df,
+            trained,
+            budget,
+            model,
+            prereq,
+            shuffle=True,
+        )
+        ckpt_dir = args.checkpoint_dir or greykt_checkpoint_dir(
+            dataset=dataset,
+            fold=args.fold,
+            variant=args.variant,
+            signal=args.signal,
+            root=REPO_ROOT / "results" / "checkpoints",
+        )
+        resume_from = args.resume_from
+        if resume_from is None and args.resume:
+            latest = Path(ckpt_dir) / "latest.pt"
+            resume_from = latest if latest.exists() else None
+            if resume_from is None:
+                print(f"--resume set but no checkpoint at {latest}; training from scratch")
+            else:
+                print(f"resuming from {resume_from}")
+        print(f"GreyKT checkpoints -> {ckpt_dir}")
         train_greykt_one_fold(
             model,
             trained,
@@ -213,6 +287,20 @@ def main() -> int:
             graph_sensitivity_margin=float(train_cfg.get("graph_sensitivity_margin", 0.05)),
             graph_sensitivity_p=float(train_cfg.get("graph_sensitivity_p", 0.9)),
             mc_samples=mc_samples,
+            checkpoint_dir=ckpt_dir,
+            resume_from=resume_from,
+            use_amp=bool(args.amp),
+            freeze_hypergraph=bool(args.freeze_hypergraph),
+            checkpoint_meta={
+                "dataset": dataset,
+                "fold": args.fold,
+                "variant": args.variant,
+                "signal": args.signal,
+                "batch_size": budget.batch_size,
+                "matched_p0": budget.matched_p0,
+                "amp": bool(args.amp),
+                "freeze_hypergraph": bool(args.freeze_hypergraph),
+            },
         )
 
     if args.variant in ("v4a", "v4ab"):

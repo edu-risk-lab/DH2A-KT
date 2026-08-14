@@ -288,6 +288,11 @@ class GreyKTBatch:
     """Optional per-prediction C_B, shape (B, T). Overrides the frequency
     table. Used for MC-dropout (or any other per-timestep signal). Detached
     by the caller -- this is not a learned parameter."""
+    white_prob: "torch.Tensor | None" = None
+    """Optional precomputed p_W, shape (B, T). White-box has no learned
+    params -- callers may cache once per sequence and reuse across epochs."""
+    white_confidence: "torch.Tensor | None" = None
+    """Optional precomputed C_W, shape (B, T), paired with ``white_prob``."""
 
     def as_dh2kt_batch(self) -> DH2KTBatch:
         return DH2KTBatch(
@@ -377,6 +382,28 @@ if _TORCH_AVAILABLE:
             lookup[c] = [(anc, hop_decay ** (h - 1)) for anc, h in visited.items()]
         return lookup
 
+    def _padded_ancestor_tables(
+        lookup: list[list[tuple[int, float]]],
+        n_concepts: int,
+        device: "torch.device",
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None:
+        """Pack per-concept ancestor lists into (n_concepts, max_A) tensors."""
+        max_a = max((len(pairs) for pairs in lookup), default=0)
+        if max_a == 0:
+            return None
+        anc_ids = torch.zeros(n_concepts, max_a, dtype=torch.long, device=device)
+        anc_w = torch.zeros(n_concepts, max_a, dtype=torch.float32, device=device)
+        anc_mask = torch.zeros(n_concepts, max_a, dtype=torch.bool, device=device)
+        for c, pairs in enumerate(lookup):
+            if not pairs:
+                continue
+            ids, weights = zip(*pairs)
+            n = len(ids)
+            anc_ids[c, :n] = torch.tensor(ids, dtype=torch.long, device=device)
+            anc_w[c, :n] = torch.tensor(weights, dtype=torch.float32, device=device)
+            anc_mask[c, :n] = True
+        return anc_ids, anc_w, anc_mask
+
     def whitebox_branch(
         concept_ids: torch.Tensor,
         responses: torch.Tensor,
@@ -388,6 +415,7 @@ if _TORCH_AVAILABLE:
         hop_decay: float = 0.5,
         recency_decay: float = 0.98,
         kappa_w: float = 4.0,
+        ancestor_tables: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Per-prerequisite Beta-Binomial mastery, aggregated into a
         confidence-weighted white-box probability and an aggregate white
@@ -408,45 +436,63 @@ if _TORCH_AVAILABLE:
         concept has no reachable ancestors within ``max_hops``, or when
         every reachable ancestor still has zero evidence (avoids 0/0).
 
+        Vectorized over the batch dimension; only the recency recurrence
+        needs a timestep loop. Pass ``ancestor_tables`` to skip rebuilding
+        the hop lookup (used when caching many batches).
+
         Returns ``(white_prob, white_confidence)``, each shape ``(B, T)``.
         """
         device = concept_ids.device
         batch_size, seq_len = concept_ids.shape
-        lookup = _build_multihop_prereq_lookup(prereq_edge_index, n_concepts, max_hops, hop_decay)
+        if ancestor_tables is None:
+            lookup = _build_multihop_prereq_lookup(
+                prereq_edge_index, n_concepts, max_hops, hop_decay
+            )
+            ancestor_tables = _padded_ancestor_tables(lookup, n_concepts, device)
         alpha0 = prior_mean * prior_strength
         beta0 = (1.0 - prior_mean) * prior_strength
 
-        # Running, recency-decayed evidence per (sample, concept): S_eff, N_eff.
         running_correct = torch.zeros(batch_size, n_concepts, device=device)
         running_count = torch.zeros(batch_size, n_concepts, device=device)
-
         white_prob = torch.full((batch_size, seq_len), float(prior_mean), device=device)
         white_confidence = torch.zeros(batch_size, seq_len, device=device)
 
+        if ancestor_tables is None:
+            for t in range(seq_len):
+                concept_t = concept_ids[:, t].clamp(0, n_concepts - 1)
+                running_count *= recency_decay
+                running_correct *= recency_decay
+                batch_idx = torch.arange(batch_size, device=device)
+                running_count.index_put_(
+                    (batch_idx, concept_t), running_count[batch_idx, concept_t] + 1.0
+                )
+                running_correct.index_put_(
+                    (batch_idx, concept_t), running_correct[batch_idx, concept_t] + responses[:, t]
+                )
+            return white_prob, white_confidence
+
+        anc_ids, anc_w, anc_mask = ancestor_tables
         for t in range(seq_len):
-            concept_t = concept_ids[:, t]  # (B,)
-            for b in range(batch_size):
-                c = int(concept_t[b].item())
-                ancestors = lookup[c] if 0 <= c < n_concepts else []
-                if not ancestors:
-                    continue  # stays at (prior_mean, 0.0 confidence)
-                anc_ids = torch.tensor([a for a, _ in ancestors], device=device, dtype=torch.long)
-                w_pc = torch.tensor([w for _, w in ancestors], device=device)
+            concept_t = concept_ids[:, t].clamp(0, n_concepts - 1)
+            gather_ids = anc_ids[concept_t]
+            w_pc = anc_w[concept_t]
+            valid = anc_mask[concept_t].to(dtype=w_pc.dtype)
+            n_eff_p = running_count.gather(1, gather_ids) * valid
+            s_eff_p = running_correct.gather(1, gather_ids) * valid
+            m_p = (alpha0 + s_eff_p) / (alpha0 + beta0 + n_eff_p)
+            c_p = n_eff_p / (n_eff_p + kappa_w)
+            weighted_c = w_pc * c_p * valid
+            numerator = (weighted_c * m_p).sum(dim=1)
+            denominator = weighted_c.sum(dim=1)
+            pooled_n_eff = (w_pc * n_eff_p).sum(dim=1)
+            has_den = denominator > 0
+            white_prob[:, t] = torch.where(
+                has_den,
+                numerator / denominator.clamp_min(1e-12),
+                white_prob[:, t],
+            )
+            white_confidence[:, t] = pooled_n_eff / (pooled_n_eff + kappa_w)
 
-                n_eff_p = running_count[b, anc_ids]
-                s_eff_p = running_correct[b, anc_ids]
-                m_p = (alpha0 + s_eff_p) / (alpha0 + beta0 + n_eff_p)
-                c_p = n_eff_p / (n_eff_p + kappa_w)
-
-                numerator = (w_pc * c_p * m_p).sum()
-                denominator = (w_pc * c_p).sum()
-                pooled_n_eff = (w_pc * n_eff_p).sum()
-
-                white_prob[b, t] = numerator / denominator if denominator > 0 else prior_mean
-                white_confidence[b, t] = pooled_n_eff / (pooled_n_eff + kappa_w)
-
-            # Recency decay, then fold in this step's own observation --
-            # vectorized across the batch dimension.
             running_count *= recency_decay
             running_correct *= recency_decay
             batch_idx = torch.arange(batch_size, device=device)
@@ -501,18 +547,24 @@ if _TORCH_AVAILABLE:
             # black-box branch's ranking -- and its AUC -- are unchanged.
             black_probs = torch.sigmoid(black_logits / self.config.temperature)
 
-            white_prob, white_confidence = whitebox_branch(
-                concept_ids=batch.concept_ids,
-                responses=batch.responses,
-                prereq_edge_index=batch.prereq_edge_index,
-                n_concepts=self.config.n_concepts,
-                prior_mean=self.config.prior_mean,
-                prior_strength=self.config.prior_strength,
-                max_hops=self.config.max_hops,
-                hop_decay=self.config.hop_decay,
-                recency_decay=self.config.recency_decay,
-                kappa_w=self.config.resolved_kappa_w(),
-            )
+            if batch.white_prob is not None and batch.white_confidence is not None:
+                white_prob = batch.white_prob
+                white_confidence = batch.white_confidence
+            else:
+                # White-box has no trainable params; keep it out of the graph.
+                with torch.no_grad():
+                    white_prob, white_confidence = whitebox_branch(
+                        concept_ids=batch.concept_ids,
+                        responses=batch.responses,
+                        prereq_edge_index=batch.prereq_edge_index,
+                        n_concepts=self.config.n_concepts,
+                        prior_mean=self.config.prior_mean,
+                        prior_strength=self.config.prior_strength,
+                        max_hops=self.config.max_hops,
+                        hop_decay=self.config.hop_decay,
+                        recency_decay=self.config.recency_decay,
+                        kappa_w=self.config.resolved_kappa_w(),
+                    )
 
             if self.config.black_confidence_mode == "predictive":
                 # Stop-gradient: C_B is a diagnostic function of p_B, not a

@@ -41,9 +41,41 @@ design claim is that fused wins in the low-C_B / high-C_W cell.
 Starts from the DH2-KT checkpoint; fused BCE; C_B is detached `|2p-1|`.
 Matched GKT budget (batch 4, 10 epochs). Slow: white-box loop every batch.
 
+Each completed epoch writes:
+
+- `results/checkpoints/greykt_xes3g5m_fold0_v3_predictive/latest.pt`
+- `.../best.pt` when train loss improves
+
+Train also **precomputes white-box once** (no learned params) and reuses
+it every epoch — major wall-clock win; scientific equivalence unchanged.
+
 ```bash
 python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \
-  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive
+  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive \
+  --batch-size 12
+```
+
+`--batch-size 12` is a **speed override** (not matched GKT batch 4). Report it
+as observational if used in any table. Omit the flag to keep batch 4.
+
+To actually spend leftover VRAM on throughput (hypergraph encode is ~5.5 GB
+fixed; sequence activations scale with batch):
+
+```bash
+python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \
+  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive \
+  --batch-size 64 --amp --freeze-hypergraph
+```
+
+`--freeze-hypergraph` encodes the concept graph once per epoch (no graph
+backward). Dual-gate still trains. Combined with `--amp`, leftover VRAM goes
+into a larger sequence batch.
+
+After a crash / kill, resume (continues from the next epoch after `latest.pt`):
+
+```bash
+python scripts/22_run_greykt.py configs/xes3g5m.yaml --fold 0 --device cuda --mode train \
+  --load-checkpoint results/checkpoints/xes3g5m_fold0.pt --signal predictive --resume
 ```
 
 Optional after wrap, if calibration looks poor:

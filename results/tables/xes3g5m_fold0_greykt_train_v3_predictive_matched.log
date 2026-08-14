@@ -1,0 +1,91 @@
+diagnostic verdict=SUPPORTED (D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold0_black_confidence_diagnostic_predictive.json)
+python : INFO:dh2a_kt.train.greykt:diagnostic verdict=SUPPORTED 
+(D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold0_black_confidence_diagnostic_predictive.json)
+At C:\Users\EDM\AppData\Local\Temp\ps-script-be9c1439-8fe7-4a4e-be61-c61bb8350bfc.ps1:102 char:26
++ ... BUFFERED=1; python scripts/22_run_greykt.py configs/xes3g5m.yaml --fo ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:dh2a_kt.tr...redictive.json):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:src.io_utils:Loading interactions from 
+D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 users (from 1922840 interactions)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 12646 users (from 4490513 interactions)
+INFO:dh2a_kt.train.greykt:precomputing white-box cache for 12646 sequences (batch=256)...
+INFO:dh2a_kt.train.greykt:white-box cache ready (12646 sequences)
+GreyKT checkpoints -> results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=999920550
+INFO:src.dag_disruption:node_drop result_shape=(101052, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=1/10 loss=0.5295
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=1 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=1 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=1677274885
+INFO:src.dag_disruption:node_drop result_shape=(58287, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=2/10 loss=0.5100
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=2 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=2 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=1050520995
+INFO:src.dag_disruption:node_drop result_shape=(121992, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=3/10 loss=0.5005
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=3 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=3 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=975826827
+INFO:src.dag_disruption:node_drop result_shape=(83846, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=4/10 loss=0.4861
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=4 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=4 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=650383318
+INFO:src.dag_disruption:node_drop result_shape=(171926, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=5/10 loss=0.4771
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=5 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=5 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=848790672
+INFO:src.dag_disruption:node_drop result_shape=(40098, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=6/10 loss=0.4744
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=6 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=6 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=1705748185
+INFO:src.dag_disruption:node_drop result_shape=(211577, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=7/10 loss=0.4725
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=7 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=7 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=24277662
+INFO:src.dag_disruption:node_drop result_shape=(135257, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=8/10 loss=0.4791
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=8 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=592675254
+INFO:src.dag_disruption:node_drop result_shape=(149353, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=9/10 loss=0.4710
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=9 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=9 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:src.dag_disruption:Applying node_drop edges_shape=(11568053, 3) p=0.9 seed=843186553
+INFO:src.dag_disruption:node_drop result_shape=(74523, 3)
+INFO:dh2a_kt.train.greykt:greykt epoch=10/10 loss=0.4692
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=10 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\latest.pt
+INFO:dh2a_kt.train.greykt:wrote GreyKT checkpoint epoch=10 -> 
+results\checkpoints\greykt_xes3g5m_fold0_v3_predictive_matched\best.pt
+INFO:dh2a_kt.train.greykt:greykt restored best epoch=10 train_loss=0.4692
+
+GreyKT train/v3: n=1078580 fused_auc=0.7346 black_auc=0.7347 white_auc=0.6744 mean_gate=0.491
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold0_greykt_train_v3_predictive.json

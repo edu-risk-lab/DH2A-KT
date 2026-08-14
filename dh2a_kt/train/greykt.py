@@ -98,6 +98,126 @@ def make_sequence_loader(df: pd.DataFrame, trained: "TrainedFold", budget: Train
     )
 
 
+def _collate_with_white(batch_items: list) -> dict:
+    from dh2a_kt.train.tier1 import _collate
+
+    out = _collate(batch_items)
+    if batch_items and "white_prob" in batch_items[0]:
+        import torch
+
+        out["white_prob"] = torch.stack([item["white_prob"] for item in batch_items])
+        out["white_confidence"] = torch.stack([item["white_confidence"] for item in batch_items])
+    return out
+
+
+class _WhiteboxCachedDataset:
+    """Wraps UserSequenceDataset with precomputed white-box tensors."""
+
+    def __init__(self, base, white_probs, white_confs):
+        self.base = base
+        self.white_probs = white_probs
+        self.white_confs = white_confs
+
+    def __len__(self) -> int:
+        return len(self.base)
+
+    def __getitem__(self, idx: int) -> dict:
+        item = dict(self.base[idx])
+        item["white_prob"] = self.white_probs[idx]
+        item["white_confidence"] = self.white_confs[idx]
+        return item
+
+
+def precompute_whitebox_cache(
+    dataset,
+    *,
+    model,
+    prereq_edge_index,
+    batch_size: int = 256,
+    device=None,
+) -> tuple[list, list]:
+    """Run white-box once per sequence (no grad). Safe to reuse across epochs."""
+    import torch
+    from torch.utils.data import DataLoader
+
+    from dh2a_kt.models.greykt import (
+        _build_multihop_prereq_lookup,
+        _padded_ancestor_tables,
+        whitebox_branch,
+    )
+    from dh2a_kt.train.tier1 import _collate
+
+    dev = device if device is not None else next(model.parameters()).device
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=_collate)
+    white_probs: list = [None] * len(dataset)
+    white_confs: list = [None] * len(dataset)
+    cfg = model.config
+    lookup = _build_multihop_prereq_lookup(
+        prereq_edge_index.to(dev), cfg.n_concepts, cfg.max_hops, cfg.hop_decay
+    )
+    tables = _padded_ancestor_tables(lookup, cfg.n_concepts, dev)
+    offset = 0
+    with torch.no_grad():
+        for batch in loader:
+            concept_ids = batch["concept_ids"].to(dev)
+            responses = batch["responses"].to(dev)
+            wp, wc = whitebox_branch(
+                concept_ids=concept_ids,
+                responses=responses,
+                prereq_edge_index=prereq_edge_index.to(dev),
+                n_concepts=cfg.n_concepts,
+                prior_mean=cfg.prior_mean,
+                prior_strength=cfg.prior_strength,
+                max_hops=cfg.max_hops,
+                hop_decay=cfg.hop_decay,
+                recency_decay=cfg.recency_decay,
+                kappa_w=cfg.resolved_kappa_w(),
+                ancestor_tables=tables,
+            )
+            bsz = concept_ids.size(0)
+            for i in range(bsz):
+                white_probs[offset + i] = wp[i].detach().cpu()
+                white_confs[offset + i] = wc[i].detach().cpu()
+            offset += bsz
+    assert offset == len(dataset)
+    return white_probs, white_confs
+
+
+def make_whitebox_cached_loader(
+    df: pd.DataFrame,
+    trained: "TrainedFold",
+    budget: TrainingBudget,
+    model,
+    prereq_edge_index,
+    *,
+    shuffle: bool,
+    cache_batch_size: int = 256,
+):
+    """Build a train loader with white-box outputs cached on CPU once."""
+    from torch.utils.data import DataLoader
+
+    from dh2a_kt.train.tier1 import UserSequenceDataset
+
+    base = UserSequenceDataset(
+        df, trained.kc_to_idx, trained.item_to_idx, max_seq_len=budget.max_seq_len
+    )
+    logger.info("precomputing white-box cache for %d sequences (batch=%s)...", len(base), cache_batch_size)
+    white_probs, white_confs = precompute_whitebox_cache(
+        base,
+        model=model,
+        prereq_edge_index=prereq_edge_index,
+        batch_size=cache_batch_size,
+        device=trained.device,
+    )
+    logger.info("white-box cache ready (%d sequences)", len(base))
+    return DataLoader(
+        _WhiteboxCachedDataset(base, white_probs, white_confs),
+        batch_size=budget.batch_size,
+        shuffle=shuffle,
+        collate_fn=_collate_with_white,
+    )
+
+
 def wrap_trained_fold(
     trained: "TrainedFold",
     *,
@@ -200,6 +320,8 @@ def _to_grey_batch(
     from dh2a_kt.models.greykt import GreyKTBatch
 
     device = trained.device
+    white_prob = batch.get("white_prob")
+    white_confidence = batch.get("white_confidence")
     return GreyKTBatch(
         concept_ids=batch["concept_ids"].to(device),
         exercise_ids=batch["exercise_ids"].to(device),
@@ -209,6 +331,8 @@ def _to_grey_batch(
         prereq_edge_index=prereq_edge_index.to(device),
         concept_train_freq=concept_train_freq.to(device),
         black_confidence=None if black_confidence is None else black_confidence.to(device),
+        white_prob=None if white_prob is None else white_prob.to(device),
+        white_confidence=None if white_confidence is None else white_confidence.to(device),
     )
 
 
@@ -324,6 +448,79 @@ def collect_greykt_outputs(
     )
 
 
+def greykt_checkpoint_dir(
+    *,
+    dataset: str,
+    fold: int,
+    variant: str,
+    signal: str,
+    root: Path | None = None,
+) -> Path:
+    """Default directory for GreyKT train resume artefacts (latest.pt / best.pt)."""
+    base = Path(root) if root is not None else Path("results") / "checkpoints"
+    return base / f"greykt_{dataset}_fold{fold}_{variant}_{signal}"
+
+
+def save_greykt_train_checkpoint(
+    path: Path,
+    *,
+    model,
+    optimizer,
+    epoch: int,
+    best_epoch: int,
+    best_loss: float,
+    best_state: dict | None,
+    meta: dict | None = None,
+) -> Path:
+    """Persist model + optimizer + best-so-far so train can resume after a crash."""
+    import torch
+
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "epoch": int(epoch),
+        "model_state": {k: v.detach().cpu() for k, v in model.state_dict().items()},
+        "optimizer_state": optimizer.state_dict(),
+        "best_epoch": int(best_epoch),
+        "best_loss": float(best_loss),
+        "best_state": best_state,
+        "meta": dict(meta or {}),
+    }
+    torch.save(payload, path)
+    logger.info("wrote GreyKT checkpoint epoch=%s -> %s", epoch, path)
+    return path
+
+
+def load_greykt_train_checkpoint(
+    path: Path,
+    model,
+    optimizer,
+    *,
+    device: str = "cpu",
+) -> dict:
+    """Load a GreyKT train checkpoint into ``model`` / ``optimizer``.
+
+    Returns the payload (epoch = last *completed* 1-based epoch).
+    """
+    import torch
+
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(path)
+    payload = torch.load(path, map_location=device, weights_only=False)
+    model.load_state_dict(payload["model_state"])
+    if payload.get("optimizer_state") is not None:
+        optimizer.load_state_dict(payload["optimizer_state"])
+    logger.info(
+        "resumed GreyKT from %s (completed epoch=%s best_epoch=%s best_loss=%.4f)",
+        path,
+        payload.get("epoch"),
+        payload.get("best_epoch"),
+        float(payload.get("best_loss", float("nan"))),
+    )
+    return payload
+
+
 def train_greykt_one_fold(
     model,
     trained: "TrainedFold",
@@ -337,6 +534,11 @@ def train_greykt_one_fold(
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     mc_samples: int = 0,
+    checkpoint_dir: Path | None = None,
+    resume_from: Path | None = None,
+    checkpoint_meta: dict | None = None,
+    use_amp: bool = False,
+    freeze_hypergraph: bool = False,
 ) -> None:
     import torch
 
@@ -346,17 +548,56 @@ def train_greykt_one_fold(
 
     device = trained.device
     optimizer = torch.optim.Adam(model.black_box.parameters(), lr=budget.lr)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp and str(device).startswith("cuda"))
     model.train()
     full_index = {k: v.to(device) for k, v in trained.clean_hyperedge_index.items()}
+    if freeze_hypergraph:
+        logger.info("GreyKT freeze-hypergraph: concept graph encoded once per epoch (no graph backward)")
+    if use_amp:
+        logger.info("GreyKT AMP enabled")
     best_state = None
     best_loss = float("inf")
     best_epoch = -1
-    for epoch in range(budget.epochs):
+    start_epoch = 0  # 0-based index into range(budget.epochs)
+
+    ckpt_dir = Path(checkpoint_dir) if checkpoint_dir is not None else None
+    if ckpt_dir is not None:
+        ckpt_dir.mkdir(parents=True, exist_ok=True)
+    resume_path = Path(resume_from) if resume_from is not None else None
+    if resume_path is None and ckpt_dir is not None:
+        candidate = ckpt_dir / "latest.pt"
+        if candidate.exists():
+            resume_path = candidate
+    if resume_path is not None:
+        payload = load_greykt_train_checkpoint(
+            resume_path, model, optimizer, device=str(device)
+        )
+        completed = int(payload.get("epoch", 0))
+        start_epoch = completed  # next epoch index = completed count
+        best_epoch = int(payload.get("best_epoch", -1))
+        best_loss = float(payload.get("best_loss", float("inf")))
+        best_state = payload.get("best_state")
+        if start_epoch >= budget.epochs:
+            logger.info(
+                "resume checkpoint already finished all %s epochs; restoring best",
+                budget.epochs,
+            )
+            if best_state is not None:
+                model.load_state_dict(best_state)
+            return
+
+    amp_device = "cuda" if str(device).startswith("cuda") else "cpu"
+    for epoch in range(start_epoch, budget.epochs):
         empty_states = precompute_concept_states(
             model.black_box, empty_hyperedge_index(device), device, enable_grad=False
         )
+        cached_full_states = None
+        if freeze_hypergraph:
+            cached_full_states = precompute_concept_states(
+                model.black_box, full_index, device, enable_grad=False
+            )
         ablated_index = None
-        if graph_sensitivity_weight > 0.0 and trained.clean_hyperedges:
+        if graph_sensitivity_weight > 0.0 and trained.clean_hyperedges and not freeze_hypergraph:
             ablation_seed = int(torch.randint(0, 2**31, (1,)).item())
             ablated_index = destroyed_hyperedge_index(
                 trained.clean_hyperedges,
@@ -370,9 +611,12 @@ def train_greykt_one_fold(
         for batch in train_loader:
             lengths = batch["lengths"].to(device)
             use_empty = graph_dropout > 0.0 and torch.rand(1).item() < graph_dropout
-            states = empty_states if use_empty else precompute_concept_states(
-                model.black_box, full_index, device, enable_grad=True
-            )
+            if freeze_hypergraph:
+                states = empty_states if use_empty else cached_full_states
+            else:
+                states = empty_states if use_empty else precompute_concept_states(
+                    model.black_box, full_index, device, enable_grad=True
+                )
             cb_t = _maybe_mc_confidence(model, batch, trained, mc_samples)
             grey_batch = _to_grey_batch(
                 batch,
@@ -382,44 +626,74 @@ def train_greykt_one_fold(
                 states,
                 black_confidence=cb_t,
             )
-            optimizer.zero_grad()
-            out = model(grey_batch)
-            loss = next_step_bce(out.probs, batch["correct"].to(device), lengths)
+            optimizer.zero_grad(set_to_none=True)
+            with torch.amp.autocast(amp_device, enabled=use_amp):
+                out = model(grey_batch)
+            # BCE on probabilities is not AMP-safe; compute in fp32.
+            loss = next_step_bce(out.probs.float(), batch["correct"].to(device), lengths)
             if graph_sensitivity_weight > 0.0 and ablated_index is not None and n_batches % 5 == 0:
-                logits_full = model.black_box(
-                    DH2KTBatch(
-                        concept_ids=grey_batch.concept_ids,
-                        exercise_ids=grey_batch.exercise_ids,
-                        responses=grey_batch.responses,
-                        hyperedge_index=full_index,
-                        concept_states=states,
+                with torch.amp.autocast(amp_device, enabled=use_amp):
+                    logits_full = model.black_box(
+                        DH2KTBatch(
+                            concept_ids=grey_batch.concept_ids,
+                            exercise_ids=grey_batch.exercise_ids,
+                            responses=grey_batch.responses,
+                            hyperedge_index=full_index,
+                            concept_states=states,
+                        )
                     )
-                )
-                logits_ablated = model.black_box(
-                    DH2KTBatch(
-                        concept_ids=grey_batch.concept_ids,
-                        exercise_ids=grey_batch.exercise_ids,
-                        responses=grey_batch.responses,
-                        hyperedge_index=ablated_index,
+                    logits_ablated = model.black_box(
+                        DH2KTBatch(
+                            concept_ids=grey_batch.concept_ids,
+                            exercise_ids=grey_batch.exercise_ids,
+                            responses=grey_batch.responses,
+                            hyperedge_index=ablated_index,
+                        )
                     )
-                )
                 loss = loss + graph_sensitivity_weight * graph_sensitivity_loss(
-                    logits_full, logits_ablated, lengths, margin=graph_sensitivity_margin
+                    logits_full.float(), logits_ablated.float(), lengths, margin=graph_sensitivity_margin
                 )
             if not torch.isfinite(loss):
                 optimizer.zero_grad(set_to_none=True)
                 continue
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.black_box.parameters(), max_norm=1.0)
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
             epoch_loss += float(loss.item())
             n_batches += 1
         mean_loss = epoch_loss / max(n_batches, 1)
-        logger.info("greykt epoch=%s/%s loss=%.4f", epoch + 1, budget.epochs, mean_loss)
+        completed_epoch = epoch + 1
+        logger.info("greykt epoch=%s/%s loss=%.4f", completed_epoch, budget.epochs, mean_loss)
         if n_batches > 0 and mean_loss < best_loss:
             best_loss = mean_loss
-            best_epoch = epoch + 1
+            best_epoch = completed_epoch
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        if ckpt_dir is not None:
+            meta = dict(checkpoint_meta or {})
+            meta.update({"completed_epoch": completed_epoch, "train_loss": mean_loss})
+            save_greykt_train_checkpoint(
+                ckpt_dir / "latest.pt",
+                model=model,
+                optimizer=optimizer,
+                epoch=completed_epoch,
+                best_epoch=best_epoch,
+                best_loss=best_loss,
+                best_state=best_state,
+                meta=meta,
+            )
+            if best_epoch == completed_epoch and best_state is not None:
+                save_greykt_train_checkpoint(
+                    ckpt_dir / "best.pt",
+                    model=model,
+                    optimizer=optimizer,
+                    epoch=completed_epoch,
+                    best_epoch=best_epoch,
+                    best_loss=best_loss,
+                    best_state=best_state,
+                    meta=meta,
+                )
     if best_state is not None:
         model.load_state_dict(best_state)
         logger.info("greykt restored best epoch=%s train_loss=%.4f", best_epoch, best_loss)
