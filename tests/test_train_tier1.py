@@ -59,6 +59,7 @@ def test_next_step_loss_ignores_short_sequences():
 
 
 def test_train_and_evaluate_fold_toy():
+    pytest.importorskip("torch_geometric")
     torch = pytest.importorskip("torch")
     train_df = _synthetic_logs(n_users=12, seq_len=10)
     eval_df = _synthetic_logs(n_users=8, seq_len=10)
@@ -78,6 +79,32 @@ def test_train_and_evaluate_fold_toy():
         budget,
         device="cpu",
         hidden_dim=16,
+    )
+    assert np.isfinite(result.auc)
+    assert result.n_predictions > 0
+
+
+def test_train_and_evaluate_fold_toy_v3():
+    pytest.importorskip("torch_geometric")
+    train_df = _synthetic_logs(n_users=12, seq_len=10)
+    eval_df = _synthetic_logs(n_users=8, seq_len=10)
+    e_pre = pd.DataFrame({"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]})
+    budget = TrainingBudget(
+        reference_model="gkt",
+        batch_size=4,
+        epochs=2,
+        lr=1e-2,
+        max_seq_len=10,
+        matched_p0=True,
+    )
+    result = train_and_evaluate_fold(
+        train_df,
+        eval_df,
+        e_pre,
+        budget,
+        device="cpu",
+        hidden_dim=16,
+        architecture="v3",
     )
     assert np.isfinite(result.auc)
     assert result.n_predictions > 0

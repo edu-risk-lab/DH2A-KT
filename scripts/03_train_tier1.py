@@ -2,10 +2,16 @@
 """Pha 2-3 driver (M5): train DH2-KT and compare against P0 baselines.
 
 Usage:
-    python scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0
-    python scripts/03_train_tier1.py configs/xes3g5m.yaml --all-folds --device cuda
+    python scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0 --device cuda
 
-Writes ``results/tables/dh2_kt_vs_p0.csv`` (gate artefact for M5).
+v2 (Table 4): pass ``--architecture v2`` (and keep session hyperedges off).
+v3 (default in configs/xes3g5m.yaml): per-concept memory + next-concept query
++ train-only session co-practice hyperedges. Writes
+``results/checkpoints/<dataset>_fold<N>_v3.pt`` and
+``results/tables/dh2_kt_v3_vs_p0.csv``.
+
+    python scripts/05_run_manipulation_check.py configs/xes3g5m.yaml --fold 0 --device cuda \\
+        --load-checkpoint results/checkpoints/xes3g5m_fold0_v3.pt
 """
 from __future__ import annotations
 
@@ -20,12 +26,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.config_helpers import concept_prerequisite_spec_from_config
+from dh2a_kt.hyperedge.construction import build_session_hyperedges
 from dh2a_kt.hyperedge.p0_inputs import (
     get_fold_splits,
     load_configs,
     load_e_pre,
     load_interactions_with_ids,
 )
+from dh2a_kt.hyperedge.indexing import select_session_hyperedges_for_training
 from dh2a_kt.train.tier1 import (
     FoldResult,
     resolve_training_budget,
@@ -46,7 +54,24 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=REPO_ROOT / "results" / "tables" / "dh2_kt_vs_p0.csv",
+        default=None,
+        help="Comparison CSV (default: results/tables/dh2_kt_vs_p0.csv; v3 -> dh2_kt_v3_vs_p0.csv)",
+    )
+    parser.add_argument(
+        "--save-checkpoint",
+        type=Path,
+        default=None,
+        help="Write fold checkpoint (.pt). Default: results/checkpoints/<dataset>_fold<N>_<arch>.pt",
+    )
+    parser.add_argument(
+        "--architecture",
+        default=None,
+        help="Override training.architecture (v2 or v3).",
+    )
+    parser.add_argument(
+        "--no-session",
+        action="store_true",
+        help="Disable session co-practice hyperedges (v3 ablation: prereq-only).",
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -66,8 +91,23 @@ def main() -> int:
     graph_sensitivity_weight = float(train_cfg.get("graph_sensitivity_weight", 0.0))
     graph_sensitivity_margin = float(train_cfg.get("graph_sensitivity_margin", 0.05))
     graph_sensitivity_p = float(train_cfg.get("graph_sensitivity_p", 0.9))
+    architecture = str(args.architecture or train_cfg.get("architecture", "v2"))
+    diffusion_alpha = float(train_cfg.get("diffusion_alpha", 0.5))
+    dropout = float(train_cfg.get("dropout", 0.2))
+    session_cfg = dh2_cfg.get("hyperedge", {}).get("session", {})
+    session_enabled = (
+        bool(session_cfg.get("enabled", False))
+        and architecture == "v3"
+        and not args.no_session
+    )
+    output = args.output or (
+        REPO_ROOT / "results" / "tables" / (
+            "dh2_kt_v3_vs_p0.csv" if architecture == "v3" else "dh2_kt_vs_p0.csv"
+        )
+    )
 
-    print(f"dataset={dh2_cfg['dataset']} budget={budget.reference_model} "
+    print(f"dataset={dh2_cfg['dataset']} architecture={architecture} "
+          f"budget={budget.reference_model} "
           f"batch={budget.batch_size} epochs={budget.epochs} max_seq_len={budget.max_seq_len}")
     if budget.note:
         print(f"NOTE: {budget.note}")
@@ -82,6 +122,22 @@ def main() -> int:
         eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
         e_pre = load_e_pre(p0_cfg, fold)
         hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=fold)
+        session_hyperedges = None
+        if session_enabled:
+            raw_sessions = build_session_hyperedges(
+                splits["train"],
+                fold=fold,
+                session_gap_seconds=float(session_cfg.get("session_gap_seconds", 1800)),
+                train_only=True,
+            )
+            session_hyperedges = select_session_hyperedges_for_training(
+                raw_sessions,
+                max_hyperedges=int(session_cfg.get("max_hyperedges", 20_000)),
+            )
+            print(
+                f"[fold {fold}] session hyperedges: built={len(raw_sessions)} "
+                f"selected={len(session_hyperedges)}"
+            )
         fold_result = train_and_evaluate_fold(
             splits["train"],
             eval_df,
@@ -90,12 +146,23 @@ def main() -> int:
             device=args.device,
             hidden_dim=hidden_dim,
             n_hypergraph_layers=n_hypergraph_layers,
+            dropout=dropout,
             graph_dropout=graph_dropout,
             graph_sensitivity_weight=graph_sensitivity_weight,
             graph_sensitivity_margin=graph_sensitivity_margin,
             graph_sensitivity_p=graph_sensitivity_p,
             hyperedge_spec=hyperedge_spec,
+            session_hyperedges=session_hyperedges,
+            architecture=architecture,
+            diffusion_alpha=diffusion_alpha,
             max_users=args.max_users,
+            checkpoint_path=args.save_checkpoint
+            or (
+                REPO_ROOT
+                / "results"
+                / "checkpoints"
+                / f"{dh2_cfg['dataset']}_fold{fold}_{architecture}.pt"
+            ),
         )
         fold_result.fold = fold
         results.append(fold_result)
@@ -106,9 +173,9 @@ def main() -> int:
         dataset=dh2_cfg["dataset"],
         budget=budget,
         comparison_models=comparison_models,
-        output_path=args.output,
+        output_path=output,
     )
-    print(f"\nWrote comparison table: {args.output}")
+    print(f"\nWrote comparison table: {output}")
     print(table.to_string(index=False))
     return 0
 

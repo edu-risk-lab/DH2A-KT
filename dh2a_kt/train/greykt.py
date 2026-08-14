@@ -56,6 +56,8 @@ def greykt_config_from_dh2(
     embed_dim: int | None = None,
     hyperedge_kinds: tuple[str, ...] = ("concept_prerequisite",),
     black_confidence_mode: str = "frequency",
+    architecture: str = "v2",
+    diffusion_alpha: float = 0.5,
 ):
     from dh2a_kt.models.greykt import GreyKTConfig
 
@@ -80,6 +82,8 @@ def greykt_config_from_dh2(
         kappa_r=float(g.get("kappa_r", 1.0)),
         backoff_prob=g.get("backoff_prob"),
         black_confidence_mode=str(black_confidence_mode),
+        architecture=str(architecture),
+        diffusion_alpha=float(diffusion_alpha),
     )
 
 
@@ -245,6 +249,8 @@ def wrap_trained_fold(
         embed_dim=bb.config.embed_dim,
         hyperedge_kinds=tuple(bb.config.hyperedge_kinds),
         black_confidence_mode=black_confidence_mode,
+        architecture=getattr(bb.config, "architecture", "v2"),
+        diffusion_alpha=float(getattr(bb.config, "diffusion_alpha", 0.5)),
     )
     model = GreyKT(cfg)
     model.black_box.load_state_dict(bb.state_dict())
@@ -331,6 +337,7 @@ def _to_grey_batch(
         prereq_edge_index=prereq_edge_index.to(device),
         concept_train_freq=concept_train_freq.to(device),
         black_confidence=None if black_confidence is None else black_confidence.to(device),
+        lengths=None if "lengths" not in batch else batch["lengths"].to(device),
         white_prob=None if white_prob is None else white_prob.to(device),
         white_confidence=None if white_confidence is None else white_confidence.to(device),
     )
@@ -589,7 +596,12 @@ def train_greykt_one_fold(
     amp_device = "cuda" if str(device).startswith("cuda") else "cpu"
     for epoch in range(start_epoch, budget.epochs):
         empty_states = precompute_concept_states(
-            model.black_box, empty_hyperedge_index(device), device, enable_grad=False
+            model.black_box,
+            empty_hyperedge_index(
+                device, kinds=tuple(model.black_box.config.hyperedge_kinds)
+            ),
+            device,
+            enable_grad=False,
         )
         cached_full_states = None
         if freeze_hypergraph:

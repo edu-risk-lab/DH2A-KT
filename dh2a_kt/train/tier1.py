@@ -227,6 +227,7 @@ if _TORCH_AVAILABLE:
                 responses=batch["responses"].to(device),
                 hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
                 concept_states=concept_states,
+                lengths=lengths,
             )
             logits = model(dh2_batch)
             pred = logits[:, :-1, 0]
@@ -288,7 +289,10 @@ if _TORCH_AVAILABLE:
         try:
             for epoch in range(budget.epochs):
                 empty_states = precompute_concept_states(
-                    model, empty_hyperedge_index(device), device, enable_grad=False
+                    model,
+                    empty_hyperedge_index(device, kinds=tuple(model.config.hyperedge_kinds)),
+                    device,
+                    enable_grad=False,
                 )
                 ablated_index = None
                 if graph_sensitivity_weight > 0.0 and clean_hyperedges:
@@ -304,21 +308,27 @@ if _TORCH_AVAILABLE:
                 epoch_loss = 0.0
                 n_batches = 0
                 n_skipped = 0
+                empty_index = empty_hyperedge_index(
+                    device, kinds=tuple(model.config.hyperedge_kinds)
+                )
                 for batch in train_loader:
                     lengths = batch["lengths"].to(device)
                     use_empty = graph_dropout > 0.0 and torch.rand(1).item() < graph_dropout
                     if use_empty:
                         states = empty_states
+                        index_for_batch = empty_index
                     else:
                         states = precompute_concept_states(
                             model, full_hyperedge_index, device, enable_grad=True
                         )
+                        index_for_batch = full_hyperedge_index
                     dh2_batch = DH2KTBatch(
                         concept_ids=batch["concept_ids"].to(device),
                         exercise_ids=batch["exercise_ids"].to(device),
                         responses=batch["responses"].to(device),
-                        hyperedge_index=full_hyperedge_index,
+                        hyperedge_index=index_for_batch,
                         concept_states=states,
+                        lengths=lengths,
                     )
                     optimizer.zero_grad()
                     logits = model(dh2_batch)
@@ -336,12 +346,14 @@ if _TORCH_AVAILABLE:
                             concept_states=states if not use_empty else precompute_concept_states(
                                 model, full_hyperedge_index, device, enable_grad=True
                             ),
+                            lengths=lengths,
                         )
                         ablated_batch = DH2KTBatch(
                             concept_ids=dh2_batch.concept_ids,
                             exercise_ids=dh2_batch.exercise_ids,
                             responses=dh2_batch.responses,
                             hyperedge_index=ablated_index,
+                            lengths=lengths,
                         )
                         logits_full = model(full_batch)
                         logits_ablated = model(ablated_batch)
@@ -405,6 +417,8 @@ if _TORCH_AVAILABLE:
         n_hypergraph_layers: int = 2,
         dropout: float = 0.2,
         hyperedge_kinds: tuple[str, ...] = ("concept_prerequisite",),
+        architecture: str = "v2",
+        diffusion_alpha: float = 0.5,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -414,6 +428,8 @@ if _TORCH_AVAILABLE:
             n_hypergraph_layers=n_hypergraph_layers,
             dropout=dropout,
             hyperedge_kinds=hyperedge_kinds,
+            architecture=architecture,
+            diffusion_alpha=diffusion_alpha,
         )
         return DH2KT(config)
 
@@ -427,12 +443,15 @@ def train_fold(
     device: str | torch.device = "cpu",
     hidden_dim: int = 128,
     n_hypergraph_layers: int = 2,
+    dropout: float = 0.2,
     graph_dropout: float = 0.0,
     graph_sensitivity_weight: float = 0.0,
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     hyperedge_spec: ConceptPrerequisiteSpec | None = None,
     session_hyperedges: list[Hyperedge] | None = None,
+    architecture: str = "v2",
+    diffusion_alpha: float = 0.5,
     max_users: int | None = None,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
@@ -479,10 +498,14 @@ def train_fold(
         len(item_to_idx),
         hidden_dim=hidden_dim,
         n_hypergraph_layers=n_hypergraph_layers,
+        dropout=dropout,
         hyperedge_kinds=tuple(kinds),
+        architecture=architecture,
+        diffusion_alpha=diffusion_alpha,
     ).to(device)
     logger.info(
-        "train_fold: concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
+        "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
+        architecture,
         len(kc_to_idx),
         len(item_to_idx),
         len(clean_hyperedges),
@@ -535,13 +558,17 @@ def train_and_evaluate_fold(
     device: str | torch.device = "cpu",
     hidden_dim: int = 128,
     n_hypergraph_layers: int = 2,
+    dropout: float = 0.2,
     graph_dropout: float = 0.0,
     graph_sensitivity_weight: float = 0.0,
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     hyperedge_spec: ConceptPrerequisiteSpec | None = None,
     session_hyperedges: list[Hyperedge] | None = None,
+    architecture: str = "v2",
+    diffusion_alpha: float = 0.5,
     max_users: int | None = None,
+    checkpoint_path: Path | None = None,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -554,12 +581,15 @@ def train_and_evaluate_fold(
         device=device,
         hidden_dim=hidden_dim,
         n_hypergraph_layers=n_hypergraph_layers,
+        dropout=dropout,
         graph_dropout=graph_dropout,
         graph_sensitivity_weight=graph_sensitivity_weight,
         graph_sensitivity_margin=graph_sensitivity_margin,
         graph_sensitivity_p=graph_sensitivity_p,
         hyperedge_spec=hyperedge_spec,
         session_hyperedges=session_hyperedges,
+        architecture=architecture,
+        diffusion_alpha=diffusion_alpha,
         max_users=max_users,
     )
     auc, n_predictions = evaluate_auc(
@@ -568,6 +598,11 @@ def train_and_evaluate_fold(
         trained.clean_hyperedge_index,
         trained.device,
     )
+    if checkpoint_path is not None:
+        from dh2a_kt.train.checkpoint import save_trained_fold
+
+        save_trained_fold(Path(checkpoint_path), trained)
+        logger.info("wrote DH2-KT checkpoint -> %s", checkpoint_path)
     return FoldResult(fold=-1, auc=auc, n_predictions=n_predictions)
 
 

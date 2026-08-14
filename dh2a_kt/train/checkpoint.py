@@ -30,6 +30,9 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "embed_dim": cfg.embed_dim,
             "n_hypergraph_layers": cfg.n_hypergraph_layers,
             "dropout": cfg.dropout,
+            "hyperedge_kinds": list(cfg.hyperedge_kinds),
+            "architecture": getattr(cfg, "architecture", "v2"),
+            "diffusion_alpha": float(getattr(cfg, "diffusion_alpha", 0.5)),
         },
     }
     torch.save(payload, path)
@@ -40,7 +43,7 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
 
     from dh2a_kt.hyperedge.construction import Hyperedge
     from dh2a_kt.hyperedge.indexing import hyperedge_index_from_list
-    from dh2a_kt.models.dh2_kt import DH2KT, DH2KTConfig
+    from dh2a_kt.models.dh2_kt import DH2KTConfig
     from dh2a_kt.train.tier1 import TrainedFold, build_model
 
     path = Path(path)
@@ -48,6 +51,8 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         raise FileNotFoundError(path)
     payload = torch.load(path, map_location=device, weights_only=False)
     cfg_dict = payload["config"]
+    kinds = tuple(cfg_dict.get("hyperedge_kinds", ("concept_prerequisite",)))
+    architecture = str(cfg_dict.get("architecture", "v2"))
     config = DH2KTConfig(
         n_concepts=int(cfg_dict["n_concepts"]),
         n_exercises=int(cfg_dict["n_exercises"]),
@@ -55,7 +60,9 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         embed_dim=int(cfg_dict.get("embed_dim", cfg_dict["hidden_dim"])),
         n_hypergraph_layers=int(cfg_dict["n_hypergraph_layers"]),
         dropout=float(cfg_dict.get("dropout", 0.2)),
-        hyperedge_kinds=("concept_prerequisite",),
+        hyperedge_kinds=kinds,
+        architecture=architecture,
+        diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
     )
     model = build_model(
         config.n_concepts,
@@ -63,6 +70,9 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         hidden_dim=config.hidden_dim,
         n_hypergraph_layers=config.n_hypergraph_layers,
         dropout=config.dropout,
+        hyperedge_kinds=kinds,
+        architecture=architecture,
+        diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
     )
     model.load_state_dict(payload["model_state"])
     dev = torch.device(device)

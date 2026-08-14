@@ -59,30 +59,38 @@ def run_manipulation_check_for_fold(
     graph_sensitivity_margin: float = 0.05,
     graph_sensitivity_p: float = 0.9,
     hyperedge_spec: ConceptPrerequisiteSpec | None = None,
+    session_hyperedges: list[Hyperedge] | None = None,
+    architecture: str = "v2",
+    diffusion_alpha: float = 0.5,
     max_users: int | None = None,
     p: float = 0.90,
     operator: str = "node_drop",
     seed: int = 42,
+    trained: TrainedFold | None = None,
 ) -> ManipulationCheckResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("run_manipulation_check_for_fold requires PyTorch")
 
     spec = hyperedge_spec or ConceptPrerequisiteSpec(fold=fold)
-    trained = train_fold(
-        train_df,
-        eval_df,
-        e_pre,
-        budget,
-        device=device,
-        hidden_dim=hidden_dim,
-        n_hypergraph_layers=n_hypergraph_layers,
-        graph_dropout=graph_dropout,
-        graph_sensitivity_weight=graph_sensitivity_weight,
-        graph_sensitivity_margin=graph_sensitivity_margin,
-        graph_sensitivity_p=graph_sensitivity_p,
-        hyperedge_spec=spec,
-        max_users=max_users,
-    )
+    if trained is None:
+        trained = train_fold(
+            train_df,
+            eval_df,
+            e_pre,
+            budget,
+            device=device,
+            hidden_dim=hidden_dim,
+            n_hypergraph_layers=n_hypergraph_layers,
+            graph_dropout=graph_dropout,
+            graph_sensitivity_weight=graph_sensitivity_weight,
+            graph_sensitivity_margin=graph_sensitivity_margin,
+            graph_sensitivity_p=graph_sensitivity_p,
+            hyperedge_spec=spec,
+            session_hyperedges=session_hyperedges,
+            architecture=architecture,
+            diffusion_alpha=diffusion_alpha,
+            max_users=max_users,
+        )
     eval_fn = make_eval_auc_fn(trained)
     return run_manipulation_check(
         trained.clean_hyperedges,

@@ -239,6 +239,9 @@ class GreyKTConfig:
     when exposing GreyKTOutput.logits for BCEWithLogitsLoss-style
     training code."""
 
+    architecture: str = "v2"
+    diffusion_alpha: float = 0.5
+
     def to_dh2kt_config(self) -> DH2KTConfig:
         return DH2KTConfig(
             n_concepts=self.n_concepts,
@@ -248,6 +251,8 @@ class GreyKTConfig:
             n_hypergraph_layers=self.n_hypergraph_layers,
             dropout=self.dropout,
             hyperedge_kinds=self.hyperedge_kinds,
+            architecture=self.architecture,
+            diffusion_alpha=self.diffusion_alpha,
         )
 
     def resolved_kappa_w(self) -> float:
@@ -288,6 +293,7 @@ class GreyKTBatch:
     """Optional per-prediction C_B, shape (B, T). Overrides the frequency
     table. Used for MC-dropout (or any other per-timestep signal). Detached
     by the caller -- this is not a learned parameter."""
+    lengths: "torch.Tensor | None" = None
     white_prob: "torch.Tensor | None" = None
     """Optional precomputed p_W, shape (B, T). White-box has no learned
     params -- callers may cache once per sequence and reuse across epochs."""
@@ -301,6 +307,7 @@ class GreyKTBatch:
             responses=self.responses,
             hyperedge_index=self.hyperedge_index,
             concept_states=self.concept_states,
+            lengths=self.lengths,
         )
 
 

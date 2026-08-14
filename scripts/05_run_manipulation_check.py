@@ -40,6 +40,12 @@ def main() -> int:
         help="Override training.graph_sensitivity_weight (e.g. 0 = w/o L_aux ablation)",
     )
     parser.add_argument(
+        "--load-checkpoint",
+        type=Path,
+        default=None,
+        help="Score a saved DH2-KT fold instead of retraining (required for v3 M6 after 03).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -72,6 +78,20 @@ def main() -> int:
     e_pre = load_e_pre(p0_cfg, args.fold)
     hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=args.fold)
 
+    trained = None
+    if args.load_checkpoint is not None:
+        from dh2a_kt.train.checkpoint import load_trained_fold
+        from dh2a_kt.train.greykt import make_sequence_loader
+
+        trained = load_trained_fold(args.load_checkpoint, device=args.device)
+        eval_df_mc = eval_df
+        if args.max_users is not None:
+            users = eval_df_mc["user_id"].unique()[: args.max_users]
+            eval_df_mc = eval_df_mc[eval_df_mc["user_id"].isin(users)]
+        trained.eval_loader = make_sequence_loader(eval_df_mc, trained, budget, shuffle=False)
+        print(f"[fold {args.fold}] loaded checkpoint {args.load_checkpoint} "
+              f"architecture={getattr(trained.model.config, 'architecture', 'v2')}")
+
     print(
         f"[fold {args.fold}] manipulation_check p={mc_cfg.get('p', 0.90)} "
         f"operator={mc_cfg.get('operator', 'node_drop')} "
@@ -92,15 +112,27 @@ def main() -> int:
         graph_sensitivity_margin=graph_sensitivity_margin,
         graph_sensitivity_p=graph_sensitivity_p,
         hyperedge_spec=hyperedge_spec,
+        architecture=str(train_cfg.get("architecture", "v2")),
+        diffusion_alpha=float(train_cfg.get("diffusion_alpha", 0.5)),
         max_users=args.max_users,
         p=float(mc_cfg.get("p", 0.90)),
         operator=str(mc_cfg.get("operator", "node_drop")),
         seed=int(mc_cfg.get("seed", 42)),
+        trained=trained,
     )
 
     dataset = dh2_cfg["dataset"]
+    arch = (
+        str(getattr(trained.model.config, "architecture", "v2"))
+        if trained is not None
+        else str(train_cfg.get("architecture", "v2"))
+    )
     output = args.output or (
-        REPO_ROOT / "results" / "tables" / f"{dataset}_fold{args.fold}_manipulation_check.json"
+        REPO_ROOT / "results" / "tables" / (
+            f"{dataset}_fold{args.fold}_manipulation_check_v3.json"
+            if arch == "v3"
+            else f"{dataset}_fold{args.fold}_manipulation_check.json"
+        )
     )
     write_manipulation_check_result(
         result,
