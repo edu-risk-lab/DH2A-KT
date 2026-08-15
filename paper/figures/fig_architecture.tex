@@ -21,16 +21,15 @@
 % Optional FoundationalASSIST path (session+Hint / observational ATE)
 \node[dashbox, minimum width=2.6cm, below=0.42cm of he] (fa) {FoundationalASSIST\\session+Hint / ATE};
 \draw[->, densely dashed, thick] (fa) -- (enc);
+% Freeze label inside the Tier 1 frame (below the FA path, aligned with encoder)
+\node[anchor=north] (frz) at ([yshift=-0.28cm]enc |- fa.south)
+  {\textit{freeze after training}};
 % Tier 1 frame (drawn on the background layer so its fill does not paint
 % over the child boxes placed above; see \pgfonlayer{background} below)
 \begin{pgfonlayer}{background}
-\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(fa),
+\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(fa)(frz),
       label={[font=\small\bfseries]above:Tier 1 --- DH$^2$-KT (quantitative)}] {};
 \end{pgfonlayer}
-
-% ===== Freeze =====
-\node[below=1.55cm of enc] (frz) {\textit{freeze after training}};
-\draw[->, thick, densely dashed] (enc.south) -- ++(0,-0.28) -| (frz.north);
 
 % ===== Tier 2 row (Critic gates Diagnostician before Tutor write-back) =====
 \node[box, minimum width=2.5cm, below=0.5cm of frz] (diag) {Diagnostician};

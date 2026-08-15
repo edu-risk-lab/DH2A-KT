@@ -12,6 +12,7 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,positioning,backgrounds}
 \usepackage{hyperref}
+\usepackage{xurl}
 
 \journal{Knowledge-Based Systems}
 
@@ -342,7 +343,9 @@ ASSISTments~2012, and Junyi, \cite{daominh2026p0} finds that switching from
 full-log to train-only graph construction changes baseline AUC by at most
 0.003 --- evidence that leakage control alone does not manufacture large
 gains. \textbf{Reuse artefacts.} We pin the companion repository to commit
-\texttt{5e3d6a01c32a649f1655ac8712f03359bddfe478} and copy its published
+\texttt{5e3d6a0} (full SHA
+\texttt{5e3d6a01c32a649f1655ac}\allowbreak\texttt{8712f03359bddfe478})
+and copy its published
 baseline CSV tables verbatim for the nine models listed in
 Section~\ref{sec:reuse}; config checksum verification for XES3G5M is
 reported there. Concept-prerequisite hyperedges in this paper are formed by
@@ -546,21 +549,22 @@ expert prerequisite DAG for \emph{structural} ground-truth overlap only
 \label{sec:baselines-reuse}
 The protocol summary in Section~\ref{sec:p0-selfcontained} underpins reuse.
 We reuse \cite{daominh2026p0}'s published baseline results
-(\texttt{baselines/p0\_reused/baseline\_results.csv}, 69 rows, and
-\texttt{baseline\_fold\_results.csv}, 205 per-fold rows; both copied
-verbatim from \cite{daominh2026p0}'s \texttt{results/tables/}, pinned to
-commit \texttt{5e3d6a01c32a649f1655ac8712f03359bddfe478}, vendored
+(\path{baselines/p0_reused/baseline_results.csv}, 69 rows, and
+\path{baseline_fold_results.csv}, 205 per-fold rows; both copied
+verbatim from \cite{daominh2026p0}'s \path{results/tables/}, pinned to
+commit \texttt{5e3d6a0}, vendored
 2026-08-02) for BKT, DKT, AKT, simpleKT, GKT, GIKT, SKT, DyGKT, and DGEKT
 under train-only, leakage-controlled graph construction, rather than
 retraining these nine models on a single RTX~3090. Reuse is valid only if
 our preprocessing exactly matches \cite{daominh2026p0}'s (same hashed
-\texttt{kc\_id} space, same Q-matrix). \texttt{scripts/01\_verify\_p0\_preprocessing\_match.py}
+\texttt{kc\_id} space, same Q-matrix).
+\path{scripts/01_verify_p0_preprocessing_match.py}
 checks that each DH$^2$A-KT dataset config points at an unmodified,
 checksummed copy of \cite{daominh2026p0}'s own config and that the vendored
 commit is recorded; for XES3G5M this currently confirms the config file
 matches (sha256 \texttt{4f9f35d9\ldots d980b2}) against the vendored commit
 above. Processed parquet for XES3G5M, Junyi, and ASSISTments~2012 is present
-under \texttt{external/p0\_leakage\_audit/data/processed/}. Reviewers may
+under \path{external/p0_leakage_audit/data/processed/}. Reviewers may
 additionally request the companion PDF of \cite{daominh2026p0} as
 supplementary material while that manuscript is under review.
 
