@@ -205,6 +205,10 @@ if _TORCH_AVAILABLE:
                 kind_indices.append(kind_to_i[kind])
 
             if not kind_outputs:
+                # v3 next-concept query needs base identity when the graph is empty.
+                # v2 keeps zeros so Table-4 checkpoints stay behavior-compatible.
+                if self.config.architecture == "v3":
+                    return concept_x
                 return torch.zeros_like(concept_x)
             if self.kind_mix is not None and len(kind_outputs) > 1:
                 logits = self.kind_mix[kind_indices]
@@ -212,6 +216,12 @@ if _TORCH_AVAILABLE:
                 graph_x = (weights * torch.stack(kind_outputs, dim=0)).sum(dim=0)
             else:
                 graph_x = torch.stack(kind_outputs, dim=0).mean(dim=0)
+            if self.config.architecture == "v3":
+                # Residual: HypergraphConv over a shared edge can collapse members;
+                # keep concept_embed so the query head can still read concept identity.
+                out = concept_x.clone()
+                out[participated] = concept_x[participated] + graph_x[participated]
+                return out
             out = torch.zeros_like(concept_x)
             out[participated] = graph_x[participated]
             return out
