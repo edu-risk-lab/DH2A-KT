@@ -238,6 +238,7 @@ class BlackConfidenceDiagnostic:
     signal: str = "frequency"
     confidence_p05: float = float("nan")
     confidence_p95: float = float("nan")
+    global_auc: float = float("nan")
 
     spearman_cb_vs_squared_error: float = float("nan")
     spearman_pvalue: float = float("nan")
@@ -413,6 +414,7 @@ def stratify_confidence_vs_error(
         signal=signal,
         confidence_p05=cb_p05,
         confidence_p95=cb_p95,
+        global_auc=auc_np(probs, labels),
         spearman_cb_vs_squared_error=rho,
         spearman_pvalue=pvalue,
         spearman_cb_vs_absolute_error=rho_abs,

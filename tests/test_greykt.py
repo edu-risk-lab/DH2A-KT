@@ -196,6 +196,38 @@ def test_whitebox_branch_shrinks_toward_prior_with_sparse_evidence():
     assert white_confidence[0, 1].item() < 1.0
 
 
+def test_whitebox_query_next_credits_current_then_queries_next():
+    """KT next-step: query c_{t+1} using evidence strictly before t+1.
+    Prereq 0 -> 1. Sequence concepts [0, 1], outcomes a = [1, 0].
+    t=0 queries c_1 with empty evidence (prior). Then credits a_0=1 onto c_0.
+    t=1 queries c_1 (last step) with N=1, S=1 on prereq 0 → same 0.6 as the
+    contemporaneous test, but the *query* at t=0 is already about c_1.
+    """
+    prereq_edge_index = torch.tensor([[0], [1]], dtype=torch.long)
+    concept_ids = torch.tensor([[0, 1]])
+    responses = torch.tensor([[0.0, 1.0]])  # DH2KT-shifted; unused when outcomes set
+    outcomes = torch.tensor([[1.0, 0.0]])
+    prior_mean, prior_strength, kappa_w = 0.5, 4.0, 4.0
+
+    white_prob, white_confidence = whitebox_branch(
+        concept_ids=concept_ids,
+        responses=responses,
+        prereq_edge_index=prereq_edge_index,
+        n_concepts=4,
+        prior_mean=prior_mean,
+        prior_strength=prior_strength,
+        kappa_w=kappa_w,
+        outcomes=outcomes,
+        query_next=True,
+    )
+
+    assert white_prob[0, 0].item() == pytest.approx(prior_mean)
+    assert white_confidence[0, 0].item() == pytest.approx(0.0)
+    expected_m_p = (prior_mean * prior_strength + 1.0) / (prior_strength + 1.0)
+    assert white_prob[0, 1].item() == pytest.approx(expected_m_p)
+    assert white_confidence[0, 1].item() == pytest.approx(1.0 / (1.0 + kappa_w))
+
+
 def test_whitebox_multihop_reaches_beyond_direct_prerequisites():
     """Prereq chain 0 -> 1 -> 2. With max_hops=1, observing only concept 0
     must NOT affect concept 2's confidence (its only 1-hop ancestor, 1,
@@ -271,6 +303,16 @@ def test_greykt_black_box_loads_pretrained_dh2kt_state_dict():
     grey_config = GreyKTConfig(n_concepts=8, n_exercises=6, hidden_dim=16, embed_dim=16)
     grey = GreyKT(grey_config)
     grey.black_box.load_state_dict(standalone.state_dict())  # must not raise
+
+
+def test_greykt_shares_existing_black_box_module():
+    """Wrap must share the loaded DH2KT, not copy weights into a sibling."""
+    from dh2a_kt.models.dh2_kt import DH2KT
+
+    cfg = GreyKTConfig(n_concepts=8, n_exercises=6, hidden_dim=16, embed_dim=16)
+    standalone = DH2KT(cfg.to_dh2kt_config())
+    grey = GreyKT(cfg, black_box=standalone)
+    assert grey.black_box is standalone
 
 
 def test_greykt_sanity_overfit_tiny_batch():
@@ -464,7 +506,18 @@ def test_stratified_metrics_2d_returns_grid_with_expected_cell_count():
     )
     assert len(results) == n_buckets * n_buckets
     for cell_stats in results.values():
-        for key in ("n", "fused_auc", "black_auc", "fused_nll", "black_nll", "fused_brier", "black_brier"):
+        for key in (
+            "n",
+            "fused_auc",
+            "black_auc",
+            "white_auc",
+            "fused_nll",
+            "black_nll",
+            "white_nll",
+            "fused_brier",
+            "black_brier",
+            "white_brier",
+        ):
             assert key in cell_stats
 
 

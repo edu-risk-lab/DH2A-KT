@@ -299,6 +299,12 @@ class GreyKTBatch:
     params -- callers may cache once per sequence and reuse across epochs."""
     white_confidence: "torch.Tensor | None" = None
     """Optional precomputed C_W, shape (B, T), paired with ``white_prob``."""
+    correct: "torch.Tensor | None" = None
+    """Optional contemporaneous correctness ``a_t``, shape (B, T). When
+    set, the white-box queries ``c_{t+1}`` and credits ``a_t`` onto
+    ``c_t`` (KT next-step; no leakage). When omitted, the white-box
+    treats ``responses[:, t]`` as the outcome of ``concept_ids[:, t]``
+    -- the unit-test / contemporaneous contract."""
 
     def as_dh2kt_batch(self) -> DH2KTBatch:
         return DH2KTBatch(
@@ -423,6 +429,8 @@ if _TORCH_AVAILABLE:
         recency_decay: float = 0.98,
         kappa_w: float = 4.0,
         ancestor_tables: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None,
+        outcomes: torch.Tensor | None = None,
+        query_next: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Per-prerequisite Beta-Binomial mastery, aggregated into a
         confidence-weighted white-box probability and an aggregate white
@@ -430,6 +438,11 @@ if _TORCH_AVAILABLE:
 
         For each (sample, timestep): walks up to ``max_hops`` ancestors of
         the timestep's target concept in the audited prerequisite DAG.
+        With ``query_next=True`` the target is ``c_{t+1}`` and evidence
+        credited after the query is ``outcomes[:, t]`` (or ``a_t``);
+        that is the KT next-step contract. The default queries ``c_t``
+        and credits ``responses[:, t]`` so existing unit tests stay
+        contemporaneous.
         For each ancestor ``p``, pools the student's own recency-weighted
         evidence on ``p`` (strictly before this timestep -- no leakage)
         into a per-prerequisite Beta-Binomial posterior mastery ``M_p``
@@ -478,12 +491,17 @@ if _TORCH_AVAILABLE:
                 )
             return white_prob, white_confidence
 
+        credit = outcomes if outcomes is not None else responses
         anc_ids, anc_w, anc_mask = ancestor_tables
         for t in range(seq_len):
             concept_t = concept_ids[:, t].clamp(0, n_concepts - 1)
-            gather_ids = anc_ids[concept_t]
-            w_pc = anc_w[concept_t]
-            valid = anc_mask[concept_t].to(dtype=w_pc.dtype)
+            if query_next and t + 1 < seq_len:
+                query_c = concept_ids[:, t + 1].clamp(0, n_concepts - 1)
+            else:
+                query_c = concept_t
+            gather_ids = anc_ids[query_c]
+            w_pc = anc_w[query_c]
+            valid = anc_mask[query_c].to(dtype=w_pc.dtype)
             n_eff_p = running_count.gather(1, gather_ids) * valid
             s_eff_p = running_correct.gather(1, gather_ids) * valid
             m_p = (alpha0 + s_eff_p) / (alpha0 + beta0 + n_eff_p)
@@ -507,7 +525,7 @@ if _TORCH_AVAILABLE:
                 (batch_idx, concept_t), running_count[batch_idx, concept_t] + 1.0
             )
             running_correct.index_put_(
-                (batch_idx, concept_t), running_correct[batch_idx, concept_t] + responses[:, t]
+                (batch_idx, concept_t), running_correct[batch_idx, concept_t] + credit[:, t]
             )
 
         return white_prob, white_confidence
@@ -538,18 +556,20 @@ if _TORCH_AVAILABLE:
         prerequisite rule, fused by a non-learned relative-reliability
         gate in probability space.
 
-        ``self.black_box`` is a plain ``DH2KT`` instance, so a Tier-1
-        checkpoint trained with ``dh2a_kt.models.dh2_kt.DH2KT`` loads
-        directly via ``model.black_box.load_state_dict(...)``.
+        ``self.black_box`` is a plain ``DH2KT`` instance. Prefer sharing
+        a loaded checkpoint (``GreyKT(config, black_box=trained.model)``)
+        over ``load_state_dict`` into a freshly constructed sibling -- a
+        kind / architecture mismatch there is a silent ranking collapse.
         """
 
-        def __init__(self, config: GreyKTConfig):
+        def __init__(self, config: GreyKTConfig, black_box: DH2KT | None = None):
             super().__init__()
             self.config = config
-            self.black_box = DH2KT(config.to_dh2kt_config())
+            self.black_box = black_box if black_box is not None else DH2KT(config.to_dh2kt_config())
 
         def forward(self, batch: GreyKTBatch) -> GreyKTOutput:
-            black_logits = self.black_box(batch.as_dh2kt_batch()).squeeze(-1)  # (B, T)
+            raw = self.black_box(batch.as_dh2kt_batch())
+            black_logits = raw[..., 0] if raw.dim() == 3 else raw  # (B, T)
             # v4a: temperature scaling (identity at T=1.0). Monotone, so the
             # black-box branch's ranking -- and its AUC -- are unchanged.
             black_probs = torch.sigmoid(black_logits / self.config.temperature)
@@ -571,6 +591,8 @@ if _TORCH_AVAILABLE:
                         hop_decay=self.config.hop_decay,
                         recency_decay=self.config.recency_decay,
                         kappa_w=self.config.resolved_kappa_w(),
+                        outcomes=batch.correct,
+                        query_next=batch.correct is not None,
                     )
 
             if self.config.black_confidence_mode == "predictive":
@@ -703,6 +725,7 @@ if _TORCH_AVAILABLE:
         white_confidence: torch.Tensor,
         labels: torch.Tensor,
         n_buckets: int = 3,
+        white_probs: torch.Tensor | None = None,
     ) -> dict[str, dict[str, float]]:
         """The direct test of GreyKT's central hypothesis, stratified
         jointly along BOTH confidence axes -- concept_train_support (C_B)
@@ -732,6 +755,22 @@ if _TORCH_AVAILABLE:
         fp = fused_probs.detach().reshape(-1)
         bp = black_probs.detach().reshape(-1)
         y = labels.detach().reshape(-1)
+        wp = None if white_probs is None else white_probs.detach().reshape(-1)
+
+        def _nan_cell(n: int) -> dict[str, float]:
+            cell = {
+                "n": float(n),
+                "fused_auc": float("nan"),
+                "black_auc": float("nan"),
+                "white_auc": float("nan"),
+                "fused_nll": float("nan"),
+                "black_nll": float("nan"),
+                "white_nll": float("nan"),
+                "fused_brier": float("nan"),
+                "black_brier": float("nan"),
+                "white_brier": float("nan"),
+            }
+            return cell
 
         edges = torch.linspace(0.0, 1.0, n_buckets + 1)
         results: dict[str, dict[str, float]] = {}
@@ -745,26 +784,26 @@ if _TORCH_AVAILABLE:
                 key = f"C_B[{lo_b:.2f},{hi_b:.2f}]_C_W[{lo_w:.2f},{hi_w:.2f}]"
                 n = int(mask.sum().item())
                 if n < 2 or y[mask].unique().numel() < 2:
-                    results[key] = {
-                        "n": float(n),
-                        "fused_auc": float("nan"),
-                        "black_auc": float("nan"),
-                        "fused_nll": float("nan"),
-                        "black_nll": float("nan"),
-                        "fused_brier": float("nan"),
-                        "black_brier": float("nan"),
-                    }
+                    results[key] = _nan_cell(n)
                     continue
                 y_np = y[mask].numpy()
-                results[key] = {
+                cell = {
                     "n": float(n),
                     "fused_auc": float(roc_auc_score(y_np, fp[mask].numpy())),
                     "black_auc": float(roc_auc_score(y_np, bp[mask].numpy())),
+                    "white_auc": float("nan"),
                     "fused_nll": negative_log_likelihood(fp[mask], y[mask]),
                     "black_nll": negative_log_likelihood(bp[mask], y[mask]),
+                    "white_nll": float("nan"),
                     "fused_brier": brier_score(fp[mask], y[mask]),
                     "black_brier": brier_score(bp[mask], y[mask]),
+                    "white_brier": float("nan"),
                 }
+                if wp is not None:
+                    cell["white_auc"] = float(roc_auc_score(y_np, wp[mask].numpy()))
+                    cell["white_nll"] = negative_log_likelihood(wp[mask], y[mask])
+                    cell["white_brier"] = brier_score(wp[mask], y[mask])
+                results[key] = cell
         return results
 
 else:  # pragma: no cover

@@ -37,12 +37,14 @@ from dh2a_kt.hyperedge.p0_inputs import (
 )
 from dh2a_kt.train.checkpoint import load_trained_fold
 from dh2a_kt.train.greykt import (
+    assert_black_auc_matches_native,
     collect_greykt_outputs,
     enforce_cb_diagnostic,
     fit_temperature_on_loader,
     greykt_checkpoint_dir,
     make_sequence_loader,
     make_whitebox_cached_loader,
+    native_dh2kt_auc,
     train_greykt_one_fold,
     wrap_trained_fold,
     write_greykt_report,
@@ -73,6 +75,21 @@ def _enforce_diagnostic(path: Path, *, force: bool) -> str | None:
     return verdict
 
 
+def _cap_users(df: pd.DataFrame, max_users: int | None) -> pd.DataFrame:
+    if max_users is None:
+        return df
+    users = df["user_id"].unique()[:max_users]
+    return df[df["user_id"].isin(users)]
+
+
+def _eval_frames(splits: dict, max_users: int | None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Validation-only, test-only, and Table-4 comparable valid+test frames."""
+    valid_df = _cap_users(splits["valid"], max_users)
+    test_df = _cap_users(splits["test"], max_users)
+    combined = pd.concat([valid_df, test_df], ignore_index=True)
+    return valid_df, test_df, combined
+
+
 def _load_or_train_black_box(args, dh2_cfg, p0_cfg, splits, e_pre, budget, hyperedge_spec):
     train_cfg = dh2_cfg.get("training", {})
     kwargs = dict(
@@ -86,16 +103,15 @@ def _load_or_train_black_box(args, dh2_cfg, p0_cfg, splits, e_pre, budget, hyper
         hyperedge_spec=hyperedge_spec,
         max_users=args.max_users,
     )
+    valid_df, test_df, combined = _eval_frames(splits, args.max_users)
     if args.load_checkpoint is not None:
         trained = load_trained_fold(args.load_checkpoint, device=args.device)
-        eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
-        if args.max_users is not None:
-            users = eval_df["user_id"].unique()[: args.max_users]
-            eval_df = eval_df[eval_df["user_id"].isin(users)]
-        trained.eval_loader = make_sequence_loader(eval_df, trained, budget, shuffle=False)
-        return trained
-    eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
-    return train_fold(splits["train"], eval_df, e_pre, budget, **kwargs)
+        # Default eval_loader is valid+test so wrap black_auc is Table-4 comparable.
+        # Checkpoint *selection* uses a separate valid_loader (never this one).
+        trained.eval_loader = make_sequence_loader(combined, trained, budget, shuffle=False)
+        return trained, valid_df, test_df, combined
+    trained = train_fold(splits["train"], combined, e_pre, budget, **kwargs)
+    return trained, valid_df, test_df, combined
 
 
 def main() -> int:
@@ -232,9 +248,12 @@ def main() -> int:
         train_df = train_df[train_df["user_id"].isin(users)]
     e_pre = load_e_pre(p0_cfg, args.fold)
 
-    trained = _load_or_train_black_box(
+    trained, valid_df, test_df, combined_df = _load_or_train_black_box(
         args, dh2_cfg, p0_cfg, splits, e_pre, budget, hyperedge_spec
     )
+    valid_loader = make_sequence_loader(valid_df, trained, budget, shuffle=False)
+    test_loader = make_sequence_loader(test_df, trained, budget, shuffle=False)
+    combined_loader = trained.eval_loader  # valid+test, Table 4 protocol
     prior_mean = prior_mean_from_train(train_df)
     freq = concept_training_frequency(train_df, trained.kc_to_idx)
     prereq = prereq_edge_index_from_e_pre(e_pre, trained.kc_to_idx)
@@ -275,6 +294,14 @@ def main() -> int:
             else:
                 print(f"resuming from {resume_from}")
         print(f"GreyKT checkpoints -> {ckpt_dir}")
+        valid_cached = make_whitebox_cached_loader(
+            valid_df,
+            trained,
+            budget,
+            model,
+            prereq,
+            shuffle=False,
+        )
         train_greykt_one_fold(
             model,
             trained,
@@ -291,6 +318,7 @@ def main() -> int:
             resume_from=resume_from,
             use_amp=bool(args.amp),
             freeze_hypergraph=bool(args.freeze_hypergraph),
+            valid_loader=valid_cached,
             checkpoint_meta={
                 "dataset": dataset,
                 "fold": args.fold,
@@ -300,22 +328,55 @@ def main() -> int:
                 "matched_p0": budget.matched_p0,
                 "amp": bool(args.amp),
                 "freeze_hypergraph": bool(args.freeze_hypergraph),
+                "selection_metric": "valid_nll",
             },
         )
 
     if args.variant in ("v4a", "v4ab"):
-        valid_df = splits["valid"]
-        if args.max_users is not None:
-            users = valid_df["user_id"].unique()[: args.max_users]
-            valid_df = valid_df[valid_df["user_id"].isin(users)]
-        valid_loader = make_sequence_loader(valid_df, trained, budget, shuffle=False)
         t = fit_temperature_on_loader(model, trained, valid_loader, prereq, freq_t)
         print(f"fitted temperature T={t:.4f} (v4a, validation only)")
 
-    report = collect_greykt_outputs(model, trained, prereq, freq_t, mc_samples=mc_samples)
-    report.fold = args.fold
-    report.variant = args.variant
-    report.diagnostic_verdict = verdict
+    trained.eval_loader = combined_loader
+    native_auc, native_n = native_dh2kt_auc(trained)
+    print(f"DH2KT native evaluate_auc on valid+test: {native_auc:.4f} (n={native_n})")
+
+    split_reports = {}
+    for split_name, loader in (
+        ("valid", valid_loader),
+        ("test", test_loader),
+        ("valid+test", combined_loader),
+    ):
+        trained.eval_loader = loader
+        split_report = collect_greykt_outputs(
+            model, trained, prereq, freq_t, mc_samples=mc_samples
+        )
+        split_report.fold = args.fold
+        split_report.variant = args.variant
+        split_report.diagnostic_verdict = verdict
+        split_report.eval_split = split_name
+        split_reports[split_name] = split_report
+        print(
+            f"  {split_name}: n={split_report.n_predictions} "
+            f"fused={split_report.fused_auc:.4f} black={split_report.black_auc:.4f} "
+            f"white={split_report.white_auc:.4f}"
+        )
+
+    report = split_reports["valid+test"]
+    report.dh2kt_native_auc = native_auc
+    from dataclasses import asdict as _asdict
+
+    report.splits = {
+        name: {k: v for k, v in _asdict(r).items() if k != "splits"}
+        for name, r in split_reports.items()
+    }
+    try:
+        assert_black_auc_matches_native(report.black_auc, native_auc)
+    except RuntimeError as exc:
+        raise SystemExit(str(exc)) from exc
+    print(
+        f"wrap audit OK: |black_auc - native| = "
+        f"{abs(report.black_auc - native_auc):.4f} (tol=0.01)"
+    )
     out = args.output or (
         REPO_ROOT
         / "results"
@@ -324,9 +385,10 @@ def main() -> int:
     )
     write_greykt_report(report, out)
     print(
-        f"\nGreyKT {args.mode}/{args.variant}: n={report.n_predictions} "
+        f"\nGreyKT {args.mode}/{args.variant} valid+test: n={report.n_predictions} "
         f"fused_auc={report.fused_auc:.4f} black_auc={report.black_auc:.4f} "
-        f"white_auc={report.white_auc:.4f} mean_gate={report.mean_gate:.3f}"
+        f"white_auc={report.white_auc:.4f} native_auc={native_auc:.4f} "
+        f"mean_gate={report.mean_gate:.3f}"
     )
     print(f"written: {out}")
     return 0

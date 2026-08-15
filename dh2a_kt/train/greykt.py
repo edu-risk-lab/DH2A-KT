@@ -39,6 +39,9 @@ class GreyKTEvalReport:
     use_absolute_backoff: bool
     grid: dict
     diagnostic_verdict: str | None = None
+    eval_split: str = "valid+test"
+    dh2kt_native_auc: float | None = None
+    splits: dict | None = None
 
 
 def greykt_config_from_dh2(
@@ -165,6 +168,7 @@ def precompute_whitebox_cache(
         for batch in loader:
             concept_ids = batch["concept_ids"].to(dev)
             responses = batch["responses"].to(dev)
+            outcomes = batch["correct"].to(dev) if "correct" in batch else None
             wp, wc = whitebox_branch(
                 concept_ids=concept_ids,
                 responses=responses,
@@ -177,6 +181,8 @@ def precompute_whitebox_cache(
                 recency_decay=cfg.recency_decay,
                 kappa_w=cfg.resolved_kappa_w(),
                 ancestor_tables=tables,
+                outcomes=outcomes,
+                query_next=outcomes is not None,
             )
             bsz = concept_ids.size(0)
             for i in range(bsz):
@@ -252,10 +258,14 @@ def wrap_trained_fold(
         architecture=getattr(bb.config, "architecture", "v2"),
         diffusion_alpha=float(getattr(bb.config, "diffusion_alpha", 0.5)),
     )
-    model = GreyKT(cfg)
-    model.black_box.load_state_dict(bb.state_dict())
-    model = model.to(trained.device)
-    return model
+    # Share the loaded module. Copying into a freshly constructed DH2KT
+    # is how wrap black_auc collapsed to ~0.53 (near chance) while the
+    # checkpoint itself is ~0.75 -- a kind/architecture mismatch that
+    # load_state_dict does not always refuse.
+    model = GreyKT(cfg, black_box=bb)
+    if model.black_box is not bb:
+        raise RuntimeError("GreyKT wrap did not share trained.model as black_box")
+    return model.to(trained.device)
 
 
 def enforce_cb_diagnostic(path: Path, *, force: bool = False) -> str | None:
@@ -328,6 +338,7 @@ def _to_grey_batch(
     device = trained.device
     white_prob = batch.get("white_prob")
     white_confidence = batch.get("white_confidence")
+    correct = batch.get("correct")
     return GreyKTBatch(
         concept_ids=batch["concept_ids"].to(device),
         exercise_ids=batch["exercise_ids"].to(device),
@@ -340,6 +351,7 @@ def _to_grey_batch(
         lengths=None if "lengths" not in batch else batch["lengths"].to(device),
         white_prob=None if white_prob is None else white_prob.to(device),
         white_confidence=None if white_confidence is None else white_confidence.to(device),
+        correct=None if correct is None else correct.to(device),
     )
 
 
@@ -366,6 +378,99 @@ def next_step_bce(probs, targets, lengths):
     if not mask.any():
         return pred.sum() * 0.0
     return F.binary_cross_entropy(pred[mask].clamp(1e-6, 1.0 - 1e-6), label[mask])
+
+
+def _as_bt(tensor):
+    """(B, T) from (B, T) or (B, T, 1) — same slice as ``evaluate_auc``."""
+    if tensor.dim() == 3:
+        return tensor[..., 0]
+    return tensor
+
+
+WRAP_BLACK_AUC_TOL = 0.01
+
+
+def native_dh2kt_auc(trained: "TrainedFold") -> tuple[float, int]:
+    """DH2KT ``evaluate_auc`` on ``trained.eval_loader`` (Table 4 protocol)."""
+    from dh2a_kt.train.tier1 import evaluate_auc
+
+    return evaluate_auc(
+        trained.model, trained.eval_loader, trained.clean_hyperedge_index, trained.device
+    )
+
+
+def assert_black_auc_matches_native(
+    black_auc: float,
+    native_auc: float,
+    *,
+    tol: float = WRAP_BLACK_AUC_TOL,
+) -> None:
+    """Refuse a wrap/train report whose black branch is not the loaded DH2KT."""
+    if not (np.isfinite(black_auc) and np.isfinite(native_auc)):
+        raise RuntimeError(
+            f"GreyKT black_auc={black_auc} or DH2KT native AUC={native_auc} is not finite. "
+            "Weight-load or eval-loader bug; do not trust this run."
+        )
+    if abs(black_auc - native_auc) > tol:
+        raise RuntimeError(
+            f"GreyKT black_auc={black_auc:.4f} disagrees with DH2KT "
+            f"evaluate_auc={native_auc:.4f} (|Δ|>{tol}). Weight-load or "
+            "batch-alignment bug; do not trust this run."
+        )
+
+
+def greykt_loader_nll(
+    model,
+    trained: "TrainedFold",
+    loader,
+    prereq_edge_index,
+    concept_train_freq,
+    *,
+    mc_samples: int = 0,
+) -> float:
+    """Mean fused next-step NLL on ``loader``. Used for validation checkpoint selection."""
+    import torch
+
+    from dh2a_kt.train.tier1 import precompute_concept_states
+
+    was_training = model.training
+    model.eval()
+    total = 0.0
+    count = 0
+    device = trained.device
+    with torch.no_grad():
+        states = precompute_concept_states(model.black_box, trained.clean_hyperedge_index, device)
+        for batch in loader:
+            lengths = batch["lengths"].to(device)
+            cb_t = _maybe_mc_confidence(model, batch, trained, mc_samples)
+            out = model(
+                _to_grey_batch(
+                    batch,
+                    trained,
+                    prereq_edge_index,
+                    concept_train_freq,
+                    states,
+                    black_confidence=cb_t,
+                )
+            )
+            probs = _as_bt(out.probs.float())
+            if probs.size(1) < 2:
+                continue
+            pred = probs[:, :-1]
+            label = batch["correct"].to(device)[:, 1:]
+            mask = torch.arange(pred.size(1), device=device).unsqueeze(0) < (lengths.unsqueeze(1) - 1)
+            if not mask.any():
+                continue
+            p = pred[mask].clamp(1e-6, 1.0 - 1e-6)
+            y = label[mask]
+            nll = -(y * torch.log(p) + (1.0 - y) * torch.log(1.0 - p))
+            total += float(nll.sum().item())
+            count += int(mask.sum().item())
+    if was_training:
+        model.train()
+    if count == 0:
+        return float("inf")
+    return total / count
 
 
 def collect_greykt_outputs(
@@ -404,12 +509,17 @@ def collect_greykt_outputs(
                 lengths.unsqueeze(1) - 1
             )
             target = batch["correct"].to(device)[:, 1:]
-            fused.extend(out.probs[:, :-1][mask].cpu().tolist())
-            black.extend(out.black_probs[:, :-1][mask].cpu().tolist())
-            white.extend(out.white_prob[:, :-1][mask].cpu().tolist())
-            gates.extend(out.gate[:, :-1][mask].cpu().tolist())
-            cb.extend(out.black_confidence[:, :-1][mask].cpu().tolist())
-            cw.extend(out.white_confidence[:, :-1][mask].cpu().tolist())
+            # Match evaluate_auc: sigmoid(logits[:, :-1]) not the temperature-scaled
+            # black_probs tensor (AUC-identical at T=1; NLL of the black *branch*
+            # still uses black_probs below for fused-vs-black calibration).
+            black_logits = _as_bt(out.black_logits)
+            black_from_logits = torch.sigmoid(black_logits[:, :-1])
+            fused.extend(_as_bt(out.probs)[:, :-1][mask].cpu().tolist())
+            black.extend(black_from_logits[mask].cpu().tolist())
+            white.extend(_as_bt(out.white_prob)[:, :-1][mask].cpu().tolist())
+            gates.extend(_as_bt(out.gate)[:, :-1][mask].cpu().tolist())
+            cb.extend(_as_bt(out.black_confidence)[:, :-1][mask].cpu().tolist())
+            cw.extend(_as_bt(out.white_confidence)[:, :-1][mask].cpu().tolist())
             labels.extend(target[mask].cpu().tolist())
 
     ft = torch.tensor(fused)
@@ -432,6 +542,7 @@ def collect_greykt_outputs(
         torch.tensor(cw),
         yt,
         n_buckets=3,
+        white_probs=wt,
     )
     return GreyKTEvalReport(
         fold=-1,
@@ -546,6 +657,7 @@ def train_greykt_one_fold(
     checkpoint_meta: dict | None = None,
     use_amp: bool = False,
     freeze_hypergraph: bool = False,
+    valid_loader=None,
 ) -> None:
     import torch
 
@@ -566,6 +678,12 @@ def train_greykt_one_fold(
     best_loss = float("inf")
     best_epoch = -1
     start_epoch = 0  # 0-based index into range(budget.epochs)
+    selection_metric = "valid_nll" if valid_loader is not None else "train_loss"
+    if valid_loader is None:
+        logger.warning(
+            "GreyKT train has no valid_loader; best.pt is selected on train loss. "
+            "Do not use this run for a paper table."
+        )
 
     ckpt_dir = Path(checkpoint_dir) if checkpoint_dir is not None else None
     if ckpt_dir is not None:
@@ -584,6 +702,17 @@ def train_greykt_one_fold(
         best_epoch = int(payload.get("best_epoch", -1))
         best_loss = float(payload.get("best_loss", float("inf")))
         best_state = payload.get("best_state")
+        prev_metric = (payload.get("meta") or {}).get("selection_metric", "train_loss")
+        if prev_metric != selection_metric:
+            logger.warning(
+                "resume checkpoint selected on %s; this run selects on %s. "
+                "Resetting best.pt tracking — do not mix the two.",
+                prev_metric,
+                selection_metric,
+            )
+            best_loss = float("inf")
+            best_epoch = -1
+            best_state = None
         if start_epoch >= budget.epochs:
             logger.info(
                 "resume checkpoint already finished all %s epochs; restoring best",
@@ -677,14 +806,39 @@ def train_greykt_one_fold(
             n_batches += 1
         mean_loss = epoch_loss / max(n_batches, 1)
         completed_epoch = epoch + 1
-        logger.info("greykt epoch=%s/%s loss=%.4f", completed_epoch, budget.epochs, mean_loss)
-        if n_batches > 0 and mean_loss < best_loss:
-            best_loss = mean_loss
+        if valid_loader is not None:
+            selection_value = greykt_loader_nll(
+                model,
+                trained,
+                valid_loader,
+                prereq_edge_index,
+                concept_train_freq,
+                mc_samples=mc_samples,
+            )
+            logger.info(
+                "greykt epoch=%s/%s train_loss=%.4f valid_nll=%.4f",
+                completed_epoch,
+                budget.epochs,
+                mean_loss,
+                selection_value,
+            )
+        else:
+            selection_value = mean_loss
+            logger.info("greykt epoch=%s/%s loss=%.4f", completed_epoch, budget.epochs, mean_loss)
+        if n_batches > 0 and selection_value < best_loss:
+            best_loss = selection_value
             best_epoch = completed_epoch
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         if ckpt_dir is not None:
             meta = dict(checkpoint_meta or {})
-            meta.update({"completed_epoch": completed_epoch, "train_loss": mean_loss})
+            meta.update(
+                {
+                    "completed_epoch": completed_epoch,
+                    "train_loss": mean_loss,
+                    "selection_metric": selection_metric,
+                    "selection_value": selection_value,
+                }
+            )
             save_greykt_train_checkpoint(
                 ckpt_dir / "latest.pt",
                 model=model,
@@ -708,7 +862,12 @@ def train_greykt_one_fold(
                 )
     if best_state is not None:
         model.load_state_dict(best_state)
-        logger.info("greykt restored best epoch=%s train_loss=%.4f", best_epoch, best_loss)
+        logger.info(
+            "greykt restored best epoch=%s %s=%.4f",
+            best_epoch,
+            selection_metric,
+            best_loss,
+        )
 
 
 def write_greykt_report(report: GreyKTEvalReport, path: Path) -> Path:

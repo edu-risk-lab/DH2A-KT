@@ -10,7 +10,7 @@ import pytest
 import yaml
 
 from dh2a_kt.config_helpers import concept_prerequisite_spec_from_config
-from dh2a_kt.train.greykt import enforce_cb_diagnostic
+from dh2a_kt.train.greykt import assert_black_auc_matches_native, enforce_cb_diagnostic
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -56,3 +56,23 @@ def test_enforce_cb_diagnostic_gate(tmp_path: Path):
 def test_greykt_sources_parse(rel: str):
     src = (REPO / rel).read_text(encoding="utf-8")
     ast.parse(src)
+
+
+def test_wrap_black_auc_audit_rejects_chance_level_disagreement():
+    assert_black_auc_matches_native(0.750, 0.751)
+    with pytest.raises(RuntimeError, match="disagrees"):
+        assert_black_auc_matches_native(0.535, 0.750)
+    with pytest.raises(RuntimeError, match="not finite"):
+        assert_black_auc_matches_native(float("nan"), 0.750)
+
+
+def test_script_22_selects_on_valid_and_audits_native_black():
+    src = (REPO / "scripts" / "22_run_greykt.py").read_text(encoding="utf-8")
+    assert "valid_loader=valid_cached" in src
+    assert "assert_black_auc_matches_native" in src
+    assert "native_dh2kt_auc" in src
+    assert '"valid"' in src and '"test"' in src and '"valid+test"' in src
+    train_src = (REPO / "dh2a_kt" / "train" / "greykt.py").read_text(encoding="utf-8")
+    assert "valid_nll" in train_src
+    assert "GreyKT(cfg, black_box=bb)" in train_src
+    assert "Do not use this run for a paper table" in train_src

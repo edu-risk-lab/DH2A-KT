@@ -69,3 +69,13 @@ def test_predictive_confidence_is_abs_2p_minus_1():
     p = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
     cb = confidence_from_predictive_prob(p)
     assert list(cb) == pytest.approx([1.0, 0.5, 0.0, 0.5, 1.0])
+
+
+def test_diagnostic_reports_global_auc_not_only_bucket_auc():
+    rng = np.random.default_rng(0)
+    n = 2000
+    labels = rng.integers(0, 2, size=n).astype(float)
+    probs = np.clip(labels + rng.normal(0, 0.25, size=n), 0.01, 0.99)
+    cb = np.abs(2.0 * probs - 1.0)
+    diag = stratify_confidence_vs_error(probs, labels, cb, signal="predictive")
+    assert 0.6 < diag.global_auc < 1.0
