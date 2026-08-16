@@ -1,0 +1,12 @@
+{
+  "auc": 0.6786895286274522,
+  "n": 1078580,
+  "m6_delta_auc": 0.0019013650974724072,
+  "vs_v2_0.750": -0.07131047137254776,
+  "vs_gkt_from_csv": -0.15495481832325875,
+  "gkt_auc_from_csv": 0.833644346950711,
+  "gate_no_session_eligible": false,
+  "passes_manipulation_check": false,
+  "auc_clean": 0.6786895286101231,
+  "auc_destroyed": 0.6767881635126507
+}

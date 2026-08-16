@@ -1,0 +1,12 @@
+dataset=xes3g5m architecture=v3 budget=gkt batch=4 epochs=10 max_seq_len=200
+
+[fold 0] loading splits + e_pre...
+[fold 0] session hyperedges: built=788818 selected=20000
+[fold 0] AUC=0.6787 n_predictions=1078580
+
+Wrote comparison table: results\tables\dh2_kt_v3_residual_vs_p0.csv
+dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type budget_note  n_predictions
+xes3g5m    0             gkt 0.833644     0.67869  -0.154955              gkt           4      10         matched                    1078580
+xes3g5m    0        simplekt 0.874720     0.67869  -0.196030              gkt           4      10         matched                    1078580
+xes3g5m mean             gkt 0.833644     0.67869  -0.154955              gkt           4      10         matched                    1078580
+xes3g5m mean        simplekt 0.874720     0.67869  -0.196030              gkt           4      10         matched                    1078580

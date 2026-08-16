@@ -13,7 +13,7 @@ data/
 
 # Stray artefacts from failed `git submodule add` / filesystem-probe attempts
 # in the authoring environment (mounted filesystem does not support unlink)
-# — harmless, kept instead of deleted because this environment cannot remove
+# â€” harmless, kept instead of deleted because this environment cannot remove
 # files either. Safe to delete by hand on an unrestricted machine.
 external/_failed_submodule_gitlink.txt
 external/_writetest2.txt
@@ -28,7 +28,7 @@ logs/*
 .pytest_cache/
 
 # Model checkpoints and generated result artefacts (large / non-reproducible
-# binaries — regenerate via scripts/03_train_tier1.py etc. on the GPU server,
+# binaries â€” regenerate via scripts/03_train_tier1.py etc. on the GPU server,
 # do not commit weights to GitHub). Keep directory skeletons via .gitkeep.
 checkpoints/*
 !checkpoints/.gitkeep
@@ -112,3 +112,10 @@ results/tables/tier2_human_eval/distribution.rar
 
 # Local Python virtual environment created by scripts/00_setup_p0_submodule.sh
 .venv/
+!results/tables/dh2_kt_v3_residual_vs_p0.csv
+!results/tables/dh2_kt_v3_vs_p0_preresidual.csv
+!results/tables/xes3g5m_fold0_manipulation_check_v3_residual.json
+!results/tables/xes3g5m_fold0_manipulation_check_v3_preresidual.json
+!results/tables/xes3g5m_fold0_v3_residual_train.log
+!results/tables/xes3g5m_fold0_v3_residual_manipulation_check.log
+!results/tables/xes3g5m_fold0_v3_residual_gate_report.json
