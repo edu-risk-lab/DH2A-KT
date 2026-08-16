@@ -97,6 +97,15 @@ def main() -> int:
         help="v4: add Rasch-style item difficulty (compare against simplekt/akt/gikt).",
     )
     parser.add_argument(
+        "--mask-repeats",
+        action="store_true",
+        help="Clean protocol: drop targets that only repeat the previous row's "
+        "attempt at the same question. pyKT's KC-level export splits one "
+        "multi-concept question into rows sharing the answer, so 14.4%% of "
+        "XES3G5M eval positions are answerable by copying the input. AUC under "
+        "this flag is NOT comparable to the P0 baseline table.",
+    )
+    parser.add_argument(
         "--window-mode",
         choices=("first", "chunked"),
         default=None,
@@ -144,18 +153,28 @@ def main() -> int:
         lr=float(train_cfg.get("lr", 0.001)),
         max_seq_len=train_cfg.get("max_seq_len"),
     )
+    p0_batch_size, p0_epochs = budget.batch_size, budget.epochs
     if args.batch_size is not None:
         budget.batch_size = args.batch_size
     if args.epochs is not None:
         budget.epochs = args.epochs
     if args.lr is not None:
         budget.lr = args.lr
-    if args.batch_size is not None or args.epochs is not None:
+    # Only an override that actually differs from P0 breaks the matched claim:
+    # passing --batch-size 4 --epochs 10 reproduces the reference budget.
+    if budget.batch_size != p0_batch_size or budget.epochs != p0_epochs:
         budget.matched_p0 = False
         budget.note = (
             f"tuned budget (batch={budget.batch_size}, epochs={budget.epochs}); "
-            f"P0 {budget.reference_model} used batch=4, epochs=10"
+            f"P0 {budget.reference_model} used batch={p0_batch_size}, epochs={p0_epochs}"
         )
+    if args.mask_repeats:
+        # P0 scores every KC row of a multi-concept attempt, so a repeat-masked
+        # AUC measures a different protocol rather than a better model.
+        budget.matched_p0 = False
+        budget.note = (
+            f"{budget.note}; " if budget.note else ""
+        ) + "clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines"
 
     comparison_models = train_cfg.get("comparison_models", ["gkt", "simplekt"])
     hidden_dim = int(args.hidden_dim or train_cfg.get("hidden_dim", 128))
@@ -201,6 +220,7 @@ def main() -> int:
     print(f"dataset={dh2_cfg['dataset']} architecture={architecture} tag={tag} "
           f"hyperedge_source={args.hyperedge_source or 'from config'} no_graph={args.no_graph} "
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
+          f"mask_repeats={args.mask_repeats} "
           f"graph_dropout={graph_dropout} laux={graph_sensitivity_weight} "
           f"budget={budget.reference_model} matched_p0={budget.matched_p0} "
           f"batch={budget.batch_size} epochs={budget.epochs} lr={budget.lr} "
@@ -260,6 +280,7 @@ def main() -> int:
             val_frac=val_frac,
             early_stop_patience=early_stop_patience,
             use_graph=not args.no_graph,
+            mask_repeats=args.mask_repeats,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT

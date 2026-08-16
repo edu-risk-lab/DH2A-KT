@@ -134,6 +134,151 @@ def test_chunked_windows_cover_the_whole_log():
     assert all(e - s <= 10 for s, e in zip(chunked._starts, chunked._ends, strict=True))
 
 
+def test_last_window_matches_p0s_tail_slice():
+    """P0's pyKT export keeps ``q_list[-max_seq_len:]``, so 'first' scores other rows.
+
+    Both modes yield one window per learner and therefore the same position count,
+    which is why the mismatch stayed invisible in the comparison tables.
+    """
+    from dh2a_kt.train.tier1 import UserSequenceDataset
+
+    logs = _synthetic_logs(n_users=5, seq_len=25)
+    kc_to_idx = {kc: i for i, kc in enumerate(sorted(logs["kc_id"].unique()))}
+    item_to_idx = {it: i for i, it in enumerate(sorted(logs["item_id"].unique()))}
+    kwargs = dict(max_seq_len=10)
+    first = UserSequenceDataset(logs, kc_to_idx, item_to_idx, window_mode="first", **kwargs)
+    last = UserSequenceDataset(logs, kc_to_idx, item_to_idx, window_mode="last", **kwargs)
+
+    assert len(last) == len(first) == 5
+    for (fs, fe), (ls, le) in zip(
+        zip(first._starts, first._ends, strict=True),
+        zip(last._starts, last._ends, strict=True),
+        strict=True,
+    ):
+        assert le - ls == 10, "the tail window is full whenever the learner is long enough"
+        assert le == fe, "both modes end at the learner boundary in _ends"
+        assert ls == fe - 10, "'last' starts max_seq_len before the learner's final row"
+        assert ls != fs, "so the two modes score disjoint halves of a 25-row log"
+
+    short = _synthetic_logs(n_users=1, seq_len=4)
+    short_ds = UserSequenceDataset(
+        short,
+        {kc: i for i, kc in enumerate(sorted(short["kc_id"].unique()))},
+        {it: i for i, it in enumerate(sorted(short["item_id"].unique()))},
+        window_mode="last",
+        max_seq_len=10,
+    )
+    assert short_ds._starts == [0], "a learner shorter than the window is not clipped"
+
+
+def _logs_with_multi_kc_questions() -> pd.DataFrame:
+    """One learner whose 2nd question covers 3 concepts, as pyKT's KC-level export writes it."""
+    rows = [
+        {"user_id": 0, "item_id": 10, "kc_id": 0, "timestamp": 100, "correct": 1},
+        {"user_id": 0, "item_id": 11, "kc_id": 1, "timestamp": 200, "correct": 0},
+        {"user_id": 0, "item_id": 11, "kc_id": 2, "timestamp": 200, "correct": 0},
+        {"user_id": 0, "item_id": 11, "kc_id": 3, "timestamp": 200, "correct": 0},
+        {"user_id": 0, "item_id": 12, "kc_id": 0, "timestamp": 300, "correct": 1},
+        # A different learner reusing the same item must not be flagged.
+        {"user_id": 1, "item_id": 11, "kc_id": 1, "timestamp": 200, "correct": 1},
+        {"user_id": 1, "item_id": 12, "kc_id": 2, "timestamp": 400, "correct": 0},
+    ]
+    return pd.DataFrame(rows)
+
+
+def test_repeat_flags_mark_only_continuations_of_the_same_attempt():
+    from dh2a_kt.train.tier1 import _repeat_flags
+
+    logs = _logs_with_multi_kc_questions().sort_values(
+        ["user_id", "timestamp", "item_id"]
+    ).reset_index(drop=True)
+    flags = _repeat_flags(logs)
+    # rows 2 and 3 continue row 1's attempt; the learner boundary resets the flag.
+    assert flags.tolist() == [False, False, True, True, False, False, False]
+
+
+def test_dataset_exposes_repeat_flags_per_window():
+    torch = pytest.importorskip("torch")
+    from dh2a_kt.train.tier1 import UserSequenceDataset
+
+    logs = _logs_with_multi_kc_questions()
+    kc_to_idx = {kc: i for i, kc in enumerate(sorted(logs["kc_id"].unique()))}
+    item_to_idx = {it: i for i, it in enumerate(sorted(logs["item_id"].unique()))}
+    dataset = UserSequenceDataset(
+        logs, kc_to_idx, item_to_idx, max_seq_len=8, window_mode="chunked"
+    )
+    first = dataset[0]
+    assert first["is_repeat"].dtype == torch.bool
+    length = int(first["length"])
+    assert first["is_repeat"][:length].tolist() == [False, False, True, True, False]
+    # padding must never be scored as a repeat
+    assert not first["is_repeat"][length:].any()
+
+
+def test_next_step_mask_drops_repeat_targets_only_when_asked():
+    torch = pytest.importorskip("torch")
+    from dh2a_kt.train.tier1 import next_step_mask
+
+    lengths = torch.tensor([5])
+    is_repeat = torch.tensor([[False, False, True, True, False]])
+    default = next_step_mask(4, lengths)
+    clean = next_step_mask(4, lengths, is_repeat=is_repeat)
+    # positions t=0..3 predict rows 1..4; rows 2 and 3 are repeats.
+    assert default.tolist() == [[True, True, True, True]]
+    assert clean.tolist() == [[True, False, False, True]]
+
+
+def test_next_step_loss_ignores_repeat_targets_under_clean_protocol():
+    torch = pytest.importorskip("torch")
+
+    targets = torch.tensor([[1.0, 0.0, 0.0, 0.0, 1.0]])
+    lengths = torch.tensor([5])
+    is_repeat = torch.tensor([[False, False, True, True, False]])
+    logits = torch.zeros(1, 5, 1)
+    clean_before = next_step_loss(logits, targets, lengths, is_repeat=is_repeat)
+
+    # Perturbing only the masked-out positions must not move the clean loss,
+    # while the default protocol does react to them.
+    perturbed = logits.clone()
+    perturbed[0, 1, 0] = 9.0
+    perturbed[0, 2, 0] = -9.0
+    clean_after = next_step_loss(perturbed, targets, lengths, is_repeat=is_repeat)
+    default_after = next_step_loss(perturbed, targets, lengths)
+
+    assert torch.isclose(clean_before, clean_after)
+    assert not torch.isclose(next_step_loss(logits, targets, lengths), default_after)
+
+
+def test_clean_protocol_scores_fewer_positions_than_p0_protocol():
+    pytest.importorskip("torch_geometric")
+    from dh2a_kt.train.tier1 import _collate, UserSequenceDataset, build_model, evaluate_auc
+    from dh2a_kt.hyperedge.indexing import hyperedge_index_from_list
+
+    torch = pytest.importorskip("torch")
+    from torch.utils.data import DataLoader
+
+    logs = pd.concat(
+        [_logs_with_multi_kc_questions().assign(user_id=lambda d: d["user_id"] + 2 * k) for k in range(6)],
+        ignore_index=True,
+    )
+    kc_to_idx = {kc: i for i, kc in enumerate(sorted(logs["kc_id"].unique()))}
+    item_to_idx = {it: i for i, it in enumerate(sorted(logs["item_id"].unique()))}
+    loader = DataLoader(
+        UserSequenceDataset(logs, kc_to_idx, item_to_idx, max_seq_len=8, window_mode="chunked"),
+        batch_size=4,
+        shuffle=False,
+        collate_fn=_collate,
+    )
+    model = build_model(len(kc_to_idx), len(item_to_idx), hidden_dim=8, architecture="v4")
+    index = hyperedge_index_from_list([], kc_to_idx)
+    _p0_auc, p0_n = evaluate_auc(model, loader, index, torch.device("cpu"))
+    _clean_auc, clean_n = evaluate_auc(
+        model, loader, index, torch.device("cpu"), mask_repeats=True
+    )
+    # each 3-concept question contributes exactly 2 repeat targets per learner
+    assert p0_n - clean_n == 2 * 6
+
+
 def test_responses_for_model_alignment_per_architecture():
     torch = pytest.importorskip("torch")
     from dh2a_kt.train.tier1 import build_model, responses_for_model

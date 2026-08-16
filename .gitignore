@@ -121,7 +121,7 @@ results/tables/tier2_human_eval/distribution.rar
 !results/tables/xes3g5m_fold0_v3_residual_gate_report.json
 
 # Local GPU runner scripts (machine-specific interpreter paths)
-scripts/run_v4_*.ps1
+scripts/run_v4*.ps1
 
 # v4 AUC track (LSTM backbone + chunked windows + DKT response alignment)
 !results/tables/dh2_kt_v4_vs_p0.csv
@@ -142,6 +142,15 @@ scripts/run_v4_*.ps1
 !results/tables/xes3g5m_fold0_v4_laux_train.log
 !results/tables/xes3g5m_fold0_manipulation_check_v4_laux.json
 !results/tables/xes3g5m_fold0_v4_laux_manipulation_check.log
+!results/tables/dh2_kt_v4q_clean_vs_p0.csv
+!results/tables/xes3g5m_fold0_v4q_clean_train.log
+!results/tables/xes3g5m_fold0_clean_protocol.csv
+!results/tables/xes3g5m_fold0_slice_auc.csv
+!results/tables/xes3g5m_fold0_slice_auc.json
+!results/tables/dh2_kt_v4q_h256l1_vs_p0.csv
+!results/tables/dh2_kt_v4q_h256l2_vs_p0.csv
+!results/tables/xes3g5m_fold0_v4q_h256l1_train.log
+!results/tables/xes3g5m_fold0_v4q_h256l2_train.log
 !results/tables/dh2_kt_v4_neigh_vs_p0.csv
 !results/tables/dh2_kt_v4_pair_vs_p0.csv
 !results/tables/xes3g5m_fold0_v4_neigh_train.log
@@ -150,3 +159,19 @@ scripts/run_v4_*.ps1
 !results/tables/xes3g5m_fold0_manipulation_check_v4_pair.json
 !results/tables/xes3g5m_fold0_v4_neigh_manipulation_check.log
 !results/tables/xes3g5m_fold0_v4_pair_manipulation_check.log
+
+# Protocol audit: window rule, repeat masking, baseline retraining, bootstrap CI
+!results/tables/xes3g5m_fold0_p0window_protocol.csv
+!results/tables/xes3g5m_fold0_p0parity_protocol.csv
+!results/tables/xes3g5m_fold0_chunked_test_protocol.csv
+!results/tables/xes3g5m_fold0_baselines_protocol.csv
+!results/tables/xes3g5m_fold0_clean_ci_v4q_vs_simplekt.csv
+!results/tables/baseline_A_dkt_repro.log
+!results/tables/_diag_pykt_smask.py
+!results/tables/_diag_pad_share.py
+
+# pyKT work dirs and prediction dumps are large regenerable intermediates
+results/pykt_work_clean/
+results/predictions/
+results/tables/_rescore_tmp.csv
+temp/_diag_pykt_smask/

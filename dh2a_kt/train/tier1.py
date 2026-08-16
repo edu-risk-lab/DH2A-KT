@@ -116,17 +116,44 @@ def shift_responses_for_next_step(correct: torch.Tensor) -> torch.Tensor:
     return responses
 
 
+def next_step_mask(
+    n_positions: int,
+    lengths: torch.Tensor,
+    *,
+    is_repeat: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Which positions ``t`` (predicting ``t + 1``) count towards loss and AUC.
+
+    Single source of truth so the training loss, validation AUC and test AUC can
+    never disagree about which positions are scored.
+
+    ``is_repeat`` is the per-row flag of shape ``(B, T)``; passing it drops every
+    target that merely continues the previous row's attempt. pyKT's KC-level
+    export splits one multi-concept question into consecutive rows sharing the
+    answer, so such a target is already visible in the model's input and is
+    predictable without any knowledge tracing.
+    """
+    mask = torch.arange(n_positions, device=lengths.device).unsqueeze(0) < (
+        lengths.unsqueeze(1) - 1
+    )
+    if is_repeat is not None:
+        mask = mask & ~is_repeat[:, 1 : n_positions + 1].bool()
+    return mask
+
+
 def next_step_loss(
     logits: torch.Tensor,
     targets: torch.Tensor,
     lengths: torch.Tensor,
+    *,
+    is_repeat: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """``logits[:, t]`` predicts ``targets[:, t + 1]`` for valid positions."""
     if logits.size(1) < 2:
         return logits.sum() * 0.0
     pred = logits[:, :-1, 0]
     label = targets[:, 1:]
-    mask = torch.arange(pred.size(1), device=pred.device).unsqueeze(0) < (lengths.unsqueeze(1) - 1)
+    mask = next_step_mask(pred.size(1), lengths, is_repeat=is_repeat)
     if not mask.any():
         return pred.sum() * 0.0
     return nn.functional.binary_cross_entropy_with_logits(pred[mask], label[mask])
@@ -151,6 +178,28 @@ def graph_sensitivity_loss(
     return torch.relu(torch.tensor(margin, device=diff.device) - diff)
 
 
+def _repeat_flags(sorted_df: pd.DataFrame) -> np.ndarray:
+    """Rows that continue the previous row's attempt on the same question.
+
+    pyKT's KC-level export emits one row per concept of a multi-concept question,
+    all sharing user, item, timestamp and answer. Such a row is not a new
+    opportunity to predict: its label is the answer already fed to the model.
+    """
+    n = len(sorted_df)
+    flags = np.zeros(n, dtype=bool)
+    if n < 2:
+        return flags
+    user_ids = sorted_df["user_id"].to_numpy()
+    item_ids = sorted_df["item_id"].to_numpy()
+    timestamps = sorted_df["timestamp"].to_numpy()
+    flags[1:] = (
+        (user_ids[1:] == user_ids[:-1])
+        & (item_ids[1:] == item_ids[:-1])
+        & (timestamps[1:] == timestamps[:-1])
+    )
+    return flags
+
+
 if _TORCH_AVAILABLE:
 
     class UserSequenceDataset(Dataset):
@@ -163,8 +212,10 @@ if _TORCH_AVAILABLE:
             max_seq_len: int,
             window_mode: str = "first",
         ):
-            if window_mode not in ("first", "chunked"):
-                raise ValueError(f"window_mode must be 'first' or 'chunked', got {window_mode!r}")
+            if window_mode not in ("first", "last", "chunked"):
+                raise ValueError(
+                    f"window_mode must be 'first', 'last' or 'chunked', got {window_mode!r}"
+                )
             self.max_seq_len = max_seq_len
             self.window_mode = window_mode
             sorted_df = df.sort_values(["user_id", "timestamp", "item_id"]).reset_index(drop=True)
@@ -177,7 +228,9 @@ if _TORCH_AVAILABLE:
             self._item_ids = item_col.to_numpy(dtype=np.int64)
             self._correct = sorted_df["correct"].to_numpy(dtype=np.float32)
             user_ids = sorted_df["user_id"].to_numpy()
+            self._is_repeat = _repeat_flags(sorted_df)
             self._n_users = 0
+            self._window_users: list[int] = []
             if len(user_ids) == 0:
                 self._starts = []
                 self._ends = []
@@ -189,9 +242,9 @@ if _TORCH_AVAILABLE:
                 starts = starts[valid]
                 ends = ends[valid]
                 if window_mode == "chunked":
-                    # One window per user keeps only the first max_seq_len rows; on
-                    # XES3G5M every user is longer than that, so ~44% of the log was
-                    # unused and eval covered ~56% of P0's positions.
+                    # Tile each learner so every interaction is used. "first" and
+                    # "last" keep a single max_seq_len window, and on XES3G5M every
+                    # learner is longer than that, so they discard most of the log.
                     window_starts: list[int] = []
                     window_ends: list[int] = []
                     for user_start, user_end in zip(starts.tolist(), ends.tolist(), strict=True):
@@ -202,10 +255,19 @@ if _TORCH_AVAILABLE:
                                 window_ends.append(window_end)
                     self._starts = window_starts
                     self._ends = window_ends
+                elif window_mode == "last":
+                    # P0's pyKT export slices ``q_list[-max_seq_len:]``, so scoring a
+                    # DH2-KT checkpoint against its published table needs the tail,
+                    # not the head: same position count, different rows.
+                    self._starts = np.maximum(starts, ends - max_seq_len).tolist()
+                    self._ends = ends.tolist()
                 else:
                     self._starts = starts.tolist()
                     self._ends = ends.tolist()
                 self._n_users = int(len(starts))
+                # Learner id per window, so predictions can be grouped by learner
+                # for a bootstrap that resamples learners rather than positions.
+                self._window_users = [int(user_ids[s]) for s in self._starts]
             logger.info(
                 "UserSequenceDataset: %d windows (mode=%s) from %d interactions",
                 len(self._starts),
@@ -223,16 +285,20 @@ if _TORCH_AVAILABLE:
             concept_ids = torch.zeros(self.max_seq_len, dtype=torch.long)
             exercise_ids = torch.zeros(self.max_seq_len, dtype=torch.long)
             correct = torch.zeros(self.max_seq_len, dtype=torch.float)
+            is_repeat = torch.zeros(self.max_seq_len, dtype=torch.bool)
             concept_ids[:length] = torch.from_numpy(self._kc_ids[start:end])
             exercise_ids[:length] = torch.from_numpy(self._item_ids[start:end])
             correct[:length] = torch.from_numpy(self._correct[start:end])
+            is_repeat[:length] = torch.from_numpy(self._is_repeat[start:end])
             responses = shift_responses_for_next_step(correct.unsqueeze(0)).squeeze(0)
             return {
                 "concept_ids": concept_ids,
                 "exercise_ids": exercise_ids,
                 "responses": responses,
                 "correct": correct,
+                "is_repeat": is_repeat,
                 "length": torch.tensor(length, dtype=torch.long),
+                "user_id": torch.tensor(self._window_users[idx], dtype=torch.long),
             }
 
     def _collate(batch_items: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
@@ -241,7 +307,9 @@ if _TORCH_AVAILABLE:
             "exercise_ids": torch.stack([item["exercise_ids"] for item in batch_items]),
             "responses": torch.stack([item["responses"] for item in batch_items]),
             "correct": torch.stack([item["correct"] for item in batch_items]),
+            "is_repeat": torch.stack([item["is_repeat"] for item in batch_items]),
             "lengths": torch.stack([item["length"] for item in batch_items]),
+            "user_ids": torch.stack([item["user_id"] for item in batch_items]),
         }
 
     @torch.no_grad()
@@ -250,10 +318,14 @@ if _TORCH_AVAILABLE:
         loader: DataLoader,
         hyperedge_index: dict[str, torch.Tensor],
         device: torch.device,
-    ) -> tuple[np.ndarray, np.ndarray]:
+        *,
+        mask_repeats: bool = False,
+        return_users: bool = False,
+    ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
         model.eval()
         probs: list[float] = []
         labels: list[float] = []
+        users: list[int] = []
         concept_states = precompute_concept_states(model, hyperedge_index, device)
         for batch in loader:
             lengths = batch["lengths"].to(device)
@@ -268,9 +340,18 @@ if _TORCH_AVAILABLE:
             logits = model(dh2_batch)
             pred = logits[:, :-1, 0]
             target = batch["correct"].to(device)[:, 1:]
-            mask = torch.arange(pred.size(1), device=device).unsqueeze(0) < (lengths.unsqueeze(1) - 1)
+            mask = next_step_mask(
+                pred.size(1),
+                lengths,
+                is_repeat=batch["is_repeat"].to(device) if mask_repeats else None,
+            )
             probs.extend(torch.sigmoid(pred[mask]).cpu().tolist())
             labels.extend(target[mask].cpu().tolist())
+            if return_users:
+                per_row = batch["user_ids"].to(device).unsqueeze(1).expand_as(mask)
+                users.extend(per_row[mask].cpu().tolist())
+        if return_users:
+            return np.asarray(probs), np.asarray(labels), np.asarray(users)
         return np.asarray(probs), np.asarray(labels)
 
     def evaluate_auc(
@@ -278,10 +359,14 @@ if _TORCH_AVAILABLE:
         loader: DataLoader,
         hyperedge_index: dict[str, torch.Tensor],
         device: torch.device,
+        *,
+        mask_repeats: bool = False,
     ) -> tuple[float, int]:
         from sklearn.metrics import roc_auc_score
 
-        probs, labels = collect_predictions(model, loader, hyperedge_index, device)
+        probs, labels = collect_predictions(
+            model, loader, hyperedge_index, device, mask_repeats=mask_repeats
+        )
         if len(probs) == 0 or len(np.unique(labels)) < 2:
             return float("nan"), 0
         return float(roc_auc_score(labels, probs)), len(probs)
@@ -314,7 +399,12 @@ if _TORCH_AVAILABLE:
         graph_sensitivity_p: float = 0.9,
         val_loader: DataLoader | None = None,
         early_stop_patience: int | None = None,
+        mask_repeats: bool = False,
     ) -> None:
+        if mask_repeats:
+            logger.info(
+                "clean protocol: repeat-row targets excluded from the loss and from val AUC"
+            )
         optimizer = torch.optim.Adam(model.parameters(), lr=budget.lr)
         model.train()
         full_hyperedge_index = {k: v.to(device) for k, v in hyperedge_index.items()}
@@ -372,7 +462,12 @@ if _TORCH_AVAILABLE:
                     )
                     optimizer.zero_grad()
                     logits = model(dh2_batch)
-                    loss = next_step_loss(logits, batch["correct"].to(device), lengths)
+                    loss = next_step_loss(
+                        logits,
+                        batch["correct"].to(device),
+                        lengths,
+                        is_repeat=batch["is_repeat"].to(device) if mask_repeats else None,
+                    )
                     if (
                         graph_sensitivity_weight > 0.0
                         and ablated_index is not None
@@ -436,7 +531,11 @@ if _TORCH_AVAILABLE:
                 # split is available, select on its AUC instead.
                 if val_loader is not None:
                     val_auc, val_n = evaluate_auc(
-                        model, val_loader, full_hyperedge_index, device
+                        model,
+                        val_loader,
+                        full_hyperedge_index,
+                        device,
+                        mask_repeats=mask_repeats,
                     )
                     model.train()
                     logger.info(
@@ -541,6 +640,7 @@ def train_fold(
     val_frac: float = 0.0,
     early_stop_patience: int | None = None,
     use_graph: bool = True,
+    mask_repeats: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -658,6 +758,7 @@ def train_fold(
         graph_sensitivity_p=graph_sensitivity_p,
         val_loader=val_loader,
         early_stop_patience=early_stop_patience,
+        mask_repeats=mask_repeats,
     )
     return TrainedFold(
         model=model,
@@ -696,6 +797,7 @@ def train_and_evaluate_fold(
     val_frac: float = 0.0,
     early_stop_patience: int | None = None,
     use_graph: bool = True,
+    mask_repeats: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -724,12 +826,14 @@ def train_and_evaluate_fold(
         val_frac=val_frac,
         early_stop_patience=early_stop_patience,
         use_graph=use_graph,
+        mask_repeats=mask_repeats,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,
         trained.eval_loader,
         trained.clean_hyperedge_index,
         trained.device,
+        mask_repeats=mask_repeats,
     )
     if checkpoint_path is not None:
         from dh2a_kt.train.checkpoint import save_trained_fold

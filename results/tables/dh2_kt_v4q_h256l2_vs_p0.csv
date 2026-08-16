@@ -1,0 +1,5 @@
+dataset,fold,reference_model,p0_auc,dh2_kt_auc,delta_auc,budget_reference,batch_size,epochs,comparison_type,budget_note,n_predictions
+xes3g5m,0,gkt,0.833644346950711,0.86213988969492,0.028495542744208957,gkt,64,40,observational,"tuned budget (batch=64, epochs=40); P0 gkt used batch=4, epochs=10",1910331
+xes3g5m,0,simplekt,0.8747199831753898,0.86213988969492,-0.012580093480469845,gkt,64,40,observational,"tuned budget (batch=64, epochs=40); P0 gkt used batch=4, epochs=10",1910331
+xes3g5m,mean,gkt,0.833644346950711,0.86213988969492,0.028495542744208957,gkt,64,40,observational,"tuned budget (batch=64, epochs=40); P0 gkt used batch=4, epochs=10",1910331
+xes3g5m,mean,simplekt,0.8747199831753898,0.86213988969492,-0.012580093480469845,gkt,64,40,observational,"tuned budget (batch=64, epochs=40); P0 gkt used batch=4, epochs=10",1910331

@@ -1,0 +1,4 @@
+checkpoint,eval_split,window_mode,architecture,use_questions,n_hyperedges,p0_protocol_auc,p0_protocol_n,clean_protocol_auc,clean_protocol_n,auc_attributable_to_repeats
+v4q,test,last,v4,True,466305,0.8731363333779905,719186,0.8219184897417335,599546,0.05121784363625692
+v4,test,last,v4,False,466305,0.8596271374640889,719186,0.8032886609983965,599546,0.056338476465692455
+v4q_clean,test,last,v4,True,466305,0.8235563158021744,719186,0.8242365688025927,599546,-0.0006802530004182961

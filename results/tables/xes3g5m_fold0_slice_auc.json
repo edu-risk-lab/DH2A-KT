@@ -1,0 +1,208 @@
+{
+  "fold": 0,
+  "n_predictions": 1910331,
+  "arms": {
+    "graph": {
+      "n_hyperedges": 466305
+    },
+    "nograph": {
+      "n_hyperedges": 0
+    }
+  },
+  "primary": "graph",
+  "baseline": "nograph",
+  "slices": [
+    {
+      "slice_dim": "overall",
+      "slice": "all",
+      "n": 1910331,
+      "positive_rate": 0.7933630349923652,
+      "auc_graph": 0.8486958285451762,
+      "auc_nograph": 0.8489417700408045,
+      "delta": -0.00024594149562828793,
+      "delta_ci_lo": -0.001009231145726941,
+      "delta_ci_hi": 0.0008704074027186721,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "unseen",
+      "n": 2,
+      "positive_rate": 0.5,
+      "auc_graph": 1.0,
+      "auc_nograph": 0.0,
+      "delta": 1.0,
+      "delta_ci_lo": 1.0,
+      "delta_ci_hi": 1.0,
+      "significant": true
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "1-99",
+      "n": 2738,
+      "positive_rate": 0.7487216946676406,
+      "auc_graph": 0.8836907969370391,
+      "auc_nograph": 0.881604154849688,
+      "delta": 0.0020866420873510982,
+      "delta_ci_lo": -0.003302490659385185,
+      "delta_ci_hi": 0.008315923996808127,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "100-499",
+      "n": 17557,
+      "positive_rate": 0.7794042262345503,
+      "auc_graph": 0.8952134765806462,
+      "auc_nograph": 0.8943265490942209,
+      "delta": 0.0008869274864252708,
+      "delta_ci_lo": -0.001252196697158206,
+      "delta_ci_hi": 0.003115718091734386,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "500-1999",
+      "n": 78728,
+      "positive_rate": 0.7974672289401483,
+      "auc_graph": 0.8884972562019047,
+      "auc_nograph": 0.8885651592105839,
+      "delta": -6.790300867920429e-05,
+      "delta_ci_lo": -0.0009574836176474172,
+      "delta_ci_hi": 0.0007888964958958063,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "2000-9999",
+      "n": 462324,
+      "positive_rate": 0.7767820835604468,
+      "auc_graph": 0.8645389639454054,
+      "auc_nograph": 0.8646694445995271,
+      "delta": -0.00013048065412168963,
+      "delta_ci_lo": -0.0011678819988018535,
+      "delta_ci_hi": 0.0004296928189263657,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_concept_train_freq",
+      "slice": "10000+",
+      "n": 1348982,
+      "positive_rate": 0.7990788609484781,
+      "auc_graph": 0.8390355594820653,
+      "auc_nograph": 0.8393558274416788,
+      "delta": -0.000320267959613485,
+      "delta_ci_lo": -0.001827248983183974,
+      "delta_ci_hi": 0.0002529203221379561,
+      "significant": false
+    },
+    {
+      "slice_dim": "position_in_learner_log",
+      "slice": "1-5",
+      "n": 21680,
+      "positive_rate": 0.7337638376383764,
+      "auc_graph": 0.7888526691330313,
+      "auc_nograph": 0.7871993432088982,
+      "delta": 0.0016533259241331422,
+      "delta_ci_lo": -0.0004938273453602787,
+      "delta_ci_hi": 0.003791958950239428,
+      "significant": false
+    },
+    {
+      "slice_dim": "position_in_learner_log",
+      "slice": "6-20",
+      "n": 81300,
+      "positive_rate": 0.7345633456334564,
+      "auc_graph": 0.8001478827360553,
+      "auc_nograph": 0.8009431121880485,
+      "delta": -0.0007952294519931735,
+      "delta_ci_lo": -0.001789394680733769,
+      "delta_ci_hi": 0.0003700826451567535,
+      "significant": false
+    },
+    {
+      "slice_dim": "position_in_learner_log",
+      "slice": "21-50",
+      "n": 162600,
+      "positive_rate": 0.7510147601476015,
+      "auc_graph": 0.8181497035056823,
+      "auc_nograph": 0.817884462969369,
+      "delta": 0.0002652405363132715,
+      "delta_ci_lo": -0.0009822414201805295,
+      "delta_ci_hi": 0.001213573755506983,
+      "significant": false
+    },
+    {
+      "slice_dim": "position_in_learner_log",
+      "slice": "51-100",
+      "n": 271000,
+      "positive_rate": 0.7752509225092251,
+      "auc_graph": 0.8368592930304096,
+      "auc_nograph": 0.8369952700334851,
+      "delta": -0.00013597700307543814,
+      "delta_ci_lo": -0.001201743820326781,
+      "delta_ci_hi": 0.0007289162539788974,
+      "significant": false
+    },
+    {
+      "slice_dim": "position_in_learner_log",
+      "slice": "101+",
+      "n": 1373751,
+      "positive_rate": 0.8063688397679055,
+      "auc_graph": 0.8569777987583836,
+      "auc_nograph": 0.8573161551408282,
+      "delta": -0.0003383563824445046,
+      "delta_ci_lo": -0.0015191908411899852,
+      "delta_ci_hi": 0.0003287208149226505,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_item_kc_count",
+      "slice": "single_kc_item",
+      "n": 1444802,
+      "positive_rate": 0.7913015070577145,
+      "auc_graph": 0.798125046497116,
+      "auc_nograph": 0.7982213026583094,
+      "delta": -9.625616119335323e-05,
+      "delta_ci_lo": -0.0008786753011209486,
+      "delta_ci_hi": 0.0013320805293041166,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_item_kc_count",
+      "slice": "multi_kc_item",
+      "n": 465529,
+      "positive_rate": 0.7997611319595557,
+      "auc_graph": 0.9600817743008376,
+      "auc_nograph": 0.9604735227112465,
+      "delta": -0.00039174841040889863,
+      "delta_ci_lo": -0.000682365947325822,
+      "delta_ci_hi": 6.849402437498463e-05,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_is_repeat_row",
+      "slice": "repeat_of_same_attempt",
+      "n": 274803,
+      "positive_rate": 0.7987321826908731,
+      "auc_graph": 0.9996639464468464,
+      "auc_nograph": 0.9996772158524736,
+      "delta": -1.326940562718093e-05,
+      "delta_ci_lo": -4.467148195685944e-05,
+      "delta_ci_hi": 1.818779868727749e-05,
+      "significant": false
+    },
+    {
+      "slice_dim": "target_is_repeat_row",
+      "slice": "fresh_attempt",
+      "n": 1635528,
+      "positive_rate": 0.7924609055913442,
+      "auc_graph": 0.7976856258579385,
+      "auc_nograph": 0.7978370496145387,
+      "delta": -0.0001514237566002663,
+      "delta_ci_lo": -0.0011343507245715118,
+      "delta_ci_hi": 0.0012182104421709712,
+      "significant": false
+    }
+  ]
+}
