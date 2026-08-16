@@ -110,6 +110,75 @@ def test_train_and_evaluate_fold_toy_v3():
     assert result.n_predictions > 0
 
 
+def test_chunked_windows_cover_the_whole_log():
+    from dh2a_kt.train.tier1 import UserSequenceDataset
+
+    logs = _synthetic_logs(n_users=5, seq_len=25)
+    kc_to_idx = {kc: i for i, kc in enumerate(sorted(logs["kc_id"].unique()))}
+    item_to_idx = {it: i for i, it in enumerate(sorted(logs["item_id"].unique()))}
+    kwargs = dict(max_seq_len=10)
+    first = UserSequenceDataset(logs, kc_to_idx, item_to_idx, window_mode="first", **kwargs)
+    chunked = UserSequenceDataset(logs, kc_to_idx, item_to_idx, window_mode="chunked", **kwargs)
+
+    def covered(dataset) -> int:
+        # __getitem__ truncates each window at max_seq_len.
+        return sum(
+            min(e - s, dataset.max_seq_len)
+            for s, e in zip(dataset._starts, dataset._ends, strict=True)
+        )
+
+    assert len(first) == 5
+    assert covered(first) == 5 * 10  # only the first window per user
+
+    assert covered(chunked) == len(logs)
+    assert all(e - s <= 10 for s, e in zip(chunked._starts, chunked._ends, strict=True))
+
+
+def test_responses_for_model_alignment_per_architecture():
+    torch = pytest.importorskip("torch")
+    from dh2a_kt.train.tier1 import build_model, responses_for_model
+
+    batch = {
+        "correct": torch.tensor([[1.0, 0.0, 1.0]]),
+        "responses": torch.tensor([[0.0, 1.0, 0.0]]),
+    }
+    for architecture, expected in (("v2", "responses"), ("v3", "responses"), ("v4", "correct")):
+        model = build_model(4, 4, hidden_dim=8, architecture=architecture)
+        assert torch.equal(responses_for_model(model, batch), batch[expected])
+
+
+@pytest.mark.parametrize("use_questions", [False, True])
+def test_train_and_evaluate_fold_toy_v4(use_questions: bool):
+    pytest.importorskip("torch_geometric")
+    train_df = _synthetic_logs(n_users=12, seq_len=20)
+    eval_df = _synthetic_logs(n_users=8, seq_len=20)
+    e_pre = pd.DataFrame({"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]})
+    budget = TrainingBudget(
+        reference_model="gkt",
+        batch_size=4,
+        epochs=2,
+        lr=1e-2,
+        max_seq_len=10,
+        matched_p0=False,
+    )
+    result = train_and_evaluate_fold(
+        train_df,
+        eval_df,
+        e_pre,
+        budget,
+        device="cpu",
+        hidden_dim=16,
+        architecture="v4",
+        use_questions=use_questions,
+        window_mode="chunked",
+        val_frac=0.25,
+        early_stop_patience=2,
+    )
+    assert np.isfinite(result.auc)
+    # chunked windows must score more positions than one window per user would.
+    assert result.n_predictions > 8 * 9
+
+
 def test_write_comparison_table(tmp_path: Path):
     budget = TrainingBudget(
         reference_model="gkt",

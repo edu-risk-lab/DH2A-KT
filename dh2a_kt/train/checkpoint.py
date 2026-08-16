@@ -33,6 +33,8 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "hyperedge_kinds": list(cfg.hyperedge_kinds),
             "architecture": getattr(cfg, "architecture", "v2"),
             "diffusion_alpha": float(getattr(cfg, "diffusion_alpha", 0.5)),
+            "use_questions": bool(getattr(cfg, "use_questions", False)),
+            "n_lstm_layers": int(getattr(cfg, "n_lstm_layers", 1)),
         },
     }
     torch.save(payload, path)
@@ -63,6 +65,8 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         hyperedge_kinds=kinds,
         architecture=architecture,
         diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
+        use_questions=bool(cfg_dict.get("use_questions", False)),
+        n_lstm_layers=int(cfg_dict.get("n_lstm_layers", 1)),
     )
     model = build_model(
         config.n_concepts,
@@ -73,6 +77,8 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         hyperedge_kinds=kinds,
         architecture=architecture,
         diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
+        use_questions=config.use_questions,
+        n_lstm_layers=config.n_lstm_layers,
     )
     model.load_state_dict(payload["model_state"])
     dev = torch.device(device)

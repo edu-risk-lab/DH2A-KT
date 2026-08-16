@@ -5,10 +5,14 @@ Usage:
     python scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0 --device cuda
 
 v2 (Table 4): pass ``--architecture v2`` (and keep session hyperedges off).
-v3 (default in configs/xes3g5m.yaml): per-concept memory + next-concept query
-+ train-only session co-practice hyperedges. Writes
-``results/checkpoints/<dataset>_fold<N>_v3.pt`` and
-``results/tables/dh2_kt_v3_vs_p0.csv``.
+v3: per-concept memory + next-concept query (recorded negative result).
+v4 (AUC track): LSTM backbone, DKT-style response alignment, residual concept
+encoding and chunked windows. Add ``--use-questions`` for the item-aware
+variant. Outputs are tagged, e.g. ``dh2_kt_v4_vs_p0.csv`` /
+``dh2_kt_v4q_vs_p0.csv`` and ``<dataset>_fold<N>_<tag>.pt``.
+
+    python scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0 --device cuda \\
+        --architecture v4 --batch-size 64 --epochs 20 --early-stop-patience 3
 
     python scripts/05_run_manipulation_check.py configs/xes3g5m.yaml --fold 0 --device cuda \\
         --load-checkpoint results/checkpoints/xes3g5m_fold0_v3.pt
@@ -66,12 +70,59 @@ def main() -> int:
     parser.add_argument(
         "--architecture",
         default=None,
-        help="Override training.architecture (v2 or v3).",
+        help="Override training.architecture (v2, v3 or v4).",
     )
     parser.add_argument(
         "--no-session",
         action="store_true",
-        help="Disable session co-practice hyperedges (v3 ablation: prereq-only).",
+        help="Disable session co-practice hyperedges (v3/v4 ablation: prereq-only).",
+    )
+    parser.add_argument(
+        "--no-graph",
+        action="store_true",
+        help="Train with zero hyperedges (graph-contribution ablation).",
+    )
+    parser.add_argument(
+        "--use-questions",
+        action="store_true",
+        help="v4: add Rasch-style item difficulty (compare against simplekt/akt/gikt).",
+    )
+    parser.add_argument(
+        "--window-mode",
+        choices=("first", "chunked"),
+        default=None,
+        help="'first' keeps one max_seq_len window per user (Table 4); "
+        "'chunked' tiles the whole log, matching P0 eval coverage.",
+    )
+    parser.add_argument("--batch-size", type=int, default=None, help="Override the P0-matched batch size")
+    parser.add_argument("--epochs", type=int, default=None, help="Override the P0-matched epoch count")
+    parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument("--dropout", type=float, default=None)
+    parser.add_argument("--lstm-layers", type=int, default=None, help="v4 LSTM depth")
+    parser.add_argument(
+        "--val-frac",
+        type=float,
+        default=None,
+        help="Fraction of TRAIN users held out to select the best epoch by AUC.",
+    )
+    parser.add_argument("--early-stop-patience", type=int, default=None)
+    parser.add_argument(
+        "--graph-dropout",
+        type=float,
+        default=None,
+        help="Override training.graph_dropout (0 disables empty-graph batches).",
+    )
+    parser.add_argument(
+        "--graph-sensitivity-weight",
+        type=float,
+        default=None,
+        help="Override the M6 auxiliary loss weight (0 disables it).",
+    )
+    parser.add_argument(
+        "--tag",
+        default=None,
+        help="Suffix for default output/checkpoint names, e.g. 'v4q_tuned'.",
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -84,31 +135,66 @@ def main() -> int:
         lr=float(train_cfg.get("lr", 0.001)),
         max_seq_len=train_cfg.get("max_seq_len"),
     )
+    if args.batch_size is not None:
+        budget.batch_size = args.batch_size
+    if args.epochs is not None:
+        budget.epochs = args.epochs
+    if args.lr is not None:
+        budget.lr = args.lr
+    if args.batch_size is not None or args.epochs is not None:
+        budget.matched_p0 = False
+        budget.note = (
+            f"tuned budget (batch={budget.batch_size}, epochs={budget.epochs}); "
+            f"P0 {budget.reference_model} used batch=4, epochs=10"
+        )
+
     comparison_models = train_cfg.get("comparison_models", ["gkt", "simplekt"])
-    hidden_dim = int(train_cfg.get("hidden_dim", 128))
+    hidden_dim = int(args.hidden_dim or train_cfg.get("hidden_dim", 128))
     n_hypergraph_layers = int(train_cfg.get("n_hypergraph_layers", 2))
-    graph_dropout = float(train_cfg.get("graph_dropout", 0.0))
-    graph_sensitivity_weight = float(train_cfg.get("graph_sensitivity_weight", 0.0))
+    graph_dropout = float(
+        args.graph_dropout if args.graph_dropout is not None
+        else train_cfg.get("graph_dropout", 0.0)
+    )
+    graph_sensitivity_weight = float(
+        args.graph_sensitivity_weight if args.graph_sensitivity_weight is not None
+        else train_cfg.get("graph_sensitivity_weight", 0.0)
+    )
     graph_sensitivity_margin = float(train_cfg.get("graph_sensitivity_margin", 0.05))
     graph_sensitivity_p = float(train_cfg.get("graph_sensitivity_p", 0.9))
     architecture = str(args.architecture or train_cfg.get("architecture", "v2"))
     diffusion_alpha = float(train_cfg.get("diffusion_alpha", 0.5))
-    dropout = float(train_cfg.get("dropout", 0.2))
+    dropout = float(args.dropout if args.dropout is not None else train_cfg.get("dropout", 0.2))
+    n_lstm_layers = int(args.lstm_layers or train_cfg.get("n_lstm_layers", 1))
+    use_questions = bool(args.use_questions or train_cfg.get("use_questions", False))
+    window_mode = str(
+        args.window_mode or train_cfg.get("window_mode", "chunked" if architecture == "v4" else "first")
+    )
+    val_frac = float(
+        args.val_frac if args.val_frac is not None
+        else train_cfg.get("val_frac", 0.1 if architecture == "v4" else 0.0)
+    )
+    early_stop_patience = args.early_stop_patience or train_cfg.get("early_stop_patience")
     session_cfg = dh2_cfg.get("hyperedge", {}).get("session", {})
     session_enabled = (
         bool(session_cfg.get("enabled", False))
-        and architecture == "v3"
+        and architecture in ("v3", "v4")
         and not args.no_session
+        and not args.no_graph
     )
+    tag = args.tag or (f"{architecture}q" if use_questions else architecture)
     output = args.output or (
         REPO_ROOT / "results" / "tables" / (
-            "dh2_kt_v3_vs_p0.csv" if architecture == "v3" else "dh2_kt_vs_p0.csv"
+            "dh2_kt_vs_p0.csv" if architecture == "v2" and not args.tag
+            else f"dh2_kt_{tag}_vs_p0.csv"
         )
     )
 
-    print(f"dataset={dh2_cfg['dataset']} architecture={architecture} "
-          f"budget={budget.reference_model} "
-          f"batch={budget.batch_size} epochs={budget.epochs} max_seq_len={budget.max_seq_len}")
+    print(f"dataset={dh2_cfg['dataset']} architecture={architecture} tag={tag} "
+          f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
+          f"graph_dropout={graph_dropout} laux={graph_sensitivity_weight} "
+          f"budget={budget.reference_model} matched_p0={budget.matched_p0} "
+          f"batch={budget.batch_size} epochs={budget.epochs} lr={budget.lr} "
+          f"max_seq_len={budget.max_seq_len}")
     if budget.note:
         print(f"NOTE: {budget.note}")
 
@@ -156,12 +242,18 @@ def main() -> int:
             architecture=architecture,
             diffusion_alpha=diffusion_alpha,
             max_users=args.max_users,
+            use_questions=use_questions,
+            n_lstm_layers=n_lstm_layers,
+            window_mode=window_mode,
+            val_frac=val_frac,
+            early_stop_patience=early_stop_patience,
+            use_graph=not args.no_graph,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT
                 / "results"
                 / "checkpoints"
-                / f"{dh2_cfg['dataset']}_fold{fold}_{architecture}.pt"
+                / f"{dh2_cfg['dataset']}_fold{fold}_{tag}.pt"
             ),
         )
         fold_result.fold = fold

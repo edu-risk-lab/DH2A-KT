@@ -8,6 +8,14 @@ Tracing). docs/idea-D-plan.md Pha 2 ("Encoder + causal layer").
   - dual-gated temporal update over a single student hidden state;
   - scalar head ``out_proj(h_t)`` that does **not** see the next concept.
 
+``architecture="v4"`` (AUC track; ``use_questions`` adds item difficulty):
+  - concept states = ``concept_embed + hypergraph refinement`` (residual, so the
+    ~50% of concepts absent from any hyperedge keep their identity);
+  - LSTM backbone over an embedded ``(concept, response)`` interaction;
+  - the response consumed at step ``t`` is the outcome **of** step ``t``, so the
+    head predicts ``t+1`` from everything observed up to ``t`` (DKT alignment);
+  - bilinear readout against the graph-refined vector of ``c_{t+1}``.
+
 ``architecture="v3"`` (AUC upgrade, still graph-only / concept-level):
   - same hypergraph concept encoder + participation mask;
   - per-concept knowledge memory updated by the dual gate (dynamic graph);
@@ -20,6 +28,7 @@ Tracing). docs/idea-D-plan.md Pha 2 ("Encoder + causal layer").
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -57,9 +66,14 @@ class DH2KTConfig:
     )
     architecture: str = "v2"
     """``v2``: scalar history head (Table 4). ``v3``: per-concept memory +
-    next-concept query. Default v2 so existing checkpoints load strictly."""
+    next-concept query. ``v4``: LSTM backbone + bilinear next-concept readout.
+    Default v2 so existing checkpoints load strictly."""
     diffusion_alpha: float = 0.5
     """v3 only: weight of neighbor knowledge when reading ``c_{t+1}``."""
+    use_questions: bool = False
+    """v4 only: add Rasch-style question difficulty on top of the concept vector."""
+    n_lstm_layers: int = 1
+    """v4 only: depth of the LSTM backbone."""
 
 
 @dataclass
@@ -71,6 +85,10 @@ class DH2KTBatch:
     Kinds with no edges may be omitted or supplied as empty tensors.
     ``lengths`` is optional; v3 uses it to skip padded timesteps so they
     do not write into concept-0 memory.
+
+    ``responses`` semantics depend on the architecture: v2/v3 expect the
+    response shifted by one step, v4 expects the response of the same step
+    (see :func:`dh2a_kt.train.tier1.responses_for_model`).
     """
 
     concept_ids: torch.Tensor
@@ -151,9 +169,9 @@ if _TORCH_AVAILABLE:
                     "DH2KT requires torch_geometric. Install with: "
                     "pip install torch_geometric (see docs/execution-plan.md M3)"
                 )
-            if config.architecture not in ("v2", "v3"):
+            if config.architecture not in ("v2", "v3", "v4"):
                 raise ValueError(
-                    f"architecture must be 'v2' or 'v3', got {config.architecture!r}"
+                    f"architecture must be 'v2', 'v3' or 'v4', got {config.architecture!r}"
                 )
             self.config = config
             self.concept_embed = nn.Embedding(config.n_concepts, config.hidden_dim)
@@ -176,8 +194,33 @@ if _TORCH_AVAILABLE:
             self.kind_mix: nn.Parameter | None = None
             if config.architecture == "v3":
                 self.query_head = nn.Linear(config.hidden_dim * 2, 1)
-                if len(config.hyperedge_kinds) > 1:
-                    self.kind_mix = nn.Parameter(torch.zeros(len(config.hyperedge_kinds)))
+            if config.architecture in ("v3", "v4") and len(config.hyperedge_kinds) > 1:
+                self.kind_mix = nn.Parameter(torch.zeros(len(config.hyperedge_kinds)))
+
+            if config.architecture == "v4":
+                hidden = config.hidden_dim
+                self.interaction_embed = nn.Embedding(2 * config.n_concepts, hidden)
+                self.concept_in_proj = nn.Linear(hidden, hidden)
+                self.input_norm = nn.LayerNorm(hidden)
+                self.lstm = nn.LSTM(
+                    hidden,
+                    hidden,
+                    num_layers=config.n_lstm_layers,
+                    batch_first=True,
+                    dropout=config.dropout if config.n_lstm_layers > 1 else 0.0,
+                )
+                self.query_proj = nn.Linear(hidden, hidden)
+                self.concept_bias = nn.Embedding(config.n_concepts, 1)
+                nn.init.zeros_(self.concept_bias.weight)
+                if config.use_questions:
+                    # Rasch parameterisation (AKT/simpleKT): a scalar per item
+                    # scaling a per-concept variation vector, plus an item bias.
+                    self.item_scale = nn.Embedding(config.n_exercises, 1)
+                    self.concept_var = nn.Embedding(config.n_concepts, hidden)
+                    self.item_bias = nn.Embedding(config.n_exercises, 1)
+                    nn.init.zeros_(self.item_scale.weight)
+                    nn.init.zeros_(self.concept_var.weight)
+                    nn.init.zeros_(self.item_bias.weight)
 
         def _encode_concepts(
             self,
@@ -205,9 +248,9 @@ if _TORCH_AVAILABLE:
                 kind_indices.append(kind_to_i[kind])
 
             if not kind_outputs:
-                # v3 next-concept query needs base identity when the graph is empty.
-                # v2 keeps zeros so Table-4 checkpoints stay behavior-compatible.
-                if self.config.architecture == "v3":
+                # v3/v4 next-concept readouts need base identity when the graph is
+                # empty. v2 keeps zeros so Table-4 checkpoints stay compatible.
+                if self.config.architecture in ("v3", "v4"):
                     return concept_x
                 return torch.zeros_like(concept_x)
             if self.kind_mix is not None and len(kind_outputs) > 1:
@@ -216,9 +259,10 @@ if _TORCH_AVAILABLE:
                 graph_x = (weights * torch.stack(kind_outputs, dim=0)).sum(dim=0)
             else:
                 graph_x = torch.stack(kind_outputs, dim=0).mean(dim=0)
-            if self.config.architecture == "v3":
-                # Residual: HypergraphConv over a shared edge can collapse members;
-                # keep concept_embed so the query head can still read concept identity.
+            if self.config.architecture in ("v3", "v4"):
+                # Residual: HypergraphConv over a shared edge can collapse members,
+                # and on XES3G5M only 420/865 concepts occur in any hyperedge — the
+                # rest must keep concept_embed instead of becoming zero vectors.
                 out = concept_x.clone()
                 out[participated] = concept_x[participated] + graph_x[participated]
                 return out
@@ -230,11 +274,72 @@ if _TORCH_AVAILABLE:
             """Return hidden states after each timestep, shape ``(B, T, hidden_dim)``.
 
             v2: student dual-gate trajectory. v3: queried per-concept memory
-            at ``c_{t+1}`` (the representation that feeds the correctness head).
+            at ``c_{t+1}``. v4: LSTM hidden states.
             """
+            if self.config.architecture == "v4":
+                return self._encode_sequence_v4(batch)[0]
             if self.config.architecture == "v3":
                 return self._encode_sequence_v3(batch)[0]
             return self._encode_sequence_v2(batch)
+
+        def _concept_vectors_v4(
+            self,
+            concept_x: torch.Tensor,
+            concept_ids: torch.Tensor,
+            exercise_ids: torch.Tensor | None,
+        ) -> torch.Tensor:
+            """Graph-refined vector per timestep, optionally Rasch-adjusted."""
+            vectors = concept_x[concept_ids]
+            if self.config.use_questions and exercise_ids is not None:
+                items = exercise_ids.clamp(0, self.config.n_exercises - 1)
+                vectors = vectors + self.item_scale(items) * self.concept_var(concept_ids)
+            return vectors
+
+        def _encode_sequence_v4(
+            self, batch: DH2KTBatch
+        ) -> tuple[torch.Tensor, torch.Tensor]:
+            """LSTM hidden states and the query vectors read at ``c_{t+1}``."""
+            concept_x = (
+                batch.concept_states
+                if batch.concept_states is not None
+                else self._encode_concepts(batch.hyperedge_index)
+            )
+            n_concepts = self.config.n_concepts
+            concepts = batch.concept_ids.clamp(0, n_concepts - 1)
+            responses = batch.responses.clamp(0.0, 1.0).round().long()
+            exercises = batch.exercise_ids if batch.exercise_ids is not None else None
+
+            interaction = self.interaction_embed(concepts + n_concepts * responses)
+            observed = self._concept_vectors_v4(concept_x, concepts, exercises)
+            x = self.input_norm(interaction + self.concept_in_proj(observed))
+            x = F.dropout(x, p=self.config.dropout, training=self.training)
+            hidden, _ = self.lstm(x)
+            hidden = F.dropout(hidden, p=self.config.dropout, training=self.training)
+
+            # Position t is scored against the concept asked at t+1; the final
+            # column is never used by the loss or the AUC mask.
+            next_concepts = torch.cat([concepts[:, 1:], concepts[:, -1:]], dim=1)
+            next_exercises = (
+                torch.cat([exercises[:, 1:], exercises[:, -1:]], dim=1)
+                if exercises is not None
+                else None
+            )
+            queried = self._concept_vectors_v4(concept_x, next_concepts, next_exercises)
+            return hidden, queried
+
+        def _readout_v4(self, batch: DH2KTBatch) -> torch.Tensor:
+            hidden, queried = self._encode_sequence_v4(batch)
+            n_concepts = self.config.n_concepts
+            concepts = batch.concept_ids.clamp(0, n_concepts - 1)
+            next_concepts = torch.cat([concepts[:, 1:], concepts[:, -1:]], dim=1)
+            scale = math.sqrt(self.config.hidden_dim)
+            logits = (hidden * self.query_proj(queried)).sum(dim=-1, keepdim=True) / scale
+            logits = logits + self.concept_bias(next_concepts)
+            if self.config.use_questions and batch.exercise_ids is not None:
+                items = batch.exercise_ids.clamp(0, self.config.n_exercises - 1)
+                next_items = torch.cat([items[:, 1:], items[:, -1:]], dim=1)
+                logits = logits + self.item_bias(next_items)
+            return logits
 
         def _encode_sequence_v2(self, batch: DH2KTBatch) -> torch.Tensor:
             concept_x = (
@@ -317,8 +422,10 @@ if _TORCH_AVAILABLE:
 
             ``logits[:, t]`` predicts correctness at step ``t + 1`` given
             interactions up to and including step ``t`` (KT next-step setup).
-            v3 additionally conditions on the identity of concept ``t + 1``.
+            v3/v4 additionally condition on the identity of concept ``t + 1``.
             """
+            if self.config.architecture == "v4":
+                return self._readout_v4(batch)
             if self.config.architecture == "v3":
                 queried, next_embeds = self._encode_sequence_v3(batch)
                 assert self.query_head is not None

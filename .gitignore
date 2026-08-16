@@ -119,3 +119,26 @@ results/tables/tier2_human_eval/distribution.rar
 !results/tables/xes3g5m_fold0_v3_residual_train.log
 !results/tables/xes3g5m_fold0_v3_residual_manipulation_check.log
 !results/tables/xes3g5m_fold0_v3_residual_gate_report.json
+
+# Local GPU runner scripts (machine-specific interpreter paths)
+scripts/run_v4_*.ps1
+
+# v4 AUC track (LSTM backbone + chunked windows + DKT response alignment)
+!results/tables/dh2_kt_v4_vs_p0.csv
+!results/tables/dh2_kt_v4q_vs_p0.csv
+!results/tables/dh2_kt_v4_matched_vs_p0.csv
+!results/tables/dh2_kt_v4q_matched_vs_p0.csv
+!results/tables/xes3g5m_fold0_v4_train.log
+!results/tables/xes3g5m_fold0_v4q_train.log
+!results/tables/xes3g5m_fold0_v4_matched_train.log
+!results/tables/xes3g5m_fold0_v4q_matched_train.log
+!results/tables/xes3g5m_fold0_manipulation_check_v4.json
+!results/tables/xes3g5m_fold0_manipulation_check_v4q.json
+!results/tables/xes3g5m_fold0_v4_manipulation_check.log
+!results/tables/xes3g5m_fold0_v4q_manipulation_check.log
+!results/tables/dh2_kt_v4_nograph_vs_p0.csv
+!results/tables/dh2_kt_v4_laux_vs_p0.csv
+!results/tables/xes3g5m_fold0_v4_nograph_train.log
+!results/tables/xes3g5m_fold0_v4_laux_train.log
+!results/tables/xes3g5m_fold0_manipulation_check_v4_laux.json
+!results/tables/xes3g5m_fold0_v4_laux_manipulation_check.log

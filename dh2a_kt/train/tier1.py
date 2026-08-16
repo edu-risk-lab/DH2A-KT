@@ -97,6 +97,18 @@ def resolve_training_budget(
     )
 
 
+def responses_for_model(model: "DH2KT", batch: dict) -> torch.Tensor:
+    """Pick the response channel matching the architecture's alignment.
+
+    v2/v3 read the response shifted by one step, which leaves them predicting
+    ``t+1`` without ever seeing the outcome of ``t``. v4 reads the response of
+    the same step (standard DKT alignment), so no outcome is wasted.
+    """
+    if getattr(model.config, "architecture", "v2") == "v4":
+        return batch["correct"]
+    return batch["responses"]
+
+
 def shift_responses_for_next_step(correct: torch.Tensor) -> torch.Tensor:
     responses = torch.zeros_like(correct)
     if correct.size(1) > 1:
@@ -149,8 +161,12 @@ if _TORCH_AVAILABLE:
             item_to_idx: dict[int, int],
             *,
             max_seq_len: int,
+            window_mode: str = "first",
         ):
+            if window_mode not in ("first", "chunked"):
+                raise ValueError(f"window_mode must be 'first' or 'chunked', got {window_mode!r}")
             self.max_seq_len = max_seq_len
+            self.window_mode = window_mode
             sorted_df = df.sort_values(["user_id", "timestamp", "item_id"]).reset_index(drop=True)
             kc_col = sorted_df["kc_id"].map(kc_to_idx)
             item_col = sorted_df["item_id"].map(item_to_idx)
@@ -161,6 +177,7 @@ if _TORCH_AVAILABLE:
             self._item_ids = item_col.to_numpy(dtype=np.int64)
             self._correct = sorted_df["correct"].to_numpy(dtype=np.float32)
             user_ids = sorted_df["user_id"].to_numpy()
+            self._n_users = 0
             if len(user_ids) == 0:
                 self._starts = []
                 self._ends = []
@@ -169,11 +186,30 @@ if _TORCH_AVAILABLE:
                 starts = np.concatenate(([0], boundaries))
                 ends = np.concatenate((boundaries, [len(user_ids)]))
                 valid = (ends - starts) >= 2
-                self._starts = starts[valid].tolist()
-                self._ends = ends[valid].tolist()
+                starts = starts[valid]
+                ends = ends[valid]
+                if window_mode == "chunked":
+                    # One window per user keeps only the first max_seq_len rows; on
+                    # XES3G5M every user is longer than that, so ~44% of the log was
+                    # unused and eval covered ~56% of P0's positions.
+                    window_starts: list[int] = []
+                    window_ends: list[int] = []
+                    for user_start, user_end in zip(starts.tolist(), ends.tolist(), strict=True):
+                        for offset in range(user_start, user_end, max_seq_len):
+                            window_end = min(offset + max_seq_len, user_end)
+                            if window_end - offset >= 2:
+                                window_starts.append(offset)
+                                window_ends.append(window_end)
+                    self._starts = window_starts
+                    self._ends = window_ends
+                else:
+                    self._starts = starts.tolist()
+                    self._ends = ends.tolist()
+                self._n_users = int(len(starts))
             logger.info(
-                "UserSequenceDataset: %d users (from %d interactions)",
+                "UserSequenceDataset: %d windows (mode=%s) from %d interactions",
                 len(self._starts),
+                window_mode,
                 len(sorted_df),
             )
 
@@ -224,7 +260,7 @@ if _TORCH_AVAILABLE:
             dh2_batch = DH2KTBatch(
                 concept_ids=batch["concept_ids"].to(device),
                 exercise_ids=batch["exercise_ids"].to(device),
-                responses=batch["responses"].to(device),
+                responses=responses_for_model(model, batch).to(device),
                 hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
                 concept_states=concept_states,
                 lengths=lengths,
@@ -276,6 +312,8 @@ if _TORCH_AVAILABLE:
         graph_sensitivity_weight: float = 0.0,
         graph_sensitivity_margin: float = 0.05,
         graph_sensitivity_p: float = 0.9,
+        val_loader: DataLoader | None = None,
+        early_stop_patience: int | None = None,
     ) -> None:
         optimizer = torch.optim.Adam(model.parameters(), lr=budget.lr)
         model.train()
@@ -285,7 +323,9 @@ if _TORCH_AVAILABLE:
         p0_log.setLevel(logging.WARNING)
         best_state: dict[str, torch.Tensor] | None = None
         best_epoch_loss = float("inf")
+        best_val_auc = -float("inf")
         best_epoch = -1
+        epochs_without_gain = 0
         try:
             for epoch in range(budget.epochs):
                 empty_states = precompute_concept_states(
@@ -325,7 +365,7 @@ if _TORCH_AVAILABLE:
                     dh2_batch = DH2KTBatch(
                         concept_ids=batch["concept_ids"].to(device),
                         exercise_ids=batch["exercise_ids"].to(device),
-                        responses=batch["responses"].to(device),
+                        responses=responses_for_model(model, batch).to(device),
                         hyperedge_index=index_for_batch,
                         concept_states=states,
                         lengths=lengths,
@@ -392,18 +432,56 @@ if _TORCH_AVAILABLE:
                 )
                 # Keep the best epoch: fold-1 previously collapsed on the final
                 # epoch (loss 0.46 -> 0.76) while earlier epochs were healthy.
-                if n_batches > 0 and mean_loss < best_epoch_loss:
+                # Train loss is only the fallback criterion — when a held-out
+                # split is available, select on its AUC instead.
+                if val_loader is not None:
+                    val_auc, val_n = evaluate_auc(
+                        model, val_loader, full_hyperedge_index, device
+                    )
+                    model.train()
+                    logger.info(
+                        "epoch=%s/%s val_auc=%.4f val_n=%s",
+                        epoch + 1,
+                        budget.epochs,
+                        val_auc,
+                        val_n,
+                    )
+                    improved = np.isfinite(val_auc) and val_auc > best_val_auc
+                    if improved:
+                        best_val_auc = float(val_auc)
+                        best_epoch_loss = mean_loss
+                        best_epoch = epoch + 1
+                        epochs_without_gain = 0
+                    else:
+                        epochs_without_gain += 1
+                elif n_batches > 0 and mean_loss < best_epoch_loss:
+                    improved = True
                     best_epoch_loss = mean_loss
                     best_epoch = epoch + 1
+                else:
+                    improved = False
+                if improved:
                     best_state = {
                         k: v.detach().cpu().clone() for k, v in model.state_dict().items()
                     }
+                if (
+                    early_stop_patience is not None
+                    and val_loader is not None
+                    and epochs_without_gain >= early_stop_patience
+                ):
+                    logger.info(
+                        "early stop at epoch=%s (no val AUC gain for %s epochs)",
+                        epoch + 1,
+                        epochs_without_gain,
+                    )
+                    break
             if best_state is not None:
                 model.load_state_dict(best_state)
                 logger.info(
-                    "restored best epoch=%s train_loss=%.4f (of %s)",
+                    "restored best epoch=%s train_loss=%.4f val_auc=%s (of %s)",
                     best_epoch,
                     best_epoch_loss,
+                    f"{best_val_auc:.4f}" if np.isfinite(best_val_auc) else "n/a",
                     budget.epochs,
                 )
         finally:
@@ -419,6 +497,8 @@ if _TORCH_AVAILABLE:
         hyperedge_kinds: tuple[str, ...] = ("concept_prerequisite",),
         architecture: str = "v2",
         diffusion_alpha: float = 0.5,
+        use_questions: bool = False,
+        n_lstm_layers: int = 1,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -430,6 +510,8 @@ if _TORCH_AVAILABLE:
             hyperedge_kinds=hyperedge_kinds,
             architecture=architecture,
             diffusion_alpha=diffusion_alpha,
+            use_questions=use_questions,
+            n_lstm_layers=n_lstm_layers,
         )
         return DH2KT(config)
 
@@ -453,6 +535,12 @@ def train_fold(
     architecture: str = "v2",
     diffusion_alpha: float = 0.5,
     max_users: int | None = None,
+    use_questions: bool = False,
+    n_lstm_layers: int = 1,
+    window_mode: str = "first",
+    val_frac: float = 0.0,
+    early_stop_patience: int | None = None,
+    use_graph: bool = True,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -493,6 +581,12 @@ def train_fold(
             len(selected),
         )
     hyperedge_index = hyperedge_index_from_list(clean_hyperedges, kc_to_idx)
+    if not use_graph:
+        # Graph-contribution ablation: keep the architecture and the kind list so
+        # state dicts stay comparable, but feed zero hyperedges throughout.
+        hyperedge_index = empty_hyperedge_index(device, kinds=tuple(kinds))
+        clean_hyperedges = []
+        logger.info("use_graph=False: training with zero hyperedges (graph ablation)")
     model = build_model(
         len(kc_to_idx),
         len(item_to_idx),
@@ -502,6 +596,8 @@ def train_fold(
         hyperedge_kinds=tuple(kinds),
         architecture=architecture,
         diffusion_alpha=diffusion_alpha,
+        use_questions=use_questions,
+        n_lstm_layers=n_lstm_layers,
     ).to(device)
     logger.info(
         "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
@@ -513,18 +609,41 @@ def train_fold(
         device,
     )
 
-    train_loader = DataLoader(
-        UserSequenceDataset(train_df, kc_to_idx, item_to_idx, max_seq_len=budget.max_seq_len),
-        batch_size=budget.batch_size,
-        shuffle=True,
-        collate_fn=_collate,
-    )
-    eval_loader = DataLoader(
-        UserSequenceDataset(eval_df, kc_to_idx, item_to_idx, max_seq_len=budget.max_seq_len),
-        batch_size=budget.batch_size,
-        shuffle=False,
-        collate_fn=_collate,
-    )
+    # Model selection must not touch eval_df: P0 reports AUC on valid+test, so
+    # the selection split is carved out of the training users instead.
+    val_df: pd.DataFrame | None = None
+    if val_frac > 0.0:
+        users = np.sort(train_df["user_id"].unique())
+        rng = np.random.default_rng(42)
+        rng.shuffle(users)
+        n_val = max(1, int(round(len(users) * val_frac)))
+        val_users = set(users[:n_val].tolist())
+        val_df = train_df[train_df["user_id"].isin(val_users)]
+        train_df = train_df[~train_df["user_id"].isin(val_users)]
+        logger.info(
+            "internal selection split: %d train users / %d val users (val_frac=%.2f)",
+            train_df["user_id"].nunique(),
+            len(val_users),
+            val_frac,
+        )
+
+    def _loader(frame: pd.DataFrame, *, shuffle: bool) -> DataLoader:
+        return DataLoader(
+            UserSequenceDataset(
+                frame,
+                kc_to_idx,
+                item_to_idx,
+                max_seq_len=budget.max_seq_len,
+                window_mode=window_mode,
+            ),
+            batch_size=budget.batch_size,
+            shuffle=shuffle,
+            collate_fn=_collate,
+        )
+
+    train_loader = _loader(train_df, shuffle=True)
+    eval_loader = _loader(eval_df, shuffle=False)
+    val_loader = _loader(val_df, shuffle=False) if val_df is not None else None
     train_one_fold(
         model,
         train_loader,
@@ -537,6 +656,8 @@ def train_fold(
         graph_sensitivity_weight=graph_sensitivity_weight,
         graph_sensitivity_margin=graph_sensitivity_margin,
         graph_sensitivity_p=graph_sensitivity_p,
+        val_loader=val_loader,
+        early_stop_patience=early_stop_patience,
     )
     return TrainedFold(
         model=model,
@@ -569,6 +690,12 @@ def train_and_evaluate_fold(
     diffusion_alpha: float = 0.5,
     max_users: int | None = None,
     checkpoint_path: Path | None = None,
+    use_questions: bool = False,
+    n_lstm_layers: int = 1,
+    window_mode: str = "first",
+    val_frac: float = 0.0,
+    early_stop_patience: int | None = None,
+    use_graph: bool = True,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -591,6 +718,12 @@ def train_and_evaluate_fold(
         architecture=architecture,
         diffusion_alpha=diffusion_alpha,
         max_users=max_users,
+        use_questions=use_questions,
+        n_lstm_layers=n_lstm_layers,
+        window_mode=window_mode,
+        val_frac=val_frac,
+        early_stop_patience=early_stop_patience,
+        use_graph=use_graph,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,

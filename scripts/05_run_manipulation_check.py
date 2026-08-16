@@ -129,9 +129,9 @@ def main() -> int:
     )
     output = args.output or (
         REPO_ROOT / "results" / "tables" / (
-            f"{dataset}_fold{args.fold}_manipulation_check_v3.json"
-            if arch == "v3"
-            else f"{dataset}_fold{args.fold}_manipulation_check.json"
+            f"{dataset}_fold{args.fold}_manipulation_check.json"
+            if arch == "v2"
+            else f"{dataset}_fold{args.fold}_manipulation_check_{arch}.json"
         )
     )
     write_manipulation_check_result(

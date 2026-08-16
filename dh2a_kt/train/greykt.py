@@ -90,14 +90,31 @@ def greykt_config_from_dh2(
     )
 
 
-def make_sequence_loader(df: pd.DataFrame, trained: "TrainedFold", budget: TrainingBudget, *, shuffle: bool):
+def make_sequence_loader(
+    df: pd.DataFrame,
+    trained: "TrainedFold",
+    budget: TrainingBudget,
+    *,
+    shuffle: bool,
+    window_mode: str | None = None,
+):
     from torch.utils.data import DataLoader
 
     from dh2a_kt.train.tier1 import UserSequenceDataset, _collate
 
+    if window_mode is None:
+        # v4 was trained and scored on chunked windows; reusing the truncated
+        # single-window loader would report a different AUC than 03 did.
+        architecture = getattr(trained.model.config, "architecture", "v2")
+        window_mode = "chunked" if architecture == "v4" else "first"
+
     return DataLoader(
         UserSequenceDataset(
-            df, trained.kc_to_idx, trained.item_to_idx, max_seq_len=budget.max_seq_len
+            df,
+            trained.kc_to_idx,
+            trained.item_to_idx,
+            max_seq_len=budget.max_seq_len,
+            window_mode=window_mode,
         ),
         batch_size=budget.batch_size,
         shuffle=shuffle,

@@ -1,0 +1,13 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "ddr": 0.9923748696558915,
+  "auc_clean": 0.848875583643704,
+  "auc_destroyed": 0.8488437389061423,
+  "auc_drop": 3.184473756168149e-05,
+  "passes_manipulation_check": false,
+  "verdict": "AUC drop 0.0000 at p=0.9 (node_drop). AUC barely moved \u2014 check whether DH2-KT is graph-inert before interpreting any ablation result as evidence of graph benefit (see P0 Section 4.7).",
+  "p": 0.9,
+  "operator": "node_drop",
+  "seed": 42
+}

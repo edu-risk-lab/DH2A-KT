@@ -237,6 +237,132 @@ def test_normalized_concept_adjacency_is_row_stochastic():
     assert torch.allclose(row_sums[connected], torch.ones_like(row_sums[connected]))
 
 
+def _v4_config(**kwargs) -> DH2KTConfig:
+    defaults = dict(
+        n_concepts=8,
+        n_exercises=6,
+        hidden_dim=32,
+        embed_dim=32,
+        n_hypergraph_layers=1,
+        dropout=0.0,
+        hyperedge_kinds=("concept_prerequisite",),
+        architecture="v4",
+    )
+    defaults.update(kwargs)
+    return DH2KTConfig(**defaults)
+
+
+def test_v4_forward_output_shape():
+    model = DH2KT(_v4_config())
+    logits = model(_make_toy_batch(batch_size=4, seq_len=5))
+    assert logits.shape == (4, 5, 1)
+
+
+def test_v4_next_concept_changes_logit_at_previous_step():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config())
+    model.eval()
+    batch = _make_toy_batch(batch_size=3, seq_len=6)
+    alt_ids = batch.concept_ids.clone()
+    alt_ids[:, -1] = (alt_ids[:, -1] + 3) % 8
+    alt = DH2KTBatch(
+        concept_ids=alt_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=batch.responses,
+        hyperedge_index=batch.hyperedge_index,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        swapped = model(alt)
+    assert (base[:, -2] - swapped[:, -2]).abs().max().item() > 1e-5
+    assert (base[:, :-2] - swapped[:, :-2]).abs().max().item() < 1e-5
+
+
+def test_v4_uses_response_of_the_same_step():
+    """Flipping r_t must move logit[:, t]; v2/v3 alignment could not see it."""
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config())
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    flipped = batch.responses.clone()
+    flipped[:, 2] = 1.0 - flipped[:, 2]
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=flipped,
+        hyperedge_index=batch.hyperedge_index,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, 2] - changed[:, 2]).abs().max().item() > 1e-5
+    assert (base[:, :2] - changed[:, :2]).abs().max().item() < 1e-5
+
+
+def test_v4_keeps_identity_of_concepts_outside_any_hyperedge():
+    """On XES3G5M 445/865 concepts have no hyperedge; they must not become zero."""
+    model = DH2KT(_v4_config())
+    model.eval()
+    with torch.no_grad():
+        states = model._encode_concepts(_toy_hyperedge_index())
+    # Concepts 4..7 appear in no hyperedge of the toy index.
+    absent = states[4:]
+    assert absent.abs().sum(dim=-1).min().item() > 0.0
+    assert torch.allclose(absent, model.concept_embed.weight[4:])
+
+
+def test_v4_forward_differs_with_vs_without_graph():
+    torch.manual_seed(2)
+    model = DH2KT(_v4_config(n_hypergraph_layers=2))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=4)
+    no_graph = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=batch.responses,
+        hyperedge_index=empty_hyperedge_index(),
+    )
+    with torch.no_grad():
+        diff = (model(batch) - model(no_graph)).abs().max().item()
+    assert diff > 1e-4, f"expected graph to affect v4 logits, max diff={diff}"
+
+
+@pytest.mark.parametrize("use_questions", [False, True])
+def test_v4_sanity_overfit_tiny_batch(use_questions: bool):
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(n_concepts=4, n_exercises=4, use_questions=use_questions))
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+    concept_ids = torch.tensor([[0, 1, 2, 3, 0, 1, 2, 3]] * 4)
+    exercise_ids = torch.tensor([[0, 1, 2, 3, 1, 2, 3, 0]] * 4)
+    labels = (concept_ids % 2).float()
+    batch = DH2KTBatch(
+        concept_ids=concept_ids,
+        exercise_ids=exercise_ids,
+        responses=labels,  # v4 alignment: response of the same step
+        hyperedge_index={
+            "concept_prerequisite": torch.tensor([[0, 1, 2, 3], [0, 0, 0, 0]], dtype=torch.long),
+        },
+        lengths=torch.full((4,), 8, dtype=torch.long),
+    )
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+    targets = labels[:, 1:]
+    for _ in range(400):
+        optimizer.zero_grad()
+        loss = loss_fn(model(batch)[:, :-1, 0], targets)
+        loss.backward()
+        optimizer.step()
+    with torch.no_grad():
+        final_loss = loss_fn(model(batch)[:, :-1, 0], targets).item()
+    assert final_loss < 0.05
+
+
+def test_v4_question_variant_adds_item_parameters():
+    plain = DH2KT(_v4_config()).state_dict()
+    questioned = DH2KT(_v4_config(use_questions=True)).state_dict()
+    assert "item_scale.weight" not in plain
+    assert {"item_scale.weight", "item_bias.weight", "concept_var.weight"} <= set(questioned)
+
+
 def test_v2_state_dict_has_no_v3_head():
     v2 = DH2KT(DH2KTConfig(n_concepts=8, n_exercises=6, hidden_dim=16, embed_dim=16,
                            hyperedge_kinds=("concept_prerequisite",), architecture="v2"))
