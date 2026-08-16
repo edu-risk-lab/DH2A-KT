@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pandas as pd
@@ -38,6 +39,12 @@ def main() -> int:
         type=float,
         default=None,
         help="Override training.graph_sensitivity_weight (e.g. 0 = w/o L_aux ablation)",
+    )
+    parser.add_argument(
+        "--hyperedge-source",
+        choices=("chain", "pairwise", "neighborhood"),
+        default=None,
+        help="Must match the source the checkpoint was trained with.",
     )
     parser.add_argument(
         "--load-checkpoint",
@@ -77,6 +84,8 @@ def main() -> int:
     eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
     e_pre = load_e_pre(p0_cfg, args.fold)
     hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=args.fold)
+    if args.hyperedge_source is not None:
+        hyperedge_spec = replace(hyperedge_spec, source=args.hyperedge_source)
 
     trained = None
     if args.load_checkpoint is not None:

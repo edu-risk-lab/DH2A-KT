@@ -1,0 +1,73 @@
+dataset=xes3g5m architecture=v4 tag=v4_neigh hyperedge_source=neighborhood no_graph=False use_questions=False window_mode=chunked val_frac=0.1 graph_dropout=0.0 laux=0.0 budget=gkt matched_p0=False batch=64 epochs=20 lr=0.001 max_seq_len=200
+NOTE: tuned budget (batch=64, epochs=20); P0 gkt used batch=4, epochs=10
+python.exe : INFO:src.io_utils:Loading interactions from 
+D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+At D:\TUAN\DH2A-KT\DH2A-KT\scripts\run_v4_graphsource.ps1:3 char:1
++ & $py -u scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0 --de ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:src.io_uti...xes3g5m.parquet:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+
+[fold 0] loading splits + e_pre...
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=neighborhood fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 391 concept-prerequisite neighborhood hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=865 exercises=7652 hyperedges=391 
+kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 11381 train users / 1265 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 26253 windows (mode=chunked) from 4041573 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 12507 windows (mode=chunked) from 1922840 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 2929 windows (mode=chunked) from 448940 interactions
+INFO:dh2a_kt.train.tier1:epoch=1/20 loss=0.4231 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/20 val_auc=0.8199 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=2/20 loss=0.3802 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/20 val_auc=0.8310 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=3/20 loss=0.3721 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/20 val_auc=0.8355 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=4/20 loss=0.3679 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/20 val_auc=0.8379 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=5/20 loss=0.3650 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/20 val_auc=0.8403 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=6/20 loss=0.3630 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/20 val_auc=0.8415 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=7/20 loss=0.3611 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/20 val_auc=0.8423 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=8/20 loss=0.3596 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/20 val_auc=0.8431 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=9/20 loss=0.3584 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/20 val_auc=0.8441 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=10/20 loss=0.3572 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/20 val_auc=0.8446 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=11/20 loss=0.3565 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/20 val_auc=0.8450 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=12/20 loss=0.3557 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/20 val_auc=0.8453 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=13/20 loss=0.3547 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/20 val_auc=0.8457 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=14/20 loss=0.3540 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/20 val_auc=0.8461 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=15/20 loss=0.3533 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/20 val_auc=0.8464 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=16/20 loss=0.3527 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/20 val_auc=0.8466 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=17/20 loss=0.3523 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/20 val_auc=0.8468 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=18/20 loss=0.3519 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/20 val_auc=0.8470 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=19/20 loss=0.3514 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=19/20 val_auc=0.8474 val_n=446010
+INFO:dh2a_kt.train.tier1:epoch=20/20 loss=0.3508 batches=411 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=20/20 val_auc=0.8474 val_n=446010
+INFO:dh2a_kt.train.tier1:restored best epoch=20 train_loss=0.3508 val_auc=0.8474 (of 20)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> results\checkpoints\xes3g5m_fold0_v4_neigh.pt
+[fold 0] AUC=0.8489 n_predictions=1910331
+
+Wrote comparison table: results\tables\dh2_kt_v4_neigh_vs_p0.csv
+dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                        budget_note  n_predictions
+xes3g5m    0             gkt 0.833644    0.848905   0.015261              gkt          64      20   observational tuned budget (batch=64, epochs=20); P0 gkt used batch=4, epochs=10        1910331
+xes3g5m    0        simplekt 0.874720    0.848905  -0.025815              gkt          64      20   observational tuned budget (batch=64, epochs=20); P0 gkt used batch=4, epochs=10        1910331
+xes3g5m mean             gkt 0.833644    0.848905   0.015261              gkt          64      20   observational tuned budget (batch=64, epochs=20); P0 gkt used batch=4, epochs=10        1910331
+xes3g5m mean        simplekt 0.874720    0.848905  -0.025815              gkt          64      20   observational tuned budget (batch=64, epochs=20); P0 gkt used batch=4, epochs=10        1910331

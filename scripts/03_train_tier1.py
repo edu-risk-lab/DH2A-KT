@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import pandas as pd
@@ -76,6 +77,14 @@ def main() -> int:
         "--no-session",
         action="store_true",
         help="Disable session co-practice hyperedges (v3/v4 ablation: prereq-only).",
+    )
+    parser.add_argument(
+        "--hyperedge-source",
+        choices=("chain", "pairwise", "neighborhood"),
+        default=None,
+        help="Override hyperedge.concept_prerequisite.source. 'chain' enumerates "
+        "every length-3..8 walk (446k hyperedges on XES3G5M); 'neighborhood' keeps "
+        "one hyperedge per concept plus its direct prerequisites.",
     )
     parser.add_argument(
         "--no-graph",
@@ -190,6 +199,7 @@ def main() -> int:
     )
 
     print(f"dataset={dh2_cfg['dataset']} architecture={architecture} tag={tag} "
+          f"hyperedge_source={args.hyperedge_source or 'from config'} no_graph={args.no_graph} "
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"graph_dropout={graph_dropout} laux={graph_sensitivity_weight} "
           f"budget={budget.reference_model} matched_p0={budget.matched_p0} "
@@ -208,6 +218,8 @@ def main() -> int:
         eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
         e_pre = load_e_pre(p0_cfg, fold)
         hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=fold)
+        if args.hyperedge_source is not None:
+            hyperedge_spec = replace(hyperedge_spec, source=args.hyperedge_source)
         session_hyperedges = None
         if session_enabled:
             raw_sessions = build_session_hyperedges(

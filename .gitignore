@@ -142,3 +142,11 @@ scripts/run_v4_*.ps1
 !results/tables/xes3g5m_fold0_v4_laux_train.log
 !results/tables/xes3g5m_fold0_manipulation_check_v4_laux.json
 !results/tables/xes3g5m_fold0_v4_laux_manipulation_check.log
+!results/tables/dh2_kt_v4_neigh_vs_p0.csv
+!results/tables/dh2_kt_v4_pair_vs_p0.csv
+!results/tables/xes3g5m_fold0_v4_neigh_train.log
+!results/tables/xes3g5m_fold0_v4_pair_train.log
+!results/tables/xes3g5m_fold0_manipulation_check_v4_neigh.json
+!results/tables/xes3g5m_fold0_manipulation_check_v4_pair.json
+!results/tables/xes3g5m_fold0_v4_neigh_manipulation_check.log
+!results/tables/xes3g5m_fold0_v4_pair_manipulation_check.log

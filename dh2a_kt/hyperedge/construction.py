@@ -114,6 +114,46 @@ def hyperedges_from_e_pre_pairwise(e_pre: pd.DataFrame, *, fold: int = 0) -> lis
     ]
 
 
+def hyperedges_from_e_pre_neighborhood(
+    e_pre: pd.DataFrame, *, fold: int = 0
+) -> list[Hyperedge]:
+    """One hyperedge per concept: itself plus its direct prerequisites.
+
+    The ``chain`` source enumerates every length-3..8 walk, turning E_pre's
+    ~1.2k edges into ~446k hyperedges in which one hub concept appears in 29%
+    of the set; convolving over that mixes ~40% of all concept pairs and washes
+    the embeddings out. This source keeps one hyperedge per target concept, so
+    the incidence matrix carries the same information without the blow-up.
+    """
+    hyperedges: list[Hyperedge] = []
+    for dst, group in e_pre.groupby("dst_kc", sort=True):
+        preds = sorted({int(src) for src in group["src_kc"]} - {int(dst)})
+        if not preds:
+            continue
+        members = [("concept", int(dst))] + [("concept", src) for src in preds]
+        weight = float(group["weight"].mean()) if "weight" in group else 1.0
+        hyperedges.append(
+            Hyperedge(
+                hyperedge_id=f"preneigh_f{fold}_{int(dst)}",
+                kind="concept_prerequisite",
+                members=members,
+                fold=fold,
+                train_only=True,
+                provenance={
+                    "source": "p0_e_pre_neighborhood",
+                    "n_prerequisites": len(preds),
+                    "mean_weight": weight,
+                },
+            )
+        )
+    logger.info(
+        "Built %d concept-prerequisite neighborhood hyperedges (fold=%s)",
+        len(hyperedges),
+        fold,
+    )
+    return hyperedges
+
+
 def resolve_concept_prerequisite_hyperedges(
     e_pre: pd.DataFrame,
     *,
@@ -125,6 +165,8 @@ def resolve_concept_prerequisite_hyperedges(
     """Build training/eval hyperedge set from audited ``E_pre``."""
     if source == "pairwise":
         return hyperedges_from_e_pre_pairwise(e_pre, fold=fold)
+    if source == "neighborhood":
+        return hyperedges_from_e_pre_neighborhood(e_pre, fold=fold)
     if source == "chain":
         return build_concept_prerequisite_hyperedges(
             e_pre,
@@ -132,7 +174,10 @@ def resolve_concept_prerequisite_hyperedges(
             min_chain_len=min_chain_len,
             max_chain_len=max_chain_len,
         )
-    raise ValueError(f"Unsupported hyperedge source {source!r}; use 'chain' or 'pairwise'")
+    raise ValueError(
+        f"Unsupported hyperedge source {source!r}; "
+        "use 'chain', 'pairwise' or 'neighborhood'"
+    )
 
 
 def build_session_hyperedges(
