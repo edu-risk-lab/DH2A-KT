@@ -5,7 +5,7 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 - **Corpus:** XES3G5M, fold 0 (trừ khi ghi khác)
 - **Thiết bị tham chiếu:** CUDA (RTX 3090 class)
 - **Mốc SOTA sạch (test, mask repeats, chunked):** GIKT **0.823807**
-- **Ngày ghi / cập nhật:** 2026-08-17
+- **Ngày ghi / cập nhật:** 2026-08-18
 
 ---
 
@@ -18,6 +18,7 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 5. **Nhóm ưu tiên** (attention + star + hedge embed + kind-conditioned): có graph **hại** (Δ −0.047); không graph lại cao hơn.
 6. **Ablation:** `star` phá model (0.52); `attention` trung tính; `hyperedge_embed` giúp nhẹ (0.8047) — vẫn xa GIKT ~0.019.
 7. **GIKT vượt** vì dùng đồ thị câu–KC quan sát để tinh chỉnh embedding câu + LSTM/recap — không loang đáp án qua cạnh như transport memory của v5.
+8. **Giai đoạn H (SOTA ladder E0–E5) đã kết thúc (2026-08-18):** không vượt GIKT 0.8238; E2/E3 FAIL cổng; cải thiện thật từ L=400 + batch nhỏ + ensemble; tuyên bố “bất biến giao thức” và “graph đóng góp AUC” đều **bác bỏ**.
 
 ---
 
@@ -161,10 +162,19 @@ Cùng checkpoint train với `mask_repeats=True`, chấm lại trên chunked **l
 
 #### E1–E5
 
-- E1: thêm `--max-seq-len`; quét L∈{100,150,200,300,400}; chốt theo **val AUC** (đang chạy).
-- E2: `--recap-attention` + unit test nhân quả (mã đã có; chờ L*).
-- E3: `--question-kc-agg` (incidence quan sát train-only; chờ L*).
-- E4 / E5: matched batch / ensemble 3 seed — chưa chạy.
+- E1: quét L∈{100,150,200,300,400} (batch=64, epochs=20). **Chốt L\*=400** theo val AUC (0.818629); test AUC 0.819285. File: `results/tables/sota_E1_chunk_sweep.csv`.
+- E2: `--recap-attention` tại L=400 → val **0.8175** vs baseline 0.8186 (Δ **−0.0011**). **GATE FAIL** (cần ≥ +0.002) → **tắt cờ**, ghi nhật ký thất bại.
+- E3: `--question-kc-agg` tại L=400 → val **0.8183** / test **0.8192** vs baseline 0.8186 / 0.8193 (Δ ≈ **0**). **GATE FAIL** → ghi thẳng: graph Q–KC agg **không đóng góp AUC**.
+- E4: batch 16/32, L=400, epochs=30. **bs16** val 0.8201 / test **0.8209** (44 phút); **bs32** val 0.8198 / test 0.8207 (23 phút). bs16 tốt nhất trong ladder nội bộ.
+- E5: ensemble 3 seed v4q_clean (logit avg, test-only) → **0.820721** (đơn seed ~0.818). Dòng riêng “ensemble of 3 seeds”.
+
+#### Đánh giá tổng thể giai đoạn H (2026-08-18)
+
+- **Ladder E0→E5 đã chạy xong.** E6 (gộp multi-KC không transport) không bắt buộc vì E2+E3 đã fail cổng.
+- **Không đạt SOTA sạch** so với GIKT **0.823807**. Số gần nhất trên protocol sạch test-only: ensemble **0.820721**; E4 bs16 đạt **0.820908** trên CSV valid+test (không đồng protocol tuyệt đối với bảng GIKT).
+- **Hai đòn kiến trúc gần GIKT đều FAIL:** recap Δval −0.001; Q–KC agg Δ≈0 → **graph không đóng góp AUC** theo cổng đã đặt trước.
+- **Cải thiện có thật** đến từ cửa sổ L=400, batch nhỏ hơn, và ensemble — không từ novelty hypergraph.
+- **Hệ quả bài báo:** không viết tiêu đề/đóng góp “hypergraph SOTA AUC”. Trục vững: rò rỉ multi-KC, bảng sạch tái lập, audit protocol, và kết luận trung thực graph/prereq/transport ≈0 hoặc hại. File tổng hợp: `results/tables/sota_summary.csv`.
 
 ---
 
@@ -187,9 +197,11 @@ Cùng checkpoint train với `mask_repeats=True`, chấm lại trên chunked **l
 | Baseline sạch | `scripts/24_train_baselines_clean.py` |
 | Eval hai giao thức | `scripts/23_eval_clean_protocol.py` |
 | Bootstrap CI | `scripts/25_bootstrap_protocol_ci.py` |
+| Ensemble E5 | `scripts/26_sota_E5_ensemble.py` |
 | Bảng baseline | `results/tables/xes3g5m_fold0_baselines_protocol.csv` |
 | v4q test-only | `results/tables/v4q_testonly_clean.csv` |
 | v5 / priority CSV | `results/tables/dh2_kt_v5q_*_vs_p0.csv` |
+| SOTA ladder | `results/tables/sota_*.csv`, `dh2_kt_sota_*_vs_p0.csv` |
 | Log ablation | `results/tables/v5q_ablation.log` |
 
 ### 3.3 Quyết định đã chốt với người dùng (tóm tắt)
@@ -288,19 +300,84 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 
 → **GATE FAIL** cho tuyên bố bất biến giao thức.
 
+### E1 chunk length (val+test CSV; chốt theo val)
+
+| L | val_auc | test_auc | phút |
+|---|---|---|---|
+| 100 | 0.8147 | 0.8154 | 26.1 |
+| 150 | 0.8166 | 0.8172 | 18.5 |
+| 200 | 0.8172 | 0.8181 | 15.5 |
+| 300 | 0.8183 | 0.8191 | 11.5 |
+| **400** | **0.8186** | **0.8193** | 9.2 |
+
+→ **L\* = 400** cho mọi thí nghiệm sau.
+
+### E2 recap attention (L=400)
+
+| | val_auc | test_auc |
+|---|---|---|
+| baseline E1 L=400 | 0.818629 | 0.819285 |
+| +recap | 0.817501 | 0.818182 |
+| Δ | **−0.00113** | −0.00110 |
+
+→ **GATE FAIL** (cần Δval ≥ +0.002). Tắt `--recap-attention`.
+
+### E3 question–KC agg (L=400, incidence quan sát)
+
+| | val_auc | test_auc |
+|---|---|---|
+| baseline E1 L=400 | 0.818629 | 0.819285 |
+| +question_kc_agg | 0.818296 | 0.819185 |
+| Δ | **−0.00033** | −0.00010 |
+
+→ **GATE FAIL** (cần ΔAUC ≥ +0.002). **Graph không đóng góp AUC** trên cổng này — báo cáo trung thực, không biện minh.
+
+### E4 matched budget (L=400, epochs=30)
+
+| batch | val_auc | test_auc (valid+test CSV) | phút |
+|---|---|---|---|
+| 64 (E1) | 0.8186 | 0.8193 | ~9 |
+| **16** | **0.8201** | **0.8209** | 43.9 |
+| 32 | 0.8198 | 0.8207 | 22.8 |
+
+→ Giảm batch giúp nhẹ; vẫn dưới GIKT 0.8238 (bảng sạch test-only).
+
+### E5 ensemble 3 seed (logit avg; test-only chunked + mask)
+
+| Model | AUC | n_scored |
+|---|---|---|
+| v4q_clean s42 | 0.818243 | 1.090.610 |
+| v4q_clean s17 | 0.818109 | 1.090.610 |
+| v4q_clean s1234 | 0.817975 | 1.090.610 |
+| **ensemble_of_3_seeds** | **0.820721** | 1.090.610 |
+
+→ Báo cáo thành **một dòng riêng** “ensemble of 3 seeds”; vẫn dưới GIKT 0.823807 (~−0.003).
+
+### Giai đoạn H — bảng tóm tắt cổng
+
+| Exp | Kết luận cổng |
+|---|---|
+| E0 | FAIL — không có lợi thế bất biến giao thức |
+| E1 | PASS chọn L\* — **L=400** |
+| E2 | FAIL — tắt recap |
+| E3 | FAIL — graph ΔAUC≈0 |
+| E4 | bs16 tốt nhất nội bộ (0.8209 valid+test) |
+| E5 | ensemble 0.8207 test-only; chưa vượt GIKT |
+
 ---
 
 ## 6. Việc còn mở (checklist)
 
 - [x] E0 protocol-invariance control → bác bỏ lợi thế "bất biến giao thức"
-- [ ] E1 chunk-length sweep → chốt L* theo val AUC
-- [ ] E2 recap attention (gate Δval ≥ +0.002)
-- [ ] E3 question–KC agg (gate ΔAUC(graph) ≥ +0.002; báo cáo trung thực nếu ≈0)
-- [ ] E4 matched batch 16/32 + minutes
-- [ ] E5 ensemble 3 seed (logit avg)
-- [ ] `sota_summary.csv` + bootstrap khi tuyên bố vượt
-- [ ] Xong ablation v5 còn lại (`ahk`, nograph twins) nếu còn chạy
-- [ ] Commit/push nhật ký + số liệu SOTA khi có block kết quả
+- [x] E1 chunk-length sweep → chốt L\*=400 theo val AUC
+- [x] E2 recap attention → **FAIL** (Δval −0.001; tắt cờ)
+- [x] E3 question–KC agg → **FAIL** (Δ≈0; graph không đóng góp AUC)
+- [x] E4 matched batch 16/32 + minutes → bs16 tốt nhất (test 0.8209)
+- [x] E5 ensemble 3 seed (logit avg) → **0.820721** test-only
+- [x] `sota_summary.csv` + nhật ký đánh giá tổng thể giai đoạn H
+- [ ] (Tùy chọn) chạy lại `v5q_ab_ahk` + `hedge_nograph` nếu cần đóng ablation v5
+- [ ] Bootstrap CI chỉ khi tuyên bố “vượt” (hiện **không** tuyên bố vượt GIKT)
+- [x] Commit/push nhật ký + số liệu SOTA
 
 ---
 
@@ -310,5 +387,6 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 |---|---|
 | 2026-08-17 | Khởi tạo: toàn bộ quá trình, phân tích, nhật ký; ablation đến hedge xong, kind đang chạy |
 | 2026-08-17 tối | Giai đoạn H: E0 xong (bác bỏ protocol-invariance); bắt đầu E1; thêm cờ E2/E3 |
+| 2026-08-18 | E1–E5 xong; đánh giá tổng thể: không SOTA; E2/E3 FAIL; push `sota_summary.csv` |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

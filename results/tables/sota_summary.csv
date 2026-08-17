@@ -1,0 +1,16 @@
+exp_id,tag,architecture,flags,window_L,batch,seed,val_auc,test_auc,n_scored,delta_vs_v4q_baseline,minutes,gate_passed,note
+E0,C_simplekt_clean_on_leaky,simplekt,trained_mask=True eval=leaky,200,64,42,—,0.814198,1273545,—,0.2,False,same clean ckpt on leaky; no jump to ~0.87; protocol-invariance claim rejected
+E0,C_akt_clean_on_leaky,akt,trained_mask=True eval=leaky,200,64,42,—,0.809396,1273545,—,0.3,False,same clean ckpt on leaky; protocol-invariance claim rejected
+E1,sota_E1_chunk100,v4,use_questions mask_repeats chunked,100,64,42,0.814693,0.815380,1627583,-0.003905,26.1,—,val+test CSV; delta vs E1 L200 test
+E1,sota_E1_chunk150,v4,use_questions mask_repeats chunked,150,64,42,0.816567,0.817184,1633116,-0.000904,18.49,—,val+test CSV
+E1,sota_E1_chunk200,v4,use_questions mask_repeats chunked,200,64,42,0.817244,0.818088,1635528,0.000000,15.51,—,L=200 reference within E1 sweep
+E1,sota_E1_chunk300,v4,use_questions mask_repeats chunked,300,64,42,0.818341,0.819142,1638652,0.001054,11.52,—,val+test CSV
+E1,sota_E1_chunk400,v4,use_questions mask_repeats chunked,400,64,42,0.818629,0.819285,1640242,0.001197,9.24,True,LOCKED L* by max val_auc
+E2,sota_E2_recap,v4,recap_attention L=400,400,64,42,0.817501,0.818182,1640242,-0.001103,9.43,False,gate needs delta_val>=+0.002 vs E1 L400; flag OFF
+E3,sota_E3_qkc,v4,question_kc_agg L=400,400,64,42,0.818296,0.819185,1640242,-0.000100,9.85,False,gate needs delta_auc>=+0.002; graph contribution ~0
+E4,sota_E4_bs16,v4,L=400 epochs=30,400,16,42,0.820078,0.820908,1640242,0.001623,43.93,—,best single-run in ladder on val+test CSV
+E4,sota_E4_bs32,v4,L=400 epochs=30,400,32,42,0.819843,0.820747,1640242,0.001462,22.77,—,val+test CSV
+E5,ensemble_of_3_seeds,v4,logit_avg seeds 42/17/1234,200,64,multi,—,0.820721,1090610,—,~0.3,—,test-only clean; report as separate ensemble row; still below GIKT 0.823807
+ref,GIKT_clean,gikt,chunked mask_repeats test-only,200,8,—,—,0.823807,1090574,—,142.7,—,clean SOTA reference from baselines_protocol.csv
+ref,AKT_clean,akt,chunked mask_repeats test-only,200,64,—,—,0.819751,1090574,—,10.9,—,clean reference
+ref,v4q_e40_testonly,v4,use_questions mask_repeats test-only,200,64,42,—,0.818340,1090610,—,—,—,prior v4q best on clean test-only table

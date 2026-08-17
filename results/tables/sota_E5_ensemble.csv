@@ -1,0 +1,5 @@
+model,kind,auc,n_scored,note
+v4q_clean_s42,single,0.8182425063154897,1090610,
+v4q_clean_s17,single,0.8181087978043144,1090610,
+v4q_clean_s1234,single,0.8179751749550632,1090610,
+ensemble_of_3_seeds,ensemble_logit_avg,0.8207211490991086,1090610,mean of logits from v4q_clean seeds 42/17/1234; test-only chunked mask_repeats; L=200

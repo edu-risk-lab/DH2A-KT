@@ -1,0 +1,6 @@
+﻿L,tag,val_auc,test_auc,n_predictions,minutes,gate_note
+100,sota_E1_chunk100,0.814693,0.815380,1627583,26.1,
+150,sota_E1_chunk150,0.816567,0.817184,1633116,18.49,
+200,sota_E1_chunk200,0.817244,0.818088,1635528,15.51,baseline L=200
+300,sota_E1_chunk300,0.818341,0.819142,1638652,11.52,
+400,sota_E1_chunk400,0.818629,0.819285,1640242,9.24,LOCKED L* by max val_auc

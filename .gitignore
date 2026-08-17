@@ -211,4 +211,6 @@ temp/_diag_pykt_smask/
 !results/tables/sota_*.csv
 !results/tables/sota_*.log
 !results/tables/sota_*.json
+!results/tables/dh2_kt_sota_*_vs_p0.csv
+!scripts/26_sota_E5_ensemble.py
 
