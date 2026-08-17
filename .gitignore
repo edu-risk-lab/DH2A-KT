@@ -9,7 +9,8 @@ external/p0_leakage_audit/data/raw/*
 external/p0_leakage_audit/data/processed/*
 !external/p0_leakage_audit/data/raw/.gitkeep
 !external/p0_leakage_audit/data/processed/.gitkeep
-data/
+# Only the repo-root dataset folder (not package modules like dh2a_kt/data/)
+/data/
 
 # Stray artefacts from failed `git submodule add` / filesystem-probe attempts
 # in the authoring environment (mounted filesystem does not support unlink)
@@ -169,6 +170,36 @@ scripts/run_v4*.ps1
 !results/tables/baseline_A_dkt_repro.log
 !results/tables/_diag_pykt_smask.py
 !results/tables/_diag_pad_share.py
+!results/tables/v4q_testonly_clean.csv
+!results/tables/bootstrap_v4q_vs_akt_clean.json
+!results/tables/bootstrap_v4q_vs_gikt_clean.json
+!results/tables/dh2_kt_v4q_clean_s17_vs_p0.csv
+!results/tables/dh2_kt_v4q_clean_s1234_vs_p0.csv
+!results/tables/dh2_kt_v4q_clean_e40_vs_p0.csv
+!results/tables/v4q_multiseed.log
+!results/tables/v4q_clean_e40.log
+!results/tables/v4q_testonly_rescore.log
+!results/tables/baseline_akt_gikt.log
+
+# v5 + priority hypergraph + single-factor ablation (fold 0)
+!results/tables/dh2_kt_v5q_smoke_vs_p0.csv
+!results/tables/dh2_kt_v5q_clean_vs_p0.csv
+!results/tables/dh2_kt_v5q_nograph_vs_p0.csv
+!results/tables/dh2_kt_v5q_priority_vs_p0.csv
+!results/tables/dh2_kt_v5q_priority_nograph_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_attn_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_star_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_hedge_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_kind_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_ahk_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_hedge_nograph_vs_p0.csv
+!results/tables/dh2_kt_v5q_ab_ahk_nograph_vs_p0.csv
+!results/tables/v5_smoke.log
+!results/tables/v5q_fold0.log
+!results/tables/v5q_priority.log
+!results/tables/v5q_ablation.log
+!results/tables/v5q_ablation_snapshot.log
+!NhatKy.md
 
 # pyKT work dirs and prediction dumps are large regenerable intermediates
 results/pykt_work_clean/

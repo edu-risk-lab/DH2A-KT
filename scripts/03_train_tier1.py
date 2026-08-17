@@ -71,12 +71,12 @@ def main() -> int:
     parser.add_argument(
         "--architecture",
         default=None,
-        help="Override training.architecture (v2, v3 or v4).",
+        help="Override training.architecture (v2, v3, v4 or v5).",
     )
     parser.add_argument(
         "--no-session",
         action="store_true",
-        help="Disable session co-practice hyperedges (v3/v4 ablation: prereq-only).",
+        help="Disable session co-practice hyperedges (v3/v4/v5 ablation: prereq-only).",
     )
     parser.add_argument(
         "--hyperedge-source",
@@ -94,7 +94,60 @@ def main() -> int:
     parser.add_argument(
         "--use-questions",
         action="store_true",
-        help="v4: add Rasch-style item difficulty (compare against simplekt/akt/gikt).",
+        help="v4/v5: add Rasch-style item difficulty (compare against simplekt/akt/gikt).",
+    )
+    parser.add_argument(
+        "--memory-dim",
+        type=int,
+        default=None,
+        help="v5 only: width of the per-concept mastery memory (default 16).",
+    )
+    parser.add_argument(
+        "--max-degree",
+        type=int,
+        default=None,
+        help="v5 only: cap on hyperedge neighbours transported per concept.",
+    )
+    parser.add_argument(
+        "--graph-transport",
+        type=float,
+        default=None,
+        help="v5 only: damping on evidence written to a neighbour (0 = inert write).",
+    )
+    parser.add_argument(
+        "--max-kcs",
+        type=int,
+        default=None,
+        help="v5 only: pad width for the KC set of each question attempt.",
+    )
+    parser.add_argument(
+        "--priority-hypergraph",
+        action="store_true",
+        help="v5: enable the priority hypergraph group — attention pool over "
+        "multi-KC sets, star (concept↔hyperedge↔concept) transport, learned "
+        "question-hyperedge embeddings, and kind-conditioned concept projections.",
+    )
+    parser.add_argument(
+        "--event-pool",
+        choices=("mean", "attention"),
+        default=None,
+        help="v5: how to pool the KC set of an event (default mean; attention with --priority-hypergraph).",
+    )
+    parser.add_argument(
+        "--transport",
+        choices=("clique", "star"),
+        default=None,
+        help="v5: clique expands hyperedges to pairs; star keeps the hyperedge node.",
+    )
+    parser.add_argument(
+        "--hyperedge-embed",
+        action="store_true",
+        help="v5: add a learned embedding of the question-as-hyperedge to each event.",
+    )
+    parser.add_argument(
+        "--kind-conditioned",
+        action="store_true",
+        help="v5: project each hyperedge kind's concept states with its own Linear.",
     )
     parser.add_argument(
         "--mask-repeats",
@@ -125,6 +178,14 @@ def main() -> int:
         help="Fraction of TRAIN users held out to select the best epoch by AUC.",
     )
     parser.add_argument("--early-stop-patience", type=int, default=None)
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Seed weight init and batch order so a run is reproducible. The "
+        "internal selection split stays fixed, so multi-seed runs differ only "
+        "in optimisation noise.",
+    )
     parser.add_argument(
         "--graph-dropout",
         type=float,
@@ -194,18 +255,44 @@ def main() -> int:
     dropout = float(args.dropout if args.dropout is not None else train_cfg.get("dropout", 0.2))
     n_lstm_layers = int(args.lstm_layers or train_cfg.get("n_lstm_layers", 1))
     use_questions = bool(args.use_questions or train_cfg.get("use_questions", False))
+    memory_dim = int(args.memory_dim if args.memory_dim is not None else train_cfg.get("memory_dim", 16))
+    max_degree = int(args.max_degree if args.max_degree is not None else train_cfg.get("max_degree", 16))
+    graph_transport = float(
+        args.graph_transport if args.graph_transport is not None
+        else train_cfg.get("graph_transport", 0.5)
+    )
+    max_kcs = int(args.max_kcs if args.max_kcs is not None else train_cfg.get("max_kcs", 6))
+    priority = bool(args.priority_hypergraph)
+    event_pool = str(
+        args.event_pool
+        or train_cfg.get("event_pool", "attention" if priority else "mean")
+    )
+    transport = str(
+        args.transport
+        or train_cfg.get("transport", "star" if priority else "clique")
+    )
+    use_hyperedge_embed = bool(
+        args.hyperedge_embed or priority or train_cfg.get("use_hyperedge_embed", False)
+    )
+    kind_conditioned = bool(
+        args.kind_conditioned or priority or train_cfg.get("kind_conditioned", False)
+    )
     window_mode = str(
-        args.window_mode or train_cfg.get("window_mode", "chunked" if architecture == "v4" else "first")
+        args.window_mode
+        or train_cfg.get(
+            "window_mode",
+            "chunked" if architecture in ("v4", "v5") else "first",
+        )
     )
     val_frac = float(
         args.val_frac if args.val_frac is not None
-        else train_cfg.get("val_frac", 0.1 if architecture == "v4" else 0.0)
+        else train_cfg.get("val_frac", 0.1 if architecture in ("v4", "v5") else 0.0)
     )
     early_stop_patience = args.early_stop_patience or train_cfg.get("early_stop_patience")
     session_cfg = dh2_cfg.get("hyperedge", {}).get("session", {})
     session_enabled = (
         bool(session_cfg.get("enabled", False))
-        and architecture in ("v3", "v4")
+        and architecture in ("v3", "v4", "v5")
         and not args.no_session
         and not args.no_graph
     )
@@ -220,7 +307,10 @@ def main() -> int:
     print(f"dataset={dh2_cfg['dataset']} architecture={architecture} tag={tag} "
           f"hyperedge_source={args.hyperedge_source or 'from config'} no_graph={args.no_graph} "
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
-          f"mask_repeats={args.mask_repeats} "
+          f"mask_repeats={args.mask_repeats} seed={args.seed} "
+          f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
+          f"event_pool={event_pool} transport={transport} "
+          f"hyperedge_embed={use_hyperedge_embed} kind_conditioned={kind_conditioned} "
           f"graph_dropout={graph_dropout} laux={graph_sensitivity_weight} "
           f"budget={budget.reference_model} matched_p0={budget.matched_p0} "
           f"batch={budget.batch_size} epochs={budget.epochs} lr={budget.lr} "
@@ -281,6 +371,15 @@ def main() -> int:
             early_stop_patience=early_stop_patience,
             use_graph=not args.no_graph,
             mask_repeats=args.mask_repeats,
+            seed=args.seed,
+            memory_dim=memory_dim,
+            max_degree=max_degree,
+            graph_transport=graph_transport,
+            max_kcs=max_kcs,
+            event_pool=event_pool,
+            transport=transport,
+            use_hyperedge_embed=use_hyperedge_embed,
+            kind_conditioned=kind_conditioned,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT

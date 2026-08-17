@@ -154,6 +154,53 @@ def hyperedges_from_e_pre_neighborhood(
     return hyperedges
 
 
+def build_question_hyperedges(
+    question_kc_sets: dict[int, Sequence[int]],
+    *,
+    fold: int = 0,
+    min_size: int = 2,
+) -> list[Hyperedge]:
+    """One hyperedge per multi-KC question: the KCs that question exercises.
+
+    Unlike the ``E_pre``-derived sources, these hyperedges are not inferred —
+    each is an observed fact about a question, so no prerequisite edge has to be
+    trusted. They are also the only hyperedges in this corpus whose members are
+    genuinely used *together* in a single event, which is what a hypergraph (as
+    opposed to a graph) is for.
+
+    Questions touching a single KC are skipped: a 1-member hyperedge propagates
+    nothing and only inflates the incidence matrix.
+    """
+    hyperedges: list[Hyperedge] = []
+    for item_id in sorted(question_kc_sets):
+        kcs = sorted({int(kc) for kc in question_kc_sets[item_id]})
+        if len(kcs) < min_size:
+            continue
+        hyperedges.append(
+            Hyperedge(
+                hyperedge_id=f"question_f{fold}_{int(item_id)}",
+                kind="question_concepts",
+                members=[("concept", kc) for kc in kcs],
+                fold=fold,
+                # Observed question metadata, not inferred from the train split,
+                # so this carries no train/test leakage of learner outcomes.
+                train_only=False,
+                provenance={
+                    "source": "question_kc_set",
+                    "item_id": int(item_id),
+                    "n_concepts": len(kcs),
+                },
+            )
+        )
+    logger.info(
+        "Built %d question hyperedges (fold=%s, min_size=%d)",
+        len(hyperedges),
+        fold,
+        min_size,
+    )
+    return hyperedges
+
+
 def resolve_concept_prerequisite_hyperedges(
     e_pre: pd.DataFrame,
     *,

@@ -35,6 +35,13 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "diffusion_alpha": float(getattr(cfg, "diffusion_alpha", 0.5)),
             "use_questions": bool(getattr(cfg, "use_questions", False)),
             "n_lstm_layers": int(getattr(cfg, "n_lstm_layers", 1)),
+            "memory_dim": int(getattr(cfg, "memory_dim", 16)),
+            "max_degree": int(getattr(cfg, "max_degree", 16)),
+            "graph_transport": float(getattr(cfg, "graph_transport", 0.5)),
+            "event_pool": str(getattr(cfg, "event_pool", "mean")),
+            "transport": str(getattr(cfg, "transport", "clique")),
+            "use_hyperedge_embed": bool(getattr(cfg, "use_hyperedge_embed", False)),
+            "kind_conditioned": bool(getattr(cfg, "kind_conditioned", False)),
         },
     }
     torch.save(payload, path)
@@ -67,6 +74,13 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
         use_questions=bool(cfg_dict.get("use_questions", False)),
         n_lstm_layers=int(cfg_dict.get("n_lstm_layers", 1)),
+        memory_dim=int(cfg_dict.get("memory_dim", 16)),
+        max_degree=int(cfg_dict.get("max_degree", 16)),
+        graph_transport=float(cfg_dict.get("graph_transport", 0.5)),
+        event_pool=str(cfg_dict.get("event_pool", "mean")),
+        transport=str(cfg_dict.get("transport", "clique")),
+        use_hyperedge_embed=bool(cfg_dict.get("use_hyperedge_embed", False)),
+        kind_conditioned=bool(cfg_dict.get("kind_conditioned", False)),
     )
     model = build_model(
         config.n_concepts,
@@ -79,6 +93,13 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         diffusion_alpha=float(cfg_dict.get("diffusion_alpha", 0.5)),
         use_questions=config.use_questions,
         n_lstm_layers=config.n_lstm_layers,
+        memory_dim=config.memory_dim,
+        max_degree=config.max_degree,
+        graph_transport=config.graph_transport,
+        event_pool=config.event_pool,
+        transport=config.transport,
+        use_hyperedge_embed=config.use_hyperedge_embed,
+        kind_conditioned=config.kind_conditioned,
     )
     model.load_state_dict(payload["model_state"])
     dev = torch.device(device)

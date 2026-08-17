@@ -53,6 +53,18 @@ class FoldResult:
     n_predictions: int
 
 
+def seed_everything(seed: int) -> None:
+    """Seed Python, NumPy and torch RNGs so a run can be reproduced by seed."""
+    import random
+
+    random.seed(seed)
+    np.random.seed(seed)
+    if _TORCH_AVAILABLE:
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+
+
 if _TORCH_AVAILABLE:
 
     @dataclass
@@ -101,12 +113,22 @@ def responses_for_model(model: "DH2KT", batch: dict) -> torch.Tensor:
     """Pick the response channel matching the architecture's alignment.
 
     v2/v3 read the response shifted by one step, which leaves them predicting
-    ``t+1`` without ever seeing the outcome of ``t``. v4 reads the response of
+    ``t+1`` without ever seeing the outcome of ``t``. v4/v5 read the response of
     the same step (standard DKT alignment), so no outcome is wasted.
     """
-    if getattr(model.config, "architecture", "v2") == "v4":
+    if getattr(model.config, "architecture", "v2") in ("v4", "v5"):
         return batch["correct"]
     return batch["responses"]
+
+
+def kc_set_kwargs(batch: dict, device: torch.device | str) -> dict:
+    """Forward the v5 KC-set tensors when the loader produced them."""
+    if "kc_set_ids" not in batch:
+        return {}
+    return {
+        "kc_set_ids": batch["kc_set_ids"].to(device),
+        "kc_set_mask": batch["kc_set_mask"].to(device),
+    }
 
 
 def shift_responses_for_next_step(correct: torch.Tensor) -> torch.Tensor:
@@ -211,6 +233,8 @@ if _TORCH_AVAILABLE:
             *,
             max_seq_len: int,
             window_mode: str = "first",
+            collapse_events: bool = False,
+            max_kcs: int = 6,
         ):
             if window_mode not in ("first", "last", "chunked"):
                 raise ValueError(
@@ -218,7 +242,23 @@ if _TORCH_AVAILABLE:
                 )
             self.max_seq_len = max_seq_len
             self.window_mode = window_mode
+            self.collapse_events = collapse_events
+            self.max_kcs = max_kcs
             sorted_df = df.sort_values(["user_id", "timestamp", "item_id"]).reset_index(drop=True)
+            self._kc_set_ids: np.ndarray | None = None
+            self._kc_set_mask: np.ndarray | None = None
+            if collapse_events:
+                # v5 models one question attempt per position, carrying its KC set,
+                # so the duplicated KC rows disappear instead of being masked.
+                from dh2a_kt.data.events import collapse_to_events, pad_kc_matrix
+
+                events = collapse_to_events(sorted_df, max_kcs=max_kcs)
+                mapped = [
+                    [kc_to_idx[kc] for kc in kcs if kc in kc_to_idx]
+                    for kcs in events["kc_ids"]
+                ]
+                self._kc_set_ids, self._kc_set_mask = pad_kc_matrix(mapped, width=max_kcs)
+                sorted_df = events
             kc_col = sorted_df["kc_id"].map(kc_to_idx)
             item_col = sorted_df["item_id"].map(item_to_idx)
             if kc_col.isna().any() or item_col.isna().any():
@@ -291,7 +331,7 @@ if _TORCH_AVAILABLE:
             correct[:length] = torch.from_numpy(self._correct[start:end])
             is_repeat[:length] = torch.from_numpy(self._is_repeat[start:end])
             responses = shift_responses_for_next_step(correct.unsqueeze(0)).squeeze(0)
-            return {
+            item = {
                 "concept_ids": concept_ids,
                 "exercise_ids": exercise_ids,
                 "responses": responses,
@@ -300,9 +340,17 @@ if _TORCH_AVAILABLE:
                 "length": torch.tensor(length, dtype=torch.long),
                 "user_id": torch.tensor(self._window_users[idx], dtype=torch.long),
             }
+            if self._kc_set_ids is not None and self._kc_set_mask is not None:
+                kc_set_ids = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.long)
+                kc_set_mask = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.bool)
+                kc_set_ids[:length] = torch.from_numpy(self._kc_set_ids[start:end])
+                kc_set_mask[:length] = torch.from_numpy(self._kc_set_mask[start:end])
+                item["kc_set_ids"] = kc_set_ids
+                item["kc_set_mask"] = kc_set_mask
+            return item
 
     def _collate(batch_items: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
-        return {
+        collated = {
             "concept_ids": torch.stack([item["concept_ids"] for item in batch_items]),
             "exercise_ids": torch.stack([item["exercise_ids"] for item in batch_items]),
             "responses": torch.stack([item["responses"] for item in batch_items]),
@@ -311,6 +359,14 @@ if _TORCH_AVAILABLE:
             "lengths": torch.stack([item["length"] for item in batch_items]),
             "user_ids": torch.stack([item["user_id"] for item in batch_items]),
         }
+        if "kc_set_ids" in batch_items[0]:
+            collated["kc_set_ids"] = torch.stack(
+                [item["kc_set_ids"] for item in batch_items]
+            )
+            collated["kc_set_mask"] = torch.stack(
+                [item["kc_set_mask"] for item in batch_items]
+            )
+        return collated
 
     @torch.no_grad()
     def collect_predictions(
@@ -336,6 +392,7 @@ if _TORCH_AVAILABLE:
                 hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
                 concept_states=concept_states,
                 lengths=lengths,
+                **kc_set_kwargs(batch, device),
             )
             logits = model(dh2_batch)
             pred = logits[:, :-1, 0]
@@ -452,6 +509,7 @@ if _TORCH_AVAILABLE:
                             model, full_hyperedge_index, device, enable_grad=True
                         )
                         index_for_batch = full_hyperedge_index
+                    kc_sets = kc_set_kwargs(batch, device)
                     dh2_batch = DH2KTBatch(
                         concept_ids=batch["concept_ids"].to(device),
                         exercise_ids=batch["exercise_ids"].to(device),
@@ -459,6 +517,7 @@ if _TORCH_AVAILABLE:
                         hyperedge_index=index_for_batch,
                         concept_states=states,
                         lengths=lengths,
+                        **kc_sets,
                     )
                     optimizer.zero_grad()
                     logits = model(dh2_batch)
@@ -482,6 +541,7 @@ if _TORCH_AVAILABLE:
                                 model, full_hyperedge_index, device, enable_grad=True
                             ),
                             lengths=lengths,
+                            **kc_sets,
                         )
                         ablated_batch = DH2KTBatch(
                             concept_ids=dh2_batch.concept_ids,
@@ -489,6 +549,7 @@ if _TORCH_AVAILABLE:
                             responses=dh2_batch.responses,
                             hyperedge_index=ablated_index,
                             lengths=lengths,
+                            **kc_sets,
                         )
                         logits_full = model(full_batch)
                         logits_ablated = model(ablated_batch)
@@ -598,6 +659,13 @@ if _TORCH_AVAILABLE:
         diffusion_alpha: float = 0.5,
         use_questions: bool = False,
         n_lstm_layers: int = 1,
+        memory_dim: int = 16,
+        max_degree: int = 16,
+        graph_transport: float = 0.5,
+        event_pool: str = "mean",
+        transport: str = "clique",
+        use_hyperedge_embed: bool = False,
+        kind_conditioned: bool = False,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -611,6 +679,13 @@ if _TORCH_AVAILABLE:
             diffusion_alpha=diffusion_alpha,
             use_questions=use_questions,
             n_lstm_layers=n_lstm_layers,
+            memory_dim=memory_dim,
+            max_degree=max_degree,
+            graph_transport=graph_transport,
+            event_pool=event_pool,
+            transport=transport,
+            use_hyperedge_embed=use_hyperedge_embed,
+            kind_conditioned=kind_conditioned,
         )
         return DH2KT(config)
 
@@ -641,11 +716,24 @@ def train_fold(
     early_stop_patience: int | None = None,
     use_graph: bool = True,
     mask_repeats: bool = False,
+    seed: int | None = None,
+    memory_dim: int = 16,
+    max_degree: int = 16,
+    graph_transport: float = 0.5,
+    max_kcs: int = 6,
+    event_pool: str = "mean",
+    transport: str = "clique",
+    use_hyperedge_embed: bool = False,
+    kind_conditioned: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
 
     from dh2a_kt.hyperedge.indexing import select_session_hyperedges_for_training
+
+    if seed is not None:
+        seed_everything(seed)
+        logger.info("seed=%d (weight init and batch order)", seed)
 
     device = torch.device(device)
     if max_users is not None:
@@ -672,6 +760,21 @@ def train_fold(
         max_chain_len=spec.max_chain_len,
     )
     kinds: list[str] = ["concept_prerequisite"]
+    if architecture == "v5":
+        # The KC set of a question is observed metadata, so it needs no
+        # train-only gating; build it from every split the run can see.
+        from dh2a_kt.data.events import question_kc_sets
+        from dh2a_kt.hyperedge.construction import build_question_hyperedges
+
+        kc_sets = question_kc_sets(pd.concat([train_df, eval_df], ignore_index=True))
+        question_hyperedges = build_question_hyperedges(kc_sets, fold=spec.fold)
+        clean_hyperedges = list(clean_hyperedges) + question_hyperedges
+        kinds.append("question_concepts")
+        logger.info(
+            "v5: added %d question hyperedges over %d questions",
+            len(question_hyperedges),
+            len(kc_sets),
+        )
     if session_hyperedges:
         selected = select_session_hyperedges_for_training(session_hyperedges)
         clean_hyperedges = list(clean_hyperedges) + list(selected)
@@ -698,6 +801,13 @@ def train_fold(
         diffusion_alpha=diffusion_alpha,
         use_questions=use_questions,
         n_lstm_layers=n_lstm_layers,
+        memory_dim=memory_dim,
+        max_degree=max_degree,
+        graph_transport=graph_transport,
+        event_pool=event_pool,
+        transport=transport,
+        use_hyperedge_embed=use_hyperedge_embed,
+        kind_conditioned=kind_conditioned,
     ).to(device)
     logger.info(
         "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
@@ -714,6 +824,8 @@ def train_fold(
     val_df: pd.DataFrame | None = None
     if val_frac > 0.0:
         users = np.sort(train_df["user_id"].unique())
+        # Fixed regardless of `seed`: multi-seed runs should vary initialisation
+        # and batch order, not which learners are held out for selection.
         rng = np.random.default_rng(42)
         rng.shuffle(users)
         n_val = max(1, int(round(len(users) * val_frac)))
@@ -735,6 +847,8 @@ def train_fold(
                 item_to_idx,
                 max_seq_len=budget.max_seq_len,
                 window_mode=window_mode,
+                collapse_events=architecture == "v5",
+                max_kcs=max_kcs,
             ),
             batch_size=budget.batch_size,
             shuffle=shuffle,
@@ -798,6 +912,15 @@ def train_and_evaluate_fold(
     early_stop_patience: int | None = None,
     use_graph: bool = True,
     mask_repeats: bool = False,
+    seed: int | None = None,
+    memory_dim: int = 16,
+    max_degree: int = 16,
+    graph_transport: float = 0.5,
+    max_kcs: int = 6,
+    event_pool: str = "mean",
+    transport: str = "clique",
+    use_hyperedge_embed: bool = False,
+    kind_conditioned: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -827,6 +950,15 @@ def train_and_evaluate_fold(
         early_stop_patience=early_stop_patience,
         use_graph=use_graph,
         mask_repeats=mask_repeats,
+        seed=seed,
+        memory_dim=memory_dim,
+        max_degree=max_degree,
+        graph_transport=graph_transport,
+        max_kcs=max_kcs,
+        event_pool=event_pool,
+        transport=transport,
+        use_hyperedge_embed=use_hyperedge_embed,
+        kind_conditioned=kind_conditioned,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,

@@ -13,6 +13,7 @@ pytest.importorskip("torch")
 from dh2a_kt.hyperedge.p0_inputs import REPO_ROOT, load_configs, load_e_pre, load_interactions_with_ids, get_fold_splits
 from dh2a_kt.train.tier1 import (
     TrainingBudget,
+    UserSequenceDataset,
     next_step_loss,
     resolve_training_budget,
     train_and_evaluate_fold,
@@ -324,6 +325,48 @@ def test_train_and_evaluate_fold_toy_v4(use_questions: bool):
     assert result.n_predictions > 8 * 9
 
 
+def test_same_seed_reproduces_auc_and_different_seed_does_not():
+    pytest.importorskip("torch_geometric")
+    train_df = _synthetic_logs(n_users=12, seq_len=20)
+    eval_df = _synthetic_logs(n_users=8, seq_len=20)
+    e_pre = pd.DataFrame({"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]})
+
+    def run(seed: int) -> float:
+        budget = TrainingBudget(
+            reference_model="gkt",
+            batch_size=4,
+            epochs=2,
+            lr=1e-2,
+            max_seq_len=10,
+            matched_p0=False,
+        )
+        return train_and_evaluate_fold(
+            train_df,
+            eval_df,
+            e_pre,
+            budget,
+            device="cpu",
+            hidden_dim=16,
+            architecture="v4",
+            window_mode="chunked",
+            seed=seed,
+        ).auc
+
+    assert run(17) == pytest.approx(run(17))
+
+
+def test_seed_everything_controls_weight_init():
+    torch = pytest.importorskip("torch")
+    from dh2a_kt.train.tier1 import seed_everything
+
+    def first_weights(seed: int):
+        seed_everything(seed)
+        return torch.nn.Linear(8, 8).weight.detach().clone()
+
+    assert torch.equal(first_weights(17), first_weights(17))
+    assert not torch.equal(first_weights(17), first_weights(1234))
+
+
 def test_write_comparison_table(tmp_path: Path):
     budget = TrainingBudget(
         reference_model="gkt",
@@ -387,3 +430,78 @@ def test_train_tier1_smoke_xes3g5m_fold0(tmp_path: Path):
         output_path=out,
     )
     assert out.exists()
+
+
+def _multi_kc_logs_for_v5(n_users: int = 12, n_items: int = 8) -> pd.DataFrame:
+    """Logs where some questions expand into several KC rows, as XES3G5M does."""
+    rng = np.random.default_rng(3)
+    kc_of_item = {item: [item % 4] for item in range(n_items)}
+    for item in range(0, n_items, 3):  # every third question is multi-KC
+        kc_of_item[item] = [item % 4, (item + 1) % 4]
+    rows = []
+    for user in range(n_users):
+        for step in range(14):
+            item = int(rng.integers(0, n_items))
+            correct = int(rng.integers(0, 2))
+            for kc in kc_of_item[item]:
+                rows.append((user, item, float(step), kc, correct))
+    return pd.DataFrame(rows, columns=["user_id", "item_id", "timestamp", "kc_id", "correct"])
+
+
+def test_dataset_collapses_events_and_exposes_kc_sets():
+    df = _multi_kc_logs_for_v5()
+    kc_to_idx = {kc: i for i, kc in enumerate(sorted(df["kc_id"].unique()))}
+    item_to_idx = {item: i for i, item in enumerate(sorted(df["item_id"].unique()))}
+    collapsed = UserSequenceDataset(
+        df, kc_to_idx, item_to_idx, max_seq_len=20, window_mode="chunked",
+        collapse_events=True, max_kcs=4,
+    )
+    expanded = UserSequenceDataset(
+        df, kc_to_idx, item_to_idx, max_seq_len=20, window_mode="chunked",
+    )
+    item = collapsed[0]
+    assert item["kc_set_ids"].shape == (20, 4)
+    assert item["kc_set_mask"].shape == (20, 4)
+    # Multi-KC events occupy more than one slot.
+    assert item["kc_set_mask"].sum(dim=1).max() > 1
+    # Collapsing must never invent positions.
+    assert int(item["length"]) <= int(expanded[0]["length"])
+    # Padding slots stay unmarked.
+    assert not item["kc_set_mask"][int(item["length"]) :].any()
+
+
+def test_train_and_evaluate_fold_toy_v5():
+    pytest.importorskip("torch_geometric")
+    train_df = _multi_kc_logs_for_v5(n_users=12)
+    eval_df = _multi_kc_logs_for_v5(n_users=8)
+    e_pre = pd.DataFrame({"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]})
+    budget = TrainingBudget(
+        reference_model="gkt", batch_size=4, epochs=2, lr=1e-2,
+        max_seq_len=10, matched_p0=False,
+    )
+    result = train_and_evaluate_fold(
+        train_df, eval_df, e_pre, budget, device="cpu", hidden_dim=16,
+        architecture="v5", window_mode="chunked", memory_dim=8,
+    )
+    assert np.isfinite(result.auc)
+    assert result.n_predictions > 0
+
+
+def test_v5_scores_fewer_positions_than_the_expanded_protocol():
+    pytest.importorskip("torch_geometric")
+    train_df = _multi_kc_logs_for_v5(n_users=10)
+    eval_df = _multi_kc_logs_for_v5(n_users=8)
+    e_pre = pd.DataFrame({"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]})
+    budget = TrainingBudget(
+        reference_model="gkt", batch_size=4, epochs=1, lr=1e-2,
+        max_seq_len=10, matched_p0=False,
+    )
+    common = dict(device="cpu", hidden_dim=16, window_mode="chunked")
+    v5 = train_and_evaluate_fold(
+        train_df, eval_df, e_pre, budget, architecture="v5", memory_dim=8, **common
+    )
+    v4 = train_and_evaluate_fold(
+        train_df, eval_df, e_pre, budget, architecture="v4", **common
+    )
+    # v5 predicts once per attempt; v4 predicts once per KC row.
+    assert v5.n_predictions < v4.n_predictions
