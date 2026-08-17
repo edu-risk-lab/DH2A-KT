@@ -172,6 +172,22 @@ def main() -> int:
     parser.add_argument("--dropout", type=float, default=None)
     parser.add_argument("--lstm-layers", type=int, default=None, help="v4 LSTM depth")
     parser.add_argument(
+        "--max-seq-len",
+        type=int,
+        default=None,
+        help="Override pyKT/P0 max_seq_len (chunk/window length). Do not edit the YAML for sweeps.",
+    )
+    parser.add_argument(
+        "--recap-attention",
+        action="store_true",
+        help="v4: causal attention over LSTM history before the bilinear readout (E2).",
+    )
+    parser.add_argument(
+        "--question-kc-agg",
+        action="store_true",
+        help="v4: add mean of observed question→KC concepts to the Rasch vector (E3).",
+    )
+    parser.add_argument(
         "--val-frac",
         type=float,
         default=None,
@@ -212,7 +228,7 @@ def main() -> int:
         p0_cfg,
         reference_model=train_cfg.get("budget_reference", "gkt"),
         lr=float(train_cfg.get("lr", 0.001)),
-        max_seq_len=train_cfg.get("max_seq_len"),
+        max_seq_len=args.max_seq_len if args.max_seq_len is not None else train_cfg.get("max_seq_len"),
     )
     p0_batch_size, p0_epochs = budget.batch_size, budget.epochs
     if args.batch_size is not None:
@@ -255,6 +271,8 @@ def main() -> int:
     dropout = float(args.dropout if args.dropout is not None else train_cfg.get("dropout", 0.2))
     n_lstm_layers = int(args.lstm_layers or train_cfg.get("n_lstm_layers", 1))
     use_questions = bool(args.use_questions or train_cfg.get("use_questions", False))
+    recap_attention = bool(args.recap_attention or train_cfg.get("recap_attention", False))
+    question_kc_agg = bool(args.question_kc_agg or train_cfg.get("question_kc_agg", False))
     memory_dim = int(args.memory_dim if args.memory_dim is not None else train_cfg.get("memory_dim", 16))
     max_degree = int(args.max_degree if args.max_degree is not None else train_cfg.get("max_degree", 16))
     graph_transport = float(
@@ -308,6 +326,7 @@ def main() -> int:
           f"hyperedge_source={args.hyperedge_source or 'from config'} no_graph={args.no_graph} "
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
+          f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
           f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
           f"event_pool={event_pool} transport={transport} "
           f"hyperedge_embed={use_hyperedge_embed} kind_conditioned={kind_conditioned} "
@@ -380,6 +399,8 @@ def main() -> int:
             transport=transport,
             use_hyperedge_embed=use_hyperedge_embed,
             kind_conditioned=kind_conditioned,
+            recap_attention=recap_attention,
+            question_kc_agg=question_kc_agg,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT
@@ -390,7 +411,15 @@ def main() -> int:
         )
         fold_result.fold = fold
         results.append(fold_result)
-        print(f"[fold {fold}] AUC={fold_result.auc:.4f} n_predictions={fold_result.n_predictions}")
+        val_note = (
+            f" val_auc={fold_result.val_auc:.4f}"
+            if fold_result.val_auc is not None
+            else ""
+        )
+        print(
+            f"[fold {fold}] AUC={fold_result.auc:.4f}{val_note} "
+            f"n_predictions={fold_result.n_predictions}"
+        )
 
     table = write_comparison_table(
         results,

@@ -206,3 +206,9 @@ results/pykt_work_clean/
 results/predictions/
 results/tables/_rescore_tmp.csv
 temp/_diag_pykt_smask/
+
+# SOTA v4q track (PROMPT_cursor_v4q_sota.md)
+!results/tables/sota_*.csv
+!results/tables/sota_*.log
+!results/tables/sota_*.json
+

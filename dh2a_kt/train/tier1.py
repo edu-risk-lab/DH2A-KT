@@ -51,6 +51,7 @@ class FoldResult:
     fold: int
     auc: float
     n_predictions: int
+    val_auc: float | None = None
 
 
 def seed_everything(seed: int) -> None:
@@ -76,6 +77,7 @@ if _TORCH_AVAILABLE:
         clean_hyperedge_index: dict[str, torch.Tensor]
         clean_hyperedges: list[Hyperedge]
         device: torch.device
+        val_auc: float | None = None
 
 
 def resolve_training_budget(
@@ -457,7 +459,7 @@ if _TORCH_AVAILABLE:
         val_loader: DataLoader | None = None,
         early_stop_patience: int | None = None,
         mask_repeats: bool = False,
-    ) -> None:
+    ) -> float | None:
         if mask_repeats:
             logger.info(
                 "clean protocol: repeat-row targets excluded from the loss and from val AUC"
@@ -646,6 +648,9 @@ if _TORCH_AVAILABLE:
                 )
         finally:
             p0_log.setLevel(prev_p0_level)
+        if val_loader is not None and np.isfinite(best_val_auc) and best_val_auc > -float("inf"):
+            return float(best_val_auc)
+        return None
 
     def build_model(
         n_concepts: int,
@@ -666,6 +671,8 @@ if _TORCH_AVAILABLE:
         transport: str = "clique",
         use_hyperedge_embed: bool = False,
         kind_conditioned: bool = False,
+        recap_attention: bool = False,
+        question_kc_agg: bool = False,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -686,6 +693,8 @@ if _TORCH_AVAILABLE:
             transport=transport,
             use_hyperedge_embed=use_hyperedge_embed,
             kind_conditioned=kind_conditioned,
+            recap_attention=recap_attention,
+            question_kc_agg=question_kc_agg,
         )
         return DH2KT(config)
 
@@ -725,6 +734,8 @@ def train_fold(
     transport: str = "clique",
     use_hyperedge_embed: bool = False,
     kind_conditioned: bool = False,
+    recap_attention: bool = False,
+    question_kc_agg: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -808,7 +819,30 @@ def train_fold(
         transport=transport,
         use_hyperedge_embed=use_hyperedge_embed,
         kind_conditioned=kind_conditioned,
+        recap_attention=recap_attention,
+        question_kc_agg=question_kc_agg,
     ).to(device)
+    if question_kc_agg and architecture == "v4":
+        # Observed Q–KC incidence from TRAIN only (not E_pre / not eval).
+        from dh2a_kt.data.events import pad_kc_matrix, question_kc_sets
+
+        raw_sets = question_kc_sets(train_df)
+        rev_item = {idx: raw for raw, idx in item_to_idx.items()}
+        kc_lists: list[list[int]] = []
+        for item_idx in range(len(item_to_idx)):
+            raw_item = rev_item[item_idx]
+            dense = [kc_to_idx[k] for k in raw_sets.get(raw_item, []) if k in kc_to_idx]
+            kc_lists.append(dense)
+        ids_np, mask_np = pad_kc_matrix(kc_lists, width=max_kcs)
+        model.set_question_kc_table(
+            torch.as_tensor(ids_np, device=device),
+            torch.as_tensor(mask_np, device=device),
+        )
+        logger.info(
+            "question_kc_agg: registered KC table for %d items (width=%d)",
+            len(item_to_idx),
+            max_kcs,
+        )
     logger.info(
         "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
         architecture,
@@ -858,7 +892,7 @@ def train_fold(
     train_loader = _loader(train_df, shuffle=True)
     eval_loader = _loader(eval_df, shuffle=False)
     val_loader = _loader(val_df, shuffle=False) if val_df is not None else None
-    train_one_fold(
+    val_auc = train_one_fold(
         model,
         train_loader,
         hyperedge_index,
@@ -882,6 +916,7 @@ def train_fold(
         clean_hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
         clean_hyperedges=clean_hyperedges,
         device=device,
+        val_auc=val_auc,
     )
 
 
@@ -921,6 +956,8 @@ def train_and_evaluate_fold(
     transport: str = "clique",
     use_hyperedge_embed: bool = False,
     kind_conditioned: bool = False,
+    recap_attention: bool = False,
+    question_kc_agg: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -959,6 +996,8 @@ def train_and_evaluate_fold(
         transport=transport,
         use_hyperedge_embed=use_hyperedge_embed,
         kind_conditioned=kind_conditioned,
+        recap_attention=recap_attention,
+        question_kc_agg=question_kc_agg,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,
@@ -972,7 +1011,12 @@ def train_and_evaluate_fold(
 
         save_trained_fold(Path(checkpoint_path), trained)
         logger.info("wrote DH2-KT checkpoint -> %s", checkpoint_path)
-    return FoldResult(fold=-1, auc=auc, n_predictions=n_predictions)
+    return FoldResult(
+        fold=-1,
+        auc=auc,
+        n_predictions=n_predictions,
+        val_auc=trained.val_auc,
+    )
 
 
 def write_comparison_table(
@@ -1005,6 +1049,7 @@ def write_comparison_table(
                     "comparison_type": comparison_type,
                     "budget_note": budget.note or "no_p0_baseline",
                     "n_predictions": fold_result.n_predictions,
+                    "val_auc": fold_result.val_auc,
                 }
             )
         rows.append(
@@ -1021,6 +1066,9 @@ def write_comparison_table(
                 "comparison_type": comparison_type,
                 "budget_note": budget.note or "no_p0_baseline",
                 "n_predictions": sum(r.n_predictions for r in results),
+                "val_auc": float(np.nanmean([r.val_auc for r in results if r.val_auc is not None]))
+                if any(r.val_auc is not None for r in results)
+                else None,
             }
         )
     else:
@@ -1042,6 +1090,7 @@ def write_comparison_table(
                         "comparison_type": comparison_type,
                         "budget_note": budget.note,
                         "n_predictions": fold_result.n_predictions,
+                        "val_auc": fold_result.val_auc,
                     }
                 )
 
@@ -1061,6 +1110,9 @@ def write_comparison_table(
                     "comparison_type": comparison_type,
                     "budget_note": budget.note,
                     "n_predictions": sum(r.n_predictions for r in results),
+                    "val_auc": float(np.nanmean([r.val_auc for r in results if r.val_auc is not None]))
+                    if any(r.val_auc is not None for r in results)
+                    else None,
                 }
             )
 

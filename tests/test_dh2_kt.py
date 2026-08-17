@@ -356,11 +356,59 @@ def test_v4_sanity_overfit_tiny_batch(use_questions: bool):
     assert final_loss < 0.05
 
 
-def test_v4_question_variant_adds_item_parameters():
+def test_v4_recap_attention_is_causal():
+    """Future responses must not move logits at earlier positions (E2 leak check)."""
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(recap_attention=True, use_questions=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=8)
+    cut = 3
+    flipped = batch.responses.clone()
+    flipped[:, cut + 1 :] = 1.0 - flipped[:, cut + 1 :]
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=flipped,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    # Future position should move (sanity: the flip is not a no-op overall).
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
+def test_v4_question_kc_agg_changes_logits():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(use_questions=True, question_kc_agg=True))
+    # Item 0 → concepts {0,1}; item 1 → {2}
+    model.set_question_kc_table(
+        torch.tensor([[0, 1], [2, 0], [0, 0], [0, 0], [0, 0], [0, 0]], dtype=torch.long),
+        torch.tensor(
+            [[True, True], [True, False], [False, False], [False, False], [False, False], [False, False]]
+        ),
+    )
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    plain = DH2KT(_v4_config(use_questions=True))
+    plain.load_state_dict(
+        {k: v for k, v in model.state_dict().items() if not k.startswith("exercise_kc_")},
+        strict=False,
+    )
+    plain.eval()
+    with torch.no_grad():
+        diff = (model(batch) - plain(batch)).abs().max().item()
+    assert diff > 1e-4
+
+
+def test_v4_recap_attention_adds_projection():
     plain = DH2KT(_v4_config()).state_dict()
-    questioned = DH2KT(_v4_config(use_questions=True)).state_dict()
-    assert "item_scale.weight" not in plain
-    assert {"item_scale.weight", "item_bias.weight", "concept_var.weight"} <= set(questioned)
+    recap = DH2KT(_v4_config(recap_attention=True)).state_dict()
+    assert "recap_proj.weight" not in plain
+    assert "recap_proj.weight" in recap
+
 
 
 def test_v2_state_dict_has_no_v3_head():

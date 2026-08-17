@@ -114,6 +114,13 @@ class DH2KTConfig:
     """v5 only: project each hyperedge kind's concept states with its own Linear
     before mixing, so a KC in a question hyperedge is not forced to share the
     same refined vector as in a prerequisite hyperedge."""
+    recap_attention: bool = False
+    """v4 only: causal attention over LSTM history before the bilinear readout."""
+    question_kc_agg: bool = False
+    """v4 only: add mean of observed KCs for the question to the Rasch vector.
+
+    Uses the train-time question→KC incidence (not prerequisite hyperedges).
+    """
     max_hyperedge_members: int = 8
     """v5 star transport: pad width for members of one hyperedge."""
     max_hedges_per_concept: int = 8
@@ -439,6 +446,8 @@ if _TORCH_AVAILABLE:
                 self.query_proj = nn.Linear(hidden, hidden)
                 self.concept_bias = nn.Embedding(config.n_concepts, 1)
                 nn.init.zeros_(self.concept_bias.weight)
+                if config.recap_attention:
+                    self.recap_proj = nn.Linear(hidden, hidden)
                 if config.use_questions:
                     # Rasch parameterisation (AKT/simpleKT): a scalar per item
                     # scaling a per-concept variation vector, plus an item bias.
@@ -448,6 +457,15 @@ if _TORCH_AVAILABLE:
                     nn.init.zeros_(self.item_scale.weight)
                     nn.init.zeros_(self.concept_var.weight)
                     nn.init.zeros_(self.item_bias.weight)
+
+        def set_question_kc_table(
+            self,
+            exercise_kc_ids: "torch.Tensor",
+            exercise_kc_mask: "torch.Tensor",
+        ) -> None:
+            """Register the observed question→KC incidence used by ``question_kc_agg``."""
+            self.register_buffer("exercise_kc_ids", exercise_kc_ids.long())
+            self.register_buffer("exercise_kc_mask", exercise_kc_mask.bool())
 
         def _encode_concepts(
             self,
@@ -527,6 +545,17 @@ if _TORCH_AVAILABLE:
             if self.config.use_questions and exercise_ids is not None:
                 items = exercise_ids.clamp(0, self.config.n_exercises - 1)
                 vectors = vectors + self.item_scale(items) * self.concept_var(concept_ids)
+            if (
+                self.config.question_kc_agg
+                and exercise_ids is not None
+                and hasattr(self, "exercise_kc_ids")
+            ):
+                # Observed Q–KC incidence (train only): mean over KCs of the item.
+                items = exercise_ids.clamp(0, self.config.n_exercises - 1)
+                kc_ids = self.exercise_kc_ids[items]
+                kc_mask = self.exercise_kc_mask[items]
+                member = self.concept_embed(kc_ids)
+                vectors = vectors + masked_mean(member, kc_mask)
             return vectors
 
         def _encode_sequence_v4(
@@ -567,7 +596,22 @@ if _TORCH_AVAILABLE:
             concepts = batch.concept_ids.clamp(0, n_concepts - 1)
             next_concepts = torch.cat([concepts[:, 1:], concepts[:, -1:]], dim=1)
             scale = math.sqrt(self.config.hidden_dim)
-            logits = (hidden * self.query_proj(queried)).sum(dim=-1, keepdim=True) / scale
+            q = self.query_proj(queried)
+            if self.config.recap_attention:
+                # Causal recap over LSTM history: retrieve sparse distant evidence
+                # that a single hidden state tends to forget on long logs.
+                _, t_len, hidden_dim = hidden.shape
+                scores = torch.einsum("bth,bsh->bts", q, hidden) / math.sqrt(hidden_dim)
+                causal = torch.ones(
+                    t_len, t_len, dtype=torch.bool, device=hidden.device
+                ).tril()
+                scores = scores.masked_fill(~causal, float("-inf"))
+                attn = scores.softmax(dim=-1)
+                context = torch.einsum("bts,bsh->bth", attn, hidden)
+                readout = hidden + self.recap_proj(context)
+                logits = (readout * q).sum(dim=-1, keepdim=True) / scale
+            else:
+                logits = (hidden * q).sum(dim=-1, keepdim=True) / scale
             logits = logits + self.concept_bias(next_concepts)
             if self.config.use_questions and batch.exercise_ids is not None:
                 items = batch.exercise_ids.clamp(0, self.config.n_exercises - 1)

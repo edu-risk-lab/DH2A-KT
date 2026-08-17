@@ -136,11 +136,35 @@ Cùng seed 42, batch 64, 20 epoch, neighborhood, no-session, `graph_dropout=0`, 
 | v5q_ab_attn | attention only | **0.799567** | xong — trung tính |
 | v5q_ab_star | star only | **0.524332** | xong — phá model |
 | v5q_ab_hedge | hyperedge embed | **0.804702** | xong — tốt nhất có-graph trong ablation |
-| v5q_ab_kind | kind-conditioned | (chưa) | **đang chạy** |
-| v5q_ab_ahk | attn+hedge+kind, clique | (chưa) | chờ |
-| *_nograph | nếu AUC ≥ 0.80 | (chưa) | sẽ tự chạy (hedge đã vượt cổng) |
+| v5q_ab_kind | kind-conditioned | **0.799561** | xong — trung tính |
+| v5q_ab_ahk | attn+hedge+kind, clique | (chưa / đang chạy) | xem log ablation |
+| *_nograph | nếu AUC ≥ 0.80 | (chưa) | hedge vượt cổng → sẽ có twin |
 
 Log: `results/tables/v5q_ablation.log`.
+
+### Giai đoạn H — Hướng SOTA v4q (`PROMPT_cursor_v4q_sota.md`)
+
+Thực nghiệm theo thứ tự E0→E5; cổng quyết định đặt trước khi nhìn số.
+
+#### E0 — Đối chứng "bất biến giao thức" (xong)
+
+Cùng checkpoint train với `mask_repeats=True`, chấm lại trên chunked **leaky**:
+
+| Model | clean AUC | leaky AUC (cùng ckpt) | n_scored leaky |
+|---|---|---|---|
+| SimpleKT (`C_simplekt_clean`) | 0.817760 | **0.814198** | 1.273.545 |
+| AKT (`C_akt_clean`) | 0.819751 | **0.809396** | 1.273.545 |
+
+**Cổng:** nếu leaky ≈ 0.818 → lợi thế không tồn tại; nếu ~0.87 → thật.
+
+**Kết luận:** cả hai đều ≈ 0.81 (thậm chí *thấp hơn* clean), **không** nhảy lên ~0.87 như B_* (retrain leaky). Lợi thế "bất biến giao thức" của v4q so với baseline **không tồn tại** khi so đối xứng (cùng ckpt, đổi eval). Xóa mọi phát biểu kiểu đó khỏi nháp bài báo. File: `results/tables/sota_E0_protocol_invariance_control.csv`.
+
+#### E1–E5
+
+- E1: thêm `--max-seq-len`; quét L∈{100,150,200,300,400}; chốt theo **val AUC** (đang chạy).
+- E2: `--recap-attention` + unit test nhân quả (mã đã có; chờ L*).
+- E3: `--question-kc-agg` (incidence quan sát train-only; chờ L*).
+- E4 / E5: matched batch / ensemble 3 seed — chưa chạy.
 
 ---
 
@@ -255,15 +279,28 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | v5q_priority | 0.758950 |
 | v5q_ab_star | 0.524332 |
 
+### E0 protocol-invariance control (cùng ckpt clean → eval leaky)
+
+| Model | clean | leaky |
+|---|---|---|
+| SimpleKT | 0.817760 | 0.814198 |
+| AKT | 0.819751 | 0.809396 |
+
+→ **GATE FAIL** cho tuyên bố bất biến giao thức.
+
 ---
 
 ## 6. Việc còn mở (checklist)
 
-- [ ] Xong `v5q_ab_kind`, `v5q_ab_ahk`
-- [ ] Nograph twin cho hedge (và mọi run ≥ 0.80) — đo ΔAUC graph
-- [ ] (Nếu theo SOTA hypergraph) thiết kế lại gần GIKT: GCN câu←KC + recap; **cấm** loang đáp án qua cạnh
-- [ ] Chấm lại v5/hedge **test-only** cho bảng công bằng tuyệt đối với GIKT
-- [ ] Commit/push nhật ký + số liệu ablation khi hàng đợi xong (theo yêu cầu người dùng)
+- [x] E0 protocol-invariance control → bác bỏ lợi thế "bất biến giao thức"
+- [ ] E1 chunk-length sweep → chốt L* theo val AUC
+- [ ] E2 recap attention (gate Δval ≥ +0.002)
+- [ ] E3 question–KC agg (gate ΔAUC(graph) ≥ +0.002; báo cáo trung thực nếu ≈0)
+- [ ] E4 matched batch 16/32 + minutes
+- [ ] E5 ensemble 3 seed (logit avg)
+- [ ] `sota_summary.csv` + bootstrap khi tuyên bố vượt
+- [ ] Xong ablation v5 còn lại (`ahk`, nograph twins) nếu còn chạy
+- [ ] Commit/push nhật ký + số liệu SOTA khi có block kết quả
 
 ---
 
@@ -272,5 +309,6 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | Phiên bản | Nội dung |
 |---|---|
 | 2026-08-17 | Khởi tạo: toàn bộ quá trình, phân tích, nhật ký; ablation đến hedge xong, kind đang chạy |
+| 2026-08-17 tối | Giai đoạn H: E0 xong (bác bỏ protocol-invariance); bắt đầu E1; thêm cờ E2/E3 |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

@@ -1,0 +1,5 @@
+﻿model,trained_with_mask,eval_protocol,auc,n_scored,note
+simplekt,True,clean,0.817760,1090574,C_simplekt_clean from xes3g5m_fold0_baselines_protocol.csv
+simplekt,True,leaky,0.814198,1273545,same C_simplekt_clean ckpt scored on chunked leaky (E0_simplekt_clean_on_leaky)
+akt,True,clean,0.819751,1090574,C_akt_clean from xes3g5m_fold0_baselines_protocol.csv
+akt,True,leaky,0.809396,1273545,same C_akt_clean ckpt scored on chunked leaky (E0_akt_clean_on_leaky)
