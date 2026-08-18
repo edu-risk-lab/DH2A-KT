@@ -395,6 +395,7 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 - [ ] (Trước tuyên bố SOTA) GIKT / AKT cùng L=400 + bootstrap vs `hg_qkc_on`
 - [ ] (Tùy chọn) variant (1) event-collapse — chỉ nếu muốn sau khi I đã PASS
 - [x] Commit nhật ký + số liệu hg_qkc (sau cổng)
+- [x] Push `main`: `809c76b` / `e7ffbcc` (question-graph + diary)
 
 ---
 
@@ -405,6 +406,6 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | 2026-08-17 | Khởi tạo: toàn bộ quá trình, phân tích, nhật ký; ablation đến hedge xong, kind đang chạy |
 | 2026-08-17 tối | Giai đoạn H: E0 xong (bác bỏ protocol-invariance); bắt đầu E1; thêm cờ E2/E3 |
 | 2026-08-18 | E1–E5 xong; đánh giá tổng thể: không SOTA; E2/E3 FAIL; push `sota_summary.csv` |
-| 2026-08-18 sáng | Giai đoạn I: Q←KC `--question-graph` GATE PASS Δval +0.006; test-only 0.8270 |
+| 2026-08-18 sáng | Giai đoạn I: Q←KC `--question-graph` GATE PASS Δval +0.006; test-only 0.8270; push `809c76b` |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*
