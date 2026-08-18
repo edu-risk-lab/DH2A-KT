@@ -1,0 +1,2 @@
+model_a,model_b,auc_a,auc_b,difference,diff_ci_low,diff_ci_high,auc_a_ci_low,auc_a_ci_high,auc_b_ci_low,auc_b_ci_high,n_boot,n_learners,indistinguishable
+hg_qkc_on,hg_qkc_off,0.8269842183645131,0.8202485459863773,0.006735672378135771,0.006263310563608413,0.007206330148923201,0.8247895588401901,0.8291997203249708,0.8180624457620791,0.8225116759062575,1000,3614,False

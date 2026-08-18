@@ -673,6 +673,7 @@ if _TORCH_AVAILABLE:
         kind_conditioned: bool = False,
         recap_attention: bool = False,
         question_kc_agg: bool = False,
+        question_graph: bool = False,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -695,6 +696,7 @@ if _TORCH_AVAILABLE:
             kind_conditioned=kind_conditioned,
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
+            question_graph=question_graph,
         )
         return DH2KT(config)
 
@@ -736,6 +738,7 @@ def train_fold(
     kind_conditioned: bool = False,
     recap_attention: bool = False,
     question_kc_agg: bool = False,
+    question_graph: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -821,28 +824,46 @@ def train_fold(
         kind_conditioned=kind_conditioned,
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
+        question_graph=question_graph,
     ).to(device)
-    if question_kc_agg and architecture == "v4":
+    if (question_kc_agg or question_graph) and architecture == "v4":
         # Observed Q–KC incidence from TRAIN only (not E_pre / not eval).
         from dh2a_kt.data.events import pad_kc_matrix, question_kc_sets
 
         raw_sets = question_kc_sets(train_df)
         rev_item = {idx: raw for raw, idx in item_to_idx.items()}
-        kc_lists: list[list[int]] = []
-        for item_idx in range(len(item_to_idx)):
-            raw_item = rev_item[item_idx]
-            dense = [kc_to_idx[k] for k in raw_sets.get(raw_item, []) if k in kc_to_idx]
-            kc_lists.append(dense)
-        ids_np, mask_np = pad_kc_matrix(kc_lists, width=max_kcs)
-        model.set_question_kc_table(
-            torch.as_tensor(ids_np, device=device),
-            torch.as_tensor(mask_np, device=device),
-        )
-        logger.info(
-            "question_kc_agg: registered KC table for %d items (width=%d)",
-            len(item_to_idx),
-            max_kcs,
-        )
+        if question_kc_agg:
+            kc_lists: list[list[int]] = []
+            for item_idx in range(len(item_to_idx)):
+                raw_item = rev_item[item_idx]
+                dense = [kc_to_idx[k] for k in raw_sets.get(raw_item, []) if k in kc_to_idx]
+                kc_lists.append(dense)
+            ids_np, mask_np = pad_kc_matrix(kc_lists, width=max_kcs)
+            model.set_question_kc_table(
+                torch.as_tensor(ids_np, device=device),
+                torch.as_tensor(mask_np, device=device),
+            )
+            logger.info(
+                "question_kc_agg: registered KC table for %d items (width=%d)",
+                len(item_to_idx),
+                max_kcs,
+            )
+        if question_graph:
+            A_qs = torch.zeros(len(item_to_idx), len(kc_to_idx), device=device)
+            for item_idx in range(len(item_to_idx)):
+                raw_item = rev_item[item_idx]
+                for k in raw_sets.get(raw_item, []):
+                    if k in kc_to_idx:
+                        A_qs[item_idx, kc_to_idx[k]] = 1.0
+            model.set_question_kc_incidence(A_qs)
+            n_linked = int((A_qs.sum(dim=1) > 0).sum().item())
+            logger.info(
+                "question_graph: registered Q–KC incidence for %d/%d items "
+                "(mean degree=%.2f)",
+                n_linked,
+                len(item_to_idx),
+                float(A_qs.sum().item()) / max(len(item_to_idx), 1),
+            )
     logger.info(
         "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
         architecture,
@@ -958,6 +979,7 @@ def train_and_evaluate_fold(
     kind_conditioned: bool = False,
     recap_attention: bool = False,
     question_kc_agg: bool = False,
+    question_graph: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -998,6 +1020,7 @@ def train_and_evaluate_fold(
         kind_conditioned=kind_conditioned,
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
+        question_graph=question_graph,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,

@@ -1,0 +1,3 @@
+checkpoint,eval_split,window_mode,mask_repeats,max_seq_len,auc,n
+hg_qkc_off,test,chunked,True,400,0.8202485459863772,1093755
+hg_qkc_on,test,chunked,True,400,0.8269842183645132,1093755

@@ -403,6 +403,80 @@ def test_v4_question_kc_agg_changes_logits():
     assert diff > 1e-4
 
 
+def test_v4_question_graph_incidence_changes_logits():
+    """Flipping a Q–KC membership must move logits that use that question."""
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(use_questions=True, question_graph=True))
+    n_ex, n_c = 6, 8
+    A = torch.zeros(n_ex, n_c)
+    A[0, 0] = 1.0
+    A[0, 1] = 1.0
+    A[1, 2] = 1.0
+    model.set_question_kc_incidence(A)
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    # Force item 0 into the sequence so the flipped row is scored.
+    batch.exercise_ids[:, :] = 0
+    with torch.no_grad():
+        base = model(batch)
+    A2 = A.clone()
+    A2[0, 2] = 1.0  # add a third KC for item 0
+    model.set_question_kc_incidence(A2)
+    with torch.no_grad():
+        changed = model(batch)
+    assert (base - changed).abs().max().item() > 1e-4
+
+
+def test_v4_question_graph_ablation_differs_from_full():
+    """Zeroed incidence (empty agg) differs from a connected incidence."""
+    torch.manual_seed(1)
+    model = DH2KT(_v4_config(use_questions=True, question_graph=True))
+    n_ex, n_c = 6, 8
+    A = torch.zeros(n_ex, n_c)
+    A[0, 0] = 1.0
+    A[1, 1] = 1.0
+    A[2, 2] = 1.0
+    model.set_question_kc_incidence(A)
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    with torch.no_grad():
+        full = model(batch)
+    model.set_question_kc_incidence(torch.zeros_like(A))
+    with torch.no_grad():
+        empty = model(batch)
+    assert (full - empty).abs().max().item() > 1e-4
+    # Twin without the module must not have question_embed.
+    off = DH2KT(_v4_config(use_questions=True, question_graph=False))
+    assert not hasattr(off, "question_embed")
+
+
+def test_v4_question_graph_no_future_leak():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(use_questions=True, question_graph=True))
+    n_ex, n_c = 6, 8
+    A = torch.zeros(n_ex, n_c)
+    for i in range(min(n_ex, n_c)):
+        A[i, i] = 1.0
+    model.set_question_kc_incidence(A)
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    cut = 2
+    flipped = batch.responses.clone()
+    flipped[:, cut + 1 :] = 1.0 - flipped[:, cut + 1 :]
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=flipped,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
 def test_v4_recap_attention_adds_projection():
     plain = DH2KT(_v4_config()).state_dict()
     recap = DH2KT(_v4_config(recap_attention=True)).state_dict()

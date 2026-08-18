@@ -188,6 +188,12 @@ def main() -> int:
         help="v4: add mean of observed question→KC concepts to the Rasch vector (E3).",
     )
     parser.add_argument(
+        "--question-graph",
+        action="store_true",
+        help="v4: GIKT-style question embedding refined by observed Q–KC incidence "
+        "(no response transport). Hard ablation twin: omit this flag.",
+    )
+    parser.add_argument(
         "--val-frac",
         type=float,
         default=None,
@@ -273,6 +279,7 @@ def main() -> int:
     use_questions = bool(args.use_questions or train_cfg.get("use_questions", False))
     recap_attention = bool(args.recap_attention or train_cfg.get("recap_attention", False))
     question_kc_agg = bool(args.question_kc_agg or train_cfg.get("question_kc_agg", False))
+    question_graph = bool(args.question_graph or train_cfg.get("question_graph", False))
     memory_dim = int(args.memory_dim if args.memory_dim is not None else train_cfg.get("memory_dim", 16))
     max_degree = int(args.max_degree if args.max_degree is not None else train_cfg.get("max_degree", 16))
     graph_transport = float(
@@ -327,6 +334,7 @@ def main() -> int:
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
           f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
+          f"question_graph={question_graph} "
           f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
           f"event_pool={event_pool} transport={transport} "
           f"hyperedge_embed={use_hyperedge_embed} kind_conditioned={kind_conditioned} "
@@ -401,6 +409,7 @@ def main() -> int:
             kind_conditioned=kind_conditioned,
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
+            question_graph=question_graph,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT

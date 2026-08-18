@@ -18,7 +18,8 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 5. **Nhóm ưu tiên** (attention + star + hedge embed + kind-conditioned): có graph **hại** (Δ −0.047); không graph lại cao hơn.
 6. **Ablation:** `star` phá model (0.52); `attention` trung tính; `hyperedge_embed` giúp nhẹ (0.8047) — vẫn xa GIKT ~0.019.
 7. **GIKT vượt** vì dùng đồ thị câu–KC quan sát để tinh chỉnh embedding câu + LSTM/recap — không loang đáp án qua cạnh như transport memory của v5.
-8. **Giai đoạn H (SOTA ladder E0–E5) đã kết thúc (2026-08-18):** không vượt GIKT 0.8238; E2/E3 FAIL cổng; cải thiện thật từ L=400 + batch nhỏ + ensemble; tuyên bố “bất biến giao thức” và “graph đóng góp AUC” đều **bác bỏ**.
+8. **Giai đoạn H (SOTA ladder E0–E5):** không vượt GIKT ở L=200; E2/E3 FAIL; cải thiện từ L=400 + batch + ensemble.
+9. **Giai đoạn I (Q←KC refine, 2026-08-18):** `--question-graph` (GIKT-style, không transport) **PASS cổng** Δval ≥ +0.002 (Δval **+0.00612**); test-only clean **0.826984** vs twin off **0.820249**. Chưa tuyên bố SOTA tuyệt đối vs GIKT L=200 (khác cửa sổ L=400).
 
 ---
 
@@ -172,9 +173,27 @@ Cùng checkpoint train với `mask_repeats=True`, chấm lại trên chunked **l
 
 - **Ladder E0→E5 đã chạy xong.** E6 (gộp multi-KC không transport) không bắt buộc vì E2+E3 đã fail cổng.
 - **Không đạt SOTA sạch** so với GIKT **0.823807**. Số gần nhất trên protocol sạch test-only: ensemble **0.820721**; E4 bs16 đạt **0.820908** trên CSV valid+test (không đồng protocol tuyệt đối với bảng GIKT).
-- **Hai đòn kiến trúc gần GIKT đều FAIL:** recap Δval −0.001; Q–KC agg Δ≈0 → **graph không đóng góp AUC** theo cổng đã đặt trước.
-- **Cải thiện có thật** đến từ cửa sổ L=400, batch nhỏ hơn, và ensemble — không từ novelty hypergraph.
-- **Hệ quả bài báo:** không viết tiêu đề/đóng góp “hypergraph SOTA AUC”. Trục vững: rò rỉ multi-KC, bảng sạch tái lập, audit protocol, và kết luận trung thực graph/prereq/transport ≈0 hoặc hại. File tổng hợp: `results/tables/sota_summary.csv`.
+- **Hai đòn kiến trúc gần GIKT đều FAIL:** recap Δval −0.001; Q–KC agg Δ≈0 → **mean-add graph không đóng góp AUC** theo cổng đã đặt trước.
+- **Cải thiện có thật** đến từ cửa sổ L=400, batch nhỏ hơn, và ensemble — không từ E2/E3.
+- **Hệ quả bài báo (sau H):** không viết tiêu đề từ E2/E3. Trục vững: rò rỉ multi-KC, bảng sạch, audit protocol. File: `results/tables/sota_summary.csv`.
+
+### Giai đoạn I — Novelty graph vòng cuối: Q←KC refine (2026-08-18)
+
+**Thiết kế (đã chốt):** embedding câu riêng + `q_gcn = tanh(W(q + A_norm @ concept))` nạp vào LSTM/query v4q; **không** transport đáp án, không star, không prereq-as-novelty. Cờ `--question-graph`. Twin ablation: cùng protocol, `--no-graph` concept stack, **không** `--question-graph`.
+
+**Protocol:** fold 0, mask-repeats, chunked, L=400, batch=16, epochs=30, val_frac=0.1, seed=42, `--use-questions`, `--no-session --no-graph`.
+
+**Cổng (val, đăng ký trước):** `val(on) − val(off) ≥ +0.002`.
+
+| Run | tag | val AUC | test AUC (CSV valid+test) | test-only clean |
+|---|---|---|---|---|
+| B | `hg_qkc_off` | 0.819862 | 0.820497 | **0.820249** |
+| A | `hg_qkc_on` | **0.825982** | 0.827184 | **0.826984** |
+| Δ A−B | | **+0.006120** | +0.006687 | +0.006736 |
+
+**Kết luận cổng:** **PASS** (Δval ≫ +0.002). Graph Q←KC kiểu GIKT **có đóng góp AUC** trên ablation cứng — khác E3 (mean-add absorbable). Bootstrap learner-level (1000×): Δtest-only **+0.00674**, 95% CI **[+0.00626, +0.00721]** (loại trừ 0). File: `bootstrap_hg_qkc_on_vs_off.json`.
+
+**So GIKT 0.823807 (clean test, L≈200):** số thô `hg_qkc_on` test-only **0.826984** cao hơn, nhưng **không** tuyên bố SOTA tuyệt đối cho đến khi (i) GIKT (hoặc baseline) chạy cùng L=400 và (ii) bootstrap CI của hiệu số vs GIKT loại trừ 0. File: `results/tables/dh2_kt_hg_qkc_*_vs_p0.csv`, `hg_qkc_testonly_clean.csv`, `hg_qkc_ablation.log`.
 
 ---
 
@@ -363,21 +382,19 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | E3 | FAIL — graph ΔAUC≈0 |
 | E4 | bs16 tốt nhất nội bộ (0.8209 valid+test) |
 | E5 | ensemble 0.8207 test-only; chưa vượt GIKT |
+| I (`question_graph`) | **PASS** Δval +0.00612; test-only 0.8270; chưa SOTA tuyệt đối vs GIKT@L200 |
 
 ---
 
 ## 6. Việc còn mở (checklist)
 
-- [x] E0 protocol-invariance control → bác bỏ lợi thế "bất biến giao thức"
-- [x] E1 chunk-length sweep → chốt L\*=400 theo val AUC
-- [x] E2 recap attention → **FAIL** (Δval −0.001; tắt cờ)
-- [x] E3 question–KC agg → **FAIL** (Δ≈0; graph không đóng góp AUC)
-- [x] E4 matched batch 16/32 + minutes → bs16 tốt nhất (test 0.8209)
-- [x] E5 ensemble 3 seed (logit avg) → **0.820721** test-only
-- [x] `sota_summary.csv` + nhật ký đánh giá tổng thể giai đoạn H
-- [ ] (Tùy chọn) chạy lại `v5q_ab_ahk` + `hedge_nograph` nếu cần đóng ablation v5
-- [ ] Bootstrap CI chỉ khi tuyên bố “vượt” (hiện **không** tuyên bố vượt GIKT)
-- [x] Commit/push nhật ký + số liệu SOTA
+- [x] E0–E5 SOTA ladder (giai đoạn H)
+- [x] Giai đoạn I: `--question-graph` vs twin off → **GATE PASS**
+- [x] Test-only clean rescore L=400 (`hg_qkc_testonly_clean.csv`)
+- [x] Bootstrap CI on−off (learner-level) → Δ CI [+0.00626, +0.00721], loại trừ 0
+- [ ] (Trước tuyên bố SOTA) GIKT / AKT cùng L=400 + bootstrap vs `hg_qkc_on`
+- [ ] (Tùy chọn) variant (1) event-collapse — chỉ nếu muốn sau khi I đã PASS
+- [x] Commit nhật ký + số liệu hg_qkc (sau cổng)
 
 ---
 
@@ -388,5 +405,6 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | 2026-08-17 | Khởi tạo: toàn bộ quá trình, phân tích, nhật ký; ablation đến hedge xong, kind đang chạy |
 | 2026-08-17 tối | Giai đoạn H: E0 xong (bác bỏ protocol-invariance); bắt đầu E1; thêm cờ E2/E3 |
 | 2026-08-18 | E1–E5 xong; đánh giá tổng thể: không SOTA; E2/E3 FAIL; push `sota_summary.csv` |
+| 2026-08-18 sáng | Giai đoạn I: Q←KC `--question-graph` GATE PASS Δval +0.006; test-only 0.8270 |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

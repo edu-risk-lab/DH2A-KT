@@ -212,5 +212,11 @@ temp/_diag_pykt_smask/
 !results/tables/sota_*.log
 !results/tables/sota_*.json
 !results/tables/dh2_kt_sota_*_vs_p0.csv
+!results/tables/dh2_kt_hg_qkc_*_vs_p0.csv
+!results/tables/hg_qkc_ablation.log
+!results/tables/hg_qkc_testonly_clean.csv
+!results/tables/hg_qkc_testonly.log
+!results/tables/hg_qkc_bootstrap.log
+!results/tables/bootstrap_hg_qkc_on_vs_off.json
 !scripts/26_sota_E5_ensemble.py
 

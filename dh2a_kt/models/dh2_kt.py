@@ -120,6 +120,12 @@ class DH2KTConfig:
     """v4 only: add mean of observed KCs for the question to the Rasch vector.
 
     Uses the train-time question→KC incidence (not prerequisite hyperedges).
+    Legacy E3 path; prefer ``question_graph`` for a non-absorbable Q←KC refine.
+    """
+    question_graph: bool = False
+    """v4 only: GIKT-style question embedding refined by observed Q–KC incidence.
+
+    ``q_gcn = tanh(W(q_emb + A_norm @ concept_emb))`` — no response transport.
     """
     max_hyperedge_members: int = 8
     """v5 star transport: pad width for members of one hyperedge."""
@@ -457,6 +463,17 @@ if _TORCH_AVAILABLE:
                     nn.init.zeros_(self.item_scale.weight)
                     nn.init.zeros_(self.concept_var.weight)
                     nn.init.zeros_(self.item_bias.weight)
+                if config.question_graph:
+                    # Own question parameters + one propagation step over the
+                    # observed question–KC incidence (GIKT-style; not absorbable
+                    # into concept_embed the way E3's mean-add was).
+                    self.question_embed = nn.Embedding(config.n_exercises, hidden)
+                    self.question_gcn_linear = nn.Linear(hidden, hidden)
+                    self.question_in_proj = nn.Linear(hidden, hidden)
+                    self.register_buffer(
+                        "A_qs_norm",
+                        torch.zeros(config.n_exercises, config.n_concepts),
+                    )
 
         def set_question_kc_table(
             self,
@@ -466,6 +483,31 @@ if _TORCH_AVAILABLE:
             """Register the observed question→KC incidence used by ``question_kc_agg``."""
             self.register_buffer("exercise_kc_ids", exercise_kc_ids.long())
             self.register_buffer("exercise_kc_mask", exercise_kc_mask.bool())
+
+        def set_question_kc_incidence(self, A_qs: "torch.Tensor") -> None:
+            """Register row-normalized Q–KC incidence for ``question_graph``.
+
+            ``A_qs`` is ``(n_exercises, n_concepts)`` with 1 where the question
+            exercises that KC (train-only observed metadata).
+            """
+            A = A_qs.float()
+            row_norm = A.sum(dim=1, keepdim=True).clamp(min=1.0)
+            normalized = A / row_norm
+            if hasattr(self, "A_qs_norm"):
+                self.A_qs_norm.copy_(normalized.to(device=self.A_qs_norm.device))
+            else:
+                self.register_buffer("A_qs_norm", normalized)
+
+        def _question_gcn_embeddings(self) -> "torch.Tensor":
+            """All question vectors after optional Q←KC propagation, ``(n_ex, H)``."""
+            q_emb = self.question_embed.weight
+            q_prop = self.A_qs_norm @ self.concept_embed.weight
+            return torch.tanh(self.question_gcn_linear(q_emb + q_prop))
+
+        def _question_vectors(self, exercise_ids: "torch.Tensor") -> "torch.Tensor":
+            """Indexed ``q_gcn`` for a batch of item ids, ``(B, T, H)``."""
+            items = exercise_ids.clamp(0, self.config.n_exercises - 1)
+            return self._question_gcn_embeddings()[items]
 
         def _encode_concepts(
             self,
@@ -574,7 +616,10 @@ if _TORCH_AVAILABLE:
 
             interaction = self.interaction_embed(concepts + n_concepts * responses)
             observed = self._concept_vectors_v4(concept_x, concepts, exercises)
-            x = self.input_norm(interaction + self.concept_in_proj(observed))
+            x = interaction + self.concept_in_proj(observed)
+            if self.config.question_graph and exercises is not None:
+                x = x + self.question_in_proj(self._question_vectors(exercises))
+            x = self.input_norm(x)
             x = F.dropout(x, p=self.config.dropout, training=self.training)
             hidden, _ = self.lstm(x)
             hidden = F.dropout(hidden, p=self.config.dropout, training=self.training)
@@ -588,6 +633,10 @@ if _TORCH_AVAILABLE:
                 else None
             )
             queried = self._concept_vectors_v4(concept_x, next_concepts, next_exercises)
+            if self.config.question_graph and next_exercises is not None:
+                queried = queried + self.question_in_proj(
+                    self._question_vectors(next_exercises)
+                )
             return hidden, queried
 
         def _readout_v4(self, batch: DH2KTBatch) -> torch.Tensor:
