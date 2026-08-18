@@ -215,6 +215,8 @@ Bootstrap learner-level 1000×, 3614 learners:
 
 **Kết luận:** trên giao thức sạch L=400, `--question-graph` **vượt GIKT** một khe nhỏ nhưng có ý nghĩa thống kê. GIKT L=400 chỉ +0.0021 so với GIKT L=200. **Lưu ý ngân sách:** GIKT 10 epoch / batch 8; DH2 30 epoch / batch 16 — không gán phần vượt cho “hypergraph” nếu đối thủ chưa matched budget. File: `sota_baselines_L400.csv`, `bootstrap_hg_qkc_on_vs_gikt_L400.json`.
 
+**Matched budget (2026-08-18 chiều):** `C_gikt_clean_L400_e30b16` — batch 16, cap 30, patience 5 (như DH2). Early-stop epoch 8/13; test **0.825815** (100 phút) — **không** hơn bản P0 10ep/bs8 (0.825953). Bootstrap: `hg_qkc_on` − GIKT_e30b16 = **+0.001169**, 95% CI **[+0.000776, +0.001528]** (loại trừ 0). Khe không phải do GIKT thiếu epoch/batch. File: `sota_gikt_L400_e30b16.log`, `bootstrap_hg_qkc_on_vs_gikt_e30b16.json`.
+
 ---
 
 ## 3. Quá trình thực nghiệm (method log)
@@ -414,11 +416,12 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 - [x] Test-only clean rescore L=400 (`hg_qkc_testonly_clean.csv`)
 - [x] Bootstrap CI on−off (learner-level) → Δ CI [+0.00626, +0.00721], loại trừ 0
 - [x] GIKT / AKT sạch @ L=400 + bootstrap vs `hg_qkc_on` → `hg_qkc_on` hơn GIKT +0.001, CI loại trừ 0
-- [ ] (Tùy chọn) GIKT matched budget (epochs/batch) trước khi viết tiêu đề SOTA
+- [x] GIKT matched budget L=400 bs16 cap30 patience5 → test **0.825815** (không hơn bản 10ep/bs8); `hg_qkc_on` +0.00117, CI [+0.00078, +0.00153]
 - [ ] (Tùy chọn) variant (1) event-collapse / nâng hypergraph trên native GIKT
 - [x] Commit nhật ký + số liệu hg_qkc (sau cổng)
 - [x] Push `main`: `809c76b` / `e7ffbcc` (question-graph + diary)
 - [x] Push giai đoạn J: GIKT/AKT L=400 + bootstrap vs `hg_qkc_on`
+- [x] Push GIKT matched budget e30b16 + bootstrap
 
 ---
 

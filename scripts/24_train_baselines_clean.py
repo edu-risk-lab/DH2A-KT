@@ -78,6 +78,12 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=None, help="Default: P0's setting")
     parser.add_argument("--epochs", type=int, default=None, help="Default: P0's setting")
     parser.add_argument(
+        "--patience",
+        type=int,
+        default=None,
+        help="Early-stop patience on valid AUC (default: P0/engine 3). Use 5 to match DH2.",
+    )
+    parser.add_argument(
         "--max-seq-len",
         type=int,
         default=None,
@@ -108,6 +114,8 @@ def main() -> int:
     epochs = int(args.epochs or hp.get("epochs", pykt_cfg.get("epochs", 30)))
     batch_size = int(args.batch_size or hp.get("batch_size", pykt_cfg.get("batch_size", 64)))
     lr = float(hp.get("lr", pykt_cfg.get("lr", 1e-3)))
+    if args.patience is not None:
+        hp["patience"] = int(args.patience)
 
     interactions = load_interactions_with_ids(p0_cfg)
     splits = get_fold_splits(interactions, p0_cfg, args.fold)
