@@ -674,6 +674,7 @@ if _TORCH_AVAILABLE:
         recap_attention: bool = False,
         question_kc_agg: bool = False,
         question_graph: bool = False,
+        question_hypergraph: bool = False,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -697,6 +698,7 @@ if _TORCH_AVAILABLE:
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
+            question_hypergraph=question_hypergraph,
         )
         return DH2KT(config)
 
@@ -739,6 +741,7 @@ def train_fold(
     recap_attention: bool = False,
     question_kc_agg: bool = False,
     question_graph: bool = False,
+    question_hypergraph: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -761,42 +764,56 @@ def train_fold(
         pd.concat([train_df, eval_df], ignore_index=True),
         e_pre,
     )
-    logger.info(
-        "Building concept-prerequisite hyperedges source=%s fold=%s",
-        spec.source,
-        spec.fold,
-    )
-    clean_hyperedges = resolve_concept_prerequisite_hyperedges(
-        e_pre,
-        fold=spec.fold,
-        source=spec.source,
-        min_chain_len=spec.min_chain_len,
-        max_chain_len=spec.max_chain_len,
-    )
-    kinds: list[str] = ["concept_prerequisite"]
-    if architecture == "v5":
-        # The KC set of a question is observed metadata, so it needs no
-        # train-only gating; build it from every split the run can see.
+    if question_hypergraph and architecture == "v4":
+        # Isolated multi-KC question hyperedges — not E_pre chains, not v5
+        # memory transport. Incidence is observed item metadata.
         from dh2a_kt.data.events import question_kc_sets
         from dh2a_kt.hyperedge.construction import build_question_hyperedges
 
-        kc_sets = question_kc_sets(pd.concat([train_df, eval_df], ignore_index=True))
-        question_hyperedges = build_question_hyperedges(kc_sets, fold=spec.fold)
-        clean_hyperedges = list(clean_hyperedges) + question_hyperedges
-        kinds.append("question_concepts")
+        kinds = ["question_concepts"]
+        kc_sets = question_kc_sets(train_df)
+        clean_hyperedges = build_question_hyperedges(kc_sets, fold=spec.fold)
         logger.info(
-            "v5: added %d question hyperedges over %d questions",
-            len(question_hyperedges),
-            len(kc_sets),
+            "question_hypergraph: %d multi-KC question hyperedges (train items)",
+            len(clean_hyperedges),
         )
-    if session_hyperedges:
-        selected = select_session_hyperedges_for_training(session_hyperedges)
-        clean_hyperedges = list(clean_hyperedges) + list(selected)
-        kinds.append("session")
+    else:
         logger.info(
-            "Added %d session hyperedges (concept projection) for training",
-            len(selected),
+            "Building concept-prerequisite hyperedges source=%s fold=%s",
+            spec.source,
+            spec.fold,
         )
+        clean_hyperedges = resolve_concept_prerequisite_hyperedges(
+            e_pre,
+            fold=spec.fold,
+            source=spec.source,
+            min_chain_len=spec.min_chain_len,
+            max_chain_len=spec.max_chain_len,
+        )
+        kinds = ["concept_prerequisite"]
+        if architecture == "v5":
+            # The KC set of a question is observed metadata, so it needs no
+            # train-only gating; build it from every split the run can see.
+            from dh2a_kt.data.events import question_kc_sets
+            from dh2a_kt.hyperedge.construction import build_question_hyperedges
+
+            kc_sets = question_kc_sets(pd.concat([train_df, eval_df], ignore_index=True))
+            question_hyperedges = build_question_hyperedges(kc_sets, fold=spec.fold)
+            clean_hyperedges = list(clean_hyperedges) + question_hyperedges
+            kinds.append("question_concepts")
+            logger.info(
+                "v5: added %d question hyperedges over %d questions",
+                len(question_hyperedges),
+                len(kc_sets),
+            )
+        if session_hyperedges:
+            selected = select_session_hyperedges_for_training(session_hyperedges)
+            clean_hyperedges = list(clean_hyperedges) + list(selected)
+            kinds.append("session")
+            logger.info(
+                "Added %d session hyperedges (concept projection) for training",
+                len(selected),
+            )
     hyperedge_index = hyperedge_index_from_list(clean_hyperedges, kc_to_idx)
     if not use_graph:
         # Graph-contribution ablation: keep the architecture and the kind list so
@@ -825,6 +842,7 @@ def train_fold(
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
+        question_hypergraph=question_hypergraph,
     ).to(device)
     if (question_kc_agg or question_graph) and architecture == "v4":
         # Observed Q–KC incidence from TRAIN only (not E_pre / not eval).
@@ -980,6 +998,7 @@ def train_and_evaluate_fold(
     recap_attention: bool = False,
     question_kc_agg: bool = False,
     question_graph: bool = False,
+    question_hypergraph: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -1021,6 +1040,7 @@ def train_and_evaluate_fold(
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
+        question_hypergraph=question_hypergraph,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,

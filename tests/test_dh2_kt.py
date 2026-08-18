@@ -477,6 +477,102 @@ def test_v4_question_graph_no_future_leak():
     assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
 
 
+def test_v4_question_hypergraph_empty_incidence_differs():
+    """Zeroing multi-KC question hyperedges must move logits (graph is live)."""
+    torch.manual_seed(0)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            question_hypergraph=True,
+            hyperedge_kinds=("question_concepts",),
+        )
+    )
+    A = torch.zeros(6, 8)
+    A[0, 0] = 1.0
+    A[0, 1] = 1.0
+    model.set_question_kc_incidence(A)
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    batch.concept_ids[:, :] = 0
+    batch.exercise_ids[:, :] = 0
+    batch.hyperedge_index = {
+        "question_concepts": torch.tensor([[0, 1], [0, 0]], dtype=torch.long),
+    }
+    with torch.no_grad():
+        live = model(batch)
+    batch.hyperedge_index = {
+        "question_concepts": torch.empty((2, 0), dtype=torch.long),
+    }
+    with torch.no_grad():
+        empty = model(batch)
+    assert (live - empty).abs().max().item() > 1e-4
+    off = DH2KT(_v4_config(use_questions=True, question_graph=True))
+    assert not hasattr(off, "question_hconv")
+
+
+def test_v4_question_hypergraph_membership_changes_logits():
+    torch.manual_seed(1)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            question_hypergraph=True,
+            hyperedge_kinds=("question_concepts",),
+        )
+    )
+    model.set_question_kc_incidence(torch.eye(6, 8))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    batch.concept_ids[:, :] = 0
+    pair = {
+        "question_concepts": torch.tensor([[0, 1], [0, 0]], dtype=torch.long),
+    }
+    triple = {
+        "question_concepts": torch.tensor([[0, 1, 2], [0, 0, 0]], dtype=torch.long),
+    }
+    batch.hyperedge_index = pair
+    with torch.no_grad():
+        a = model(batch)
+    batch.hyperedge_index = triple
+    with torch.no_grad():
+        b = model(batch)
+    assert (a - b).abs().max().item() > 1e-4
+
+
+def test_v4_question_hypergraph_no_future_leak():
+    torch.manual_seed(0)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            question_hypergraph=True,
+            hyperedge_kinds=("question_concepts",),
+        )
+    )
+    model.set_question_kc_incidence(torch.eye(6, 8))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    batch.hyperedge_index = {
+        "question_concepts": torch.tensor([[0, 1, 2], [0, 0, 0]], dtype=torch.long),
+    }
+    cut = 2
+    flipped = batch.responses.clone()
+    flipped[:, cut + 1 :] = 1.0 - flipped[:, cut + 1 :]
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=flipped,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
 def test_v4_recap_attention_adds_projection():
     plain = DH2KT(_v4_config()).state_dict()
     recap = DH2KT(_v4_config(recap_attention=True)).state_dict()

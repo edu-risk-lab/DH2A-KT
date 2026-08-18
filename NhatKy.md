@@ -20,7 +20,8 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 7. **GIKT vượt** vì dùng đồ thị câu–KC quan sát để tinh chỉnh embedding câu + LSTM/recap — không loang đáp án qua cạnh như transport memory của v5.
 8. **Giai đoạn H (SOTA ladder E0–E5):** không vượt GIKT ở L=200; E2/E3 FAIL; cải thiện từ L=400 + batch + ensemble.
 9. **Giai đoạn I (Q←KC refine, 2026-08-18):** `--question-graph` **PASS cổng** Δval **+0.00612**; test-only **0.826984**.
-10. **Giai đoạn J (fair L=400, 2026-08-18):** GIKT sạch L=400 test **0.825953**; AKT **0.822140**. `hg_qkc_on` hơn GIKT **+0.00103**, bootstrap CI **[+0.00063, +0.00140]** (loại trừ 0). Protocol matched; ngân sách train GIKT vẫn P0 (batch 8, 10 epoch) vs DH2 (batch 16, 30 epoch).
+10. **Giai đoạn J (fair L=400, 2026-08-18):** GIKT sạch L=400 test **0.825953**; matched budget **0.825815**. `hg_qkc_on` hơn GIKT **+0.001**, CI loại trừ 0.
+11. **Giai đoạn K (HypergraphConv multi-KC cô lập):** GATE **FAIL** Δval **+0.00025** (cần ≥ +0.002). Slice `multi_kc_item` Δ **+0.0003**, CI chứa 0. Trên XES3G5M, hypergraph multi-way **không** thêm gì ngoài bipartite GIKT.
 
 ---
 
@@ -217,6 +218,28 @@ Bootstrap learner-level 1000×, 3614 learners:
 
 **Matched budget (2026-08-18 chiều):** `C_gikt_clean_L400_e30b16` — batch 16, cap 30, patience 5 (như DH2). Early-stop epoch 8/13; test **0.825815** (100 phút) — **không** hơn bản P0 10ep/bs8 (0.825953). Bootstrap: `hg_qkc_on` − GIKT_e30b16 = **+0.001169**, 95% CI **[+0.000776, +0.001528]** (loại trừ 0). Khe không phải do GIKT thiếu epoch/batch. File: `sota_gikt_L400_e30b16.log`, `bootstrap_hg_qkc_on_vs_gikt_e30b16.json`.
 
+### Giai đoạn K — HypergraphConv multi-KC cô lập (2026-08-18)
+
+Backbone = `hg_qkc_on`. Thêm `--question-hypergraph`: 1 lớp PyG HypergraphConv trên **1017** siêu cạnh `question_concepts` (train, min_size=2); Linear `tanh(W(·))` mới; không E_pre, không v5 transport.
+
+Cổng val (đăng ký trước): Δval ≥ +0.002 vs `hg_qkc_on` 0.825982.
+
+| Run | val AUC | test CSV (valid+test) | test-only (slice) |
+|---|---|---|---|
+| `hg_qkc_on` | 0.825982 | 0.827184 | 0.8270 |
+| `hg_qkc_hconv_on` | 0.826232 | 0.827443 | 0.8273 |
+| Δ | **+0.000250** | +0.000259 | +0.0004 |
+
+**GATE FAIL.** Slice test-only L=400 mask-repeats (`hg_qkc_hconv_slice.csv`):
+
+| Slice | n | AUC hconv | AUC qgraph | Δ | CI 95% |
+|---|---|---|---|---|---|
+| overall | 1.093.755 | 0.8273 | 0.8270 | +0.0004 | [−0.0008, +0.0012] chứa 0 |
+| single_kc_item | 956.199 | 0.8264 | 0.8260 | +0.0004 | chứa 0 |
+| **multi_kc_item** | 137.556 | 0.8338 | 0.8336 | **+0.0003** | [−0.0007, +0.0015] chứa 0 |
+
+**Kết luận:** ngay trên đúng phân nhóm multi-KC, HypergraphConv **không** đóng góp. Bipartite GIKT đã lấy hết tín hiệu Q–KC trên XES3G5M. Đóng cánh cửa “hypergraph multi-way AUC” (không nới cổng).
+
 ---
 
 ## 3. Quá trình thực nghiệm (method log)
@@ -406,6 +429,7 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | E5 | ensemble 0.8207 test-only; chưa vượt GIKT |
 | I (`question_graph`) | **PASS** Δval +0.00612; test-only 0.8270 |
 | J (GIKT/AKT @ L=400) | GIKT 0.82595; AKT 0.82214; `hg_qkc_on` +0.00103 vs GIKT, CI loại trừ 0 |
+| K (`question_hypergraph`) | **FAIL** Δval +0.00025; multi-KC slice Δ +0.0003, CI chứa 0 |
 
 ---
 
@@ -417,11 +441,13 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 - [x] Bootstrap CI on−off (learner-level) → Δ CI [+0.00626, +0.00721], loại trừ 0
 - [x] GIKT / AKT sạch @ L=400 + bootstrap vs `hg_qkc_on` → `hg_qkc_on` hơn GIKT +0.001, CI loại trừ 0
 - [x] GIKT matched budget L=400 bs16 cap30 patience5 → test **0.825815** (không hơn bản 10ep/bs8); `hg_qkc_on` +0.00117, CI [+0.00078, +0.00153]
-- [ ] (Tùy chọn) variant (1) event-collapse / nâng hypergraph trên native GIKT
+- [x] Giai đoạn K: HypergraphConv cô lập trên `question_concepts` → **GATE FAIL**; slice multi-KC Δ≈0
+- [ ] (Tùy chọn) variant (1) event-collapse — không ưu tiên (K đã đóng hypergraph multi-way AUC)
 - [x] Commit nhật ký + số liệu hg_qkc (sau cổng)
 - [x] Push `main`: `809c76b` / `e7ffbcc` (question-graph + diary)
 - [x] Push giai đoạn J: GIKT/AKT L=400 + bootstrap vs `hg_qkc_on`
 - [x] Push GIKT matched budget e30b16 + bootstrap
+- [x] Push giai đoạn K: HypergraphConv multi-KC GATE FAIL + slice
 
 ---
 
@@ -434,5 +460,6 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | 2026-08-18 | E1–E5 xong; đánh giá tổng thể: không SOTA; E2/E3 FAIL; push `sota_summary.csv` |
 | 2026-08-18 sáng | Giai đoạn I: Q←KC `--question-graph` GATE PASS Δval +0.006; test-only 0.8270; push `809c76b` |
 | 2026-08-18 trưa | Giai đoạn J: GIKT L=400 test 0.8260; `hg_qkc_on` +0.001 vs GIKT (CI loại trừ 0) |
+| 2026-08-18 tối | Giai đoạn K: HypergraphConv multi-KC GATE FAIL; slice Δ≈0 |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

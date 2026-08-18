@@ -127,6 +127,12 @@ class DH2KTConfig:
 
     ``q_gcn = tanh(W(q_emb + A_norm @ concept_emb))`` — no response transport.
     """
+    question_hypergraph: bool = False
+    """v4 only: HypergraphConv on observed multi-KC ``question_concepts`` edges.
+
+    Isolated from v5 memory/transport and from E_pre chains. Refine is added
+    through a dedicated Linear so the mix is not absorbable into ``concept_embed``.
+    """
     max_hyperedge_members: int = 8
     """v5 star transport: pad width for members of one hyperedge."""
     max_hedges_per_concept: int = 8
@@ -385,6 +391,10 @@ if _TORCH_AVAILABLE:
 
             self.hypergraph_layers = nn.ModuleDict()
             for kind in config.hyperedge_kinds:
+                if config.question_hypergraph and kind == "question_concepts":
+                    # Dedicated one-step stack below; do not also residual-add
+                    # through the absorbable v2–v4 ``_encode_concepts`` path.
+                    continue
                 layers: list[nn.Module] = []
                 in_dim = config.hidden_dim
                 for _ in range(config.n_hypergraph_layers):
@@ -474,6 +484,13 @@ if _TORCH_AVAILABLE:
                         "A_qs_norm",
                         torch.zeros(config.n_exercises, config.n_concepts),
                     )
+                if config.question_hypergraph:
+                    # One HypergraphConv hop over multi-KC question hyperedges,
+                    # then a fresh Linear (non-absorbable into concept_embed).
+                    self.question_hconv = nn.ModuleList(
+                        [HypergraphConv(hidden, hidden)]
+                    )
+                    self.question_hconv_linear = nn.Linear(hidden, hidden)
 
         def set_question_kc_table(
             self,
@@ -508,6 +525,25 @@ if _TORCH_AVAILABLE:
             """Indexed ``q_gcn`` for a batch of item ids, ``(B, T, H)``."""
             items = exercise_ids.clamp(0, self.config.n_exercises - 1)
             return self._question_gcn_embeddings()[items]
+
+        def _question_hconv_refine(
+            self,
+            hyperedge_index: dict[str, torch.Tensor],
+        ) -> "torch.Tensor":
+            """Concept refine from multi-KC question hyperedges, ``(n_concepts, H)``.
+
+            Empty incidence returns zeros so ``--no-graph`` is a hard ablation.
+            """
+            edge_index = hyperedge_index.get("question_concepts")
+            base = self.concept_embed.weight
+            if edge_index is None or edge_index.numel() == 0:
+                return torch.zeros_like(base)
+            h = base
+            for conv in self.question_hconv:
+                h = conv(h, edge_index)
+                h = F.relu(h)
+                h = F.dropout(h, p=self.config.dropout, training=self.training)
+            return torch.tanh(self.question_hconv_linear(h))
 
         def _encode_concepts(
             self,
@@ -616,6 +652,10 @@ if _TORCH_AVAILABLE:
 
             interaction = self.interaction_embed(concepts + n_concepts * responses)
             observed = self._concept_vectors_v4(concept_x, concepts, exercises)
+            hconv_refine = None
+            if self.config.question_hypergraph:
+                hconv_refine = self._question_hconv_refine(batch.hyperedge_index)
+                observed = observed + hconv_refine[concepts]
             x = interaction + self.concept_in_proj(observed)
             if self.config.question_graph and exercises is not None:
                 x = x + self.question_in_proj(self._question_vectors(exercises))
@@ -637,6 +677,8 @@ if _TORCH_AVAILABLE:
                 queried = queried + self.question_in_proj(
                     self._question_vectors(next_exercises)
                 )
+            if hconv_refine is not None:
+                queried = queried + hconv_refine[next_concepts]
             return hidden, queried
 
         def _readout_v4(self, batch: DH2KTBatch) -> torch.Tensor:

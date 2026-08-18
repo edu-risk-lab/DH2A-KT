@@ -45,6 +45,7 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "recap_attention": bool(getattr(cfg, "recap_attention", False)),
             "question_kc_agg": bool(getattr(cfg, "question_kc_agg", False)),
             "question_graph": bool(getattr(cfg, "question_graph", False)),
+            "question_hypergraph": bool(getattr(cfg, "question_hypergraph", False)),
         },
     }
     torch.save(payload, path)
@@ -87,6 +88,7 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         recap_attention=bool(cfg_dict.get("recap_attention", False)),
         question_kc_agg=bool(cfg_dict.get("question_kc_agg", False)),
         question_graph=bool(cfg_dict.get("question_graph", False)),
+        question_hypergraph=bool(cfg_dict.get("question_hypergraph", False)),
     )
     model = build_model(
         config.n_concepts,
@@ -109,6 +111,7 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         recap_attention=config.recap_attention,
         question_kc_agg=config.question_kc_agg,
         question_graph=config.question_graph,
+        question_hypergraph=config.question_hypergraph,
     )
     model.load_state_dict(payload["model_state"])
     dev = torch.device(device)

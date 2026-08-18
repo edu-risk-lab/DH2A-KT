@@ -194,6 +194,13 @@ def main() -> int:
         "(no response transport). Hard ablation twin: omit this flag.",
     )
     parser.add_argument(
+        "--question-hypergraph",
+        action="store_true",
+        help="v4: HypergraphConv on observed multi-KC question_concepts hyperedges "
+        "(no E_pre, no v5 transport). Add on top of --question-graph. "
+        "Ablation twin: omit this flag.",
+    )
+    parser.add_argument(
         "--val-frac",
         type=float,
         default=None,
@@ -280,6 +287,9 @@ def main() -> int:
     recap_attention = bool(args.recap_attention or train_cfg.get("recap_attention", False))
     question_kc_agg = bool(args.question_kc_agg or train_cfg.get("question_kc_agg", False))
     question_graph = bool(args.question_graph or train_cfg.get("question_graph", False))
+    question_hypergraph = bool(
+        args.question_hypergraph or train_cfg.get("question_hypergraph", False)
+    )
     memory_dim = int(args.memory_dim if args.memory_dim is not None else train_cfg.get("memory_dim", 16))
     max_degree = int(args.max_degree if args.max_degree is not None else train_cfg.get("max_degree", 16))
     graph_transport = float(
@@ -334,7 +344,7 @@ def main() -> int:
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
           f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
-          f"question_graph={question_graph} "
+          f"question_graph={question_graph} question_hypergraph={question_hypergraph} "
           f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
           f"event_pool={event_pool} transport={transport} "
           f"hyperedge_embed={use_hyperedge_embed} kind_conditioned={kind_conditioned} "
@@ -410,6 +420,7 @@ def main() -> int:
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
+            question_hypergraph=question_hypergraph,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT
