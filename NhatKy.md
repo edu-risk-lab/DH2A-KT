@@ -13,7 +13,7 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 
 1. **Giao thức đánh giá** (cửa sổ + dòng lặp multi-KC) chi phối AUC mạnh hơn khoảng cách kiến trúc (~0.05 vs ~0.001–0.006).
 2. **DH2-KT v4q** cạnh tranh SimpleKT trên giao thức sạch (~0.818) nhưng **không SOTA** (thua AKT/GIKT).
-3. **Hypergraph trên embedding tĩnh (v2–v4)** gần như **không đóng góp** (ΔAUC ≈ 0).
+3. **Hypergraph trên embedding tĩnh / mean-add (v2–v4 E3, prereq, transport)** gần như **không đóng góp**; **Q←KC refine** (`--question-graph`, giai đoạn I) thì **PASS** cổng Δval +0.006.
 4. **v5** (gộp sự kiện multi-KC + memory) đúng hướng chống rò rỉ nhưng AUC thấp hơn v4q; graph vẫn gần trơ (+0.0009).
 5. **Nhóm ưu tiên** (attention + star + hedge embed + kind-conditioned): có graph **hại** (Δ −0.047); không graph lại cao hơn.
 6. **Ablation:** `star` phá model (0.52); `attention` trung tính; `hyperedge_embed` giúp nhẹ (0.8047) — vẫn xa GIKT ~0.019.
