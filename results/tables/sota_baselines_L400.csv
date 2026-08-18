@@ -1,0 +1,3 @@
+dataset,fold,model,tag,window_mode,mask_repeats,eval_split,auc,acc,nll,n_scored,batch_size,epochs,max_seq_len,lr,p0_published_auc,delta_vs_published,minutes,note
+xes3g5m,0,gikt,C_gikt_clean_L400,chunked,True,test,0.8259532718169261,0.8293969206012508,0.386226177414508,1093720,8,10,400,0.001,0.8775823299875001,-0.0516290581705739,155.2,pyKT `gikt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.
+xes3g5m,0,akt,C_akt_clean_L400,chunked,True,test,0.8221397902960756,0.8283015762718063,0.3897618665932853,1093720,64,30,400,0.001,0.8740823569517637,-0.05194256665568808,13.4,pyKT `akt` trained on learner-split train users; metrics on valid+test sequence positions. GKT adjacency from P0 exported graphs.

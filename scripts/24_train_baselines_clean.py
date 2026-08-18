@@ -77,6 +77,12 @@ def main() -> int:
     parser.add_argument("--tag", required=True, help="Names the work dir and the output row")
     parser.add_argument("--batch-size", type=int, default=None, help="Default: P0's setting")
     parser.add_argument("--epochs", type=int, default=None, help="Default: P0's setting")
+    parser.add_argument(
+        "--max-seq-len",
+        type=int,
+        default=None,
+        help="Override pyKT/P0 max_seq_len for export and model seq_len (fair L=400 vs DH2).",
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
@@ -93,7 +99,9 @@ def main() -> int:
     dh2_cfg, p0_cfg, _ = load_configs(REPO_ROOT / args.config)
     dataset = dh2_cfg["dataset"]
     pykt_cfg = p0_cfg.get("pykt", {}) if isinstance(p0_cfg.get("pykt"), dict) else {}
-    max_seq_len = int(pykt_cfg.get("max_seq_len", 200))
+    max_seq_len = int(
+        args.max_seq_len if args.max_seq_len is not None else pykt_cfg.get("max_seq_len", 200)
+    )
     graph_tag = str(pykt_cfg.get("gkt_graph_tag", "p0_protocol"))
 
     hp = _hyperparams(p0_cfg, args.model)
@@ -179,6 +187,7 @@ def main() -> int:
         "n_scored": int(len(ts)),
         "batch_size": batch_size,
         "epochs": epochs,
+        "max_seq_len": max_seq_len,
         "lr": lr,
         "p0_published_auc": published,
         "delta_vs_published": (auc - published) if published is not None else None,
@@ -196,7 +205,10 @@ def main() -> int:
     table.to_csv(output, index=False)
 
     print()
-    print(f"[{args.tag}] {args.model} AUC={auc:.6f} acc={acc:.4f} n={len(ts)} ({elapsed / 60:.1f} min)")
+    print(
+        f"[{args.tag}] {args.model} AUC={auc:.6f} acc={acc:.4f} n={len(ts)} "
+        f"L={max_seq_len} ({elapsed / 60:.1f} min)"
+    )
     if published is not None:
         print(f"  P0 published: {published:.6f} | delta: {auc - published:+.6f}")
         if args.window_mode == "last" and not args.mask_repeats:

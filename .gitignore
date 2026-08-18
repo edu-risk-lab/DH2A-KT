@@ -218,5 +218,7 @@ temp/_diag_pykt_smask/
 !results/tables/hg_qkc_testonly.log
 !results/tables/hg_qkc_bootstrap.log
 !results/tables/bootstrap_hg_qkc_on_vs_off.json
+!results/tables/bootstrap_hg_qkc_on_vs_gikt_L400.json
+!results/tables/bootstrap_hg_qkc_on_vs_akt_L400.json
 !scripts/26_sota_E5_ensemble.py
 
