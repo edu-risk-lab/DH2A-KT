@@ -46,6 +46,15 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "question_kc_agg": bool(getattr(cfg, "question_kc_agg", False)),
             "question_graph": bool(getattr(cfg, "question_graph", False)),
             "question_hypergraph": bool(getattr(cfg, "question_hypergraph", False)),
+            "hint_hypergraph": bool(getattr(cfg, "hint_hypergraph", False)),
+            "time_gap": bool(getattr(cfg, "time_gap", False)),
+            "time_gap_mode": str(getattr(cfg, "time_gap_mode", "both")),
+            "time_split": bool(getattr(cfg, "time_split", False)),
+            "concept_forget": bool(getattr(cfg, "concept_forget", False)),
+            "saw_input": bool(getattr(cfg, "saw_input", False)),
+            "group_embed": bool(getattr(cfg, "group_embed", False)),
+            "n_groups": int(getattr(cfg, "n_groups", 1)),
+            "expert_graph": bool(getattr(cfg, "expert_graph", False)),
         },
     }
     torch.save(payload, path)
@@ -89,6 +98,15 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         question_kc_agg=bool(cfg_dict.get("question_kc_agg", False)),
         question_graph=bool(cfg_dict.get("question_graph", False)),
         question_hypergraph=bool(cfg_dict.get("question_hypergraph", False)),
+        hint_hypergraph=bool(cfg_dict.get("hint_hypergraph", False)),
+        time_gap=bool(cfg_dict.get("time_gap", False)),
+        time_gap_mode=str(cfg_dict.get("time_gap_mode", "both")),
+        time_split=bool(cfg_dict.get("time_split", False)),
+        concept_forget=bool(cfg_dict.get("concept_forget", False)),
+        saw_input=bool(cfg_dict.get("saw_input", False)),
+        group_embed=bool(cfg_dict.get("group_embed", False)),
+        n_groups=int(cfg_dict.get("n_groups", 1)),
+        expert_graph=bool(cfg_dict.get("expert_graph", False)),
     )
     model = build_model(
         config.n_concepts,
@@ -112,10 +130,23 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         question_kc_agg=config.question_kc_agg,
         question_graph=config.question_graph,
         question_hypergraph=config.question_hypergraph,
+        hint_hypergraph=config.hint_hypergraph,
+        time_gap=config.time_gap,
+        time_gap_mode=config.time_gap_mode,
+        time_split=config.time_split,
+        concept_forget=config.concept_forget,
+        saw_input=config.saw_input,
+        group_embed=config.group_embed,
+        n_groups=config.n_groups,
+        expert_graph=config.expert_graph,
     )
-    model.load_state_dict(payload["model_state"])
     dev = torch.device(device)
     model = model.to(dev)
+    state = payload["model_state"]
+    if config.hint_hypergraph and "hint_edge_index" in state:
+        # Buffer length is data-dependent; allocate before load_state_dict.
+        model.set_hint_hyperedge_index(state["hint_edge_index"])
+    model.load_state_dict(state)
     kc_to_idx = {int(k): int(v) for k, v in payload["kc_to_idx"].items()}
     item_to_idx = {int(k): int(v) for k, v in payload["item_to_idx"].items()}
     clean_hyperedges = [Hyperedge(**he) for he in payload["clean_hyperedges"]]

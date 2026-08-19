@@ -123,6 +123,22 @@ def responses_for_model(model: "DH2KT", batch: dict) -> torch.Tensor:
     return batch["responses"]
 
 
+def aux_kwargs(batch: dict, device: torch.device | str) -> dict:
+    """Forward optional v4 sidecar tensors (time gap / saw / group) when present."""
+    out: dict = {}
+    if "time_gaps" in batch:
+        out["time_gaps"] = batch["time_gaps"].to(device)
+    if "saw_flags" in batch:
+        out["saw_flags"] = batch["saw_flags"].to(device)
+    if "group_ids" in batch:
+        out["group_ids"] = batch["group_ids"].to(device)
+    if "durations" in batch:
+        out["durations"] = batch["durations"].to(device)
+    if "idles" in batch:
+        out["idles"] = batch["idles"].to(device)
+    return out
+
+
 def kc_set_kwargs(batch: dict, device: torch.device | str) -> dict:
     """Forward the v5 KC-set tensors when the loader produced them."""
     if "kc_set_ids" not in batch:
@@ -237,6 +253,10 @@ if _TORCH_AVAILABLE:
             window_mode: str = "first",
             collapse_events: bool = False,
             max_kcs: int = 6,
+            include_time_gaps: bool = False,
+            include_saw: bool = False,
+            include_group: bool = False,
+            include_time_split: bool = False,
         ):
             if window_mode not in ("first", "last", "chunked"):
                 raise ValueError(
@@ -246,6 +266,10 @@ if _TORCH_AVAILABLE:
             self.window_mode = window_mode
             self.collapse_events = collapse_events
             self.max_kcs = max_kcs
+            self.include_time_gaps = include_time_gaps
+            self.include_saw = include_saw
+            self.include_group = include_group
+            self.include_time_split = include_time_split
             sorted_df = df.sort_values(["user_id", "timestamp", "item_id"]).reset_index(drop=True)
             self._kc_set_ids: np.ndarray | None = None
             self._kc_set_mask: np.ndarray | None = None
@@ -271,6 +295,46 @@ if _TORCH_AVAILABLE:
             self._correct = sorted_df["correct"].to_numpy(dtype=np.float32)
             user_ids = sorted_df["user_id"].to_numpy()
             self._is_repeat = _repeat_flags(sorted_df)
+            timestamps = (
+                sorted_df["timestamp"].to_numpy(dtype=np.int64)
+                if "timestamp" in sorted_df.columns
+                else np.zeros(len(sorted_df), dtype=np.int64)
+            )
+            if include_time_gaps:
+                from dh2a_kt.data.aux_signals import log_time_gaps
+
+                self._time_gaps = log_time_gaps(timestamps, user_ids)
+            else:
+                self._time_gaps = None
+            if include_saw:
+                if "saw_answer" in sorted_df.columns:
+                    self._saw = sorted_df["saw_answer"].fillna(0).to_numpy(dtype=np.int64)
+                else:
+                    self._saw = np.zeros(len(sorted_df), dtype=np.int64)
+            else:
+                self._saw = None
+            if include_group:
+                if "group_id" in sorted_df.columns:
+                    self._group = sorted_df["group_id"].fillna(0).to_numpy(dtype=np.int64)
+                else:
+                    self._group = np.zeros(len(sorted_df), dtype=np.int64)
+            else:
+                self._group = None
+            if include_time_split:
+                from dh2a_kt.data.aux_signals import log_duration_idle
+
+                if "duration_sec" in sorted_df.columns:
+                    duration_sec = (
+                        sorted_df["duration_sec"].fillna(0).to_numpy(dtype=np.float32)
+                    )
+                else:
+                    duration_sec = np.zeros(len(sorted_df), dtype=np.float32)
+                self._durations, self._idles = log_duration_idle(
+                    timestamps, user_ids, duration_sec
+                )
+            else:
+                self._durations = None
+                self._idles = None
             self._n_users = 0
             self._window_users: list[int] = []
             if len(user_ids) == 0:
@@ -342,6 +406,26 @@ if _TORCH_AVAILABLE:
                 "length": torch.tensor(length, dtype=torch.long),
                 "user_id": torch.tensor(self._window_users[idx], dtype=torch.long),
             }
+            if self._time_gaps is not None:
+                time_gaps = torch.zeros(self.max_seq_len, dtype=torch.float)
+                time_gaps[:length] = torch.from_numpy(self._time_gaps[start:end])
+                item["time_gaps"] = time_gaps
+            if self._saw is not None:
+                saw_flags = torch.zeros(self.max_seq_len, dtype=torch.long)
+                saw_flags[:length] = torch.from_numpy(self._saw[start:end])
+                item["saw_flags"] = saw_flags
+            if self._group is not None:
+                group_ids = torch.zeros(self.max_seq_len, dtype=torch.long)
+                group_ids[:length] = torch.from_numpy(self._group[start:end])
+                item["group_ids"] = group_ids
+            if self._durations is not None:
+                durations = torch.zeros(self.max_seq_len, dtype=torch.float)
+                durations[:length] = torch.from_numpy(self._durations[start:end])
+                item["durations"] = durations
+            if self._idles is not None:
+                idles = torch.zeros(self.max_seq_len, dtype=torch.float)
+                idles[:length] = torch.from_numpy(self._idles[start:end])
+                item["idles"] = idles
             if self._kc_set_ids is not None and self._kc_set_mask is not None:
                 kc_set_ids = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.long)
                 kc_set_mask = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.bool)
@@ -368,6 +452,9 @@ if _TORCH_AVAILABLE:
             collated["kc_set_mask"] = torch.stack(
                 [item["kc_set_mask"] for item in batch_items]
             )
+        for aux_key in ("time_gaps", "saw_flags", "group_ids", "durations", "idles"):
+            if aux_key in batch_items[0]:
+                collated[aux_key] = torch.stack([item[aux_key] for item in batch_items])
         return collated
 
     @torch.no_grad()
@@ -395,6 +482,7 @@ if _TORCH_AVAILABLE:
                 concept_states=concept_states,
                 lengths=lengths,
                 **kc_set_kwargs(batch, device),
+                **aux_kwargs(batch, device),
             )
             logits = model(dh2_batch)
             pred = logits[:, :-1, 0]
@@ -512,6 +600,7 @@ if _TORCH_AVAILABLE:
                         )
                         index_for_batch = full_hyperedge_index
                     kc_sets = kc_set_kwargs(batch, device)
+                    aux = aux_kwargs(batch, device)
                     dh2_batch = DH2KTBatch(
                         concept_ids=batch["concept_ids"].to(device),
                         exercise_ids=batch["exercise_ids"].to(device),
@@ -520,6 +609,7 @@ if _TORCH_AVAILABLE:
                         concept_states=states,
                         lengths=lengths,
                         **kc_sets,
+                        **aux,
                     )
                     optimizer.zero_grad()
                     logits = model(dh2_batch)
@@ -543,6 +633,11 @@ if _TORCH_AVAILABLE:
                                 model, full_hyperedge_index, device, enable_grad=True
                             ),
                             lengths=lengths,
+                            time_gaps=dh2_batch.time_gaps,
+                            saw_flags=dh2_batch.saw_flags,
+                            group_ids=dh2_batch.group_ids,
+                            durations=dh2_batch.durations,
+                            idles=dh2_batch.idles,
                             **kc_sets,
                         )
                         ablated_batch = DH2KTBatch(
@@ -551,6 +646,11 @@ if _TORCH_AVAILABLE:
                             responses=dh2_batch.responses,
                             hyperedge_index=ablated_index,
                             lengths=lengths,
+                            time_gaps=dh2_batch.time_gaps,
+                            saw_flags=dh2_batch.saw_flags,
+                            group_ids=dh2_batch.group_ids,
+                            durations=dh2_batch.durations,
+                            idles=dh2_batch.idles,
                             **kc_sets,
                         )
                         logits_full = model(full_batch)
@@ -675,6 +775,15 @@ if _TORCH_AVAILABLE:
         question_kc_agg: bool = False,
         question_graph: bool = False,
         question_hypergraph: bool = False,
+        hint_hypergraph: bool = False,
+        time_gap: bool = False,
+        time_gap_mode: str = "both",
+        time_split: bool = False,
+        concept_forget: bool = False,
+        saw_input: bool = False,
+        group_embed: bool = False,
+        n_groups: int = 1,
+        expert_graph: bool = False,
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -699,6 +808,15 @@ if _TORCH_AVAILABLE:
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
             question_hypergraph=question_hypergraph,
+            hint_hypergraph=hint_hypergraph,
+            time_gap=time_gap,
+            time_gap_mode=time_gap_mode,
+            time_split=time_split,
+            concept_forget=concept_forget,
+            saw_input=saw_input,
+            group_embed=group_embed,
+            n_groups=n_groups,
+            expert_graph=expert_graph,
         )
         return DH2KT(config)
 
@@ -742,6 +860,18 @@ def train_fold(
     question_kc_agg: bool = False,
     question_graph: bool = False,
     question_hypergraph: bool = False,
+    hint_hypergraph: bool = False,
+    hint_hyperedges: list[Hyperedge] | None = None,
+    time_gap: bool = False,
+    time_gap_mode: str = "both",
+    time_split: bool = False,
+    concept_forget: bool = False,
+    saw_input: bool = False,
+    group_embed: bool = False,
+    expert_graph: bool = False,
+    skill_item_kc_map: dict[int, list[int]] | None = None,
+    full_qmatrix: bool = False,
+    expert_edges: pd.DataFrame | None = None,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -760,9 +890,20 @@ def train_fold(
         eval_df = eval_df[eval_df["user_id"].isin(eval_users)]
 
     spec = hyperedge_spec or ConceptPrerequisiteSpec()
+    extra_kc_ids: set[int] | None = None
+    if skill_item_kc_map:
+        extra_kc_ids = {int(k) for kcs in skill_item_kc_map.values() for k in kcs}
+        if expert_edges is not None and len(expert_edges):
+            extra_kc_ids.update(int(v) for v in expert_edges["src_kc"].tolist())
+            extra_kc_ids.update(int(v) for v in expert_edges["dst_kc"].tolist())
+    elif expert_edges is not None and len(expert_edges):
+        extra_kc_ids = set()
+        extra_kc_ids.update(int(v) for v in expert_edges["src_kc"].tolist())
+        extra_kc_ids.update(int(v) for v in expert_edges["dst_kc"].tolist())
     kc_to_idx, item_to_idx = build_entity_maps(
         pd.concat([train_df, eval_df], ignore_index=True),
         e_pre,
+        extra_kc_ids=extra_kc_ids,
     )
     if question_hypergraph and architecture == "v4":
         # Isolated multi-KC question hyperedges — not E_pre chains, not v5
@@ -821,6 +962,31 @@ def train_fold(
         hyperedge_index = empty_hyperedge_index(device, kinds=tuple(kinds))
         clean_hyperedges = []
         logger.info("use_graph=False: training with zero hyperedges (graph ablation)")
+    n_groups = 1
+    if group_embed:
+        from dh2a_kt.data.aux_signals import dense_group_ids
+
+        train_df = train_df.copy()
+        eval_df = eval_df.copy()
+        if "teacher_id" in train_df.columns:
+            train_codes, group_map, n_groups = dense_group_ids(train_df["teacher_id"])
+            train_df["group_id"] = train_codes
+            eval_df["group_id"] = (
+                eval_df["teacher_id"].map(group_map).fillna(0).astype("int64")
+                if "teacher_id" in eval_df.columns
+                else 0
+            )
+            n_matched = int((train_df["group_id"] > 0).sum())
+            logger.info(
+                "group_embed: %d train groups, %d/%d train rows matched",
+                n_groups - 1,
+                n_matched,
+                len(train_df),
+            )
+        else:
+            train_df["group_id"] = 0
+            eval_df["group_id"] = 0
+            logger.warning("group_embed=True but teacher_id missing; all group_id=0")
     model = build_model(
         len(kc_to_idx),
         len(item_to_idx),
@@ -843,6 +1009,15 @@ def train_fold(
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
         question_hypergraph=question_hypergraph,
+        hint_hypergraph=hint_hypergraph,
+        time_gap=time_gap,
+        time_gap_mode=time_gap_mode,
+        time_split=time_split,
+        concept_forget=concept_forget,
+        saw_input=saw_input,
+        group_embed=group_embed,
+        n_groups=n_groups,
+        expert_graph=expert_graph,
     ).to(device)
     if (question_kc_agg or question_graph) and architecture == "v4":
         # Observed Q–KC incidence from TRAIN only (not E_pre / not eval).
@@ -870,18 +1045,52 @@ def train_fold(
             A_qs = torch.zeros(len(item_to_idx), len(kc_to_idx), device=device)
             for item_idx in range(len(item_to_idx)):
                 raw_item = rev_item[item_idx]
-                for k in raw_sets.get(raw_item, []):
+                kcs = list(raw_sets.get(raw_item, []))
+                if full_qmatrix and skill_item_kc_map is not None:
+                    kcs = list(skill_item_kc_map.get(raw_item, kcs))
+                for k in kcs:
                     if k in kc_to_idx:
                         A_qs[item_idx, kc_to_idx[k]] = 1.0
             model.set_question_kc_incidence(A_qs)
             n_linked = int((A_qs.sum(dim=1) > 0).sum().item())
             logger.info(
                 "question_graph: registered Q–KC incidence for %d/%d items "
-                "(mean degree=%.2f)",
+                "(mean degree=%.2f, full_qmatrix=%s)",
                 n_linked,
                 len(item_to_idx),
                 float(A_qs.sum().item()) / max(len(item_to_idx), 1),
+                full_qmatrix,
             )
+    if hint_hypergraph and architecture == "v4":
+        from dh2a_kt.hyperedge.indexing import (
+            item_hyperedge_index_from_list,
+            select_hint_item_hyperedges,
+        )
+
+        selected_hint = select_hint_item_hyperedges(hint_hyperedges or [])
+        hint_index = item_hyperedge_index_from_list(selected_hint, item_to_idx)
+        model.set_hint_hyperedge_index(hint_index.to(device))
+        n_inc = int(hint_index.size(1)) if hint_index.numel() else 0
+        logger.info(
+            "hint_hypergraph: %d item hyperedges (incidence=%d) — not projected to concepts",
+            len(selected_hint),
+            n_inc,
+        )
+    if expert_graph and architecture == "v4":
+        A_expert = torch.zeros(len(kc_to_idx), len(kc_to_idx), device=device)
+        n_kept = 0
+        if expert_edges is not None and len(expert_edges):
+            for row in expert_edges.itertuples(index=False):
+                src, dst = int(row.src_kc), int(row.dst_kc)
+                if src in kc_to_idx and dst in kc_to_idx:
+                    A_expert[kc_to_idx[dst], kc_to_idx[src]] = 1.0
+                    n_kept += 1
+        model.set_expert_adjacency(A_expert)
+        logger.info(
+            "expert_graph: %d directed pairs on %d concepts (non-absorbable)",
+            n_kept,
+            len(kc_to_idx),
+        )
     logger.info(
         "train_fold: architecture=%s concepts=%d exercises=%d hyperedges=%d kinds=%s device=%s",
         architecture,
@@ -922,6 +1131,10 @@ def train_fold(
                 window_mode=window_mode,
                 collapse_events=architecture == "v5",
                 max_kcs=max_kcs,
+                include_time_gaps=time_gap or concept_forget,
+                include_saw=saw_input,
+                include_group=group_embed,
+                include_time_split=time_split,
             ),
             batch_size=budget.batch_size,
             shuffle=shuffle,
@@ -999,6 +1212,18 @@ def train_and_evaluate_fold(
     question_kc_agg: bool = False,
     question_graph: bool = False,
     question_hypergraph: bool = False,
+    hint_hypergraph: bool = False,
+    hint_hyperedges: list[Hyperedge] | None = None,
+    time_gap: bool = False,
+    time_gap_mode: str = "both",
+    time_split: bool = False,
+    concept_forget: bool = False,
+    saw_input: bool = False,
+    group_embed: bool = False,
+    expert_graph: bool = False,
+    skill_item_kc_map: dict[int, list[int]] | None = None,
+    full_qmatrix: bool = False,
+    expert_edges: pd.DataFrame | None = None,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -1041,6 +1266,18 @@ def train_and_evaluate_fold(
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
         question_hypergraph=question_hypergraph,
+        hint_hypergraph=hint_hypergraph,
+        hint_hyperedges=hint_hyperedges,
+        time_gap=time_gap,
+        time_gap_mode=time_gap_mode,
+        time_split=time_split,
+        concept_forget=concept_forget,
+        saw_input=saw_input,
+        group_embed=group_embed,
+        expert_graph=expert_graph,
+        skill_item_kc_map=skill_item_kc_map,
+        full_qmatrix=full_qmatrix,
+        expert_edges=expert_edges,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,
@@ -1075,6 +1312,11 @@ def write_comparison_table(
     dh2_mean = float(np.mean(dh2_aucs)) if dh2_aucs else float("nan")
     comparison_type = "matched" if budget.matched_p0 else "observational"
 
+    def _val_auc(result: FoldResult) -> float | None:
+        return getattr(result, "val_auc", None)
+
+    val_mean = [v for v in (_val_auc(r) for r in results) if v is not None]
+
     if not comparison_models:
         # Secondary corpora (e.g. FoundationalASSIST) have no P0-reused baselines.
         for fold_result in results:
@@ -1092,7 +1334,7 @@ def write_comparison_table(
                     "comparison_type": comparison_type,
                     "budget_note": budget.note or "no_p0_baseline",
                     "n_predictions": fold_result.n_predictions,
-                    "val_auc": fold_result.val_auc,
+                    "val_auc": _val_auc(fold_result),
                 }
             )
         rows.append(
@@ -1109,9 +1351,7 @@ def write_comparison_table(
                 "comparison_type": comparison_type,
                 "budget_note": budget.note or "no_p0_baseline",
                 "n_predictions": sum(r.n_predictions for r in results),
-                "val_auc": float(np.nanmean([r.val_auc for r in results if r.val_auc is not None]))
-                if any(r.val_auc is not None for r in results)
-                else None,
+                "val_auc": float(np.nanmean(val_mean)) if val_mean else None,
             }
         )
     else:
@@ -1133,29 +1373,28 @@ def write_comparison_table(
                         "comparison_type": comparison_type,
                         "budget_note": budget.note,
                         "n_predictions": fold_result.n_predictions,
-                        "val_auc": fold_result.val_auc,
+                        "val_auc": _val_auc(fold_result),
                     }
                 )
 
         for model in comparison_models:
-            cmp = compare_against_p0(dh2_mean, dataset, model=model)
+            p0_row = load_p0_baseline_summary(dataset, model=model, graph_construction="train_only")
+            p0_auc = float(p0_row.iloc[0]["auc"]) if not p0_row.empty else float("nan")
             rows.append(
                 {
                     "dataset": dataset,
                     "fold": "mean",
                     "reference_model": model,
-                    "p0_auc": cmp["p0_auc"],
+                    "p0_auc": p0_auc,
                     "dh2_kt_auc": dh2_mean,
-                    "delta_auc": cmp["delta_auc"],
+                    "delta_auc": dh2_mean - p0_auc if np.isfinite(p0_auc) else float("nan"),
                     "budget_reference": budget.reference_model,
                     "batch_size": budget.batch_size,
                     "epochs": budget.epochs,
                     "comparison_type": comparison_type,
                     "budget_note": budget.note,
                     "n_predictions": sum(r.n_predictions for r in results),
-                    "val_auc": float(np.nanmean([r.val_auc for r in results if r.val_auc is not None]))
-                    if any(r.val_auc is not None for r in results)
-                    else None,
+                    "val_auc": float(np.nanmean(val_mean)) if val_mean else None,
                 }
             )
 

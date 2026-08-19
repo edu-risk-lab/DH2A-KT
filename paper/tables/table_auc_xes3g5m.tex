@@ -1,19 +1,25 @@
 \begin{table}[!t]
-\caption{Test AUC on XES3G5M under matched training budget (batch 4, 10 epochs,
-max seq.\ len.\ 200). P0 fold AUCs from \texttt{baselines/p0\_reused}
-(train-only graphs); DH$^2$-KT v2 uses chain concept-prerequisite hyperedges
-and graph-only interaction. Mean$\pm$SD over three learner folds.}
+\caption{Test-only AUC on XES3G5M fold~0 under the \emph{clean} protocol:
+mask-repeats, chunked windows, max seq.\ len.\ 400. DH$^2$-KT uses a v4
+LSTM with question embeddings; Q$\leftarrow$KC is bipartite incidence
+(\texttt{--question-graph}), not hypergraph convolution; $+\Delta t$ is a
+Linear $\log(1{+}\mathrm{gap})$ branch into LSTM and next-step query
+(\texttt{--time-gap}, both). GIKT is matched to the DH$^2$ budget (batch 16,
+cap 30 epochs, patience 5; early-stop epoch 8). AKT keeps P0
+hyperparameters at $L{=}400$. Learner-level bootstrap: Q$\leftarrow$KC$+\Delta t$
+minus AKT is $+0.00745$, 95\% CI $[+0.00703,+0.00792]$. This is \emph{not} the three-fold graph-only
+v2 table (Appendix~\ref{app:graph-only}).}
 \label{tab:auc-xes3g5m}
 \centering
-\begin{tabular}{@{}lccc@{}}
+\begin{tabular}{@{}lcc@{}}
 \toprule
-Fold & DH$^2$-KT v2 & GKT (P0) & simpleKT (P0) \\
+Model & Test AUC & $n$ scored \\
 \midrule
-0 & 0.7501 & 0.8346 & 0.8744 \\
-1 & 0.7518 & 0.8338 & 0.8747 \\
-2 & 0.7531 & 0.8326 & 0.8750 \\
-\textbf{Mean$\pm$SD} & $\mathbf{0.7516{\pm}0.0015}$ & $\mathbf{0.8336{\pm}0.0010}$ & $\mathbf{0.8747{\pm}0.0003}$ \\
-$\Delta$ vs.\ GKT (mean$\pm$SD) & \multicolumn{3}{c}{$-0.0820{\pm}0.0025$} \\
+DH$^2$-KT Q$\leftarrow$KC $+\Delta t$ & 0.8296 & 1{,}093{,}755 \\
+DH$^2$-KT Q$\leftarrow$KC & 0.8270 & 1{,}093{,}755 \\
+GIKT (matched budget) & 0.8258 & 1{,}093{,}720 \\
+AKT ($L{=}400$) & 0.8221 & 1{,}093{,}720 \\
+DH$^2$-KT Q$\leftarrow$KC off (twin) & 0.8202 & 1{,}093{,}755 \\
 \bottomrule
 \end{tabular}
 \end{table}

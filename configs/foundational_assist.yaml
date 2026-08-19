@@ -4,6 +4,7 @@ p0_config: configs/p0_foundational_assist.yaml
 dataset: foundational_assist
 role: secondary_hint
 extended_processed_path: external/p0_leakage_audit/data/processed/foundational_assist_extended.parquet
+skill_csv: data/FoundationalASSIST/Skills.csv
 
 hyperedge:
   concept_prerequisite:

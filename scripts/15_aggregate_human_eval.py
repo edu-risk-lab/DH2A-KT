@@ -126,6 +126,39 @@ def aggregate(long_df: pd.DataFrame) -> dict:
     return overall
 
 
+def write_human_eval_tex(summary: dict, path: Path) -> None:
+    """Sync paper table from aggregated dual-rater summary."""
+    agr = summary.get("agreement", {})
+    f_mean = summary["faithfulness_mean"]
+    f_sd = summary["faithfulness_sd"]
+    u_mean = summary["usefulness_mean"]
+    u_sd = summary["usefulness_sd"]
+    rho_f = agr.get("faithfulness_spearman_mean", float("nan"))
+    rho_u = agr.get("usefulness_spearman_mean", float("nan"))
+    w1_f = 100.0 * float(agr.get("faithfulness_within_1_mean", float("nan")))
+    w1_u = 100.0 * float(agr.get("usefulness_within_1_mean", float("nan")))
+    n = summary["n_samples"]
+    n_raters = summary["n_raters"]
+    tex = f"""\\begin{{table}}[!t]
+\\caption{{Human rating of Tier~2 outputs (XES3G5M fold~0 Ollama v2 pilot subsample,
+$n{{=}}{n}$ explanations, {n_raters} independent raters, Likert 1--5). Agreement is pairwise
+Spearman $\\rho$ and fraction of scores within $\\pm 1$.}}
+\\label{{tab:human-eval}}
+\\centering
+\\begin{{tabular}}{{@{{}}lcc@{{}}}}
+\\toprule
+Scale & Mean $\\pm$ SD & Agreement (A1 vs.\\ B1) \\\\
+\\midrule
+Faithfulness & ${f_mean:.2f} \\pm {f_sd:.2f}$ & $\\rho{{=}}{rho_f:.2f}$; within$\\pm$1: {w1_f:.1f}\\% \\\\
+Usefulness & ${u_mean:.2f} \\pm {u_sd:.2f}$ & $\\rho{{=}}{rho_u:.2f}$; within$\\pm$1: {w1_u:.1f}\\% \\\\
+\\bottomrule
+\\end{{tabular}}
+\\end{{table}}
+"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(tex, encoding="utf-8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -143,6 +176,12 @@ def main() -> int:
         type=Path,
         default=REPO_ROOT / "results" / "tables" / "tier2_human_eval",
     )
+    parser.add_argument(
+        "--tex-out",
+        type=Path,
+        default=REPO_ROOT / "paper" / "tables" / "table_human_eval.tex",
+        help="Write LaTeX table synced from the JSON summary.",
+    )
     args = parser.parse_args()
 
     long_df = load_returned(args.returned_dir)
@@ -153,6 +192,7 @@ def main() -> int:
     summary_path = args.out_dir / "human_eval_summary.json"
     long_df.to_csv(long_path, index=False)
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    write_human_eval_tex(summary, args.tex_out)
 
     print(f"Raters: {summary['raters']}  samples={summary['n_samples']}")
     print(
@@ -175,6 +215,7 @@ def main() -> int:
         )
     print(f"Wrote {long_path}")
     print(f"Wrote {summary_path}")
+    print(f"Wrote {args.tex_out}")
     return 0
 
 

@@ -133,6 +133,29 @@ class DH2KTConfig:
     Isolated from v5 memory/transport and from E_pre chains. Refine is added
     through a dedicated Linear so the mix is not absorbable into ``concept_embed``.
     """
+    hint_hypergraph: bool = False
+    """v4 only: HypergraphConv over *item* nodes in train-only hinted sessions.
+
+    Members are exercises that co-occurred in a session with real ``hint_used``,
+    not a concept projection of those sessions. Refine goes through a dedicated
+    Linear on ``hint_item_embed`` so it is not absorbable into ``concept_embed``.
+    """
+    time_gap: bool = False
+    """v4 only: dedicated Linear on log1p inter-step seconds (not in concept_embed)."""
+    time_gap_mode: str = "both"
+    """Where ``time_gap`` / ``time_split`` inject: ``both``, ``lstm``, or ``query``."""
+    time_split: bool = False
+    """v4 only: separate Linear on log1p duration and idle (ASSIST timing)."""
+    concept_forget: bool = False
+    """v4 only: per-concept multiplicative decay ``exp(-softplus(θ_c)·gap)``."""
+    saw_input: bool = False
+    """v4 only: previous-step ``saw_answer`` on the LSTM input, never on the query."""
+    group_embed: bool = False
+    """v4 only: teacher/school grouping id through a dedicated Linear."""
+    n_groups: int = 1
+    """Vocabulary size for ``group_embed`` (0 = unknown / missing)."""
+    expert_graph: bool = False
+    """v4 only: expert concept DAG refine (Junyi), not absorbable into concept_embed."""
     max_hyperedge_members: int = 8
     """v5 star transport: pad width for members of one hyperedge."""
     max_hedges_per_concept: int = 8
@@ -164,6 +187,16 @@ class DH2KTBatch:
     """v5 only: ``(B, T, K)`` padded KC set exercised by each event."""
     kc_set_mask: torch.Tensor | None = None
     """v5 only: ``(B, T, K)`` marking which KC slots are real."""
+    time_gaps: torch.Tensor | None = None
+    """v4 ``time_gap``: ``(B, T)`` log1p seconds since the previous row of the user."""
+    saw_flags: torch.Tensor | None = None
+    """v4 ``saw_input``: ``(B, T)`` 0/1 ``saw_answer`` of the *current* step (LSTM only)."""
+    group_ids: torch.Tensor | None = None
+    """v4 ``group_embed``: ``(B, T)`` dense teacher/school ids."""
+    durations: torch.Tensor | None = None
+    """v4 ``time_split``: ``(B, T)`` log1p seconds spent on the current step."""
+    idles: torch.Tensor | None = None
+    """v4 ``time_split``: ``(B, T)`` log1p idle seconds before the current step."""
 
 
 if _TORCH_AVAILABLE:
@@ -395,6 +428,10 @@ if _TORCH_AVAILABLE:
                     # Dedicated one-step stack below; do not also residual-add
                     # through the absorbable v2–v4 ``_encode_concepts`` path.
                     continue
+                if config.hint_hypergraph and kind == "session_hint":
+                    # Item-level Hint hyperedges live on ``hint_item_embed``, not
+                    # on concept nodes. Never residual-add them as if they were KCs.
+                    continue
                 layers: list[nn.Module] = []
                 in_dim = config.hidden_dim
                 for _ in range(config.n_hypergraph_layers):
@@ -491,6 +528,46 @@ if _TORCH_AVAILABLE:
                         [HypergraphConv(hidden, hidden)]
                     )
                     self.question_hconv_linear = nn.Linear(hidden, hidden)
+                if config.hint_hypergraph:
+                    # Item-level hinted-session hypergraph. Own embed table +
+                    # Linear so the mix cannot collapse into concept_embed or
+                    # into question_graph's Q←KC path.
+                    self.hint_item_embed = nn.Embedding(config.n_exercises, hidden)
+                    self.hint_hconv = nn.ModuleList(
+                        [HypergraphConv(hidden, hidden)]
+                    )
+                    self.hint_hconv_linear = nn.Linear(hidden, hidden)
+                    self.hint_in_proj = nn.Linear(hidden, hidden)
+                    self.register_buffer(
+                        "hint_edge_index",
+                        torch.empty((2, 0), dtype=torch.long),
+                    )
+                if config.time_gap:
+                    self.time_gap_proj = nn.Linear(1, hidden)
+                if config.time_split:
+                    self.duration_proj = nn.Linear(1, hidden)
+                    self.idle_proj = nn.Linear(1, hidden)
+                if config.concept_forget:
+                    self.forget_log_theta = nn.Embedding(config.n_concepts, 1)
+                    # softplus(-5) ≈ 0.007 so decay starts near identity.
+                    nn.init.constant_(self.forget_log_theta.weight, -5.0)
+                mode = getattr(config, "time_gap_mode", "both") or "both"
+                if mode not in ("both", "lstm", "query"):
+                    raise ValueError(
+                        f"time_gap_mode must be both/lstm/query, got {mode!r}"
+                    )
+                if config.saw_input:
+                    self.saw_embed = nn.Embedding(2, hidden)
+                if config.group_embed:
+                    self.group_embed_table = nn.Embedding(max(int(config.n_groups), 1), hidden)
+                    self.group_in_proj = nn.Linear(hidden, hidden)
+                if config.expert_graph:
+                    self.expert_gcn_linear = nn.Linear(hidden, hidden)
+                    self.expert_in_proj = nn.Linear(hidden, hidden)
+                    self.register_buffer(
+                        "A_expert_norm",
+                        torch.zeros(config.n_concepts, config.n_concepts),
+                    )
 
         def set_question_kc_table(
             self,
@@ -526,6 +603,38 @@ if _TORCH_AVAILABLE:
             items = exercise_ids.clamp(0, self.config.n_exercises - 1)
             return self._question_gcn_embeddings()[items]
 
+        def set_hint_hyperedge_index(self, edge_index: "torch.Tensor") -> None:
+            """Register train-only item incidence for ``hint_hypergraph``.
+
+            ``edge_index`` is PyG ``[2, num_incidence]`` over *item* node ids
+            (row 0 = item index in ``item_to_idx``, row 1 = hyperedge id).
+            """
+            device = self.hint_item_embed.weight.device
+            self.register_buffer("hint_edge_index", edge_index.long().to(device=device))
+
+        def set_expert_adjacency(self, A_expert: "torch.Tensor") -> None:
+            """Register row-normalized concept DAG for ``expert_graph``.
+
+            ``A_expert`` is ``(n_concepts, n_concepts)`` with 1 at ``[dst, src]``
+            when ``src`` is an expert prerequisite of ``dst``. Empty adjacency
+            yields a zero refine so omitting the DAG is a hard ablation.
+            """
+            A = A_expert.float()
+            row_norm = A.sum(dim=1, keepdim=True).clamp(min=1.0)
+            normalized = A / row_norm
+            if hasattr(self, "A_expert_norm"):
+                self.A_expert_norm.copy_(normalized.to(device=self.A_expert_norm.device))
+            else:
+                self.register_buffer("A_expert_norm", normalized)
+
+        def _expert_gcn_embeddings(self) -> "torch.Tensor":
+            """Concept vectors after one expert-DAG hop, ``(n_concepts, H)``."""
+            base = self.concept_embed.weight
+            if (not hasattr(self, "A_expert_norm")) or self.A_expert_norm.abs().sum() < 1e-8:
+                return torch.zeros_like(base)
+            prop = self.A_expert_norm @ base
+            return torch.tanh(self.expert_gcn_linear(base + prop))
+
         def _question_hconv_refine(
             self,
             hyperedge_index: dict[str, torch.Tensor],
@@ -544,6 +653,23 @@ if _TORCH_AVAILABLE:
                 h = F.relu(h)
                 h = F.dropout(h, p=self.config.dropout, training=self.training)
             return torch.tanh(self.question_hconv_linear(h))
+
+        def _hint_hconv_refine(self) -> "torch.Tensor":
+            """Item refine from hinted-session hyperedges, ``(n_exercises, H)``.
+
+            Empty incidence returns zeros so omitting the graph is a hard ablation.
+            Operates on ``hint_item_embed``, never on ``concept_embed``.
+            """
+            base = self.hint_item_embed.weight
+            edge_index = getattr(self, "hint_edge_index", None)
+            if edge_index is None or edge_index.numel() == 0:
+                return torch.zeros_like(base)
+            h = base
+            for conv in self.hint_hconv:
+                h = conv(h, edge_index)
+                h = F.relu(h)
+                h = F.dropout(h, p=self.config.dropout, training=self.training)
+            return torch.tanh(self.hint_hconv_linear(h))
 
         def _encode_concepts(
             self,
@@ -636,6 +762,61 @@ if _TORCH_AVAILABLE:
                 vectors = vectors + masked_mean(member, kc_mask)
             return vectors
 
+        def _time_injects_at(self, where: str) -> bool:
+            mode = getattr(self.config, "time_gap_mode", "both") or "both"
+            if where == "lstm":
+                return mode in ("both", "lstm")
+            if where == "query":
+                return mode in ("both", "query")
+            raise ValueError(where)
+
+        def _add_shared_time_gap(
+            self, x: torch.Tensor, gaps: torch.Tensor | None, *, where: str
+        ) -> torch.Tensor:
+            if not self.config.time_gap or gaps is None:
+                return x
+            if not self._time_injects_at(where):
+                return x
+            return x + self.time_gap_proj(gaps.unsqueeze(-1).to(dtype=x.dtype))
+
+        def _add_time_split(
+            self,
+            x: torch.Tensor,
+            durations: torch.Tensor | None,
+            idles: torch.Tensor | None,
+            *,
+            where: str,
+        ) -> torch.Tensor:
+            if not self.config.time_split:
+                return x
+            if not self._time_injects_at(where):
+                return x
+            if where == "lstm":
+                if durations is not None:
+                    x = x + self.duration_proj(
+                        durations.unsqueeze(-1).to(dtype=x.dtype)
+                    )
+                if idles is not None:
+                    x = x + self.idle_proj(idles.unsqueeze(-1).to(dtype=x.dtype))
+                return x
+            # Query sees idle before t+1 only. Duration of t+1 is unknown.
+            if idles is not None:
+                next_idles = torch.cat([idles[:, 1:], idles[:, -1:]], dim=1)
+                x = x + self.idle_proj(next_idles.unsqueeze(-1).to(dtype=x.dtype))
+            return x
+
+        def _apply_concept_forget(
+            self,
+            vectors: torch.Tensor,
+            concepts: torch.Tensor,
+            gaps: torch.Tensor | None,
+        ) -> torch.Tensor:
+            if not self.config.concept_forget or gaps is None:
+                return vectors
+            theta = F.softplus(self.forget_log_theta(concepts))
+            decay = torch.exp(-theta * gaps.unsqueeze(-1).to(dtype=vectors.dtype))
+            return vectors * decay
+
         def _encode_sequence_v4(
             self, batch: DH2KTBatch
         ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -656,9 +837,29 @@ if _TORCH_AVAILABLE:
             if self.config.question_hypergraph:
                 hconv_refine = self._question_hconv_refine(batch.hyperedge_index)
                 observed = observed + hconv_refine[concepts]
+            hint_refine = None
+            if self.config.hint_hypergraph:
+                hint_refine = self._hint_hconv_refine()
+            observed = self._apply_concept_forget(observed, concepts, batch.time_gaps)
             x = interaction + self.concept_in_proj(observed)
             if self.config.question_graph and exercises is not None:
                 x = x + self.question_in_proj(self._question_vectors(exercises))
+            if hint_refine is not None and exercises is not None:
+                items = exercises.clamp(0, self.config.n_exercises - 1)
+                x = x + self.hint_in_proj(hint_refine[items])
+            expert_refine = None
+            if self.config.expert_graph:
+                expert_refine = self._expert_gcn_embeddings()
+                x = x + self.expert_in_proj(expert_refine[concepts])
+            x = self._add_shared_time_gap(x, batch.time_gaps, where="lstm")
+            x = self._add_time_split(x, batch.durations, batch.idles, where="lstm")
+            if self.config.saw_input and batch.saw_flags is not None:
+                x = x + self.saw_embed(batch.saw_flags.long().clamp(0, 1))
+            if self.config.group_embed and batch.group_ids is not None:
+                n_groups = max(int(self.config.n_groups), 1)
+                x = x + self.group_in_proj(
+                    self.group_embed_table(batch.group_ids.long().clamp(0, n_groups - 1))
+                )
             x = self.input_norm(x)
             x = F.dropout(x, p=self.config.dropout, training=self.training)
             hidden, _ = self.lstm(x)
@@ -679,6 +880,29 @@ if _TORCH_AVAILABLE:
                 )
             if hconv_refine is not None:
                 queried = queried + hconv_refine[next_concepts]
+            if hint_refine is not None and next_exercises is not None:
+                next_items = next_exercises.clamp(0, self.config.n_exercises - 1)
+                queried = queried + self.hint_in_proj(hint_refine[next_items])
+            if expert_refine is not None:
+                queried = queried + self.expert_in_proj(expert_refine[next_concepts])
+            next_gaps = None
+            if batch.time_gaps is not None:
+                next_gaps = torch.cat(
+                    [batch.time_gaps[:, 1:], batch.time_gaps[:, -1:]], dim=1
+                )
+            queried = self._apply_concept_forget(queried, next_concepts, next_gaps)
+            queried = self._add_shared_time_gap(queried, next_gaps, where="query")
+            queried = self._add_time_split(
+                queried, batch.durations, batch.idles, where="query"
+            )
+            if self.config.group_embed and batch.group_ids is not None:
+                n_groups = max(int(self.config.n_groups), 1)
+                next_groups = torch.cat(
+                    [batch.group_ids[:, 1:], batch.group_ids[:, -1:]], dim=1
+                )
+                queried = queried + self.group_in_proj(
+                    self.group_embed_table(next_groups.long().clamp(0, n_groups - 1))
+                )
             return hidden, queried
 
         def _readout_v4(self, batch: DH2KTBatch) -> torch.Tensor:

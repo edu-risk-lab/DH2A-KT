@@ -5,7 +5,7 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 - **Corpus:** XES3G5M, fold 0 (trừ khi ghi khác)
 - **Thiết bị tham chiếu:** CUDA (RTX 3090 class)
 - **Mốc SOTA sạch (test, mask repeats, chunked):** GIKT **0.823807**
-- **Ngày ghi / cập nhật:** 2026-08-18
+- **Ngày ghi / cập nhật:** 2026-08-19
 
 ---
 
@@ -22,10 +22,30 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 9. **Giai đoạn I (Q←KC refine, 2026-08-18):** `--question-graph` **PASS cổng** Δval **+0.00612**; test-only **0.826984**.
 10. **Giai đoạn J (fair L=400, 2026-08-18):** GIKT sạch L=400 test **0.825953**; matched budget **0.825815**. `hg_qkc_on` hơn GIKT **+0.001**, CI loại trừ 0.
 11. **Giai đoạn K (HypergraphConv multi-KC cô lập):** GATE **FAIL** Δval **+0.00025** (cần ≥ +0.002). Slice `multi_kc_item` Δ **+0.0003**, CI chứa 0. Trên XES3G5M, hypergraph multi-way **không** thêm gì ngoài bipartite GIKT.
+12. **Giai đoạn L (Hint-item hypergraph, FoundationalASSIST):** GATE **FAIL** Δval **+0.00007** (cần ≥ +0.002). Slice `has_hint` Δ **−0.014**, CI chứa 0. Hyperedge hành vi thật, nhánh non-absorbable, **không** dịch AUC trên protocol đã đăng ký.
+13. **Giai đoạn M (thuộc tính rẻ→đắt):** M2 Δt **PASS** Δval **+0.021**; M3 saw t−1 **PASS** Δval **+0.0047**; M1 Q-matrix / M4 teacher / M5 Junyi DAG **FAIL**. Không nới cổng.
+14. **Hướng P0–P4 (2026-08-19):** P0 time-gap XES **PASS** Δval **+0.00280**; test-only **0.829593** vs GIKT **0.825815** (Δ **+0.00378**, CI loại trừ 0). P1: query giữ phần lớn M2, LSTM nhỏ. P2 time+saw **PASS** +0.00297. P3 duration/idle ASSIST **PASS** +0.00442. P4 per-concept forget **FAIL**. Không gán cho hypergraph.
 
 ---
 
 ## 2. Nhật ký theo thời gian (diary)
+
+### 2026-08-19 tối — Sóng F (author gate)
+
+Đồng tác giả xác nhận CRediT / COI none / email `sonlh@vnu.edu.vn`. Gỡ `[CẦN TÁC GIẢ XÁC NHẬN]`. Data availability: `https://github.com/edu-risk-lab/DH2A-KT`. Cover letter hết “pending”.
+
+### 2026-08-19 tối — Sóng E + C (cắt trang, P0 tự chứa)
+
+- Cắt related work P0/causal trùng; bỏ phương trình IPW; gộp design goal; rút appendix v2.
+- P0: bốn diagnostic một dòng; **TBMR = within-train mixing**, không phải train/test membership (sửa sai trước). PDF P0 chưa có trong repo — data availability: supplement on request.
+- Author gate CRediT vẫn chờ.
+
+### 2026-08-19 tối — Rewrite spine KBS (sóng A, theo reviewer)
+
+- **Encoding** trong `paper/main.tex` khớp tracer khuyến nghị: v4 LSTM + Q←KC (`--question-graph`) + Linear Δt, `--no-graph`. HypergraphConv / graph-only / $L_{aux}$ → appendix hoặc bảng FAIL.
+- Fig.1: encoder = LSTM+Q←KC+Δt; HypergraphConv và ATE là dashed.
+- C1–C6 → **C1 audit, C2 which-predicts, C3 Critic**. RQ4 ATE không còn RQ. Abstract faithfulness = **v4** 0.018/0.766; Likert n=40 gắn **v2**.
+- Cover letter đồng bộ. Cổng Δval **không** nới. Author gate CRediT vẫn chờ người.
 
 ### Giai đoạn A — v3 residual / so với GKT
 
@@ -240,6 +260,99 @@ Cổng val (đăng ký trước): Δval ≥ +0.002 vs `hg_qkc_on` 0.825982.
 
 **Kết luận:** ngay trên đúng phân nhóm multi-KC, HypergraphConv **không** đóng góp. Bipartite GIKT đã lấy hết tín hiệu Q–KC trên XES3G5M. Đóng cánh cửa “hypergraph multi-way AUC” (không nới cổng).
 
+### Giai đoạn L — Hint-item hypergraph trên FoundationalASSIST (2026-08-18)
+
+**Giả thuyết:** hyperedge hành vi thật (session có Hint) dịch AUC khi **không** chiếu về concept — khác mọi cửa Q–KC đã cạn trên XES3G5M.
+
+**Thiết kế:** backbone v4q + `--question-graph` + `--no-graph` (không E_pre, không session→concept). Thêm `--hint-hypergraph`: HypergraphConv 1 lớp trên **item** của session train-only có `hint_used`; Linear `tanh(W(·))` + `hint_in_proj` riêng (`hint_item_embed`, không hấp thụ vào `concept_embed`).
+
+**Corpus:** FoundationalASSIST fold 0 (`foundational_assist_extended.parquet`, hint_rate ≈ 5.2%). **Không** kỳ vọng số AUC so được với `hg_qkc_on` trên XES3G5M.
+
+**Protocol:** mask-repeats, chunked, L=200, batch=16, cap 30 epoch, patience 5, val_frac=0.1, seed=42, `--use-questions`, `--no-session --no-graph`.
+
+**Cổng (val, đăng ký trước):** `val(hint_on) − val(fa_off) ≥ +0.002`. Slice bắt buộc: `has_hint` vs `no_hint` trên target row. Không nới cổng.
+
+Siêu cạnh: **30 958** session-hint item HE (train), chọn **20 000** (incidence 149 431). Không E_pre, không chiếu concept.
+
+| Run | val AUC | test CSV (valid+test) | test-only (slice) |
+|---|---|---|---|
+| `hg_qkc_fa_off` | 0.808609 | 0.804109 | 0.800683 |
+| `hg_qkc_fa_hint_on` | 0.808677 | 0.804124 | 0.800704 |
+| Δ | **+0.000067** | +0.000015 | +0.000021 |
+
+**GATE FAIL.** Slice test-only L=200 mask-repeats (`hg_qkc_fa_hint_slice.csv`):
+
+| Slice | n | AUC hint | AUC off | Δ | CI 95% |
+|---|---|---|---|---|---|
+| overall | 340 356 | 0.8007 | 0.8007 | +0.0000 | [−0.0007, +0.0011] chứa 0 |
+| **has_hint** | 17 678 | 0.6980 | 0.7120 | **−0.0140** | [−0.048, +0.013] chứa 0 |
+| no_hint | 322 678 | 0.7903 | 0.7904 | −0.0001 | chứa 0 |
+
+`has_hint` có positive rate ≈ 0.2% (gần như mọi bước có hint đều sai) nên AUC slice này ồn; CI rộng và chứa 0. Single-skill FA: `multi_kc_item` n=0.
+
+**Kết luận:** trên đúng corpus có Hint thật và đúng khuôn non-absorbable, nhánh item-hypergraph **không** đóng góp AUC. Δval cũ +0.00236 (session HE chiếu về concept, kiến trúc khác) **không** tái lập khi tách Hint khỏi Q–KC. Đóng cánh cửa “hint hyperedge AUC” trên protocol này (không nới cổng). Không so số với XES3G5M.
+
+### Giai đoạn M — thuộc tính còn lại, rẻ thử trước (2026-08-18)
+
+Nguồn *thông tin* còn lại (không GNN Q–KC mới, không same-step label proxy). Cổng **đăng ký trước**, không nới: Δval ≥ +0.002 vs twin khớp vocab; nhánh Linear/embed riêng (không hấp thụ vào `concept_embed`). Backbone FA = v4q + `--question-graph` + `--no-graph --no-session`, L=200, bs16, cap 30, patience 5, val_frac=0.1, seed 42, mask-repeats, `--graph-dropout 0`.
+
+| # | Tín hiệu | Twin val | ON val | Δval | Cổng |
+|---|---|---|---|---|---|
+| M1 | FA full Q-matrix `Skills.csv` → `A_qs` (chuỗi vẫn 1 KC; vocab 224) | 0.808340 | 0.808239 | **−0.00010** | **FAIL** |
+| M2 | log1p Δt (timestamp `end_time`) | 0.808609 (`fa_off`) | 0.829722 | **+0.02111** | **PASS** |
+| M3 | `saw_answer` bước *trước* (LSTM only) | 0.808609 | 0.813295 | **+0.00469** | **PASS** |
+| M4 | ASSIST2012 `teacher_id` (726 nhóm, join 100% theo user) | 0.764349 | 0.765765 | **+0.00142** | **FAIL** |
+| M5 | Junyi expert DAG (1131 cặp, 5000 users, 695 KC) | 0.7640 | 0.764557 | **+0.00056** | **FAIL** |
+
+M1: mean degree `A_qs` 1.00 → 1.13. Đa-skill metadata **không** thêm AUC trên FA.
+
+M2: Linear `log1p(Δt)` vào LSTM **và** query bước t+1 (khoảng cách đến item sắp chấm — biết trước khi dự đoán). Timestamp FA là `end_time` nên Δt gồm idle + thời gian làm bài trước. **Không** tuyên bố hypergraph.
+
+M3: `saw[t]` khi dự đoán `t+1`; unit test chặn đưa `saw[t+1]` vào query. train saw-rate ≈ 21.8%. Khác same-step proxy (P(correct|saw)≈0).
+
+M4: join `(user,item,timestamp)` ban đầu 0% (P0 lưu ts = unix//1000). Sửa: teacher theo `user_id` hashed. 726 giáo viên, khớp mọi dòng train. Δval +0.0014 **không** đủ cổng. Không so 0.76 với P0 GKT 0.96 (giao thức khác).
+
+M5: `--expert-graph` 1131 cặp trên 695 concept; subsample 5000 user (cỡ FA), không phải full 26M. Δval ≈ 0.
+
+**Kết luận:** tín hiệu hành vi rẻ (thời gian, saw bước trước) **có** AUC; Q-matrix đầy đủ / teacher grouping / expert DAG **không** qua cổng +0.002. Không nới cổng. Không gán PASS cho hypergraph.
+
+### Hướng P0–P4 — cổng đăng ký trước khi train (2026-08-19)
+
+Không nhầm **P0 (wave này)** với baseline pyKT/P0. Cổng **không nới**: Δval ≥ +0.002 vs twin khớp; Linear/embed/θ_c riêng (không hấp thụ vào `concept_embed`). Không GNN Q–KC mới, không hint-hypergraph, không gán time/saw cho hypergraph.
+
+| Pri | Tag | Việc | Twin val (đăng ký) | Ghi chú |
+|---|---|---|---|---|
+| P0 | `p0_dt_on` | `--time-gap --time-gap-mode both` trên XES `hg_qkc_on` **L=400** | **0.825982** | Protocol I: v4q + `--question-graph --mask-repeats --window-mode chunked --max-seq-len 400 --batch-size 16 --epochs 30 --val-frac 0.1 --early-stop-patience 5 --seed 42 --graph-dropout 0 --graph-sensitivity-weight 0 --no-session --no-graph`. Slice tứ phân vị Δt. Đây là bước duy nhất có thể đổi câu SOTA corpus chính. |
+| P1 | `p1_dt_lstm` / `p1_dt_query` | Ablation M2: LSTM-only vs query-only | M2 both **0.829722**; cũng báo vs `fa_off` **0.808609** | FA, cùng protocol M. Quyết định claim forgetting vs ngữ cảnh attempt. |
+| P2 | `p2_dt_saw` | `--time-gap --saw-input` trên FA | Twin **M2** 0.829722 (cộng tính?); phụ vs `fa_off` | Bootstrap learner-level nếu additive. |
+| P3 | `p3_split_on` | ASSIST duration (`ms_first_response`) + idle; query **chỉ** idle t+1 | `m4_group_off` **0.764349** | P0 ts = unix//1000. Không đưa duration t+1 vào query. |
+| P4 | `p4_forget_on` | `exp(-softplus(θ_c)·gap)` thay Linear(1,H) | Twin = Linear time-gap hiện tại | **Chỉ sau P0/P1.** Nếu P0 PASS → XES; nếu FAIL → FA vs M2. |
+
+`--time-gap-mode {both,lstm,query}`; `--time-split`; `--concept-forget`. `make_sequence_loader` phải forward time-gap từ checkpoint (trước đây im lặng bỏ gap khi rescore).
+
+**Kết quả:**
+
+| Pri | Twin | ON val | Δval | Cổng |
+|---|---|---|---|---|
+| P0 `p0_dt_on` | `hg_qkc_on` 0.825982 | **0.828779** | **+0.00280** | **PASS** |
+| P1 `p1_dt_lstm` | `fa_off` 0.808609 / M2 0.829722 | 0.811405 | **+0.00280** / −0.01832 | PASS vs off; kém both |
+| P1 `p1_dt_query` | `fa_off` / M2 | 0.823318 | **+0.01471** / −0.00640 | PASS vs off; gần most of M2 |
+| P2 `p2_dt_saw` | M2 0.829722 | **0.832696** | **+0.00297** | **PASS** (cộng tính) |
+| P3 `p3_split_on` | `m4_group_off` 0.764349 | **0.768771** | **+0.00442** | **PASS** |
+| P4 `p4_forget_on` | Linear P0 0.828779 | 0.826195 | **−0.00258** | **FAIL** (cũng +0.00021 vs `hg_qkc_on`) |
+
+P0: early-stop epoch 18/23. valid+test **0.829754** vs twin 0.827184 (Δ **+0.00257**). **Test-only** clean L=400 (`p0_dt_testonly_clean.csv`): **0.829593** (n=1.093.755). Bootstrap 1000×, 3614 learners: vs GIKT e30b16 Δ **+0.003778**, 95% CI **[+0.003422, +0.004131]**; vs `hg_qkc_on` Δ **+0.002609**, 95% CI **[+0.002254, +0.002980]** (cả hai loại trừ 0). File: `results/predictions/p0_dt_testonly/p0_dt_on_clean.npz`, `bootstrap_p0_dt_on_vs_gikt_e30b16.json`, `bootstrap_p0_dt_on_vs_hg_qkc_on.json`. Slice `p0_dt_slice.csv`: overall Δ CI (bootstrap 100k cap) loại trừ 0. qcut Δt chỉ còn **2** bin (trùng giá trị): gap ngắn log1p≤6.98 (≈18 phút, n=1.23M) Δ **+0.0028**; gap dài Δ **+0.0019**. Cả hai CI loại trừ 0. Time-gap trên XES **không** phải forgetting dài hạn là chính — khớp P1 (query t+1 chiếm phần lớn M2 trên FA). **Không** gán cho hypergraph (`--no-graph`).
+
+P1: M2 both vẫn tốt nhất. Query (khoảng đến bước chấm) giữ ~70% Δ vs off; LSTM-only chỉ +0.0028. Claim paper: tín hiệu thời gian chủ yếu là **ngữ cảnh attempt**, không phải decay mastery ẩn.
+
+P2: `--time-gap --saw-input` cộng trên M2 đủ cổng +0.002. vs `fa_off` Δval +0.02409.
+
+P3: join duration 1 860 290 / 1 894 651 train (98.2%), median 25.7s. Query chỉ idle t+1. Twin ASSIST v4q off, không so 0.77 với P0 GKT 0.96.
+
+P4: `exp(-softplus(θ_c)·gap)` thay Linear(1,H) trên XES **không** hơn Linear; dưới cổng vs cả Linear lẫn `hg_qkc_on`. Giữ `--time-gap` Linear.
+
+**Kết luận hướng P:** AUC còn lại trên corpus chính là **time-aware next-step** (Linear log1p Δt) chồng Q←KC LSTM, cộng saw trên FA, duration/idle trên ASSIST. Per-concept forget không thắng Linear. Hypergraph vẫn đóng.
+
 ---
 
 ## 3. Quá trình thực nghiệm (method log)
@@ -430,6 +543,13 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | I (`question_graph`) | **PASS** Δval +0.00612; test-only 0.8270 |
 | J (GIKT/AKT @ L=400) | GIKT 0.82595; AKT 0.82214; `hg_qkc_on` +0.00103 vs GIKT, CI loại trừ 0 |
 | K (`question_hypergraph`) | **FAIL** Δval +0.00025; multi-KC slice Δ +0.0003, CI chứa 0 |
+| L (`hint_hypergraph` @ FA) | **FAIL** Δval +0.00007; has_hint Δ −0.014, CI chứa 0 |
+| M1–M5 (thuộc tính rẻ→đắt) | M2 PASS +0.021; M3 PASS +0.0047; M1/M4/M5 FAIL |
+| P0 (`time_gap` @ XES L=400) | **PASS** Δval +0.00280; valid+test +0.00257, slice CI loại trừ 0 |
+| P1 (lstm / query @ FA) | query +0.01471 vs off; lstm +0.00280; both (M2) vẫn tốt nhất |
+| P2 (time+saw @ FA) | **PASS** Δval +0.00297 vs M2 |
+| P3 (duration+idle @ ASSIST) | **PASS** Δval +0.00442 vs `m4_group_off` |
+| P4 (`concept_forget` @ XES) | **FAIL** −0.00258 vs Linear P0 |
 
 ---
 
@@ -442,6 +562,18 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 - [x] GIKT / AKT sạch @ L=400 + bootstrap vs `hg_qkc_on` → `hg_qkc_on` hơn GIKT +0.001, CI loại trừ 0
 - [x] GIKT matched budget L=400 bs16 cap30 patience5 → test **0.825815** (không hơn bản 10ep/bs8); `hg_qkc_on` +0.00117, CI [+0.00078, +0.00153]
 - [x] Giai đoạn K: HypergraphConv cô lập trên `question_concepts` → **GATE FAIL**; slice multi-KC Δ≈0
+- [x] Giai đoạn L: Hint-item hypergraph trên FoundationalASSIST → **GATE FAIL**; slice has_hint Δ CI chứa 0
+- [x] Giai đoạn M: M1 full Q-matrix **FAIL**; M2 Δt **PASS** +0.021; M3 saw t−1 **PASS** +0.0047; M4 teacher **FAIL**; M5 Junyi DAG **FAIL**
+- [x] Hướng P0: `--time-gap` trên XES `hg_qkc_on` L=400 vs val 0.825982 → **PASS** Δval **+0.00280**
+- [x] Test-only `p0_dt_on` L=400: **0.829593**; vs GIKT e30b16 Δ **+0.00378**, CI [+0.00342, +0.00413]; vs `hg_qkc_on` Δ **+0.00261**, CI [+0.00225, +0.00298]
+- [x] Bootstrap vs AKT L=400: Δ **+0.00745**, CI [+0.00703, +0.00792]
+- [x] Fold 1–2 `p0_dt_on` cùng protocol: test-only **0.829781** / **0.829066**; mean **0.8295±0.0004**
+- [x] Tier 2 cùng prompt trên `p0_dt_on`: grounded/IG flag **0.018/0.766**, JC **0.161/0.152** (cùng kiểu v2 0.026/0.768)
+- [x] KBS draft: abstract/title/C1–C6/keywords; bảng AUC sạch + bảng âm tính; `cover_letter_kbs.md`; 0.752 xuống appendix
+- [x] Hướng P1: FA `--time-gap-mode lstm` / `query` vs M2 both → query chiếm phần lớn; lstm nhỏ
+- [x] Hướng P2: FA `--time-gap --saw-input` vs M2 → **PASS** Δval **+0.00297**
+- [x] Hướng P3: ASSIST `--time-split` vs `m4_group_off` → **PASS** Δval **+0.00442**
+- [x] Hướng P4: `--concept-forget` trên XES vs Linear P0 → **FAIL** Δval **−0.00258**
 - [ ] (Tùy chọn) variant (1) event-collapse — không ưu tiên (K đã đóng hypergraph multi-way AUC)
 - [x] Commit nhật ký + số liệu hg_qkc (sau cổng)
 - [x] Push `main`: `809c76b` / `e7ffbcc` (question-graph + diary)
@@ -461,5 +593,10 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | 2026-08-18 sáng | Giai đoạn I: Q←KC `--question-graph` GATE PASS Δval +0.006; test-only 0.8270; push `809c76b` |
 | 2026-08-18 trưa | Giai đoạn J: GIKT L=400 test 0.8260; `hg_qkc_on` +0.001 vs GIKT (CI loại trừ 0) |
 | 2026-08-18 tối | Giai đoạn K: HypergraphConv multi-KC GATE FAIL; slice Δ≈0 |
+| 2026-08-18 đêm | Giai đoạn L: Hint-item FA GATE FAIL Δval +0.00007; slice has_hint CI chứa 0 |
+| 2026-08-18 đêm | Giai đoạn M: M2/M3 PASS (Δt, saw t−1); M1/M4/M5 FAIL |
+| 2026-08-19 | Hướng P0–P4: P0/P2/P3 PASS; P1 query chiếm M2; P4 forget FAIL. Không gán time cho hypergraph. |
+| 2026-08-19 | Test-only `p0_dt_on` 0.8296 vs GIKT 0.8258; viết lại abstract/C1–C6/bảng AUC/cover KBS; 0.752 xuống appendix. |
+| 2026-08-19 | Task còn lại: AKT bootstrap +0.00745; fold 1–2 test 0.8298/0.8291; paired ablation; Tier 2 v4 flag 0.018/0.766. |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

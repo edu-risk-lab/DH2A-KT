@@ -1,0 +1,8 @@
+giai doan M3 FoundationalASSIST fold 0 L=200 mask-repeats v4q question-graph no-graph
+ON: --saw-input (previous-step saw_answer on LSTM input only, never on query)
+twin: hg_qkc_fa_off val=0.808609
+saw train_rate=0.2185 eval_rate=0.2175
+m3_saw_on val=0.813295 test_csv=0.807879 n=510233
+delta_val=+0.004686 (need >= +0.002)
+GATE PASS
+Not same-step label proxy: saw[t] is fed when predicting t+1.

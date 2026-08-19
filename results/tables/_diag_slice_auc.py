@@ -159,6 +159,13 @@ def main() -> int:
     parser.add_argument("--window-mode", choices=("first", "last", "chunked"), default=None)
     parser.add_argument("--max-seq-len", type=int, default=None)
     parser.add_argument("--mask-repeats", action="store_true")
+    parser.add_argument(
+        "--extended-parquet",
+        type=Path,
+        default=None,
+        help="Optional FoundationalASSIST extended parquet with hint_used. "
+        "Adds target_hint_used slices (has_hint / no_hint).",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 
@@ -253,6 +260,29 @@ def main() -> int:
             meta["n_kc"] = (
                 pd.Series(tgt_item_id).map(n_kc_per_item).fillna(1).to_numpy(dtype=np.int64)
             )
+            if args.extended_parquet is not None:
+                ext_path = (
+                    args.extended_parquet
+                    if args.extended_parquet.is_absolute()
+                    else REPO_ROOT / args.extended_parquet
+                )
+                extended = pd.read_parquet(ext_path)
+                sorted_eval = eval_df.sort_values(
+                    ["user_id", "timestamp", "item_id"]
+                ).reset_index(drop=True)
+                hint_map = (
+                    extended.drop_duplicates(["user_id", "item_id", "timestamp"])
+                    .set_index(["user_id", "item_id", "timestamp"])["hint_used"]
+                )
+                keys = list(
+                    zip(
+                        sorted_eval["user_id"].astype("int64"),
+                        sorted_eval["item_id"].astype("int64"),
+                        sorted_eval["timestamp"].astype("int64"),
+                    )
+                )
+                hint_rows = hint_map.reindex(keys).fillna(0).to_numpy(dtype=np.int64)
+                meta["hint_used"] = hint_rows[rows] > 0
         else:
             if not np.array_equal(rows, target_rows):
                 raise SystemExit(f"arm {name} scored different rows than the first arm")
@@ -276,9 +306,36 @@ def main() -> int:
         slices.append(("position_in_learner_log", label, np.asarray(pos_bucket == label)))
     for label in ("single_kc_item", "multi_kc_item"):
         slices.append(("target_item_kc_count", label, multi_bucket == label))
+    if "hint_used" in meta:
+        hint_mask = meta["hint_used"].astype(bool)
+        slices.append(("target_hint_used", "has_hint", hint_mask))
+        slices.append(("target_hint_used", "no_hint", ~hint_mask))
     repeat_mask = meta["is_repeat"].astype(bool)
     slices.append(("target_is_repeat_row", "repeat_of_same_attempt", repeat_mask))
     slices.append(("target_is_repeat_row", "fresh_attempt", ~repeat_mask))
+
+    from dh2a_kt.data.aux_signals import log_time_gaps
+
+    sorted_eval = eval_df.sort_values(["user_id", "timestamp", "item_id"]).reset_index(
+        drop=True
+    )
+    gap_at_target = log_time_gaps(
+        sorted_eval["timestamp"].to_numpy(dtype=np.int64),
+        sorted_eval["user_id"].to_numpy(),
+    )[target_rows]
+    try:
+        gap_bucket = pd.qcut(gap_at_target, q=4, duplicates="drop")
+    except ValueError:
+        gap_bucket = None
+    if gap_bucket is not None:
+        for label in gap_bucket.categories:
+            slices.append(
+                (
+                    "target_time_gap_quartile",
+                    str(label),
+                    np.asarray(gap_bucket == label),
+                )
+            )
 
     n_repeat = int(repeat_mask.sum())
     leak_rate = (

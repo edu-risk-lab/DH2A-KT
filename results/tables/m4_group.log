@@ -1,0 +1,8 @@
+giai doan M4 ASSIST2012 fold 0 L=200 mask-repeats v4q question-graph no-graph
+teacher_id joined on hashed user_id (P0 blake2). 726 train groups, 1894651/1894651 rows.
+First join on (user,item,timestamp) matched 0 rows (P0 ts = unix//1000); discarded.
+m4_group_off val=0.764349 test_csv=0.761082 n=804592
+m4_group_on  val=0.765765 test_csv=0.761781 n=804592
+delta_val=+0.001416 (need >= +0.002)
+GATE FAIL
+Do not compare 0.76 to P0 GKT 0.96 (different protocol).

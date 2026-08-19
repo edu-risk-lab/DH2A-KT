@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from dh2a_kt.hyperedge.construction import build_session_hyperedges
+from dh2a_kt.hyperedge.construction import build_hint_item_hyperedges, build_session_hyperedges
 
 
 def _toy_interactions() -> pd.DataFrame:
@@ -47,3 +47,24 @@ def test_session_hyperedges_without_hint_columns():
     hes = build_session_hyperedges(df, fold=1, session_gap_seconds=1800)
     assert len(hes) == 3
     assert all(not any(t == "hint" for t, _ in he.members) for he in hes)
+
+
+def test_hint_item_hyperedges_drop_concepts_and_unhinted_sessions():
+    hes = build_hint_item_hyperedges(_toy_interactions(), fold=0, session_gap_seconds=1800)
+    assert len(hes) == 2
+    assert all(he.kind == "session_hint" for he in hes)
+    for he in hes:
+        types = {t for t, _ in he.members}
+        assert types == {"exercise"}
+        assert not any(t == "concept" for t, _ in he.members)
+        assert he.provenance["n_hint_members"] >= 1
+        assert he.provenance["n_items"] >= 2
+    item_sets = [{eid for t, eid in he.members} for he in hes]
+    assert {10, 11} in item_sets
+    assert {12, 13} in item_sets
+
+
+def test_hint_item_hyperedges_empty_without_hint_columns():
+    df = _toy_interactions().drop(columns=["hint_count", "hint_used"])
+    hes = build_hint_item_hyperedges(df, fold=0, session_gap_seconds=1800)
+    assert hes == []

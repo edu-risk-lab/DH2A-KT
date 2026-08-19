@@ -1,27 +1,35 @@
-% Paired ablation: predictive (Tier 1) + faithfulness (Tier 2) knobs.
-% Numbers from results/tables/* (Ollama n=500; FA session ablation; manip folds).
+% Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
+% knobs (Tier 2). Predictive AUCs are XES3G5M fold~0 test-only, $L{=}400$,
+% mask-repeats, chunked, unless noted. Tier~2 flag/JC are the fold~0 Ollama
+% $n{=}500$ run (originally on the v2 graph-only checkpoint; a v4 Q$\leftarrow$KC
+% re-run is optional). Independent generation (IG) strips frozen
+% $P(\mathrm{correct})$ from the Diagnostician. ``w/o Critic'' disables the
+% gate (flag $0$ by construction; JC unchanged).
 \begin{table}[!t]
-\caption{Paired ablation of DH$^2$A-KT components. Tier~1 metrics are on
-XES3G5M unless noted; Tier~2 faithfulness uses the fold~0 frozen checkpoint
-and Qwen2.5-7B (Ollama, $n{=}500$) unless noted. ``w/o Critic'' disables the
-gate on the same grounded Diagnostician outputs (flag rate $0$ by construction;
-JC unchanged). Independent generation (IG) strips frozen $P(\mathrm{correct})$
-from the Diagnostician. Session hyperedges are FoundationalASSIST-only.
-``w/o $L_{\mathrm{aux}}$'' sets \texttt{graph\_sensitivity\_weight}${}=0$
-(fold~0 retrain).}
+\caption{Paired ablation of DH$^2$A-KT knowledge and explanation knobs.
+Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except
+HypergraphConv / FA session (validation or secondary corpus, as marked).
+The registered gate is $\Delta\mathrm{val}\ge{+}0.002$; FAIL rows are not
+AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
+(Appendix~\ref{app:graph-only}), not the recommended tracer.}
 \label{tab:paired-ablation}
 \centering
 \footnotesize
 \begin{tabular}{@{}llccl@{}}
 \toprule
-Setting & AUC & Manip.\ $\Delta$AUC & Flag & Mean JC \\
+Setting & AUC & Gate / note & Flag & Mean JC \\
 \midrule
-Full (grounded + Critic) & $0.752{\pm}0.002$ & $0.038$--$0.047$ & $0.026$ & $0.152$ \\
-IG (w/o $P$ in Diag.) & --- & --- & $0.768$ & $0.142$ \\
+Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296$ & PASS $\Delta\mathrm{val}{+}0.00280$ & --- & --- \\
+Q$\leftarrow$KC on & $0.8270$ & PASS $\Delta\mathrm{val}{+}0.00612$ & --- & --- \\
+Q$\leftarrow$KC off (twin) & $0.8202$ & --- & --- & --- \\
+HypergraphConv (val) & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
+Grounded + Critic (v2 ckpt) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
+IG (v2) & --- & --- & $0.768$ & $0.142$ \\
+Grounded + Critic (v4 $+\Delta t$) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
+IG (v4 $+\Delta t$) & --- & --- & $0.766$ & $0.152$ \\
 w/o Critic & --- & --- & $0.000$ & $0.152$ \\
 FA: concept-only & $0.720$ & --- & --- & --- \\
-FA: + session HE & $0.722$ & --- & --- & --- \\
-w/o $L_{\mathrm{aux}}$ (fold~0) & $0.754$ & $0.039$ & --- & --- \\
+FA: + session HE & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

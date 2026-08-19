@@ -11,7 +11,7 @@ already exist -- it never trains.
 Usage:
     python scripts/23_eval_clean_protocol.py configs/xes3g5m.yaml --fold 0 --device cuda \
         --checkpoint v4=results/checkpoints/xes3g5m_fold0_v4.pt \
-        --checkpoint v4q=results/checkpoints/xes3g5m_fold0_v4q.pt
+        --eval-split test --window-mode chunked --max-seq-len 400
 """
 from __future__ import annotations
 
@@ -80,6 +80,16 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--max-seq-len",
+        type=int,
+        default=None,
+        help=(
+            "Override sequence window length. Default follows the DH2 training "
+            "config (currently 200). L=400 checkpoints must pass 400 here or they "
+            "are scored on a truncated position set."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -98,7 +108,11 @@ def main() -> int:
         p0_cfg,
         reference_model=train_cfg.get("budget_reference", "gkt"),
         lr=float(train_cfg.get("lr", 0.001)),
-        max_seq_len=train_cfg.get("max_seq_len"),
+        max_seq_len=(
+            args.max_seq_len
+            if args.max_seq_len is not None
+            else train_cfg.get("max_seq_len")
+        ),
     )
     budget = replace(budget, batch_size=int(args.eval_batch_size))
 

@@ -97,6 +97,57 @@ def hyperedge_index_from_list(
     return out
 
 
+def item_hyperedge_index_from_list(
+    hyperedges: list[Hyperedge],
+    item_to_idx: dict[int, int],
+) -> "torch.Tensor":
+    """PyG incidence over *exercise* members (Hint-session hyperedges).
+
+    Concept / student / hint typed members are ignored on purpose: this index
+    must never be fed to the concept HypergraphConv stack.
+    """
+    if not _TORCH_AVAILABLE:
+        raise ImportError("item_hyperedge_index_from_list requires PyTorch")
+
+    node_rows: list[int] = []
+    edge_rows: list[int] = []
+    for he_id, he in enumerate(hyperedges):
+        for member_type, entity_id in he.members:
+            if member_type != "exercise":
+                continue
+            idx = item_to_idx.get(int(entity_id))
+            if idx is None:
+                continue
+            node_rows.append(idx)
+            edge_rows.append(he_id)
+    if not node_rows:
+        return torch.empty((2, 0), dtype=torch.long)
+    return torch.tensor([node_rows, edge_rows], dtype=torch.long)
+
+
+def select_hint_item_hyperedges(
+    hint_hyperedges: list[Hyperedge],
+    *,
+    min_items: int = 2,
+    max_hyperedges: int | None = 20_000,
+) -> list[Hyperedge]:
+    """Keep the richest train-only hinted-session item hyperedges."""
+    eligible = []
+    for he in hint_hyperedges:
+        n_items = sum(1 for t, _ in he.members if t == "exercise")
+        if n_items >= min_items:
+            eligible.append(he)
+    eligible.sort(
+        key=lambda he: (
+            -sum(1 for t, _ in he.members if t == "exercise"),
+            he.hyperedge_id,
+        )
+    )
+    if max_hyperedges is not None:
+        eligible = eligible[:max_hyperedges]
+    return eligible
+
+
 def select_session_hyperedges_for_training(
     session_hyperedges: list[Hyperedge],
     *,

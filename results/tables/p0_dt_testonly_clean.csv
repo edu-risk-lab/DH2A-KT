@@ -1,0 +1,2 @@
+checkpoint,eval_split,window_mode,architecture,use_questions,n_hyperedges,p0_protocol_auc,p0_protocol_n,clean_protocol_auc,clean_protocol_n,auc_attributable_to_repeats
+p0_dt_on,test,chunked,v4,True,0,0.8397208424998561,1277288,0.8295929566323603,1093755,0.0101278858674958

@@ -1,2 +1,158 @@
 \relax 
 \providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\emailauthor{sonlh@vnu.edu.vn}{Le Hoang Son\corref {cor1}}
+\Newlabel{cor1}{1}
+\Newlabel{utehy}{a}
+\Newlabel{vnu}{b}
+\citation{piech2015dkt}
+\citation{nakagawa2019gkt,yang2021gikt}
+\citation{thmn2025,hgkt2025,htkt2025}
+\citation{dygkt2024}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\citation{daominh2026p0}
+\citation{thmn2025,hgkt2025,htkt2025}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{3}{subsection.1.1}\protected@file@percent }
+\citation{daominh2026p0}
+\citation{foundationalassist2026}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Research Questions}{4}{subsection.1.2}\protected@file@percent }
+\newlabel{sec:rqs}{{1.2}{4}{Research Questions}{subsection.1.2}{}}
+\citation{ni2026ikteia}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contributions}{5}{subsection.1.3}\protected@file@percent }
+\citation{nakagawa2019gkt,yang2021gikt}
+\citation{dygkt2024}
+\citation{thmn2025,hgkt2025,htkt2025}
+\citation{psykt2024,hhskt2023}
+\citation{ni2026ikteia}
+\citation{llmedu2025,agentcat2026,graphaugmentedllm2025,graphrag2025}
+\citation{daominh2026p0}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{6}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Graph- and hypergraph-based knowledge tracing}{6}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}LLM agents and explanation faithfulness}{6}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Leakage-controlled evaluation}{6}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:related-leakage}{{2.3}{6}{Leakage-controlled evaluation}{subsection.2.3}{}}
+\citation{kaur2019causal,kumar2023causal,minn2022interpretable}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Preliminaries}{7}{section.3}\protected@file@percent }
+\newlabel{sec:prelim}{{3}{7}{Preliminaries}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Self-contained summary of the reused P0 protocol}{7}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:p0-selfcontained}{{3.1}{7}{Self-contained summary of the reused P0 protocol}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Tier 1: DH$^2$-KT}{8}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Heterogeneous hypergraph construction}{8}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:tier1-graph}{{4.1}{8}{Heterogeneous hypergraph construction}{subsection.4.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Two-tier DH$^2$A-KT architecture. Solid Tier~1 path: leakage-audited construction, then the recommended v4 LSTM with Q$\leftarrow $KC incidence and Linear $\Delta t$ (no concept-stack HypergraphConv). Dashed: graph-only HypergraphConv diagnostic (Appendix~\ref {app:graph-only}) and FoundationalASSIST session+Hint / observational ATE (secondary). After freezing, Tier~2 agents explain and gate those outputs: Diagnostician $\rightarrow $ Critic $\rightarrow $ Tutor, with session hyperedge write-back at pilot scale.}}{9}{figure.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{9}{Two-tier DH$^2$A-KT architecture. Solid Tier~1 path: leakage-audited construction, then the recommended v4 LSTM with Q$\leftarrow $KC incidence and Linear $\Delta t$ (no concept-stack HypergraphConv). Dashed: graph-only HypergraphConv diagnostic (Appendix~\ref {app:graph-only}) and FoundationalASSIST session+Hint / observational ATE (secondary). After freezing, Tier~2 agents explain and gate those outputs: Diagnostician $\rightarrow $ Critic $\rightarrow $ Tutor, with session hyperedge write-back at pilot scale}{figure.1}{}}
+\newlabel{alg:concept-hyperedge}{{4.1}{9}{Heterogeneous hypergraph construction}{ALC@unique.8}{}}
+\citation{daominh2026p0}
+\citation{yang2021gikt}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Hyperedge-level leakage audit}{10}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:leakage-ext}{{4.2}{10}{Hyperedge-level leakage audit}{subsection.4.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Recommended tracer: v4 LSTM with Q$\leftarrow $KC and time}{10}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:encoding}{{4.3}{10}{Recommended tracer: v4 LSTM with Q$\leftarrow $KC and time}{subsection.4.3}{}}
+\newlabel{eq:qkc}{{1}{10}{Recommended tracer: v4 LSTM with Q$\leftarrow $KC and time}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Observational ATE (secondary)}{11}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:causal}{{4.4}{11}{Observational ATE (secondary)}{subsection.4.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Hyperedge-level leakage taxonomy (extends \cite  {daominh2026p0} Table~1)}}{12}{table.1}\protected@file@percent }
+\newlabel{tab:leakage-taxonomy}{{1}{12}{Hyperedge-level leakage taxonomy (extends \cite {daominh2026p0} Table~1)}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Concept-prerequisite hyperedge audit on XES3G5M fold~0. Pairwise TBMR/$|\rho |$ are skipped when the pairwise projection exceeds the implementation cap of $100{,}000$ pairs (11{,}568{,}053 projected pairs in this fold; see audit notes).}}{13}{table.2}\protected@file@percent }
+\newlabel{tab:leakage-measured}{{2}{13}{Concept-prerequisite hyperedge audit on XES3G5M fold~0. Pairwise TBMR/$|\rho |$ are skipped when the pairwise projection exceeds the implementation cap of $100{,}000$ pairs (11{,}568{,}053 projected pairs in this fold; see audit notes)}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Tier 2: AgentDG-KT pilot}{14}{section.5}\protected@file@percent }
+\newlabel{sec:tier2}{{5}{14}{Tier 2: AgentDG-KT pilot}{section.5}{}}
+\citation{daominh2026p0}
+\citation{liu2023xes3g5m}
+\citation{foundationalassist2026}
+\citation{daominh2026p0}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Tier~2 Critic flag rates (XES3G5M fold~0, $n{=}500$, seed 42, Qwen2.5-7B via Ollama unless noted). Flag rate = fraction of Diagnostician outputs flagged by the mandatory Critic. v1--v2 precede the structured \texttt  {GroundedKCs} trailer; the grounded/IG pair is the KBS faithfulness re-run (Table~\ref {tab:kc-jaccard-ig}).}}{15}{table.3}\protected@file@percent }
+\newlabel{tab:tier2}{{3}{15}{Tier~2 Critic flag rates (XES3G5M fold~0, $n{=}500$, seed 42, Qwen2.5-7B via Ollama unless noted). Flag rate = fraction of Diagnostician outputs flagged by the mandatory Critic. v1--v2 precede the structured \texttt {GroundedKCs} trailer; the grounded/IG pair is the KBS faithfulness re-run (Table~\ref {tab:kc-jaccard-ig})}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental setup}{15}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Datasets}{15}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:reuse}{{6.1}{15}{Datasets}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Baselines reused from P0}{15}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:baselines-reuse}{{6.2}{15}{Baselines reused from P0}{subsection.6.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Manipulation check}{16}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:eval}{{6.3}{16}{Manipulation check}{subsection.6.3}{}}
+\newlabel{sec:results}{{6.3}{16}{Manipulation check}{subsection.6.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Results}{16}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Which structural knowledge predicts (RQ1)}{16}{subsection.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Test-only AUC on XES3G5M fold~0 under the \emph  {clean} protocol: mask-repeats, chunked windows, max seq.\ len.\ 400. DH$^2$-KT uses a v4 LSTM with question embeddings; Q$\leftarrow $KC is bipartite incidence (\texttt  {--question-graph}), not hypergraph convolution; $+\Delta t$ is a Linear $\log (1{+}\mathrm  {gap})$ branch into LSTM and next-step query (\texttt  {--time-gap}, both). GIKT is matched to the DH$^2$ budget (batch 16, cap 30 epochs, patience 5; early-stop epoch 8). AKT keeps P0 hyperparameters at $L{=}400$. Learner-level bootstrap: Q$\leftarrow $KC$+\Delta t$ minus AKT is $+0.00745$, 95\% CI $[+0.00703,+0.00792]$. This is \emph  {not} the three-fold graph-only v2 table (Appendix~\ref {app:graph-only}).}}{17}{table.4}\protected@file@percent }
+\newlabel{tab:auc-xes3g5m}{{4}{17}{Test-only AUC on XES3G5M fold~0 under the \emph {clean} protocol: mask-repeats, chunked windows, max seq.\ len.\ 400. DH$^2$-KT uses a v4 LSTM with question embeddings; Q$\leftarrow $KC is bipartite incidence (\texttt {--question-graph}), not hypergraph convolution; $+\Delta t$ is a Linear $\log (1{+}\mathrm {gap})$ branch into LSTM and next-step query (\texttt {--time-gap}, both). GIKT is matched to the DH$^2$ budget (batch 16, cap 30 epochs, patience 5; early-stop epoch 8). AKT keeps P0 hyperparameters at $L{=}400$. Learner-level bootstrap: Q$\leftarrow $KC$+\Delta t$ minus AKT is $+0.00745$, 95\% CI $[+0.00703,+0.00792]$. This is \emph {not} the three-fold graph-only v2 table (Appendix~\ref {app:graph-only})}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Q$\leftarrow $KC$+\Delta t$ test-only AUC on XES3G5M under the clean protocol (mask-repeats, chunked, $L{=}400$), one model per learner fold. Folds are P0's three split seeds. Mean$\pm $SD is over folds, not over bootstrap resamples of fold~0.}}{17}{table.5}\protected@file@percent }
+\newlabel{tab:auc-p0-dt-folds}{{5}{17}{Q$\leftarrow $KC$+\Delta t$ test-only AUC on XES3G5M under the clean protocol (mask-repeats, chunked, $L{=}400$), one model per learner fold. Folds are P0's three split seeds. Mean$\pm $SD is over folds, not over bootstrap resamples of fold~0}{table.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Negative results under a pre-registered validation gate ($\Delta \mathrm  {val}\ge {+}0.002$ vs.\ a matched twin). All runs keep a separate Linear/embedding branch (no absorption into \texttt  {concept\_embed}). FAIL means the knowledge type is \emph  {not} credited as predictive. Hypergraph convolution and hint-item hyperedges are among the failures; they are not AUC novelty.}}{18}{table.6}\protected@file@percent }
+\newlabel{tab:negative-knowledge}{{6}{18}{Negative results under a pre-registered validation gate ($\Delta \mathrm {val}\ge {+}0.002$ vs.\ a matched twin). All runs keep a separate Linear/embedding branch (no absorption into \texttt {concept\_embed}). FAIL means the knowledge type is \emph {not} credited as predictive. Hypergraph convolution and hint-item hyperedges are among the failures; they are not AUC novelty}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Time as attempt context (RQ2)}{18}{subsection.7.2}\protected@file@percent }
+\newlabel{sec:time-result}{{7.2}{18}{Time as attempt context (RQ2)}{subsection.7.2}{}}
+\citation{ni2026ikteia}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Paired diagnostic knobs}{19}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Ground-truth structural overlap (Junyi)}{19}{subsection.7.4}\protected@file@percent }
+\newlabel{sec:junyi-gt}{{7.4}{19}{Ground-truth structural overlap (Junyi)}{subsection.7.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Paired ablation of DH$^2$A-KT knowledge and explanation knobs. Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except HypergraphConv / FA session (validation or secondary corpus, as marked). The registered gate is $\Delta \mathrm  {val}\ge {+}0.002$; FAIL rows are not AUC novelty. Manipulation $\Delta $AUC is the v2 graph-only diagnostic (Appendix~\ref {app:graph-only}), not the recommended tracer.}}{20}{table.7}\protected@file@percent }
+\newlabel{tab:paired-ablation}{{7}{20}{Paired ablation of DH$^2$A-KT knowledge and explanation knobs. Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except HypergraphConv / FA session (validation or secondary corpus, as marked). The registered gate is $\Delta \mathrm {val}\ge {+}0.002$; FAIL rows are not AUC novelty. Manipulation $\Delta $AUC is the v2 graph-only diagnostic (Appendix~\ref {app:graph-only}), not the recommended tracer}{table.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Ground-truth cross-validation on Junyi Academy (fold~0, top-$K{=}|$expert$|{=}1131$). Hyperedge chain slightly underlaps pairwise $E_{\mathrm  {pre}}$ but remains the same order of magnitude.}}{20}{table.8}\protected@file@percent }
+\newlabel{tab:junyi-gt}{{8}{20}{Ground-truth cross-validation on Junyi Academy (fold~0, top-$K{=}|$expert$|{=}1131$). Hyperedge chain slightly underlaps pairwise $E_{\mathrm {pre}}$ but remains the same order of magnitude}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Tier~2 faithfulness pilot (RQ3)}{20}{subsection.7.5}\protected@file@percent }
+\newlabel{sec:tier2-faithfulness-result}{{7.5}{20}{Tier~2 faithfulness pilot (RQ3)}{subsection.7.5}{}}
+\citation{foundationalassist2026}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.6}Secondary corpus: FoundationalASSIST}{21}{subsection.7.6}\protected@file@percent }
+\newlabel{sec:foundational-assist}{{7.6}{21}{Secondary corpus: FoundationalASSIST}{subsection.7.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Tier~2 explanation faithfulness: grounded Diagnostician vs.\ independent generation (IG). ID-anchored KC-Jaccard (JC) measures overlap between \texttt  {GroundedKCs} trailer IDs and the support set $\{\mathrm  {target}\}\cup \mathrm  {history}\cup 1$-hop $E_{\mathrm  {pre}}$. IG omits frozen $P(\mathrm  {correct})$ from the Diagnostician prompt; the Critic still sees the true Tier-1 score. The original Ollama pack used the v2 graph-only checkpoint (also the human-rating pack). The recommended Q$\leftarrow $KC$+\Delta t$ tracer is a same-prompt re-run ($n{=}500$).}}{22}{table.9}\protected@file@percent }
+\newlabel{tab:kc-jaccard-ig}{{9}{22}{Tier~2 explanation faithfulness: grounded Diagnostician vs.\ independent generation (IG). ID-anchored KC-Jaccard (JC) measures overlap between \texttt {GroundedKCs} trailer IDs and the support set $\{\mathrm {target}\}\cup \mathrm {history}\cup 1$-hop $E_{\mathrm {pre}}$. IG omits frozen $P(\mathrm {correct})$ from the Diagnostician prompt; the Critic still sees the true Tier-1 score. The original Ollama pack used the v2 graph-only checkpoint (also the human-rating pack). The recommended Q$\leftarrow $KC$+\Delta t$ tracer is a same-prompt re-run ($n{=}500$)}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Human rating of Tier~2 outputs (XES3G5M fold~0 Ollama v2 pilot subsample, $n{=}40$ explanations, 2 independent raters, Likert 1--5). Agreement is pairwise Spearman $\rho $ and fraction of scores within $\pm 1$.}}{22}{table.10}\protected@file@percent }
+\newlabel{tab:human-eval}{{10}{22}{Human rating of Tier~2 outputs (XES3G5M fold~0 Ollama v2 pilot subsample, $n{=}40$ explanations, 2 independent raters, Likert 1--5). Agreement is pairwise Spearman $\rho $ and fraction of scores within $\pm 1$}{table.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces FoundationalASSIST secondary corpus (fold~0). Session hyperedges use a 30-minute gap; Hint members appear when \texttt  {hint\_count}$>0$. Predictive AUC is observational (no P0-reused GKT/simpleKT column). Hint ATE is IPW of \texttt  {hint\_used}$_t$ on \texttt  {correct}$_{t+1}$ under pre-$t$ confounders; propensity mass hits the clip floor --- treat as limited observational evidence.}}{24}{table.11}\protected@file@percent }
+\newlabel{tab:foundational-assist}{{11}{24}{FoundationalASSIST secondary corpus (fold~0). Session hyperedges use a 30-minute gap; Hint members appear when \texttt {hint\_count}$>0$. Predictive AUC is observational (no P0-reused GKT/simpleKT column). Hint ATE is IPW of \texttt {hint\_used}$_t$ on \texttt {correct}$_{t+1}$ under pre-$t$ confounders; propensity mass hits the clip floor --- treat as limited observational evidence}{table.11}{}}
+\citation{ni2026ikteia}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{25}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Threats to validity}{25}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}What KBS should take from a small AUC edge}{25}{subsection.8.2}\protected@file@percent }
+\newlabel{sec:auc-tradeoff}{{8.2}{25}{What KBS should take from a small AUC edge}{subsection.8.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Limitations}{25}{subsection.8.3}\protected@file@percent }
+\newlabel{sec:limitations}{{8.3}{25}{Limitations}{subsection.8.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion and future work}{26}{section.9}\protected@file@percent }
+\citation{daominh2026p0}
+\citation{foundationalassist2026}
+\citation{daominh2026p0}
+\citation{foundationalassist2026}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\citation{daominh2026p0}
+\@writefile{toc}{\let\numberline\tmptocnumberline}
+\@writefile{toc}{\contentsline {section}{\numberline {Appendix~A}Graph-only encoder as a forced-reliance diagnostic}{28}{appendix.A}\protected@file@percent }
+\newlabel{app:graph-only}{{Appendix~A}{28}{Graph-only encoder as a forced-reliance diagnostic}{appendix.A}{}}
+\newlabel{sec:manipulation-result}{{Appendix~A}{28}{Graph-only encoder as a forced-reliance diagnostic}{appendix.A}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {A.12}{\ignorespaces Diagnostic graph-only track (not the recommended system). Test AUC on XES3G5M under P0's matched GKT budget (batch 4, 10 epochs, max seq.\ len.\ 200). DH$^2$-KT v2 uses chain concept-prerequisite hyperedges and graph-only interaction. Mean$\pm $SD over three learner folds.}}{29}{table.12}\protected@file@percent }
+\newlabel{tab:auc-xes3g5m-v2}{{A.12}{29}{Diagnostic graph-only track (not the recommended system). Test AUC on XES3G5M under P0's matched GKT budget (batch 4, 10 epochs, max seq.\ len.\ 200). DH$^2$-KT v2 uses chain concept-prerequisite hyperedges and graph-only interaction. Mean$\pm $SD over three learner folds}{table.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {A.13}{\ignorespaces Manipulation check at node-drop $p{=}0.9$ on XES3G5M. DH$^2$-KT: train on clean hyperedges, re-evaluate frozen weights on destroyed hyperedges (folds~0--2). Training restores the best epoch by train loss (fold~1 previously collapsed on the final epoch). GKT: P0 DDR-downstream mean $\Delta $AUC over $n{=}9$ fold--seed runs (\cite  {daominh2026p0}; retrain on destroyed pairwise graph). simpleKT has no concept-graph input, so graph destruction is undefined.}}{29}{table.13}\protected@file@percent }
+\newlabel{tab:manipulation}{{A.13}{29}{Manipulation check at node-drop $p{=}0.9$ on XES3G5M. DH$^2$-KT: train on clean hyperedges, re-evaluate frozen weights on destroyed hyperedges (folds~0--2). Training restores the best epoch by train loss (fold~1 previously collapsed on the final epoch). GKT: P0 DDR-downstream mean $\Delta $AUC over $n{=}9$ fold--seed runs (\cite {daominh2026p0}; retrain on destroyed pairwise graph). simpleKT has no concept-graph input, so graph destruction is undefined}{table.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.2}{\ignorespaces Manipulation-check $\Delta $AUC on XES3G5M fold~0 under $p{=}0.9$ node-drop. An early pairwise$+$exercise-embedding backbone is graph-inert ($\Delta $AUC$\approx 0.0003$); the chain$+$graph-only redesign passes ($\Delta $AUC$=0.038$). The dashed line at $0.003$ is an \emph  {illustrative} floor ($\approx $10$\times $ the graph-inert noise), not a formal statistical cutoff from \cite  {daominh2026p0}.}}{30}{figure.2}\protected@file@percent }
+\newlabel{fig:manipulation-sweep}{{A.2}{30}{Manipulation-check $\Delta $AUC on XES3G5M fold~0 under $p{=}0.9$ node-drop. An early pairwise$+$exercise-embedding backbone is graph-inert ($\Delta $AUC$\approx 0.0003$); the chain$+$graph-only redesign passes ($\Delta $AUC$=0.038$). The dashed line at $0.003$ is an \emph {illustrative} floor ($\approx $10$\times $ the graph-inert noise), not a formal statistical cutoff from \cite {daominh2026p0}}{figure.2}{}}
+\bibstyle{elsarticle-num}
+\bibdata{references}
+\bibcite{piech2015dkt}{{1}{}{{}}{{}}}
+\bibcite{nakagawa2019gkt}{{2}{}{{}}{{}}}
+\bibcite{yang2021gikt}{{3}{}{{}}{{}}}
+\bibcite{thmn2025}{{4}{}{{}}{{}}}
+\bibcite{hgkt2025}{{5}{}{{}}{{}}}
+\bibcite{htkt2025}{{6}{}{{}}{{}}}
+\bibcite{dygkt2024}{{7}{}{{}}{{}}}
+\bibcite{daominh2026p0}{{8}{}{{}}{{}}}
+\bibcite{foundationalassist2026}{{9}{}{{}}{{}}}
+\bibcite{ni2026ikteia}{{10}{}{{}}{{}}}
+\bibcite{psykt2024}{{11}{}{{}}{{}}}
+\bibcite{hhskt2023}{{12}{}{{}}{{}}}
+\bibcite{llmedu2025}{{13}{}{{}}{{}}}
+\bibcite{agentcat2026}{{14}{}{{}}{{}}}
+\bibcite{graphaugmentedllm2025}{{15}{}{{}}{{}}}
+\bibcite{graphrag2025}{{16}{}{{}}{{}}}
+\bibcite{kaur2019causal}{{17}{}{{}}{{}}}
+\bibcite{kumar2023causal}{{18}{}{{}}{{}}}
+\bibcite{minn2022interpretable}{{19}{}{{}}{{}}}
+\bibcite{liu2023xes3g5m}{{20}{}{{}}{{}}}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\gdef \@abspage@last{35}

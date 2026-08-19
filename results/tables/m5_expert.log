@@ -1,0 +1,7 @@
+giai doan M5 Junyi fold 0 L=200 mask-repeats v4q question-graph no-graph max_users=5000
+both arms --expert-dag (1131 pairs, concepts=695). ON: --expert-graph non-absorbable DAG hop.
+m5_expert_off val=0.7640 test_csv=0.7741 n=504257
+m5_expert_on  val=0.764557 test_csv=0.772910 n=504257
+delta_val=+0.000557 (need >= +0.002)
+GATE FAIL
+Subsample 5000 users (FA-sized); not the full 26M-log claim.

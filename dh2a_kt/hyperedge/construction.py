@@ -355,6 +355,62 @@ def _session_hyperedge_from_rows(
     )
 
 
+def build_hint_item_hyperedges(
+    interactions: pd.DataFrame,
+    *,
+    fold: int,
+    session_gap_seconds: float = 1800.0,
+    min_items: int = 2,
+    train_only: bool = True,
+) -> list[Hyperedge]:
+    """Item-level hyperedges from sessions that actually used a hint.
+
+    Unlike :func:`build_session_hyperedges` (which still carries concept
+    members for the old absorbable projection), this keeps **only exercise
+    ids**. A session contributes iff it has at least one hint member and at
+    least ``min_items`` distinct items. Train-only by construction: pass the
+    train split / train-user slice of the extended parquet.
+    """
+    sessions = build_session_hyperedges(
+        interactions,
+        fold=fold,
+        session_gap_seconds=session_gap_seconds,
+        train_only=train_only,
+    )
+    hyperedges: list[Hyperedge] = []
+    for he in sessions:
+        n_hints = int(he.provenance.get("n_hint_members", 0) or 0)
+        if n_hints < 1:
+            continue
+        items = sorted({int(eid) for t, eid in he.members if t == "exercise"})
+        if len(items) < min_items:
+            continue
+        hyperedges.append(
+            Hyperedge(
+                hyperedge_id=he.hyperedge_id.replace("session_", "session_hint_", 1),
+                kind="session_hint",
+                members=[("exercise", item_id) for item_id in items],
+                fold=he.fold,
+                train_only=he.train_only,
+                timestamp_range=he.timestamp_range,
+                provenance={
+                    "source": "session_hint_items",
+                    "n_hint_members": n_hints,
+                    "n_items": len(items),
+                    "parent_session_id": he.hyperedge_id,
+                },
+            )
+        )
+    logger.info(
+        "Built %d hint-item hyperedges from %d sessions (fold=%s min_items=%s)",
+        len(hyperedges),
+        len(sessions),
+        fold,
+        min_items,
+    )
+    return hyperedges
+
+
 def build_discussion_thread_hyperedges(forum_posts: pd.DataFrame, *, fold: int) -> list[Hyperedge]:
     """Group {Student, Forum post, Concept, Teacher} into a discussion-thread
     hyperedge. TODO: no public benchmark provides this; Tier 2 case-study

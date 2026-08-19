@@ -108,6 +108,7 @@ def make_sequence_loader(
         architecture = getattr(trained.model.config, "architecture", "v2")
         window_mode = "chunked" if architecture == "v4" else "first"
 
+    cfg = trained.model.config
     return DataLoader(
         UserSequenceDataset(
             df,
@@ -115,6 +116,13 @@ def make_sequence_loader(
             trained.item_to_idx,
             max_seq_len=budget.max_seq_len,
             window_mode=window_mode,
+            include_time_gaps=bool(
+                getattr(cfg, "time_gap", False)
+                or getattr(cfg, "concept_forget", False)
+            ),
+            include_saw=bool(getattr(cfg, "saw_input", False)),
+            include_group=bool(getattr(cfg, "group_embed", False)),
+            include_time_split=bool(getattr(cfg, "time_split", False)),
         ),
         batch_size=budget.batch_size,
         shuffle=shuffle,

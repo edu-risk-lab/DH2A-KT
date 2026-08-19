@@ -1,0 +1,18 @@
+\begin{table}[!t]
+\caption{Q$\leftarrow$KC$+\Delta t$ test-only AUC on XES3G5M under the clean
+protocol (mask-repeats, chunked, $L{=}400$), one model per learner fold.
+Folds are P0's three split seeds. Mean$\pm$SD is over folds, not over
+bootstrap resamples of fold~0.}
+\label{tab:auc-p0-dt-folds}
+\centering
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Fold & Test AUC & $n$ scored \\
+\midrule
+0 & 0.8296 & 1{,}093{,}755 \\
+1 & 0.8298 & 1{,}092{,}664 \\
+2 & 0.8291 & 1{,}090{,}374 \\
+\textbf{Mean$\pm$SD} & $\mathbf{0.8295{\pm}0.0004}$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

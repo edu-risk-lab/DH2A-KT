@@ -1,0 +1,9 @@
+{
+  "n_samples": 500,
+  "mean_kc_jaccard": 0.15244642430781866,
+  "median_kc_jaccard": 0.13636363636363635,
+  "n_empty_grounded": 1,
+  "n_flagged": 383,
+  "flag_rate": 0.766,
+  "source_records": "results\\tables\\tier2_p0_dt_on\\xes3g5m_fold0_tier2_pilot_kbs_ollama_ig.jsonl"
+}

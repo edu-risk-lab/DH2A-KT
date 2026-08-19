@@ -31,14 +31,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.config_helpers import concept_prerequisite_spec_from_config
-from dh2a_kt.hyperedge.construction import build_session_hyperedges
+from dh2a_kt.hyperedge.construction import build_hint_item_hyperedges, build_session_hyperedges
 from dh2a_kt.hyperedge.p0_inputs import (
     get_fold_splits,
     load_configs,
     load_e_pre,
     load_interactions_with_ids,
 )
-from dh2a_kt.hyperedge.indexing import select_session_hyperedges_for_training
+from dh2a_kt.hyperedge.indexing import select_hint_item_hyperedges, select_session_hyperedges_for_training
 from dh2a_kt.train.tier1 import (
     FoldResult,
     resolve_training_budget,
@@ -201,6 +201,77 @@ def main() -> int:
         "Ablation twin: omit this flag.",
     )
     parser.add_argument(
+        "--hint-hypergraph",
+        action="store_true",
+        help="v4: HypergraphConv over item nodes in train-only hinted sessions "
+        "(FoundationalASSIST extended parquet). Not projected to concepts. "
+        "Add on top of --question-graph. Ablation twin: omit this flag.",
+    )
+    parser.add_argument(
+        "--skill-csv",
+        type=Path,
+        default=None,
+        help="FoundationalASSIST Skills.csv: expand kc_to_idx with every skill_id. "
+        "Twin of --full-qmatrix uses this without filling extra Q–KC links.",
+    )
+    parser.add_argument(
+        "--full-qmatrix",
+        action="store_true",
+        help="v4 question_graph: fill A_qs from Skills.csv (all skills per item) "
+        "instead of the first-skill parquet column. Requires --skill-csv or "
+        "config skill_csv. Sequences stay single-kc.",
+    )
+    parser.add_argument(
+        "--time-gap",
+        action="store_true",
+        help="v4: dedicated Linear on log1p seconds since the previous step of "
+        "the same user. Injected per --time-gap-mode (default both LSTM and query).",
+    )
+    parser.add_argument(
+        "--time-gap-mode",
+        choices=("both", "lstm", "query"),
+        default=None,
+        help="Where --time-gap / --time-split inject. Default both. "
+        "lstm = forgetting in state; query = gap to the scored next step.",
+    )
+    parser.add_argument(
+        "--time-split",
+        action="store_true",
+        help="v4: separate Linear on log1p duration (ms_first_response) and idle "
+        "(ASSIST2012 raw CSV). Query gets next idle only, never next duration.",
+    )
+    parser.add_argument(
+        "--concept-forget",
+        action="store_true",
+        help="v4: per-concept multiplicative decay exp(-softplus(theta_c)*gap). "
+        "Uses the same log1p gaps as --time-gap; twin is Linear time-gap.",
+    )
+    parser.add_argument(
+        "--saw-input",
+        action="store_true",
+        help="v4: previous-step saw_answer on the LSTM input only (never the "
+        "query / same-step label). Requires extended_processed_path.",
+    )
+    parser.add_argument(
+        "--group-embed",
+        action="store_true",
+        help="v4: teacher_id grouping (ASSIST2012 raw CSV joined via P0 hashes). "
+        "Dedicated embed + Linear. Ablation twin: omit this flag.",
+    )
+    parser.add_argument(
+        "--expert-graph",
+        action="store_true",
+        help="v4: non-absorbable expert concept DAG (Junyi Chang et al.). "
+        "Ablation twin: omit this flag but pass --expert-dag for matched vocab.",
+    )
+    parser.add_argument(
+        "--expert-dag",
+        type=Path,
+        default=None,
+        help="CSV with Exercise_A / Exercise_B (and optional Prerequisite_avg). "
+        "Loaded for vocab expansion even without --expert-graph.",
+    )
+    parser.add_argument(
         "--val-frac",
         type=float,
         default=None,
@@ -290,6 +361,21 @@ def main() -> int:
     question_hypergraph = bool(
         args.question_hypergraph or train_cfg.get("question_hypergraph", False)
     )
+    hint_hypergraph = bool(
+        args.hint_hypergraph or train_cfg.get("hint_hypergraph", False)
+    )
+    time_gap = bool(args.time_gap or train_cfg.get("time_gap", False))
+    time_gap_mode = str(
+        args.time_gap_mode or train_cfg.get("time_gap_mode", "both") or "both"
+    )
+    time_split = bool(args.time_split or train_cfg.get("time_split", False))
+    concept_forget = bool(
+        args.concept_forget or train_cfg.get("concept_forget", False)
+    )
+    saw_input = bool(args.saw_input or train_cfg.get("saw_input", False))
+    group_embed = bool(args.group_embed or train_cfg.get("group_embed", False))
+    expert_graph = bool(args.expert_graph or train_cfg.get("expert_graph", False))
+    full_qmatrix = bool(args.full_qmatrix or train_cfg.get("full_qmatrix", False))
     memory_dim = int(args.memory_dim if args.memory_dim is not None else train_cfg.get("memory_dim", 16))
     max_degree = int(args.max_degree if args.max_degree is not None else train_cfg.get("max_degree", 16))
     graph_transport = float(
@@ -345,6 +431,11 @@ def main() -> int:
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
           f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
           f"question_graph={question_graph} question_hypergraph={question_hypergraph} "
+          f"hint_hypergraph={hint_hypergraph} "
+          f"full_qmatrix={full_qmatrix} time_gap={time_gap} "
+          f"time_gap_mode={time_gap_mode} time_split={time_split} "
+          f"concept_forget={concept_forget} saw_input={saw_input} "
+          f"group_embed={group_embed} expert_graph={expert_graph} "
           f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
           f"event_pool={event_pool} transport={transport} "
           f"hyperedge_embed={use_hyperedge_embed} kind_conditioned={kind_conditioned} "
@@ -358,16 +449,98 @@ def main() -> int:
     interactions = load_interactions_with_ids(p0_cfg)
     folds = list(range(int(p0_cfg.get("split", {}).get("n_folds", 3)))) if args.all_folds else [args.fold]
 
+    from dh2a_kt.data.aux_signals import (
+        attach_assist_teacher,
+        attach_assist_timing,
+        attach_saw_answer,
+        load_item_kc_map,
+        load_junyi_expert_edges,
+    )
+
+    skill_csv = args.skill_csv
+    if skill_csv is None and full_qmatrix and dh2_cfg.get("skill_csv"):
+        skill_csv = REPO_ROOT / dh2_cfg["skill_csv"]
+    if full_qmatrix and skill_csv is None:
+        raise SystemExit("--full-qmatrix requires --skill-csv or config skill_csv")
+    skill_item_kc_map = None
+    if skill_csv is not None:
+        skill_path = skill_csv if skill_csv.is_absolute() else REPO_ROOT / skill_csv
+        skill_item_kc_map = load_item_kc_map(skill_path)
+        print(f"skill csv: {skill_path} items={len(skill_item_kc_map)}")
+
+    expert_dag = args.expert_dag
+    if expert_dag is None and expert_graph:
+        rel = dh2_cfg.get("ground_truth_crossval", {}).get("expert_dag_path")
+        expert_dag = REPO_ROOT / rel if rel else None
+    expert_edges = None
+    if expert_dag is not None:
+        dag_path = expert_dag if Path(expert_dag).is_absolute() else REPO_ROOT / expert_dag
+        if not dag_path.exists():
+            raise SystemExit(f"expert DAG not found: {dag_path}")
+        expert_edges = load_junyi_expert_edges(dag_path)
+        print(f"expert dag: {dag_path} pairs={len(expert_edges)}")
+    if expert_graph and expert_edges is None:
+        raise SystemExit(
+            "--expert-graph requires --expert-dag or ground_truth_crossval.expert_dag_path"
+        )
+
     results: list[FoldResult] = []
     for fold in folds:
         print(f"\n[fold {fold}] loading splits + e_pre...")
         splits = get_fold_splits(interactions, p0_cfg, fold)
         eval_df = pd.concat([splits["valid"], splits["test"]], ignore_index=True)
         e_pre = load_e_pre(p0_cfg, fold)
+        if saw_input:
+            ext_rel = dh2_cfg.get("extended_processed_path")
+            if not ext_rel:
+                raise SystemExit("--saw-input requires extended_processed_path")
+            ext_path = REPO_ROOT / ext_rel
+            if not ext_path.exists():
+                raise SystemExit(f"extended parquet not found: {ext_path}")
+            extended = pd.read_parquet(ext_path)
+            splits["train"] = attach_saw_answer(splits["train"], extended)
+            eval_df = attach_saw_answer(eval_df, extended)
+            print(
+                f"[fold {fold}] saw_answer attached: "
+                f"train_rate={float(splits['train']['saw_answer'].mean()):.4f} "
+                f"eval_rate={float(eval_df['saw_answer'].mean()):.4f}"
+            )
+        if group_embed:
+            raw_rel = p0_cfg.get("raw_interactions_file")
+            if not raw_rel:
+                raise SystemExit("--group-embed requires P0 raw_interactions_file")
+            from dh2a_kt.hyperedge.p0_inputs import p0_path
+
+            raw_path = p0_path(p0_cfg, "raw_interactions_file")
+            if not raw_path.exists():
+                raise SystemExit(f"ASSIST raw CSV not found: {raw_path}")
+            splits["train"] = attach_assist_teacher(splits["train"], raw_path)
+            eval_df = attach_assist_teacher(eval_df, raw_path)
+            n_match = int(splits["train"]["teacher_id"].notna().sum())
+            print(
+                f"[fold {fold}] teacher join: {n_match}/{len(splits['train'])} train rows"
+            )
+        if time_split:
+            from dh2a_kt.hyperedge.p0_inputs import p0_path
+
+            raw_rel = p0_cfg.get("raw_interactions_file")
+            if not raw_rel:
+                raise SystemExit("--time-split requires P0 raw_interactions_file")
+            raw_path = p0_path(p0_cfg, "raw_interactions_file")
+            if not raw_path.exists():
+                raise SystemExit(f"ASSIST raw CSV not found: {raw_path}")
+            splits["train"] = attach_assist_timing(splits["train"], raw_path)
+            eval_df = attach_assist_timing(eval_df, raw_path)
+            n_dur = int((splits["train"]["duration_sec"] > 0).sum())
+            print(
+                f"[fold {fold}] timing join: {n_dur}/{len(splits['train'])} train rows "
+                f"with duration>0 (median={float(splits['train']['duration_sec'].median()):.3f}s)"
+            )
         hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=fold)
         if args.hyperedge_source is not None:
             hyperedge_spec = replace(hyperedge_spec, source=args.hyperedge_source)
         session_hyperedges = None
+        hint_hyperedges = None
         if session_enabled:
             raw_sessions = build_session_hyperedges(
                 splits["train"],
@@ -382,6 +555,33 @@ def main() -> int:
             print(
                 f"[fold {fold}] session hyperedges: built={len(raw_sessions)} "
                 f"selected={len(session_hyperedges)}"
+            )
+        if hint_hypergraph:
+            ext_rel = dh2_cfg.get("extended_processed_path")
+            if not ext_rel:
+                raise SystemExit(
+                    "--hint-hypergraph requires extended_processed_path "
+                    "(FoundationalASSIST hint_count parquet)"
+                )
+            ext_path = REPO_ROOT / ext_rel
+            if not ext_path.exists():
+                raise SystemExit(f"extended parquet not found: {ext_path}")
+            extended = pd.read_parquet(ext_path)
+            train_users = set(splits["train"]["user_id"].astype("int64"))
+            train_ext = extended[extended["user_id"].isin(train_users)].copy()
+            raw_hint = build_hint_item_hyperedges(
+                train_ext,
+                fold=fold,
+                session_gap_seconds=float(session_cfg.get("session_gap_seconds", 1800)),
+                train_only=True,
+            )
+            hint_hyperedges = select_hint_item_hyperedges(
+                raw_hint,
+                max_hyperedges=int(session_cfg.get("max_hyperedges", 20_000)),
+            )
+            print(
+                f"[fold {fold}] hint-item hyperedges: built={len(raw_hint)} "
+                f"selected={len(hint_hyperedges)} (train users={len(train_users)})"
             )
         fold_result = train_and_evaluate_fold(
             splits["train"],
@@ -421,6 +621,18 @@ def main() -> int:
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
             question_hypergraph=question_hypergraph,
+            hint_hypergraph=hint_hypergraph,
+            hint_hyperedges=hint_hyperedges,
+            time_gap=time_gap,
+            time_gap_mode=time_gap_mode,
+            time_split=time_split,
+            concept_forget=concept_forget,
+            saw_input=saw_input,
+            group_embed=group_embed,
+            expert_graph=expert_graph,
+            skill_item_kc_map=skill_item_kc_map,
+            full_qmatrix=full_qmatrix,
+            expert_edges=expert_edges,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT
