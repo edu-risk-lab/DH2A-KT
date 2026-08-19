@@ -79,3 +79,36 @@ def test_select_session_hyperedges_prefers_hint():
     selected = select_session_hyperedges_for_training(hes, max_hyperedges=10)
     assert len(selected) == 2
     assert selected[0].hyperedge_id == "s1"
+
+
+def test_item_hyperedge_index_uses_exercise_members_only():
+    from dh2a_kt.hyperedge.indexing import item_hyperedge_index_from_list
+
+    hes = [
+        Hyperedge(
+            hyperedge_id="h0",
+            kind="session_hint",
+            fold=0,
+            train_only=True,
+            members=[("exercise", 10), ("exercise", 11), ("concept", 100), ("hint", 10)],
+        )
+    ]
+    item_to_idx = {10: 0, 11: 1, 12: 2}
+    index = item_hyperedge_index_from_list(hes, item_to_idx)
+    assert index.shape == (2, 2)
+    assert set(index[0].tolist()) == {0, 1}
+    assert set(index[1].tolist()) == {0}
+
+
+def test_concept_index_ignores_session_hint_exercises():
+    hes = [
+        Hyperedge(
+            hyperedge_id="h0",
+            kind="session_hint",
+            fold=0,
+            train_only=True,
+            members=[("exercise", 10), ("exercise", 11)],
+        )
+    ]
+    index = hyperedge_index_from_list(hes, {10: 0, 11: 1})
+    assert index["session_hint"].numel() == 0

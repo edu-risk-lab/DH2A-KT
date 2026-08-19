@@ -1,0 +1,6 @@
+giai doan M1 FoundationalASSIST fold 0 L=200 mask-repeats v4q question-graph no-graph
+both arms --skill-csv (kc_to_idx=224). ON fills A_qs from Skills.csv (mean degree 1.13 vs 1.00).
+m1_qmat_off val=0.808340 test_csv=0.803240 n=510233
+m1_qmat_on  val=0.808239 test_csv=0.803150 n=510233
+delta_val=-0.000101 (need >= +0.002)
+GATE FAIL

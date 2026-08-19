@@ -1,0 +1,7 @@
+giai doan M2 FoundationalASSIST fold 0 L=200 mask-repeats v4q question-graph no-graph
+ON: --time-gap (log1p seconds, dedicated Linear, LSTM + next-step query)
+twin: hg_qkc_fa_off val=0.808609 test_csv=0.804109
+m2_dt_on val=0.829722 test_csv=0.824529 n=510233
+delta_val=+0.021113 (need >= +0.002)
+GATE PASS
+FA timestamp is end_time; gap is idle+duration of previous item, known before scoring t+1.

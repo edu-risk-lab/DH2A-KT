@@ -227,5 +227,17 @@ temp/_diag_pykt_smask/
 !results/tables/hg_qkc_hconv.log
 !results/tables/hg_qkc_hconv_slice.*
 !results/tables/_diag_slice_auc.py
+!results/tables/dh2_kt_hg_qkc_fa_*_vs_p0.csv
+!results/tables/hg_qkc_fa_hint.log
+!results/tables/hg_qkc_fa_hint_slice.*
+!results/tables/dh2_kt_m*_vs_p0.csv
+!results/tables/m1_*.log
+!results/tables/m2_*.log
+!results/tables/m3_*.log
+!results/tables/m4_*.log
+!results/tables/m5_*.log
+!results/tables/dh2_kt_p*_vs_p0.csv
+!results/tables/p_stage.log
+!results/tables/p0_dt_slice.*
 !scripts/26_sota_E5_ensemble.py
 

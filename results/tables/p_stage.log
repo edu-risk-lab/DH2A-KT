@@ -1,0 +1,589 @@
+﻿=== START P0-P3 2026-08-19T08:01:56.9087081+07:00 ===
+=== START p0_dt_on 2026-08-19T08:01:56.9187415+07:00 ===
+dataset=xes3g5m architecture=v4 tag=p0_dt_on hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=True time_gap_mode=both time_split=False concept_forget=False saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=gkt matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=400
+NOTE: tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] AUC=0.8298 val_auc=0.8288 n_predictions=1640242
+
+Wrote comparison table: results\tables\dh2_kt_p0_dt_on_vs_p0.csv
+dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                               budget_note  n_predictions  val_auc
+xes3g5m    0             gkt 0.833644    0.829754  -0.003890              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.828779
+xes3g5m    0        simplekt 0.874720    0.829754  -0.044966              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.828779
+xes3g5m mean             gkt 0.833644    0.829754  -0.003890              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.828779
+xes3g5m mean        simplekt 0.874720    0.829754  -0.044966              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.828779
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 446305 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 7602/7652 items (mean degree=1.16, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=865 exercises=7652 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 11381 train users / 1265 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 14601 windows (mode=chunked) from 4041573 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 1627 windows (mode=chunked) from 448940 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 batch=500/913 loss=0.4454
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.4289 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.8088 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=2/30 batch=500/913 loss=0.3996
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.3963 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.8175 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=3/30 batch=500/913 loss=0.3891
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.3908 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.8196 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=4/30 batch=500/913 loss=0.3867
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.3876 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.8214 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=5/30 batch=500/913 loss=0.3851
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.3854 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.8229 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=6/30 batch=500/913 loss=0.3823
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.3836 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.8235 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=7/30 batch=500/913 loss=0.3821
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.3821 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.8245 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=8/30 batch=500/913 loss=0.3816
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.3807 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.8258 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=9/30 batch=500/913 loss=0.3790
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.3790 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.8265 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=10/30 batch=500/913 loss=0.3774
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.3777 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.8272 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=11/30 batch=500/913 loss=0.3750
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.3765 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.8267 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=12/30 batch=500/913 loss=0.3746
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.3757 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.8278 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=13/30 batch=500/913 loss=0.3736
+INFO:dh2a_kt.train.tier1:epoch=13/30 loss=0.3746 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/30 val_auc=0.8273 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=14/30 batch=500/913 loss=0.3747
+INFO:dh2a_kt.train.tier1:epoch=14/30 loss=0.3736 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/30 val_auc=0.8279 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=15/30 batch=500/913 loss=0.3721
+INFO:dh2a_kt.train.tier1:epoch=15/30 loss=0.3729 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/30 val_auc=0.8281 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=16/30 batch=500/913 loss=0.3712
+INFO:dh2a_kt.train.tier1:epoch=16/30 loss=0.3720 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/30 val_auc=0.8281 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=17/30 batch=500/913 loss=0.3706
+INFO:dh2a_kt.train.tier1:epoch=17/30 loss=0.3712 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/30 val_auc=0.8287 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=18/30 batch=500/913 loss=0.3680
+INFO:dh2a_kt.train.tier1:epoch=18/30 loss=0.3705 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/30 val_auc=0.8288 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=19/30 batch=500/913 loss=0.3698
+INFO:dh2a_kt.train.tier1:epoch=19/30 loss=0.3699 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=19/30 val_auc=0.8280 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=20/30 batch=500/913 loss=0.3676
+INFO:dh2a_kt.train.tier1:epoch=20/30 loss=0.3690 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=20/30 val_auc=0.8279 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=21/30 batch=500/913 loss=0.3689
+INFO:dh2a_kt.train.tier1:epoch=21/30 loss=0.3687 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=21/30 val_auc=0.8281 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=22/30 batch=500/913 loss=0.3680
+INFO:dh2a_kt.train.tier1:epoch=22/30 loss=0.3678 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=22/30 val_auc=0.8283 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=23/30 batch=500/913 loss=0.3659
+INFO:dh2a_kt.train.tier1:epoch=23/30 loss=0.3672 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=23/30 val_auc=0.8280 val_n=382836
+INFO:dh2a_kt.train.tier1:early stop at epoch=23 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=18 train_loss=0.3705 val_auc=0.8288 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on.pt
+=== EXIT 0 p0_dt_on 2026-08-19T08:06:46.9216540+07:00 ===
+=== START p1_dt_lstm 2026-08-19T08:06:46.9246569+07:00 ===
+dataset=foundational_assist architecture=v4 tag=p1_dt_lstm hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=True time_gap_mode=lstm time_split=False concept_forget=False saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=local_default matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=200
+NOTE: tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] AUC=0.8063 val_auc=0.8114 n_predictions=510233
+
+Wrote comparison table: results\tables\dh2_kt_p1_dt_lstm_vs_p0.csv
+            dataset fold reference_model  p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                                         budget_note  n_predictions  val_auc
+foundational_assist    0            none     NaN    0.806336        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.811405
+foundational_assist mean            none     NaN    0.806336        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.811405
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\foundational_assist.parquet
+INFO:src.io_utils:Loaded interactions shape=(1740987, 5)
+INFO:src.split_checker:Creating learner split shape=(1740987, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 1218645, 'valid': 174017, 'test': 348325}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 5840 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 3349/3359 items (mean degree=1.00, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=209 exercises=3359 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 3150 train users / 350 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6514 windows (mode=chunked) from 1097657 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 3110 windows (mode=chunked) from 522342 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 723 windows (mode=chunked) from 120988 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.5820 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.7860 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.5339 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.7969 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.5248 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.8032 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.5196 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.8056 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.5158 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.8063 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.5135 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.8072 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.5107 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.8084 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.5089 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.8094 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.5070 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.8087 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.5055 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.8102 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.5040 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.8104 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.5023 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.8108 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=13/30 loss=0.5006 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/30 val_auc=0.8114 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=14/30 loss=0.4997 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/30 val_auc=0.8109 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=15/30 loss=0.4976 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/30 val_auc=0.8112 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=16/30 loss=0.4967 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/30 val_auc=0.8112 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=17/30 loss=0.4955 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/30 val_auc=0.8111 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=18/30 loss=0.4937 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/30 val_auc=0.8106 val_n=117878
+INFO:dh2a_kt.train.tier1:early stop at epoch=18 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=13 train_loss=0.5006 val_auc=0.8114 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\foundational_assist_fold0_p1_dt_lstm.pt
+=== EXIT 0 p1_dt_lstm 2026-08-19T08:07:54.4151231+07:00 ===
+=== START p1_dt_query 2026-08-19T08:07:54.4171231+07:00 ===
+dataset=foundational_assist architecture=v4 tag=p1_dt_query hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=True time_gap_mode=query time_split=False concept_forget=False saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=local_default matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=200
+NOTE: tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] AUC=0.8178 val_auc=0.8233 n_predictions=510233
+
+Wrote comparison table: results\tables\dh2_kt_p1_dt_query_vs_p0.csv
+            dataset fold reference_model  p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                                         budget_note  n_predictions  val_auc
+foundational_assist    0            none     NaN    0.817806        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.823318
+foundational_assist mean            none     NaN    0.817806        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.823318
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\foundational_assist.parquet
+INFO:src.io_utils:Loaded interactions shape=(1740987, 5)
+INFO:src.split_checker:Creating learner split shape=(1740987, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 1218645, 'valid': 174017, 'test': 348325}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 5840 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 3349/3359 items (mean degree=1.00, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=209 exercises=3359 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 3150 train users / 350 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6514 windows (mode=chunked) from 1097657 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 3110 windows (mode=chunked) from 522342 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 723 windows (mode=chunked) from 120988 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.5655 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.7901 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.5266 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.8048 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.5182 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.8093 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.5127 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.8103 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.5095 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.8115 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.5066 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.8147 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.5030 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.8174 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.5013 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.8191 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.4988 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.8184 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.4970 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.8203 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.4954 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.8207 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.4937 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.8205 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=13/30 loss=0.4923 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/30 val_auc=0.8216 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=14/30 loss=0.4910 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/30 val_auc=0.8217 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=15/30 loss=0.4892 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/30 val_auc=0.8222 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=16/30 loss=0.4881 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/30 val_auc=0.8218 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=17/30 loss=0.4866 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/30 val_auc=0.8219 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=18/30 loss=0.4856 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/30 val_auc=0.8222 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=19/30 loss=0.4846 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=19/30 val_auc=0.8219 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=20/30 loss=0.4832 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=20/30 val_auc=0.8229 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=21/30 loss=0.4821 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=21/30 val_auc=0.8233 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=22/30 loss=0.4808 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=22/30 val_auc=0.8228 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=23/30 loss=0.4794 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=23/30 val_auc=0.8227 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=24/30 loss=0.4789 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=24/30 val_auc=0.8231 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=25/30 loss=0.4778 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=25/30 val_auc=0.8232 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=26/30 loss=0.4763 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=26/30 val_auc=0.8227 val_n=117878
+INFO:dh2a_kt.train.tier1:early stop at epoch=26 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=21 train_loss=0.4821 val_auc=0.8233 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\foundational_assist_fold0_p1_dt_query.pt
+=== EXIT 0 p1_dt_query 2026-08-19T08:09:33.0991439+07:00 ===
+=== START p2_dt_saw 2026-08-19T08:09:33.1021490+07:00 ===
+dataset=foundational_assist architecture=v4 tag=p2_dt_saw hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=True time_gap_mode=both time_split=False concept_forget=False saw_input=True group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=local_default matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=200
+NOTE: tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] saw_answer attached: train_rate=0.2185 eval_rate=0.2175
+[fold 0] AUC=0.8273 val_auc=0.8327 n_predictions=510233
+
+Wrote comparison table: results\tables\dh2_kt_p2_dt_saw_vs_p0.csv
+            dataset fold reference_model  p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                                         budget_note  n_predictions  val_auc
+foundational_assist    0            none     NaN    0.827253        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.832696
+foundational_assist mean            none     NaN    0.827253        NaN    local_default          16      30   observational tuned budget (batch=16, epochs=30); P0 local_default used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         510233 0.832696
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\foundational_assist.parquet
+INFO:src.io_utils:Loaded interactions shape=(1740987, 5)
+INFO:src.split_checker:Creating learner split shape=(1740987, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 1218645, 'valid': 174017, 'test': 348325}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 5840 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 3349/3359 items (mean degree=1.00, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=209 exercises=3359 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 3150 train users / 350 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6514 windows (mode=chunked) from 1097657 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 3110 windows (mode=chunked) from 522342 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 723 windows (mode=chunked) from 120988 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.5598 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.8003 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.5224 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.8090 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.5132 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.8112 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.5090 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.8128 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.5054 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.8167 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.5022 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.8191 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.4992 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.8215 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.4962 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.8236 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.4929 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.8260 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.4910 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.8277 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.4886 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.8283 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.4861 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.8290 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=13/30 loss=0.4843 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/30 val_auc=0.8292 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=14/30 loss=0.4828 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/30 val_auc=0.8298 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=15/30 loss=0.4812 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/30 val_auc=0.8308 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=16/30 loss=0.4798 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/30 val_auc=0.8312 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=17/30 loss=0.4784 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/30 val_auc=0.8317 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=18/30 loss=0.4769 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/30 val_auc=0.8313 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=19/30 loss=0.4756 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=19/30 val_auc=0.8321 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=20/30 loss=0.4738 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=20/30 val_auc=0.8324 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=21/30 loss=0.4730 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=21/30 val_auc=0.8318 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=22/30 loss=0.4718 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=22/30 val_auc=0.8327 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=23/30 loss=0.4703 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=23/30 val_auc=0.8326 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=24/30 loss=0.4695 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=24/30 val_auc=0.8321 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=25/30 loss=0.4678 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=25/30 val_auc=0.8323 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=26/30 loss=0.4671 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=26/30 val_auc=0.8324 val_n=117878
+INFO:dh2a_kt.train.tier1:epoch=27/30 loss=0.4656 batches=408 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=27/30 val_auc=0.8322 val_n=117878
+INFO:dh2a_kt.train.tier1:early stop at epoch=27 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=22 train_loss=0.4718 val_auc=0.8327 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\foundational_assist_fold0_p2_dt_saw.pt
+=== EXIT 0 p2_dt_saw 2026-08-19T08:11:19.8603650+07:00 ===
+=== START p3_split_on 2026-08-19T08:11:19.8613722+07:00 ===
+dataset=assist2012 architecture=v4 tag=p3_split_on hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=False time_gap_mode=both time_split=True concept_forget=False saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=gkt matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=200
+NOTE: tuned budget (batch=16, epochs=30); P0 gkt used batch=32, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] timing join: 1860290/1894651 train rows with duration>0 (median=25.698s)
+[fold 0] AUC=0.7653 val_auc=0.7688 n_predictions=804592
+
+Wrote comparison table: results\tables\dh2_kt_p3_split_on_vs_p0.csv
+   dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                                budget_note  n_predictions  val_auc
+assist2012    0             gkt 0.961003    0.765262   -0.19574              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=32, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         804592 0.768771
+assist2012    0        simplekt 0.967902    0.765262   -0.20264              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=32, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         804592 0.768771
+assist2012 mean             gkt 0.961003    0.765262   -0.19574              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=32, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         804592 0.768771
+assist2012 mean        simplekt 0.967902    0.765262   -0.20264              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=32, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines         804592 0.768771
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\assist2012.parquet
+INFO:src.io_utils:Loaded interactions shape=(2711602, 5)
+INFO:src.split_checker:Creating learner split shape=(2711602, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 1894651, 'valid': 268745, 'test': 548206}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 648408 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 51321/53086 items (mean degree=0.97, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=265 exercises=53086 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 18281 train users / 2031 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 21543 windows (mode=chunked) from 1705071 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 10292 windows (mode=chunked) from 816951 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 2390 windows (mode=chunked) from 189580 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 batch=500/1347 loss=0.5854
+INFO:dh2a_kt.train.tier1:epoch=1/30 batch=1000/1347 loss=0.5704
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.5628 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.7394 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=2/30 batch=500/1347 loss=0.5248
+INFO:dh2a_kt.train.tier1:epoch=2/30 batch=1000/1347 loss=0.5214
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.5210 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.7591 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=3/30 batch=500/1347 loss=0.5055
+INFO:dh2a_kt.train.tier1:epoch=3/30 batch=1000/1347 loss=0.5062
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.5062 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.7638 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=4/30 batch=500/1347 loss=0.4956
+INFO:dh2a_kt.train.tier1:epoch=4/30 batch=1000/1347 loss=0.4988
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.4995 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.7660 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=5/30 batch=500/1347 loss=0.4910
+INFO:dh2a_kt.train.tier1:epoch=5/30 batch=1000/1347 loss=0.4940
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.4946 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.7660 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=6/30 batch=500/1347 loss=0.4891
+INFO:dh2a_kt.train.tier1:epoch=6/30 batch=1000/1347 loss=0.4897
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.4907 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.7674 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=7/30 batch=500/1347 loss=0.4842
+INFO:dh2a_kt.train.tier1:epoch=7/30 batch=1000/1347 loss=0.4863
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.4876 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.7688 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=8/30 batch=500/1347 loss=0.4814
+INFO:dh2a_kt.train.tier1:epoch=8/30 batch=1000/1347 loss=0.4819
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.4833 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.7668 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=9/30 batch=500/1347 loss=0.4755
+INFO:dh2a_kt.train.tier1:epoch=9/30 batch=1000/1347 loss=0.4791
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.4795 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.7676 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=10/30 batch=500/1347 loss=0.4712
+INFO:dh2a_kt.train.tier1:epoch=10/30 batch=1000/1347 loss=0.4723
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.4743 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.7664 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=11/30 batch=500/1347 loss=0.4652
+INFO:dh2a_kt.train.tier1:epoch=11/30 batch=1000/1347 loss=0.4682
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.4694 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.7649 val_n=186713
+INFO:dh2a_kt.train.tier1:epoch=12/30 batch=500/1347 loss=0.4601
+INFO:dh2a_kt.train.tier1:epoch=12/30 batch=1000/1347 loss=0.4636
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.4644 batches=1347 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.7622 val_n=186713
+INFO:dh2a_kt.train.tier1:early stop at epoch=12 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=7 train_loss=0.4876 val_auc=0.7688 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\assist2012_fold0_p3_split_on.pt
+=== EXIT 0 p3_split_on 2026-08-19T08:15:56.5811166+07:00 ===
+=== DONE P0-P3 2026-08-19T08:15:56.5821175+07:00 ===
+P4 (--concept-forget) is gated: run only if P0 PASS or P1 lstm carries AUC.
+=== START p4_forget_on 2026-08-19T08:17:15.6662849+07:00 ===
+dataset=xes3g5m architecture=v4 tag=p4_forget_on hyperedge_source=from config no_graph=True use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=42 recap_attention=False question_kc_agg=False question_graph=True question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=False time_gap_mode=both time_split=False concept_forget=True saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=gkt matched_p0=False batch=16 epochs=30 lr=0.001 max_seq_len=400
+NOTE: tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+
+[fold 0] loading splits + e_pre...
+[fold 0] AUC=0.8269 val_auc=0.8262 n_predictions=1640242
+
+Wrote comparison table: results\tables\dh2_kt_p4_forget_on_vs_p0.csv
+dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                                                                                               budget_note  n_predictions  val_auc
+xes3g5m    0             gkt 0.833644    0.826928  -0.006716              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.826195
+xes3g5m    0        simplekt 0.874720    0.826928  -0.047792              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.826195
+xes3g5m mean             gkt 0.833644    0.826928  -0.006716              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.826195
+xes3g5m mean        simplekt 0.874720    0.826928  -0.047792              gkt          16      30   observational tuned budget (batch=16, epochs=30); P0 gkt used batch=4, epochs=10; clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        1640242 0.826195
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:dh2a_kt.train.tier1:seed=42 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=0
+INFO:dh2a_kt.hyperedge.construction:Built 446305 concept-prerequisite hyperedges (fold=0)
+INFO:dh2a_kt.train.tier1:use_graph=False: training with zero hyperedges (graph ablation)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 7602/7652 items (mean degree=1.16, full_qmatrix=False)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=865 exercises=7652 hyperedges=0 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 11381 train users / 1265 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 14601 windows (mode=chunked) from 4041573 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 1627 windows (mode=chunked) from 448940 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/30 batch=500/913 loss=0.4398
+INFO:dh2a_kt.train.tier1:epoch=1/30 loss=0.4240 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/30 val_auc=0.8093 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=2/30 batch=500/913 loss=0.3929
+INFO:dh2a_kt.train.tier1:epoch=2/30 loss=0.3950 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/30 val_auc=0.8164 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=3/30 batch=500/913 loss=0.3898
+INFO:dh2a_kt.train.tier1:epoch=3/30 loss=0.3899 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/30 val_auc=0.8188 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=4/30 batch=500/913 loss=0.3869
+INFO:dh2a_kt.train.tier1:epoch=4/30 loss=0.3874 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/30 val_auc=0.8200 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=5/30 batch=500/913 loss=0.3859
+INFO:dh2a_kt.train.tier1:epoch=5/30 loss=0.3852 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/30 val_auc=0.8211 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=6/30 batch=500/913 loss=0.3843
+INFO:dh2a_kt.train.tier1:epoch=6/30 loss=0.3838 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/30 val_auc=0.8216 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=7/30 batch=500/913 loss=0.3824
+INFO:dh2a_kt.train.tier1:epoch=7/30 loss=0.3826 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/30 val_auc=0.8225 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=8/30 batch=500/913 loss=0.3804
+INFO:dh2a_kt.train.tier1:epoch=8/30 loss=0.3814 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/30 val_auc=0.8218 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=9/30 batch=500/913 loss=0.3795
+INFO:dh2a_kt.train.tier1:epoch=9/30 loss=0.3802 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/30 val_auc=0.8230 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=10/30 batch=500/913 loss=0.3803
+INFO:dh2a_kt.train.tier1:epoch=10/30 loss=0.3791 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/30 val_auc=0.8225 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=11/30 batch=500/913 loss=0.3782
+INFO:dh2a_kt.train.tier1:epoch=11/30 loss=0.3781 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=11/30 val_auc=0.8239 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=12/30 batch=500/913 loss=0.3762
+INFO:dh2a_kt.train.tier1:epoch=12/30 loss=0.3771 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=12/30 val_auc=0.8245 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=13/30 batch=500/913 loss=0.3750
+INFO:dh2a_kt.train.tier1:epoch=13/30 loss=0.3761 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=13/30 val_auc=0.8246 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=14/30 batch=500/913 loss=0.3747
+INFO:dh2a_kt.train.tier1:epoch=14/30 loss=0.3751 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=14/30 val_auc=0.8252 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=15/30 batch=500/913 loss=0.3726
+INFO:dh2a_kt.train.tier1:epoch=15/30 loss=0.3740 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=15/30 val_auc=0.8253 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=16/30 batch=500/913 loss=0.3732
+INFO:dh2a_kt.train.tier1:epoch=16/30 loss=0.3732 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=16/30 val_auc=0.8261 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=17/30 batch=500/913 loss=0.3719
+INFO:dh2a_kt.train.tier1:epoch=17/30 loss=0.3723 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=17/30 val_auc=0.8258 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=18/30 batch=500/913 loss=0.3693
+INFO:dh2a_kt.train.tier1:epoch=18/30 loss=0.3715 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=18/30 val_auc=0.8261 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=19/30 batch=500/913 loss=0.3705
+INFO:dh2a_kt.train.tier1:epoch=19/30 loss=0.3707 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=19/30 val_auc=0.8261 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=20/30 batch=500/913 loss=0.3674
+INFO:dh2a_kt.train.tier1:epoch=20/30 loss=0.3699 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=20/30 val_auc=0.8262 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=21/30 batch=500/913 loss=0.3688
+INFO:dh2a_kt.train.tier1:epoch=21/30 loss=0.3693 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=21/30 val_auc=0.8254 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=22/30 batch=500/913 loss=0.3666
+INFO:dh2a_kt.train.tier1:epoch=22/30 loss=0.3683 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=22/30 val_auc=0.8256 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=23/30 batch=500/913 loss=0.3672
+INFO:dh2a_kt.train.tier1:epoch=23/30 loss=0.3681 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=23/30 val_auc=0.8257 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=24/30 batch=500/913 loss=0.3656
+INFO:dh2a_kt.train.tier1:epoch=24/30 loss=0.3674 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=24/30 val_auc=0.8255 val_n=382836
+INFO:dh2a_kt.train.tier1:epoch=25/30 batch=500/913 loss=0.3672
+INFO:dh2a_kt.train.tier1:epoch=25/30 loss=0.3667 batches=913 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=25/30 val_auc=0.8253 val_n=382836
+INFO:dh2a_kt.train.tier1:early stop at epoch=25 (no val AUC gain for 5 epochs)
+INFO:dh2a_kt.train.tier1:restored best epoch=20 train_loss=0.3699 val_auc=0.8262 (of 30)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p4_forget_on.pt
+=== EXIT 0 p4_forget_on 2026-08-19T08:22:40.8401867+07:00 ===
+=== START p0_dt_slice 2026-08-19T08:22:40.8437408+07:00 ===
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:__main__:eval rows=1922840 train rows=4490513
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:__main__:arm=on arch=v4 use_questions=True hyperedges=0 windows=6954
+INFO:__main__:arm=on overall AUC=0.8298 n=1640242
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:__main__:arm=off arch=v4 use_questions=True hyperedges=0 windows=6954
+INFO:__main__:arm=off overall AUC=0.8272 n=1640242
+Traceback (most recent call last):
+  File "D:\TUAN\DH2A-KT\DH2A-KT\results\tables\_diag_slice_auc.py", line 421, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "D:\TUAN\DH2A-KT\DH2A-KT\results\tables\_diag_slice_auc.py", line 331, in main
+    for label in gap_bucket.cat.categories:
+                 ^^^^^^^^^^^^^^
+AttributeError: 'Categorical' object has no attribute 'cat'
+=== EXIT 1 p0_dt_slice 2026-08-19T08:22:52.9676962+07:00 ===
+=== START p0_dt_slice retry 2026-08-19T08:23:12.3584041+07:00 ===
+
+repeat rows scored: 0 / 1640242 (0.00%); share the previous row's answer in nan% of cases
+
+zero-learning reference rules, standard (leaky) protocol:
+  rule_copy_prev_answer_on_repeats_only: overall AUC=0.5000 | fresh-attempt AUC=0.5000
+  rule_copy_prev_answer_always: overall AUC=0.6188 | fresh-attempt AUC=0.6188
+
+                slice_dim                  slice       n  positive_rate  auc_on  auc_off  delta  delta_ci_lo  delta_ci_hi  significant
+                  overall                    all 1640242         0.7924  0.8298   0.8272 0.0026       0.0027       0.0048         True
+target_concept_train_freq                 unseen       2         0.5000  1.0000   1.0000 0.0000       0.0000       0.0000        False
+target_concept_train_freq                   1-99    2220         0.7464  0.8366   0.8338 0.0029      -0.0041       0.0100        False
+target_concept_train_freq                100-499   14626         0.7820  0.8656   0.8603 0.0053       0.0027       0.0076         True
+target_concept_train_freq               500-1999   61168         0.8010  0.8325   0.8296 0.0029       0.0014       0.0044         True
+target_concept_train_freq              2000-9999  379287         0.7744  0.8238   0.8211 0.0027       0.0015       0.0034         True
+target_concept_train_freq                 10000+ 1182939         0.7980  0.8306   0.8281 0.0025       0.0016       0.0036         True
+  position_in_learner_log                    1-5   19924         0.7365  0.7821   0.7820 0.0002      -0.0019       0.0026        False
+  position_in_learner_log                   6-20   73617         0.7328  0.7886   0.7879 0.0008      -0.0005       0.0018        False
+  position_in_learner_log                  21-50  145558         0.7501  0.8043   0.8018 0.0025       0.0018       0.0041         True
+  position_in_learner_log                 51-100  239491         0.7769  0.8187   0.8161 0.0027       0.0015       0.0037         True
+  position_in_learner_log                   101+ 1161652         0.8057  0.8371   0.8344 0.0028       0.0019       0.0041         True
+     target_item_kc_count         single_kc_item 1433557         0.7912  0.8288   0.8263 0.0026       0.0016       0.0037         True
+     target_item_kc_count          multi_kc_item  206685         0.8007  0.8359   0.8333 0.0026       0.0016       0.0036         True
+     target_is_repeat_row repeat_of_same_attempt       0            NaN     NaN      NaN    NaN          NaN          NaN        False
+     target_is_repeat_row          fresh_attempt 1640242         0.7924  0.8298   0.8272 0.0026       0.0027       0.0048         True
+ target_time_gap_quartile        (-0.001, 6.982] 1230266         0.8013  0.8409   0.8380 0.0028       0.0016       0.0035         True
+ target_time_gap_quartile        (6.982, 17.946]  409976         0.7658  0.7930   0.7911 0.0019       0.0010       0.0032         True
+
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\p0_dt_slice.csv
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\p0_dt_slice.json
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:__main__:eval rows=1922840 train rows=4490513
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:__main__:arm=on arch=v4 use_questions=True hyperedges=0 windows=6954
+INFO:__main__:arm=on overall AUC=0.8298 n=1640242
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 6954 windows (mode=chunked) from 1922840 interactions
+INFO:__main__:arm=off arch=v4 use_questions=True hyperedges=0 windows=6954
+INFO:__main__:arm=off overall AUC=0.8272 n=1640242
+=== EXIT 0 p0_dt_slice 2026-08-19T08:25:05.3404715+07:00 ===
+=== DONE P0 slice 2026-08-19T08:25:05.3444698+07:00 ===

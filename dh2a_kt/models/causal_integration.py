@@ -207,10 +207,13 @@ def estimate_hint_ate(
 def build_entity_maps(
     interactions: pd.DataFrame,
     e_pre: pd.DataFrame,
+    extra_kc_ids: set[int] | None = None,
 ) -> tuple[dict[int, int], dict[int, int]]:
     kc_ids = set(interactions["kc_id"].astype(int).tolist())
     kc_ids.update(int(v) for v in e_pre["src_kc"].tolist())
     kc_ids.update(int(v) for v in e_pre["dst_kc"].tolist())
+    if extra_kc_ids:
+        kc_ids.update(int(v) for v in extra_kc_ids)
     item_ids = set(interactions["item_id"].astype(int).tolist())
 
     kc_to_idx = {kc: idx for idx, kc in enumerate(sorted(kc_ids))}

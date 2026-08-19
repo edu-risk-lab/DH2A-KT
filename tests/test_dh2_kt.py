@@ -573,6 +573,314 @@ def test_v4_question_hypergraph_no_future_leak():
     assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
 
 
+def test_v4_hint_hypergraph_empty_incidence_differs():
+    torch.manual_seed(0)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            hint_hypergraph=True,
+        )
+    )
+    A = torch.eye(6, 8)
+    model.set_question_kc_incidence(A)
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    batch.exercise_ids[:, :] = 0
+    model.set_hint_hyperedge_index(torch.tensor([[0, 1], [0, 0]], dtype=torch.long))
+    with torch.no_grad():
+        live = model(batch)
+    model.set_hint_hyperedge_index(torch.empty((2, 0), dtype=torch.long))
+    with torch.no_grad():
+        empty = model(batch)
+    assert (live - empty).abs().max().item() > 1e-4
+    off = DH2KT(_v4_config(use_questions=True, question_graph=True))
+    assert not hasattr(off, "hint_item_embed")
+    assert not hasattr(off, "hint_hconv")
+
+
+def test_v4_hint_hypergraph_membership_changes_logits():
+    torch.manual_seed(1)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            hint_hypergraph=True,
+        )
+    )
+    model.set_question_kc_incidence(torch.eye(6, 8))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    batch.exercise_ids[:, :] = 0
+    model.set_hint_hyperedge_index(torch.tensor([[0, 1], [0, 0]], dtype=torch.long))
+    with torch.no_grad():
+        a = model(batch)
+    model.set_hint_hyperedge_index(torch.tensor([[0, 1, 2], [0, 0, 0]], dtype=torch.long))
+    with torch.no_grad():
+        b = model(batch)
+    assert (a - b).abs().max().item() > 1e-4
+
+
+def test_v4_hint_hypergraph_no_future_leak():
+    torch.manual_seed(0)
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            hint_hypergraph=True,
+        )
+    )
+    model.set_question_kc_incidence(torch.eye(6, 8))
+    model.set_hint_hyperedge_index(torch.tensor([[0, 1, 2], [0, 0, 0]], dtype=torch.long))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    cut = 2
+    flipped = batch.responses.clone()
+    flipped[:, cut + 1 :] = 1.0 - flipped[:, cut + 1 :]
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=flipped,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+    )
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
+def test_v4_hint_hypergraph_checkpoint_roundtrip(tmp_path):
+    torch.manual_seed(0)
+    from dh2a_kt.train.checkpoint import load_trained_fold, save_trained_fold
+    from dh2a_kt.train.tier1 import TrainedFold
+
+    model = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            hint_hypergraph=True,
+        )
+    )
+    model.set_question_kc_incidence(torch.eye(6, 8))
+    model.set_hint_hyperedge_index(torch.tensor([[0, 1, 2], [0, 0, 0]], dtype=torch.long))
+    path = tmp_path / "hint.pt"
+    save_trained_fold(
+        path,
+        TrainedFold(
+            model=model,
+            eval_loader=None,  # type: ignore[arg-type]
+            kc_to_idx={i: i for i in range(8)},
+            item_to_idx={i: i for i in range(6)},
+            clean_hyperedge_index={},
+            clean_hyperedges=[],
+            device=torch.device("cpu"),
+        ),
+    )
+    loaded = load_trained_fold(path, device="cpu")
+    assert loaded.model.config.hint_hypergraph
+    assert tuple(loaded.model.hint_edge_index.shape) == (2, 3)
+
+
+def test_v4_time_gap_changes_logits():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(time_gap=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    zeros = torch.zeros(2, 5)
+    batch.time_gaps = zeros
+    with torch.no_grad():
+        a = model(batch)
+    batch.time_gaps = zeros + 3.0
+    with torch.no_grad():
+        b = model(batch)
+    assert (a - b).abs().max().item() > 1e-4
+    off = DH2KT(_v4_config())
+    assert not hasattr(off, "time_gap_proj")
+
+
+def _clone_batch_gaps(batch: DH2KTBatch, gaps: torch.Tensor) -> DH2KTBatch:
+    return DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=batch.responses,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+        time_gaps=gaps,
+        durations=batch.durations,
+        idles=batch.idles,
+    )
+
+
+def test_v4_time_gap_mode_lstm_prefix_stable_when_future_gaps_change():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(time_gap=True, time_gap_mode="lstm"))
+    model.eval()
+    cut = 2
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    zeros = torch.zeros(2, 6)
+    batch.time_gaps = zeros
+    alt = _clone_batch_gaps(batch, zeros.clone())
+    alt.time_gaps[:, cut + 1 :] = 3.0
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
+def test_v4_time_gap_mode_query_uses_next_gap_not_lstm():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(time_gap=True, time_gap_mode="query"))
+    model.eval()
+    cut = 2
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    zeros = torch.zeros(2, 6)
+    batch.time_gaps = zeros
+    alt = _clone_batch_gaps(batch, zeros.clone())
+    alt.time_gaps[:, cut + 1 :] = 3.0
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    # next_gaps[cut] = gaps[cut+1], so the scored logit at `cut` moves;
+    # earlier positions do not (query-only, no LSTM injection).
+    assert (base[:, :cut] - changed[:, :cut]).abs().max().item() < 1e-5
+    assert (base[:, cut] - changed[:, cut]).abs().max().item() > 1e-5
+
+
+def test_v4_concept_forget_changes_logits():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(concept_forget=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    zeros = torch.zeros(2, 5)
+    batch.time_gaps = zeros
+    with torch.no_grad():
+        a = model(batch)
+    batch.time_gaps = zeros + 3.0
+    with torch.no_grad():
+        b = model(batch)
+    assert (a - b).abs().max().item() > 1e-4
+    off = DH2KT(_v4_config())
+    assert not hasattr(off, "forget_log_theta")
+
+
+def test_v4_time_split_query_does_not_use_next_duration():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(time_split=True, time_gap_mode="query"))
+    model.eval()
+    cut = 2
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    zeros = torch.zeros(2, 6)
+    batch.durations = zeros
+    batch.idles = zeros
+    alt = _clone_batch_gaps(batch, None)
+    alt.durations = zeros.clone()
+    alt.idles = zeros.clone()
+    alt.durations[:, cut + 1 :] = 3.0
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base - changed).abs().max().item() < 1e-5
+    alt.idles[:, cut + 1 :] = 3.0
+    with torch.no_grad():
+        idle_changed = model(alt)
+    assert (base[:, cut] - idle_changed[:, cut]).abs().max().item() > 1e-5
+
+
+def test_v4_saw_input_not_on_query():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(saw_input=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=6)
+    cut = 2
+    batch.saw_flags = torch.zeros(2, 6, dtype=torch.long)
+    alt = DH2KTBatch(
+        concept_ids=batch.concept_ids,
+        exercise_ids=batch.exercise_ids,
+        responses=batch.responses,
+        hyperedge_index=batch.hyperedge_index,
+        lengths=batch.lengths,
+        saw_flags=batch.saw_flags.clone(),
+    )
+    alt.saw_flags[:, cut + 1 :] = 1
+    with torch.no_grad():
+        base = model(batch)
+        changed = model(alt)
+    assert (base[:, : cut + 1] - changed[:, : cut + 1]).abs().max().item() < 1e-5
+    assert (base[:, cut + 1 :] - changed[:, cut + 1 :]).abs().max().item() > 1e-5
+
+
+def test_v4_saw_input_current_step_changes_logit():
+    torch.manual_seed(1)
+    model = DH2KT(_v4_config(saw_input=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    batch.saw_flags = torch.zeros(2, 5, dtype=torch.long)
+    with torch.no_grad():
+        a = model(batch)
+    batch.saw_flags[:, 1] = 1
+    with torch.no_grad():
+        b = model(batch)
+    assert (a - b).abs().max().item() > 1e-4
+
+
+def test_v4_expert_graph_empty_vs_live():
+    torch.manual_seed(0)
+    model = DH2KT(_v4_config(expert_graph=True))
+    model.eval()
+    batch = _make_toy_batch(batch_size=2, seq_len=5)
+    A = torch.zeros(8, 8)
+    A[1, 0] = 1.0
+    model.set_expert_adjacency(A)
+    with torch.no_grad():
+        live = model(batch)
+    model.set_expert_adjacency(torch.zeros(8, 8))
+    with torch.no_grad():
+        empty = model(batch)
+    assert (live - empty).abs().max().item() > 1e-4
+    off = DH2KT(_v4_config())
+    assert not hasattr(off, "expert_gcn_linear")
+
+
+def test_v4_group_embed_absent_without_flag():
+    off = DH2KT(_v4_config())
+    on = DH2KT(_v4_config(group_embed=True, n_groups=4))
+    assert not hasattr(off, "group_embed_table")
+    assert on.group_embed_table.num_embeddings == 4
+
+
+def test_dataset_time_gaps_survive_chunk_boundary():
+    import numpy as np
+    import pandas as pd
+
+    from dh2a_kt.train.tier1 import UserSequenceDataset
+
+    logs = pd.DataFrame(
+        {
+            "user_id": [1] * 5,
+            "item_id": [0, 1, 2, 3, 4],
+            "kc_id": [0, 0, 1, 1, 1],
+            "timestamp": [0, 10, 20, 50, 51],
+            "correct": [1, 0, 1, 0, 1],
+        }
+    )
+    ds = UserSequenceDataset(
+        logs,
+        {0: 0, 1: 1},
+        {i: i for i in range(5)},
+        max_seq_len=3,
+        window_mode="chunked",
+        include_time_gaps=True,
+    )
+    assert len(ds) == 2
+    first = ds[0]["time_gaps"][:3].tolist()
+    second = ds[1]["time_gaps"][:2].tolist()
+    assert first[0] == 0.0
+    assert second[0] == pytest.approx(float(np.log1p(30)))
+
+
 def test_v4_recap_attention_adds_projection():
     plain = DH2KT(_v4_config()).state_dict()
     recap = DH2KT(_v4_config(recap_attention=True)).state_dict()
