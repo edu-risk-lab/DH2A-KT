@@ -10,47 +10,48 @@
   dashbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
                   inner sep=3pt, fill=white},
 ]
-% ===== Tier 1 row =====
-\node[box, minimum width=2.5cm] (p0) {P0 audited\\$E_{\mathrm{pre}}$};
-\node[box, minimum width=2.7cm, right=0.28cm of p0] (he) {Chain hyperedges\\+ leakage audit};
-\node[box, minimum width=2.9cm, right=0.28cm of he] (enc) {HypergraphConv$\times$2\\graph-only $x_t$};
+% ===== Tier 1 row (recommended tracer) =====
+\node[box, minimum width=2.5cm] (p0) {P0 audited\\$E_{\mathrm{pre}}$ / Q--KC};
+\node[box, minimum width=2.7cm, right=0.28cm of p0] (he) {Hyperedge audit\\(not in LSTM)};
+\node[box, minimum width=2.9cm, right=0.28cm of he] (enc) {v4 LSTM\\Q$\leftarrow$KC + Linear $\Delta t$};
 \node[box, minimum width=2.9cm, right=0.28cm of enc] (out) {Frozen $P(\mathrm{correct})$\\+ concept state};
 \draw[->, thick] (p0) -- (he);
 \draw[->, thick] (he) -- (enc);
 \draw[->, thick] (enc) -- (out);
-% Optional FoundationalASSIST path (session+Hint / observational ATE)
-\node[dashbox, minimum width=2.6cm, below=0.42cm of he] (fa) {FoundationalASSIST\\session+Hint / ATE};
+% Diagnostic / secondary paths (not the headline encoder)
+\node[dashbox, minimum width=2.6cm, below=0.42cm of he] (diag) {HypergraphConv\\diagnostic (App.)};
+\node[dashbox, minimum width=2.6cm, below=0.42cm of enc] (fa) {FA session+Hint /\\observational ATE};
+\draw[->, densely dashed, thick] (diag) -- (enc);
 \draw[->, densely dashed, thick] (fa) -- (enc);
-% Freeze label inside the Tier 1 frame (below the FA path, aligned with encoder)
+% Freeze label
 \node[anchor=north] (frz) at ([yshift=-0.28cm]enc |- fa.south)
   {\textit{freeze after training}};
-% Tier 1 frame (drawn on the background layer so its fill does not paint
-% over the child boxes placed above; see \pgfonlayer{background} below)
 \begin{pgfonlayer}{background}
-\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(fa)(frz),
+\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(diag)(fa)(frz),
       label={[font=\small\bfseries]above:Tier 1 --- DH$^2$-KT (quantitative)}] {};
 \end{pgfonlayer}
 
-% ===== Tier 2 row (Critic gates Diagnostician before Tutor write-back) =====
-\node[box, minimum width=2.5cm, below=0.5cm of frz] (diag) {Diagnostician};
-\node[box, minimum width=2.3cm, right=0.32cm of diag] (crit) {Critic gate};
+% ===== Tier 2 row =====
+\node[box, minimum width=2.5cm, below=0.5cm of frz] (diagA) {Diagnostician};
+\node[box, minimum width=2.3cm, right=0.32cm of diagA] (crit) {Critic gate};
 \node[box, minimum width=2.5cm, right=0.32cm of crit] (tut) {Tutor / Hint};
 \node[box, minimum width=3.0cm, below=0.38cm of crit] (sess) {Session hyperedge write-back};
-\draw[->, thick] (frz.south) -- (diag.north);
-\draw[->, thick] (diag) -- (crit);
+\draw[->, thick] (frz.south) -- (diagA.north);
+\draw[->, thick] (diagA) -- (crit);
 \draw[->, thick] (crit) -- (tut);
 \draw[->, thick] (tut.south) |- (sess.east);
-% Tier 2 frame (background layer, same reason as the Tier 1 frame above)
 \begin{pgfonlayer}{background}
-\node[tierbox, fill=orange!5, fit=(diag)(crit)(tut)(sess),
+\node[tierbox, fill=orange!5, fit=(diagA)(crit)(tut)(sess),
       label={[font=\small\bfseries]below:Tier 2 --- AgentDG-KT (pilot)}] {};
 \end{pgfonlayer}
 \end{tikzpicture}
-\caption{Two-tier DH$^2$A-KT architecture. Tier~1 consumes P0's leakage-audited
-prerequisite edges as chain hyperedges (solid path; quantitative core on
-XES3G5M) and optionally FoundationalASSIST session+Hint hyperedges with a
-limited observational ATE (dashed). After freezing, Tier~2 agents explain and
-gate those outputs: Diagnostician $\rightarrow$ Critic $\rightarrow$ Tutor, with
-session hyperedge write-back at pilot scale.}
+\caption{Two-tier DH$^2$A-KT architecture. Solid Tier~1 path: leakage-audited
+construction, then the recommended v4 LSTM with Q$\leftarrow$KC incidence
+and Linear $\Delta t$ (no concept-stack HypergraphConv). Dashed: graph-only
+HypergraphConv diagnostic (Appendix~\ref{app:graph-only}) and
+FoundationalASSIST session+Hint / observational ATE (secondary). After
+freezing, Tier~2 agents explain and gate those outputs: Diagnostician
+$\rightarrow$ Critic $\rightarrow$ Tutor, with session hyperedge write-back
+at pilot scale.}
 \label{fig:architecture}
 \end{figure*}

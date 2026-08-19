@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\caption{Diagnostic graph-only track (not the recommended system). Test AUC
+on XES3G5M under P0's matched GKT budget (batch 4, 10 epochs,
+max seq.\ len.\ 200). DH$^2$-KT v2 uses chain concept-prerequisite hyperedges
+and graph-only interaction. Mean$\pm$SD over three learner folds.}
+\label{tab:auc-xes3g5m-v2}
+\centering
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Fold & DH$^2$-KT v2 & GKT (P0) & simpleKT (P0) \\
+\midrule
+0 & 0.7501 & 0.8346 & 0.8744 \\
+1 & 0.7518 & 0.8338 & 0.8747 \\
+2 & 0.7531 & 0.8326 & 0.8750 \\
+\textbf{Mean$\pm$SD} & $\mathbf{0.7516{\pm}0.0015}$ & $\mathbf{0.8336{\pm}0.0010}$ & $\mathbf{0.8747{\pm}0.0003}$ \\
+$\Delta$ vs.\ GKT (mean$\pm$SD) & \multicolumn{3}{c}{$-0.0820{\pm}0.0025$} \\
+\bottomrule
+\end{tabular}
+\end{table}

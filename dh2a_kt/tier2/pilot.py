@@ -96,13 +96,36 @@ if _TORCH_AVAILABLE:
             concept_ids[:length] = torch.from_numpy(mapped_kc.to_numpy(dtype=np.int64))
             exercise_ids[:length] = torch.from_numpy(mapped_item.to_numpy(dtype=np.int64))
             correct[:length] = torch.from_numpy(chunk["correct"].to_numpy(dtype=np.float32))
-            responses = shift_responses_for_next_step(correct.unsqueeze(0)).squeeze(0)
+            # v4/v5 consume the outcome of step t (DKT alignment); v2/v3 use a
+            # one-step shift. Using the v2 shift on a v4 checkpoint would feed
+            # the explainer a different P(correct) than the frozen tracer.
+            arch = getattr(model.config, "architecture", "v2")
+            if arch in ("v4", "v5"):
+                responses = correct
+            else:
+                responses = shift_responses_for_next_step(correct.unsqueeze(0)).squeeze(0)
+            extra: dict = {
+                "lengths": torch.tensor([length], dtype=torch.long, device=device),
+            }
+            if getattr(model.config, "time_gap", False) or getattr(
+                model.config, "concept_forget", False
+            ):
+                from dh2a_kt.data.aux_signals import log_time_gaps
+
+                gaps = log_time_gaps(
+                    chunk["timestamp"].to_numpy(dtype=np.int64),
+                    chunk["user_id"].to_numpy(),
+                )
+                time_gaps = torch.zeros(max_seq_len, dtype=torch.float)
+                time_gaps[:length] = torch.from_numpy(gaps.astype(np.float32))
+                extra["time_gaps"] = time_gaps.unsqueeze(0).to(device)
             batch = DH2KTBatch(
                 concept_ids=concept_ids.unsqueeze(0).to(device),
                 exercise_ids=exercise_ids.unsqueeze(0).to(device),
                 responses=responses.unsqueeze(0).to(device),
                 hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
                 concept_states=concept_states,
+                **extra,
             )
             with torch.no_grad():
                 logits = model(batch)

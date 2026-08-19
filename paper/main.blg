@@ -8,45 +8,45 @@ Database file #1: references.bib
 Warning--can't use both volume and number fields in graphrag2025
 Warning--empty pages in graphrag2025
 Warning--can't use both volume and number fields in minn2022interpretable
-You've used 21 entries,
+You've used 20 entries,
             2952 wiz_defined-function locations,
-            831 strings with 12066 characters,
-and the built_in function-call counts, 10047 in all, are:
-= -- 949
-> -- 396
-< -- 17
-+ -- 146
-- -- 125
-* -- 820
-:= -- 1320
-add.period$ -- 41
-call.type$ -- 21
-change.case$ -- 23
+            822 strings with 11649 characters,
+and the built_in function-call counts, 9441 in all, are:
+= -- 893
+> -- 371
+< -- 15
++ -- 137
+- -- 117
+* -- 766
+:= -- 1245
+add.period$ -- 39
+call.type$ -- 20
+change.case$ -- 22
 chr.to.int$ -- 0
-cite$ -- 24
-duplicate$ -- 363
-empty$ -- 1067
-format.name$ -- 145
-if$ -- 2585
+cite$ -- 23
+duplicate$ -- 340
+empty$ -- 1004
+format.name$ -- 136
+if$ -- 2430
 int.to.chr$ -- 0
-int.to.str$ -- 21
-missing$ -- 18
-newline$ -- 111
-num.names$ -- 21
-pop$ -- 178
+int.to.str$ -- 20
+missing$ -- 17
+newline$ -- 106
+num.names$ -- 20
+pop$ -- 167
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 616
+skip$ -- 579
 stack$ -- 0
-substring$ -- 489
-swap$ -- 193
-text.length$ -- 17
+substring$ -- 457
+swap$ -- 179
+text.length$ -- 15
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 3
-while$ -- 61
-width$ -- 23
-write$ -- 253
+while$ -- 57
+width$ -- 22
+write$ -- 240
 (There were 3 warnings)

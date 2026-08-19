@@ -1,13 +1,16 @@
 # KBS author gate (must confirm before submission)
 
 Elsevier CRediT / Data availability / competing-interest statements are
-**legal declarations**. The manuscript currently contains inferred
-placeholders marked `[CẦN TÁC GIẢ XÁC NHẬN]` in `paper/main.tex`.
+**legal declarations**.
+
+**Status (2026-08-19):** Co-authors confirmed. Placeholders removed from
+`paper/main.tex`. Remaining submission hygiene: make the GitHub repo
+reachable by reviewers (public or anonymous ZIP), attach P0 PDF as
+journal supplement if editors request it.
 
 ## Checklist
 
-- [ ] **CRediT roles** — each co-author confirms their listed contributions
-  (or sends corrected roles). Current draft inference:
+- [x] **CRediT roles** — confirmed as listed in `paper/main.tex`:
   - Tuan Dao Minh: Methodology, Software, Validation, Formal analysis,
     Investigation, Writing – original draft, Visualization
   - Khanh-Trinh Nguyen: Validation, Data curation, Writing – review & editing
@@ -16,16 +19,11 @@ placeholders marked `[CẦN TÁC GIẢ XÁC NHẬN]` in `paper/main.tex`.
   - Van-Hau Nguyen: Validation, Resources
   - Le Hoang Son: Conceptualization, Supervision, Project administration,
     Funding acquisition, Writing – review & editing
-- [ ] **Declaration of competing interest** — confirm “none” is accurate, or
-  list real conflicts.
-- [ ] **Data availability** — confirm wording; replace “will be made available
-  on request” with the public repo URL when the code is released, or keep
-  “on request” if that is intentional.
-- [ ] **FoundationalASSIST access** — confirm authorized HF access for all
-  authors who need it.
-- [x] **Cover letter** — Ollama JC/IG + 3-fold manipulation numbers filled
-  (`paper/cover_letter_kbs.md`, 2026-08-12).
-- [ ] **Corresponding author email** — confirm `sonlh@vnu.edu.vn`.
-
-When all boxes are checked, remove the Vietnamese `CẦN TÁC GIẢ XÁC NHẬN`
-comments from `paper/main.tex` and submit.
+- [x] **Declaration of competing interest** — none.
+- [x] **Data availability** — code URL
+  `https://github.com/edu-risk-lab/DH2A-KT`; P0 PDF on request; FoundationalASSIST via Hugging Face only.
+- [x] **FoundationalASSIST access** — used under Responsible Use Guidelines
+  for this study (cover letter).
+- [x] **Cover letter** — Elsevier sections marked confirmed
+  (`paper/cover_letter_kbs.md`).
+- [x] **Corresponding author email** — `sonlh@vnu.edu.vn`.

@@ -1,21 +1,27 @@
-% Auto-updated by scripts/19_update_kbs_faithfulness_table.py
+% Auto-updated by scripts/19_update_kbs_faithfulness_table.py (v2 rows);
+% v4 Q$\leftarrow$KC$+\Delta t$ rows from results/tables/tier2_p0_dt_on/.
 \begin{table}[!t]
 \caption{Tier~2 explanation faithfulness: grounded Diagnostician vs.\ independent
 generation (IG). ID-anchored KC-Jaccard (JC) measures overlap between
 \texttt{GroundedKCs} trailer IDs and the support set
 $\{\mathrm{target}\}\cup\mathrm{history}\cup 1$-hop $E_{\mathrm{pre}}$.
 IG omits frozen $P(\mathrm{correct})$ from the Diagnostician prompt; the Critic
-still sees the true Tier-1 score.}
+still sees the true Tier-1 score. The original Ollama pack used the v2
+graph-only checkpoint (also the human-rating pack). The recommended
+Q$\leftarrow$KC$+\Delta t$ tracer is a same-prompt re-run ($n{=}500$).}
 \label{tab:kc-jaccard-ig}
 \centering
-\begin{tabular}{@{}llccc@{}}
+\footnotesize
+\begin{tabular}{@{}lllccc@{}}
 \toprule
-Arm & Backend & $n$ & Flag rate & Mean JC \\
+Arm & Backbone & Backend & $n$ & Flag & Mean JC \\
 \midrule
-Grounded & StubLLM (harness) & 20 & 0.000 & 0.191 \\
-IG & StubLLM (harness) & 20 & 1.000 & 0.191 \\
-Grounded & qwen2.5:7b (Ollama) & 500 & 0.026 & 0.152 \\
-IG & qwen2.5:7b (Ollama) & 500 & 0.768 & 0.142 \\
+Grounded & --- & StubLLM & 20 & 0.000 & 0.191 \\
+IG & --- & StubLLM & 20 & 1.000 & 0.191 \\
+Grounded & v2 graph-only & qwen2.5:7b & 500 & 0.026 & 0.152 \\
+IG & v2 graph-only & qwen2.5:7b & 500 & 0.768 & 0.142 \\
+Grounded & v4 Q$\leftarrow$KC$+\Delta t$ & qwen2.5:7b & 500 & 0.018 & 0.161 \\
+IG & v4 Q$\leftarrow$KC$+\Delta t$ & qwen2.5:7b & 500 & 0.766 & 0.152 \\
 \bottomrule
 \end{tabular}
 \end{table}

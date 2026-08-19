@@ -24,11 +24,28 @@ Tài liệu này ghi lại **quá trình thực nghiệm**, **số liệu chính
 11. **Giai đoạn K (HypergraphConv multi-KC cô lập):** GATE **FAIL** Δval **+0.00025** (cần ≥ +0.002). Slice `multi_kc_item` Δ **+0.0003**, CI chứa 0. Trên XES3G5M, hypergraph multi-way **không** thêm gì ngoài bipartite GIKT.
 12. **Giai đoạn L (Hint-item hypergraph, FoundationalASSIST):** GATE **FAIL** Δval **+0.00007** (cần ≥ +0.002). Slice `has_hint` Δ **−0.014**, CI chứa 0. Hyperedge hành vi thật, nhánh non-absorbable, **không** dịch AUC trên protocol đã đăng ký.
 13. **Giai đoạn M (thuộc tính rẻ→đắt):** M2 Δt **PASS** Δval **+0.021**; M3 saw t−1 **PASS** Δval **+0.0047**; M1 Q-matrix / M4 teacher / M5 Junyi DAG **FAIL**. Không nới cổng.
-14. **Hướng P0–P4 (2026-08-19):** P0 time-gap XES **PASS** Δval **+0.00280**. P1: query giữ phần lớn M2, LSTM nhỏ. P2 time+saw **PASS** +0.00297. P3 duration/idle ASSIST **PASS** +0.00442. P4 per-concept forget **FAIL**. Không gán cho hypergraph.
+14. **Hướng P0–P4 (2026-08-19):** P0 time-gap XES **PASS** Δval **+0.00280**; test-only **0.829593** vs GIKT **0.825815** (Δ **+0.00378**, CI loại trừ 0). P1: query giữ phần lớn M2, LSTM nhỏ. P2 time+saw **PASS** +0.00297. P3 duration/idle ASSIST **PASS** +0.00442. P4 per-concept forget **FAIL**. Không gán cho hypergraph.
 
 ---
 
 ## 2. Nhật ký theo thời gian (diary)
+
+### 2026-08-19 tối — Sóng F (author gate)
+
+Đồng tác giả xác nhận CRediT / COI none / email `sonlh@vnu.edu.vn`. Gỡ `[CẦN TÁC GIẢ XÁC NHẬN]`. Data availability: `https://github.com/edu-risk-lab/DH2A-KT`. Cover letter hết “pending”.
+
+### 2026-08-19 tối — Sóng E + C (cắt trang, P0 tự chứa)
+
+- Cắt related work P0/causal trùng; bỏ phương trình IPW; gộp design goal; rút appendix v2.
+- P0: bốn diagnostic một dòng; **TBMR = within-train mixing**, không phải train/test membership (sửa sai trước). PDF P0 chưa có trong repo — data availability: supplement on request.
+- Author gate CRediT vẫn chờ.
+
+### 2026-08-19 tối — Rewrite spine KBS (sóng A, theo reviewer)
+
+- **Encoding** trong `paper/main.tex` khớp tracer khuyến nghị: v4 LSTM + Q←KC (`--question-graph`) + Linear Δt, `--no-graph`. HypergraphConv / graph-only / $L_{aux}$ → appendix hoặc bảng FAIL.
+- Fig.1: encoder = LSTM+Q←KC+Δt; HypergraphConv và ATE là dashed.
+- C1–C6 → **C1 audit, C2 which-predicts, C3 Critic**. RQ4 ATE không còn RQ. Abstract faithfulness = **v4** 0.018/0.766; Likert n=40 gắn **v2**.
+- Cover letter đồng bộ. Cổng Δval **không** nới. Author gate CRediT vẫn chờ người.
 
 ### Giai đoạn A — v3 residual / so với GKT
 
@@ -324,7 +341,7 @@ Không nhầm **P0 (wave này)** với baseline pyKT/P0. Cổng **không nới**
 | P3 `p3_split_on` | `m4_group_off` 0.764349 | **0.768771** | **+0.00442** | **PASS** |
 | P4 `p4_forget_on` | Linear P0 0.828779 | 0.826195 | **−0.00258** | **FAIL** (cũng +0.00021 vs `hg_qkc_on`) |
 
-P0: early-stop epoch 18/23. valid+test **0.829754** vs twin 0.827184 (Δ **+0.00257**). Slice `p0_dt_slice.csv`: overall Δ CI (bootstrap 100k cap) loại trừ 0. qcut Δt chỉ còn **2** bin (trùng giá trị): gap ngắn log1p≤6.98 (≈18 phút, n=1.23M) Δ **+0.0028**; gap dài Δ **+0.0019**. Cả hai CI loại trừ 0. Time-gap trên XES **không** phải forgetting dài hạn là chính — khớp P1 (query t+1 chiếm phần lớn M2 trên FA). **Không** gán cho hypergraph (`--no-graph`).
+P0: early-stop epoch 18/23. valid+test **0.829754** vs twin 0.827184 (Δ **+0.00257**). **Test-only** clean L=400 (`p0_dt_testonly_clean.csv`): **0.829593** (n=1.093.755). Bootstrap 1000×, 3614 learners: vs GIKT e30b16 Δ **+0.003778**, 95% CI **[+0.003422, +0.004131]**; vs `hg_qkc_on` Δ **+0.002609**, 95% CI **[+0.002254, +0.002980]** (cả hai loại trừ 0). File: `results/predictions/p0_dt_testonly/p0_dt_on_clean.npz`, `bootstrap_p0_dt_on_vs_gikt_e30b16.json`, `bootstrap_p0_dt_on_vs_hg_qkc_on.json`. Slice `p0_dt_slice.csv`: overall Δ CI (bootstrap 100k cap) loại trừ 0. qcut Δt chỉ còn **2** bin (trùng giá trị): gap ngắn log1p≤6.98 (≈18 phút, n=1.23M) Δ **+0.0028**; gap dài Δ **+0.0019**. Cả hai CI loại trừ 0. Time-gap trên XES **không** phải forgetting dài hạn là chính — khớp P1 (query t+1 chiếm phần lớn M2 trên FA). **Không** gán cho hypergraph (`--no-graph`).
 
 P1: M2 both vẫn tốt nhất. Query (khoảng đến bước chấm) giữ ~70% Δ vs off; LSTM-only chỉ +0.0028. Claim paper: tín hiệu thời gian chủ yếu là **ngữ cảnh attempt**, không phải decay mastery ẩn.
 
@@ -548,6 +565,11 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 - [x] Giai đoạn L: Hint-item hypergraph trên FoundationalASSIST → **GATE FAIL**; slice has_hint Δ CI chứa 0
 - [x] Giai đoạn M: M1 full Q-matrix **FAIL**; M2 Δt **PASS** +0.021; M3 saw t−1 **PASS** +0.0047; M4 teacher **FAIL**; M5 Junyi DAG **FAIL**
 - [x] Hướng P0: `--time-gap` trên XES `hg_qkc_on` L=400 vs val 0.825982 → **PASS** Δval **+0.00280**
+- [x] Test-only `p0_dt_on` L=400: **0.829593**; vs GIKT e30b16 Δ **+0.00378**, CI [+0.00342, +0.00413]; vs `hg_qkc_on` Δ **+0.00261**, CI [+0.00225, +0.00298]
+- [x] Bootstrap vs AKT L=400: Δ **+0.00745**, CI [+0.00703, +0.00792]
+- [x] Fold 1–2 `p0_dt_on` cùng protocol: test-only **0.829781** / **0.829066**; mean **0.8295±0.0004**
+- [x] Tier 2 cùng prompt trên `p0_dt_on`: grounded/IG flag **0.018/0.766**, JC **0.161/0.152** (cùng kiểu v2 0.026/0.768)
+- [x] KBS draft: abstract/title/C1–C6/keywords; bảng AUC sạch + bảng âm tính; `cover_letter_kbs.md`; 0.752 xuống appendix
 - [x] Hướng P1: FA `--time-gap-mode lstm` / `query` vs M2 both → query chiếm phần lớn; lstm nhỏ
 - [x] Hướng P2: FA `--time-gap --saw-input` vs M2 → **PASS** Δval **+0.00297**
 - [x] Hướng P3: ASSIST `--time-split` vs `m4_group_off` → **PASS** Δval **+0.00442**
@@ -574,5 +596,7 @@ Triển khai P0 (`external/p0_leakage_audit/src/models/gikt.py`):
 | 2026-08-18 đêm | Giai đoạn L: Hint-item FA GATE FAIL Δval +0.00007; slice has_hint CI chứa 0 |
 | 2026-08-18 đêm | Giai đoạn M: M2/M3 PASS (Δt, saw t−1); M1/M4/M5 FAIL |
 | 2026-08-19 | Hướng P0–P4: P0/P2/P3 PASS; P1 query chiếm M2; P4 forget FAIL. Không gán time cho hypergraph. |
+| 2026-08-19 | Test-only `p0_dt_on` 0.8296 vs GIKT 0.8258; viết lại abstract/C1–C6/bảng AUC/cover KBS; 0.752 xuống appendix. |
+| 2026-08-19 | Task còn lại: AKT bootstrap +0.00745; fold 1–2 test 0.8298/0.8291; paired ablation; Tier 2 v4 flag 0.018/0.766. |
 
 *File này là nhật ký nghiên cứu nội bộ, không thay thế `paper/main.tex`.*

@@ -239,5 +239,13 @@ temp/_diag_pykt_smask/
 !results/tables/dh2_kt_p*_vs_p0.csv
 !results/tables/p_stage.log
 !results/tables/p0_dt_slice.*
+!results/tables/p0_dt_testonly_clean.csv
+!results/tables/p0_dt_fold1_testonly_clean.csv
+!results/tables/p0_dt_fold2_testonly_clean.csv
+!results/tables/bootstrap_p0_dt_on_vs_gikt_e30b16.json
+!results/tables/bootstrap_p0_dt_on_vs_hg_qkc_on.json
+!results/tables/bootstrap_p0_dt_on_vs_akt_L400.json
+!results/tables/tier2_p0_dt_on/
+!results/tables/tier2_p0_dt_on/**
 !scripts/26_sota_E5_ensemble.py
 

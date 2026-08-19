@@ -89,6 +89,15 @@ D.~M. Tuan, K.-T. Nguyen, D.~N. Tien, Q.~K. Ngo, V.-H. Nguyen, L.~H. Son,
   {\path{doi:10.48550/arXiv.2602.00070}}.
 \newline\urlprefix\url{https://doi.org/10.48550/arXiv.2602.00070}
 
+\bibitem{ni2026ikteia}
+E.~Ni, J.~Wang, J.~Luan, J.~Liu, S.~Xiong, S.~Xu, W.~Cheng, M.~Chen, Y.~Ni,
+  Y.~Li, \href{https://doi.org/10.1016/j.knosys.2026.116071}{Interpretable
+  knowledge tracing via explicit--implicit alignment}, Knowledge-Based Systems
+  344 (2026) 116071.
+\newblock \href {https://doi.org/10.1016/j.knosys.2026.116071}
+  {\path{doi:10.1016/j.knosys.2026.116071}}.
+\newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2026.116071}
+
 \bibitem{psykt2024}
 Z.~Wang, W.~Wu, C.~Zeng, H.~Luo, J.~Sun,
   \href{https://doi.org/10.3389/fpsyg.2024.1359199}{Psychological factors
@@ -146,15 +155,6 @@ X.~Cheng, Z.~Zhang, J.~Wang, L.~Fang, C.~He, Q.~Guan, S.~Pan, W.~Luo,
   {\path{doi:10.1609/aaai.v40i17.38479}}.
 \newline\urlprefix\url{https://doi.org/10.1609/aaai.v40i17.38479}
 
-\bibitem{ni2026ikteia}
-E.~Ni, J.~Wang, J.~Luan, J.~Liu, S.~Xiong, S.~Xu, W.~Cheng, M.~Chen, Y.~Ni,
-  Y.~Li, \href{https://doi.org/10.1016/j.knosys.2026.116071}{Interpretable
-  knowledge tracing via explicit--implicit alignment}, Knowledge-Based Systems
-  344 (2026) 116071.
-\newblock \href {https://doi.org/10.1016/j.knosys.2026.116071}
-  {\path{doi:10.1016/j.knosys.2026.116071}}.
-\newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2026.116071}
-
 \bibitem{kaur2019causal}
 P.~Kaur, A.~Polyzou, G.~Karypis,
   \href{https://doi.org/10.1145/3330430.3333663}{Causal inference in higher
@@ -183,16 +183,6 @@ S.~Minn, J.-J. Vie, K.~Takeuchi, H.~Kashima, F.~Zhu,
 \newblock \href {https://doi.org/10.1609/aaai.v36i11.21560}
   {\path{doi:10.1609/aaai.v36i11.21560}}.
 \newline\urlprefix\url{https://doi.org/10.1609/aaai.v36i11.21560}
-
-\bibitem{esk2024}
-D.~Kim, U.~Lee, S.~Lee, J.~Bae, T.~Ahn, J.~Park, G.~Lee, H.~Kim,
-  \href{https://doi.org/10.1007/978-3-031-98284-2_20}{{ES-KT-24}: A multimodal
-  knowledge tracing benchmark dataset with educational game playing video and
-  synthetic text generation}, in: Artificial Intelligence in Education, Vol.
-  15882 of Lecture Notes in Computer Science, Springer, 2025, pp. 281--295.
-\newblock \href {https://doi.org/10.1007/978-3-031-98284-2_20}
-  {\path{doi:10.1007/978-3-031-98284-2_20}}.
-\newline\urlprefix\url{https://doi.org/10.1007/978-3-031-98284-2_20}
 
 \bibitem{liu2023xes3g5m}
 Z.~Liu, Q.~Liu, T.~Guo, J.~Chen, S.~Huang, X.~Zhao, J.~Tang, W.~Luo, J.~Weng,
