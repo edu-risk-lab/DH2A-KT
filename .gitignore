@@ -251,6 +251,11 @@ temp/_diag_pykt_smask/
 !results/tables/a2_multiseed_matrix.csv
 !results/tables/a2_pykt_runs.csv
 !results/tables/a2_multiseed_matrix.log
+!results/tables/a2_multiseed_stdout.log
+!results/tables/a2_run_logs/
+!results/tables/a2_run_logs/**
+!results/tables/a2_dh2_*.csv
+!results/tables/a2_pykt_runs.csv
 !results/tables/baseline_*_clean_L*.log
 !results/tables/tier2_p0_dt_on/
 !results/tables/tier2_p0_dt_on/**

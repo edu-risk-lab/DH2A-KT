@@ -4,10 +4,14 @@
 Runs PASS/FAIL arms and pyKT baselines at five seeds (42, 17, 1234, 0, 2024)
 and appends rows to ``results/tables/a2_multiseed_matrix.csv``.
 
+Do not Tee-Object into ``a2_multiseed_matrix.log`` while this script runs;
+Python appends that file and Windows will raise PermissionError on lock clash.
+Redirect stdout elsewhere instead, e.g. ``a2_multiseed_stdout.log``.
+
 Usage:
     python scripts/27_a2_multiseed_matrix.py --device cuda
     python scripts/27_a2_multiseed_matrix.py --device cuda --arms simplekt,p0_dt_on
-    python scripts/27_a2_multiseed_matrix.py --device cuda --seeds 42,17 --dry-run
+    python scripts/27_a2_multiseed_matrix.py --device cuda --force --seeds 42
 """
 from __future__ import annotations
 
@@ -23,31 +27,18 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SEEDS = [42, 17, 1234, 0, 2024]
 OUTPUT = REPO_ROOT / "results" / "tables" / "a2_multiseed_matrix.csv"
 LOG = REPO_ROOT / "results" / "tables" / "a2_multiseed_matrix.log"
-
-# DH2 arms: (tag, extra CLI args after shared xes block)
-DH2_ARMS: dict[str, list[str]] = {
-    "p0_dt_on": [
-        "--time-gap",
-        "--time-gap-mode",
-        "both",
-        "--tag",
-        "p0_dt_on",
-    ],
-    "hg_qkc_on": [
-        "--question-graph",
-        "--tag",
-        "hg_qkc_on",
-    ],
-    "hg_qkc_off": [
-        "--tag",
-        "hg_qkc_off",
-    ],
-}
+RUN_LOG_DIR = REPO_ROOT / "results" / "tables" / "a2_run_logs"
 
 # pyKT baselines via 24_train_baselines_clean.py
 PYKT_ARMS: dict[str, dict[str, str | int]] = {
     "simplekt": {"model": "simplekt", "tag_prefix": "C_simplekt_clean_L400"},
-    "gikt": {"model": "gikt", "tag_prefix": "C_gikt_clean_L400_e30b16", "batch_size": 16, "epochs": 30, "patience": 5},
+    "gikt": {
+        "model": "gikt",
+        "tag_prefix": "C_gikt_clean_L400_e30b16",
+        "batch_size": 16,
+        "epochs": 30,
+        "patience": 5,
+    },
     "akt": {"model": "akt", "tag_prefix": "C_akt_clean_L400"},
 }
 
@@ -80,33 +71,74 @@ XES_DH2 = [
     "0",
 ]
 
+DH2_ARM_NAMES = ("p0_dt_on", "hg_qkc_on", "hg_qkc_off")
+
+
+def _dh2_extra_args(arm: str, seed: int) -> list[str]:
+    """Per-arm CLI flags. Tags are seed-specific so checkpoints do not collide."""
+    tag = f"{arm}_s{seed}"
+    if arm == "p0_dt_on":
+        return [
+            "--question-graph",
+            "--time-gap",
+            "--time-gap-mode",
+            "both",
+            "--tag",
+            tag,
+        ]
+    if arm == "hg_qkc_on":
+        return ["--question-graph", "--tag", tag]
+    if arm == "hg_qkc_off":
+        return ["--tag", tag]
+    raise KeyError(arm)
+
 
 def _log(msg: str) -> None:
     LOG.parent.mkdir(parents=True, exist_ok=True)
     line = f"{time.strftime('%Y-%m-%dT%H:%M:%S')} {msg}"
     print(line, flush=True)
-    with LOG.open("a", encoding="utf-8") as fh:
-        fh.write(line + "\n")
+    for attempt in range(5):
+        try:
+            with LOG.open("a", encoding="utf-8") as fh:
+                fh.write(line + "\n")
+            return
+        except PermissionError:
+            time.sleep(0.2 * (attempt + 1))
+    print(f"WARN: could not append to {LOG}", flush=True)
 
 
-def _already_done(arm: str, seed: int, backend: str) -> bool:
-    if not OUTPUT.exists():
+def _already_done(arm: str, seed: int, backend: str, force: bool) -> bool:
+    if force or not OUTPUT.exists():
         return False
     df = pd.read_csv(OUTPUT)
     mask = (df["arm"] == arm) & (df["seed"] == seed) & (df["backend"] == backend)
-    return bool(mask.any())
+    if not mask.any():
+        return False
+    row = df.loc[mask].iloc[-1]
+    # Skip reruns unless forced; reject legacy rows missing question-graph on p0_dt_on.
+    if arm == "p0_dt_on" and bool(row.get("question_graph", True)) is False:
+        return False
+    return True
 
 
 def _append_row(row: dict) -> None:
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     table = pd.DataFrame([row])
     if OUTPUT.exists():
-        table = pd.concat([pd.read_csv(OUTPUT), table], ignore_index=True)
+        existing = pd.read_csv(OUTPUT)
+        dup = (
+            (existing["arm"] == row["arm"])
+            & (existing["seed"] == row["seed"])
+            & (existing["backend"] == row["backend"])
+        )
+        if dup.any():
+            existing = existing.loc[~dup]
+        table = pd.concat([existing, table], ignore_index=True)
     table.to_csv(OUTPUT, index=False)
 
 
-def run_dh2(arm: str, seed: int, device: str, dry_run: bool) -> int:
-    if _already_done(arm, seed, "dh2"):
+def run_dh2(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> int:
+    if _already_done(arm, seed, "dh2", force):
         _log(f"SKIP dh2 {arm} seed={seed} (already in matrix)")
         return 0
     cmd = [
@@ -116,26 +148,30 @@ def run_dh2(arm: str, seed: int, device: str, dry_run: bool) -> int:
         device,
         "--seed",
         str(seed),
-        *DH2_ARMS[arm],
+        *_dh2_extra_args(arm, seed),
         "--output",
         f"results/tables/a2_dh2_{arm}_s{seed}.csv",
     ]
-    _log(f"START dh2 {arm} seed={seed}: {' '.join(cmd)}")
+    run_log = RUN_LOG_DIR / f"dh2_{arm}_s{seed}.log"
+    _log(f"START dh2 {arm} seed={seed} -> {run_log.name}")
+    _log(f"  cmd: {' '.join(cmd)}")
     if dry_run:
         return 0
+    RUN_LOG_DIR.mkdir(parents=True, exist_ok=True)
     started = time.time()
-    proc = subprocess.run(cmd, cwd=REPO_ROOT)
+    with run_log.open("w", encoding="utf-8") as fh:
+        proc = subprocess.run(cmd, cwd=REPO_ROOT, stdout=fh, stderr=subprocess.STDOUT)
     if proc.returncode != 0:
-        _log(f"FAIL dh2 {arm} seed={seed} exit={proc.returncode}")
+        _log(f"FAIL dh2 {arm} seed={seed} exit={proc.returncode} (see {run_log.name})")
         return proc.returncode
     out_csv = REPO_ROOT / "results" / "tables" / f"a2_dh2_{arm}_s{seed}.csv"
-    auc = val_auc = test_auc = None
+    auc = val_auc = None
     if out_csv.exists():
         res = pd.read_csv(out_csv)
         row = res[res["fold"] == 0].iloc[-1] if (res["fold"] == 0).any() else res.iloc[-1]
         auc = float(row.get("dh2_kt_auc", row.get("auc", float("nan"))))
         val_auc = float(row["val_auc"]) if pd.notna(row.get("val_auc")) else None
-        test_auc = auc
+    question_graph = arm in ("p0_dt_on", "hg_qkc_on")
     _append_row(
         {
             "arm": arm,
@@ -144,17 +180,18 @@ def run_dh2(arm: str, seed: int, device: str, dry_run: bool) -> int:
             "fold": 0,
             "auc": auc,
             "val_auc": val_auc,
-            "test_auc": test_auc,
+            "test_auc": auc,
+            "question_graph": question_graph,
             "minutes": round((time.time() - started) / 60.0, 1),
             "status": "ok",
         }
     )
-    _log(f"DONE dh2 {arm} seed={seed} auc={auc}")
+    _log(f"DONE dh2 {arm} seed={seed} val_auc={val_auc} auc={auc}")
     return 0
 
 
-def run_pykt(arm: str, seed: int, device: str, dry_run: bool) -> int:
-    if _already_done(arm, seed, "pykt"):
+def run_pykt(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> int:
+    if _already_done(arm, seed, "pykt", force):
         _log(f"SKIP pykt {arm} seed={seed} (already in matrix)")
         return 0
     spec = PYKT_ARMS[arm]
@@ -187,13 +224,16 @@ def run_pykt(arm: str, seed: int, device: str, dry_run: bool) -> int:
         cmd.extend(["--epochs", str(spec["epochs"])])
     if "patience" in spec:
         cmd.extend(["--patience", str(spec["patience"])])
-    _log(f"START pykt {arm} seed={seed}: {' '.join(cmd)}")
+    run_log = RUN_LOG_DIR / f"pykt_{arm}_s{seed}.log"
+    _log(f"START pykt {arm} seed={seed} -> {run_log.name}")
     if dry_run:
         return 0
+    RUN_LOG_DIR.mkdir(parents=True, exist_ok=True)
     started = time.time()
-    proc = subprocess.run(cmd, cwd=REPO_ROOT)
+    with run_log.open("w", encoding="utf-8") as fh:
+        proc = subprocess.run(cmd, cwd=REPO_ROOT, stdout=fh, stderr=subprocess.STDOUT)
     if proc.returncode != 0:
-        _log(f"FAIL pykt {arm} seed={seed} exit={proc.returncode}")
+        _log(f"FAIL pykt {arm} seed={seed} exit={proc.returncode} (see {run_log.name})")
         return proc.returncode
     runs = pd.read_csv(OUTPUT.with_name("a2_pykt_runs.csv"))
     row = runs[runs["tag"] == tag].iloc[-1]
@@ -207,6 +247,7 @@ def run_pykt(arm: str, seed: int, device: str, dry_run: bool) -> int:
             "val_auc": None,
             "test_auc": float(row["auc"]),
             "n_scored": int(row["n_scored"]),
+            "question_graph": False,
             "minutes": round((time.time() - started) / 60.0, 1),
             "status": "ok",
         }
@@ -220,23 +261,28 @@ def main() -> int:
     parser.add_argument("--device", default="cuda")
     parser.add_argument(
         "--arms",
-        default=",".join(list(DH2_ARMS) + list(PYKT_ARMS)),
+        default=",".join(list(DH2_ARM_NAMES) + list(PYKT_ARMS)),
         help="Comma-separated arm names.",
     )
     parser.add_argument("--seeds", default=",".join(map(str, DEFAULT_SEEDS)))
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Rerun even if the (arm, seed) pair is already in the matrix CSV.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
-    _log(f"=== A2 matrix arms={arms} seeds={seeds} ===")
+    _log(f"=== A2 matrix arms={arms} seeds={seeds} force={args.force} ===")
 
     for arm in arms:
         for seed in seeds:
-            if arm in DH2_ARMS:
-                rc = run_dh2(arm, seed, args.device, args.dry_run)
+            if arm in DH2_ARM_NAMES:
+                rc = run_dh2(arm, seed, args.device, args.dry_run, args.force)
             elif arm in PYKT_ARMS:
-                rc = run_pykt(arm, seed, args.device, args.dry_run)
+                rc = run_pykt(arm, seed, args.device, args.dry_run, args.force)
             else:
                 _log(f"UNKNOWN arm {arm}")
                 return 1
