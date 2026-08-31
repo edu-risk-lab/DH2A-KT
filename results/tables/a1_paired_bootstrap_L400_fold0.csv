@@ -1,0 +1,4 @@
+comparison,model_a,model_b,auc_a,auc_b,delta_a_minus_b,diff_ci_low,diff_ci_high,indistinguishable,n_learners,n_boot
+p0_dt_on vs SimpleKT,p0_dt_on,SimpleKT_L400,0.829593,0.819934,+0.009659,+0.009161,+0.010128,False,3614,1000
+p0_dt_on vs AKT,p0_dt_on,AKT_L400,0.829593,0.822140,+0.007453,+0.007025,+0.007920,False,3614,1000
+p0_dt_on vs DKT,p0_dt_on,DKT_L400,0.829593,0.801079,+0.028514,+0.027744,+0.029312,False,3614,1000

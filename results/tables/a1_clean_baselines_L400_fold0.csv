@@ -1,0 +1,10 @@
+model,tag,auc,acc,n_scored,max_seq_len,window_mode,mask_repeats,batch_size,epochs,minutes,status,notes
+simpleKT,C_simplekt_clean_L400,0.819934,0.826559,1093720,400,chunked,True,64,30,7.0,done,A1 — GS Hau 29Aug2026
+DKT,C_dkt_clean_L400,0.801079,0.820400,1093720,400,chunked,True,64,30,2.5,done,A1
+AKT,C_akt_clean_L400,0.822140,0.828302,1093720,400,chunked,True,64,30,13.4,done,pre-existing
+GIKT,C_gikt_clean_L400,0.825953,0.829397,1093720,400,chunked,True,8,10,155.2,done,pre-existing
+GIKT,C_gikt_clean_L400_e30b16,0.825815,0.829354,1093720,400,chunked,True,16,30,100.3,done,pre-existing
+DH2-KT tracer (p0_dt_on),p0_dt_on_clean,0.829593,—,1093755,400,chunked,True,64,20,—,done,v4 LSTM + Q←KC + Linear Δt; --no-graph
+DyGKT,C_dygkt_clean_L400,0.598973,0.794048,1093720,400,chunked,True,16,10,139.4,failed,L=400 did not converge; do not report
+DyGKT,C_dygkt_clean_L200,0.675605,0.797189,1090574,200,chunked,True,16,10,112.2,done,rerun; still below P0 0.752 (leaky protocol)
+DGEKT,C_dgekt_clean_L400,0.785340,0.814994,1093720,400,chunked,True,16,10,230.0,done,

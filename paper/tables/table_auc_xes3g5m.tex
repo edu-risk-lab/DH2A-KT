@@ -4,11 +4,17 @@ mask-repeats, chunked windows, max seq.\ len.\ 400. DH$^2$-KT uses a v4
 LSTM with question embeddings; Q$\leftarrow$KC is bipartite incidence
 (\texttt{--question-graph}), not hypergraph convolution; $+\Delta t$ is a
 Linear $\log(1{+}\mathrm{gap})$ branch into LSTM and next-step query
-(\texttt{--time-gap}, both). GIKT is matched to the DH$^2$ budget (batch 16,
-cap 30 epochs, patience 5; early-stop epoch 8). AKT keeps P0
-hyperparameters at $L{=}400$. Learner-level bootstrap: Q$\leftarrow$KC$+\Delta t$
-minus AKT is $+0.00745$, 95\% CI $[+0.00703,+0.00792]$. This is \emph{not} the three-fold graph-only
-v2 table (Appendix~\ref{app:graph-only}).}
+(\texttt{--time-gap}, both). pyKT baselines (simpleKT, AKT, GIKT, DKT,
+DGEKT) are retrained under the same export and masking rules; P0
+published numbers use a different (leaky) protocol and are not
+comparable. GIKT is matched to the DH$^2$ budget (batch 16, cap 30
+epochs, patience 5; early-stop epoch 8). Learner-level bootstrap (1000
+resamples, 3614 learners): Q$\leftarrow$KC$+\Delta t$ minus simpleKT is
+$+0.00966$, 95\% CI $[+0.00916,+0.01013]$; minus AKT is $+0.00745$, 95\%
+CI $[+0.00703,+0.00792]$. DyGKT at $L{=}400$ failed to converge
+(valid AUC ${\approx}0.60$); a clean rerun at $L{=}200$ reached
+$0.6756$ and is omitted here. This is \emph{not} the three-fold
+graph-only v2 table (Appendix~\ref{app:graph-only}).}
 \label{tab:auc-xes3g5m}
 \centering
 \begin{tabular}{@{}lcc@{}}
@@ -20,6 +26,9 @@ DH$^2$-KT Q$\leftarrow$KC & 0.8270 & 1{,}093{,}755 \\
 GIKT (matched budget) & 0.8258 & 1{,}093{,}720 \\
 AKT ($L{=}400$) & 0.8221 & 1{,}093{,}720 \\
 DH$^2$-KT Q$\leftarrow$KC off (twin) & 0.8202 & 1{,}093{,}755 \\
+\textit{simpleKT} ($L{=}400$) & 0.8199 & 1{,}093{,}720 \\
+DKT ($L{=}400$) & 0.8011 & 1{,}093{,}720 \\
+DGEKT ($L{=}400$) & 0.7853 & 1{,}093{,}720 \\
 \bottomrule
 \end{tabular}
 \end{table}

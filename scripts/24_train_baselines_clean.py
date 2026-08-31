@@ -145,7 +145,7 @@ def main() -> int:
     )
 
     graph_npz = None
-    if args.model == "gkt":
+    if args.model in ("gkt", "skt", "dygkt", "dgekt"):
         from src.pykt_graph_matrix import edges_to_gkt_matrix, write_gkt_graph_npz
 
         graph_npz = work_dir / f"gkt_graph_{graph_tag}.npz"

@@ -245,6 +245,13 @@ temp/_diag_pykt_smask/
 !results/tables/bootstrap_p0_dt_on_vs_gikt_e30b16.json
 !results/tables/bootstrap_p0_dt_on_vs_hg_qkc_on.json
 !results/tables/bootstrap_p0_dt_on_vs_akt_L400.json
+!results/tables/bootstrap_p0_dt_on_vs_simplekt_L400.csv
+!results/tables/a1_clean_baselines_L400_fold0.csv
+!results/tables/a1_paired_bootstrap_L400_fold0.csv
+!results/tables/a2_multiseed_matrix.csv
+!results/tables/a2_pykt_runs.csv
+!results/tables/a2_multiseed_matrix.log
+!results/tables/baseline_*_clean_L*.log
 !results/tables/tier2_p0_dt_on/
 !results/tables/tier2_p0_dt_on/**
 !scripts/26_sota_E5_ensemble.py

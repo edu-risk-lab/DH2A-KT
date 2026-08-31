@@ -58,8 +58,9 @@ teacher grouping, an expert DAG, and per-concept exponential forgetting
 do not. On XES3G5M fold~0 under a clean protocol (mask-repeats, chunked
 windows, $L{=}400$, test-only), the recommended tracer --- a v4 LSTM with
 Q$\leftarrow$KC incidence and a linear $\log(1{+}\Delta t)$ branch ---
-reaches test AUC $0.8296$ versus matched-budget GIKT $0.8258$
-(learner-level bootstrap 95\% CI of the difference excludes $0$;
+reaches test AUC $0.8296$ versus matched-budget GIKT $0.8258$ and
+\textit{simpleKT} $0.8199$ under the same clean protocol
+(learner-level bootstrap 95\% CI of each difference excludes $0$;
 Q$\leftarrow$KC alone is $0.8270$). The same recipe on folds~1--2 stays
 within $0.001$ (mean $0.8295{\pm}0.0004$). Timing is attempt context
 (query at $t{+}1$), not per-concept forgetting.
@@ -479,7 +480,8 @@ graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended v4 tracer uses
 Table~\ref{tab:auc-xes3g5m} reports \emph{test-only} AUC on XES3G5M
 fold~0 under the clean protocol (mask-repeats, chunked windows,
 $L{=}400$). DH$^2$-KT with Q$\leftarrow$KC incidence reaches $0.8270$
-versus matched-budget GIKT $0.8258$ and AKT $0.8221$; the no-graph twin is
+versus matched-budget GIKT $0.8258$, AKT $0.8221$, and \textit{simpleKT}
+$0.8199$ (all retrained under the same masking rules); the no-graph twin is
 $0.8202$. The Q$\leftarrow$KC vs.\ twin gate is
 $\Delta\mathrm{val}{+}0.00612$ (PASS). Learner-level bootstrap (1000
 resamples, 3614 learners) for Q$\leftarrow$KC minus GIKT is
@@ -521,8 +523,9 @@ knowledge, not as a hypergraph effect. Query-side $\Delta t$ uses the
 gap to the item whose identity is already the next-step query; it is not
 the duration of a step whose correctness has been observed. Against AKT
 at the same $L{=}400$ clean protocol (test AUC $0.8221$),
-Q$\leftarrow$KC$+\Delta t$ is ahead by $+0.00745$
-(learner-level 95\% CI $[+0.00703,+0.00792]$).
+Q$\leftarrow$KC$+\Delta t$ is ahead by $+0.00745$ versus AKT and by
+$+0.00966$ versus \textit{simpleKT} (learner-level 95\% CIs
+$[+0.00703,+0.00792]$ and $[+0.00916,+0.01013]$, respectively).
 
 \subsection{Paired diagnostic knobs}
 Table~\ref{tab:paired-ablation} pairs remaining diagnostic knobs with
