@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -28,6 +29,7 @@ DEFAULT_SEEDS = [42, 17, 1234, 0, 2024]
 OUTPUT = REPO_ROOT / "results" / "tables" / "a2_multiseed_matrix.csv"
 LOG = REPO_ROOT / "results" / "tables" / "a2_multiseed_matrix.log"
 RUN_LOG_DIR = REPO_ROOT / "results" / "tables" / "a2_run_logs"
+PYTHON = Path(os.environ.get("DH2A_PYTHON", sys.executable))
 
 # pyKT baselines via 24_train_baselines_clean.py
 PYKT_ARMS: dict[str, dict[str, str | int]] = {
@@ -93,6 +95,31 @@ def _dh2_extra_args(arm: str, seed: int) -> list[str]:
     raise KeyError(arm)
 
 
+def _preflight_torch(device: str) -> None:
+    """Fail fast when PyTorch/CUDA is unavailable (e.g. WDAC blocks c10.dll)."""
+    probe = (
+        "import torch; "
+        f"assert torch.cuda.is_available() or '{device}'=='cpu', 'cuda unavailable'; "
+        "print('torch_ok', torch.__version__)"
+    )
+    proc = subprocess.run(
+        [str(PYTHON), "-c", probe],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "").strip()
+        raise SystemExit(
+            "PyTorch preflight failed — cannot start A2 GPU matrix.\n"
+            f"  python: {PYTHON}\n"
+            f"  error : {err}\n"
+            "Fix: allow torch DLLs in Windows Application Control (WDAC), or set "
+            "DH2A_PYTHON to a working interpreter, then rerun."
+        )
+    _log(f"preflight ok: {proc.stdout.strip()} via {PYTHON}")
+
+
 def _log(msg: str) -> None:
     LOG.parent.mkdir(parents=True, exist_ok=True)
     line = f"{time.strftime('%Y-%m-%dT%H:%M:%S')} {msg}"
@@ -142,7 +169,7 @@ def run_dh2(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> int
         _log(f"SKIP dh2 {arm} seed={seed} (already in matrix)")
         return 0
     cmd = [
-        sys.executable,
+        str(PYTHON),
         *XES_DH2,
         "--device",
         device,
@@ -197,7 +224,7 @@ def run_pykt(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> in
     spec = PYKT_ARMS[arm]
     tag = f"{spec['tag_prefix']}_s{seed}"
     cmd = [
-        sys.executable,
+        str(PYTHON),
         "scripts/24_train_baselines_clean.py",
         "configs/xes3g5m.yaml",
         "--fold",
@@ -275,7 +302,9 @@ def main() -> int:
 
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
-    _log(f"=== A2 matrix arms={arms} seeds={seeds} force={args.force} ===")
+    if not args.dry_run and args.device != "cpu":
+        _preflight_torch(args.device)
+    _log(f"=== A2 matrix arms={arms} seeds={seeds} force={args.force} python={PYTHON} ===")
 
     for arm in arms:
         for seed in seeds:

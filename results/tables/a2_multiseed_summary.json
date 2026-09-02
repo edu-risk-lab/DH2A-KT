@@ -1,0 +1,124 @@
+{
+  "matrix_rows": 30,
+  "ok_rows": 30,
+  "min_seeds": 5,
+  "val_gate": 0.002,
+  "twin_val_mean": 0.8201078922609053,
+  "arms": [
+    {
+      "arm": "akt",
+      "backend": "pykt",
+      "n_seeds": 5,
+      "auc_mean": 0.8222507266439194,
+      "auc_sd": 0.00011940394900883661,
+      "val_auc_mean": NaN,
+      "val_auc_sd": 0.0,
+      "minutes_total": 72.9,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    },
+    {
+      "arm": "gikt",
+      "backend": "pykt",
+      "n_seeds": 5,
+      "auc_mean": 0.8258460290976961,
+      "auc_sd": 0.00010013116773332676,
+      "val_auc_mean": NaN,
+      "val_auc_sd": 0.0,
+      "minutes_total": 805.9000000000001,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    },
+    {
+      "arm": "hg_qkc_off",
+      "backend": "dh2",
+      "n_seeds": 5,
+      "auc_mean": 0.8205969104794745,
+      "auc_sd": 0.0001901053858551928,
+      "val_auc_mean": 0.8201078922609053,
+      "val_auc_sd": 0.00020514242819820263,
+      "minutes_total": 18.6,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    },
+    {
+      "arm": "hg_qkc_on",
+      "backend": "dh2",
+      "n_seeds": 5,
+      "auc_mean": 0.826970835229943,
+      "auc_sd": 0.00019251375937265542,
+      "val_auc_mean": 0.8258875766471416,
+      "val_auc_sd": 0.00022513501844839283,
+      "minutes_total": 25.799999999999997,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    },
+    {
+      "arm": "p0_dt_on",
+      "backend": "dh2",
+      "n_seeds": 5,
+      "auc_mean": 0.8296195547635706,
+      "auc_sd": 0.00010022626953416198,
+      "val_auc_mean": 0.8286228547019556,
+      "val_auc_sd": 0.00015145659549049744,
+      "minutes_total": 25.1,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    },
+    {
+      "arm": "simplekt",
+      "backend": "pykt",
+      "n_seeds": 5,
+      "auc_mean": 0.8214140019839684,
+      "auc_sd": 0.0006580395573686518,
+      "val_auc_mean": NaN,
+      "val_auc_sd": 0.0,
+      "minutes_total": 39.7,
+      "seeds_done": "0,17,42,1234,2024",
+      "complete": true
+    }
+  ],
+  "gate_counts": [
+    {
+      "arm": "p0_dt_on",
+      "k_pass": 5,
+      "n_seeds": 5,
+      "gate": "5/5 PASS @ \u0394val\u22650.002"
+    },
+    {
+      "arm": "hg_qkc_on",
+      "k_pass": 5,
+      "n_seeds": 5,
+      "gate": "5/5 PASS @ \u0394val\u22650.002"
+    }
+  ],
+  "latex": {
+    "p0_dt_on": {
+      "label": "Q$\\leftarrow$KC $+\\Delta t$ (recommended)",
+      "auc": "0.8296${\\pm}0.0001",
+      "n": 5
+    },
+    "hg_qkc_on": {
+      "label": "Q$\\leftarrow$KC on",
+      "auc": "0.8270${\\pm}0.0002",
+      "n": 5
+    },
+    "hg_qkc_off": {
+      "label": "Q$\\leftarrow$KC off (twin)",
+      "auc": "0.8206${\\pm}0.0002",
+      "n": 5
+    },
+    "simplekt": {
+      "auc": "0.8214${\\pm}0.0007",
+      "n": 5
+    },
+    "gikt": {
+      "auc": "0.8258${\\pm}0.0001",
+      "n": 5
+    },
+    "akt": {
+      "auc": "0.8223${\\pm}0.0001",
+      "n": 5
+    }
+  }
+}

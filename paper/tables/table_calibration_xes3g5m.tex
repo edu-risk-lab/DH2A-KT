@@ -1,0 +1,18 @@
+% Auto-derived from results/tables/a6_calibration_xes3g5m_fold0.csv
+\begin{table}[!t]
+\caption{Calibration on XES3G5M fold~0 test predictions under the clean
+protocol (mask-repeats, chunked, $L{=}400$). ECE uses 15 equal-width bins;
+lower is better. Checkpoints: seed~42 A2 matrix.}
+\label{tab:calibration-xes3g5m}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Model & AUC & Brier & NLL & ECE \\
+\midrule
+Q$\leftarrow$KC $+\Delta t$ & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
+Q$\leftarrow$KC on & 0.8270 & 0.1216 & 0.3857 & 0.0103 \\
+Q$\leftarrow$KC off (twin) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\
+\bottomrule
+\end{tabular}
+\end{table}

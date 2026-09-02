@@ -1,0 +1,32 @@
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:__main__:export: C_simplekt_clean_L400_s1234 window=chunked mask_repeats=True | test sequences=4635 scored=1093720 masked=183527
+INFO:src.pykt_engine:pyKT epoch 1 train_loss=0.42251 valid_auc=0.81064 valid_acc=0.82331
+INFO:src.pykt_engine:pyKT epoch 2 train_loss=0.39563 valid_auc=0.81406 valid_acc=0.82476
+INFO:src.pykt_engine:pyKT epoch 3 train_loss=0.39135 valid_auc=0.81724 valid_acc=0.82659
+INFO:src.pykt_engine:pyKT epoch 4 train_loss=0.38801 valid_auc=0.81881 valid_acc=0.82762
+INFO:src.pykt_engine:pyKT epoch 5 train_loss=0.38550 valid_auc=0.81936 valid_acc=0.82700
+INFO:src.pykt_engine:pyKT epoch 6 train_loss=0.38305 valid_auc=0.82044 valid_acc=0.82791
+INFO:src.pykt_engine:pyKT epoch 7 train_loss=0.38072 valid_auc=0.82115 valid_acc=0.82776
+INFO:src.pykt_engine:pyKT epoch 8 train_loss=0.37879 valid_auc=0.82172 valid_acc=0.82843
+INFO:src.pykt_engine:pyKT epoch 9 train_loss=0.37654 valid_auc=0.82208 valid_acc=0.82828
+INFO:src.pykt_engine:pyKT epoch 10 train_loss=0.37457 valid_auc=0.82172 valid_acc=0.82822
+INFO:src.pykt_engine:pyKT epoch 11 train_loss=0.37225 valid_auc=0.82185 valid_acc=0.82836
+INFO:src.pykt_engine:pyKT epoch 12 train_loss=0.36975 valid_auc=0.82149 valid_acc=0.82823
+INFO:src.pykt_engine:Saved PyKT checkpoint to D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\simplekt_p0_protocol_best.ckpt
+Start preprocessing D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\train_valid_sequences.csv fold: _0...
+interaction_num: 3845713
+file path: D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\train_valid_sequences.csv, qlen: 16228, clen: 16228, rlen: 16228
+Start preprocessing D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\train_valid_sequences.csv fold: _1...
+interaction_num: 548675
+file path: D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\train_valid_sequences.csv, qlen: 2319, clen: 2319, rlen: 2319
+Start preprocessing D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\test_sequences.csv fold: _-1...
+interaction_num: 1098147
+file path: D:\TUAN\DH2A-KT\DH2A-KT\results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s1234\test_sequences.csv, qlen: 4635, clen: 4635, rlen: 4635
+model_name: simplekt, emb_type: qid
+
+[C_simplekt_clean_L400_s1234] simplekt AUC=0.821327 acc=0.8276 n=1093720 L=400 (7.3 min)
+  P0 published: 0.874441 | delta: -0.053114
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\a2_pykt_runs.csv

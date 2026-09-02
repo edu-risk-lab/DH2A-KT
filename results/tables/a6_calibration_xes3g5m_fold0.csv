@@ -1,0 +1,4 @@
+model,fold,protocol,n_scored,auc,brier,nll,ece,ece_bins,checkpoint
+p0_dt_on,0,clean_test_chunked,1093755,0.8295929566323603,0.12070307384540419,0.38280299490013026,0.005586676354882429,15,results/checkpoints/xes3g5m_fold0_p0_dt_on_s42.pt
+hg_qkc_on,0,clean_test_chunked,1093755,0.8269842183645132,0.12155281816437308,0.3856553911249681,0.010307020401589545,15,results/checkpoints/xes3g5m_fold0_hg_qkc_on_s42.pt
+hg_qkc_off,0,clean_test_chunked,1093755,0.8202485459863772,0.12346961235545739,0.39114686563075685,0.00807203207060862,15,results/checkpoints/xes3g5m_fold0_hg_qkc_off_s42.pt

@@ -1,0 +1,40 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "e_pre_train_only": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\external\\p0_leakage_audit\\data\\processed\\xes3g5m\\fold_0\\e_pre_train_only.csv",
+  "e_pre_full_log": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\external\\p0_leakage_audit\\data\\processed\\xes3g5m\\full_log\\e_pre.csv",
+  "n_edges_train_only": 1163,
+  "n_edges_full_log": 1260,
+  "sample_pairs": 100000,
+  "seed": 42,
+  "train_only": {
+    "hyperedge_kind": "concept_prerequisite",
+    "n_hyperedges": 446305,
+    "ecr_flag": 0.0,
+    "tbmr": 0.7340652696606873,
+    "rho": 0.0,
+    "group_membership_leak_rate": 0.0,
+    "cross_modal_leak_rate": null,
+    "intervention_timing_leak_rate": null,
+    "notes": [
+      "Pairwise projection not materialised (11568053 pairs > cap 100000); TBMR/|rho| skipped",
+      "TBMR/|rho| on random sample of 100,000 / 11,568,053 projected pairs (seed=42)"
+    ],
+    "arm": "train_only"
+  },
+  "full_log_positive_control": {
+    "hyperedge_kind": "concept_prerequisite",
+    "n_hyperedges": 588369,
+    "ecr_flag": 0.0,
+    "tbmr": 0.7356558785638102,
+    "rho": 0.0,
+    "group_membership_leak_rate": 1.0,
+    "cross_modal_leak_rate": null,
+    "intervention_timing_leak_rate": null,
+    "notes": [
+      "Pairwise projection not materialised (15279564 pairs > cap 100000); TBMR/|rho| skipped",
+      "TBMR/|rho| on random sample of 100,000 / 15,279,564 projected pairs (seed=42)"
+    ],
+    "arm": "full_log_positive_control"
+  }
+}

@@ -1,18 +1,24 @@
-% Auto-derived from results/tables/xes3g5m_fold0_hyperedge_audit.json
+% Auto-derived from xes3g5m_fold0_hyperedge_audit*.json (GS Hau A4 positive control)
 \begin{table}[!t]
-\caption{Concept-prerequisite hyperedge audit on XES3G5M fold~0.
-Pairwise TBMR/$|\rho|$ are skipped when the pairwise projection exceeds the
-implementation cap of $100{,}000$ pairs (11{,}568{,}053 projected pairs in
-this fold; see audit notes).}
+\caption{Path-derived concept-group hyperedge audit on XES3G5M fold~0.
+\textbf{Train-only} uses P0's audited $E_{\mathrm{pre}}^f$ and a
+train-only concept$\rightarrow$interaction map. \textbf{Full-log} is a
+deliberate positive control: $E_{\mathrm{pre}}$ pooled before the learner
+split with a full-log member map (GS Hau A4). Pairwise TBMR/$|\rho|$ use a
+random sample of $10^5$ projected pairs (seed 42) when the full projection
+exceeds $10^5$ pairs.}
 \label{tab:leakage-measured}
 \centering
-\begin{tabular}{@{}lc@{}}
+\footnotesize
+\begin{tabular}{@{}lcc@{}}
 \toprule
-Metric & Value \\
+Metric & Train-only & Full-log (pos.\ control) \\
 \midrule
-Hyperedges & 446{,}305 \\
-$\mathrm{ECR}^{\mathrm{flag}}$ & 0.0 \\
-Group-membership leak rate & 0.0 \\
+Hyperedges & 446{,}305 & 588{,}369 \\
+$\mathrm{ECR}^{\mathrm{flag}}$ & 0.0 & 0.0 \\
+Group-membership leak rate & 0.0 & \textbf{1.0} \\
+TBMR (sampled) & 0.734 & 0.736 \\
+$|\rho|$ (sampled) & 0.0 & 0.0 \\
 \bottomrule
 \end{tabular}
 \end{table}

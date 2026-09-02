@@ -1,0 +1,20 @@
+% Auto-derived from results/tables/a7_query_dt_ablation.csv (seed 42, fold 0)
+\begin{table}[!t]
+\caption{Query-side vs.\ LSTM-side Linear $\Delta t$ ablation on XES3G5M
+fold~0 (clean $L{=}400$, seed~42). Twin is Q$\leftarrow$KC without time-gap
+(val AUC $0.82598$). Gate: $\Delta\mathrm{val}\ge{+}0.002$. Only
+\texttt{both} passes in isolation; the branches are complementary.}
+\label{tab:a7-query-dt}
+\centering
+\footnotesize
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Mode & Injection site & Test AUC & $\Delta$val / gate \\
+\midrule
+\texttt{both} & LSTM + query & 0.8298 & PASS $+0.00280$ \\
+\texttt{lstm} & LSTM only & 0.8289 & FAIL $+0.00170$ \\
+\texttt{query} & next-step query only & 0.8277 & FAIL $+0.00069$ \\
+Q$\leftarrow$KC (twin) & --- & 0.8270 & baseline \\
+\bottomrule
+\end{tabular}
+\end{table}

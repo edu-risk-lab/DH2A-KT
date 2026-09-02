@@ -82,6 +82,36 @@ Pass manipulation check & \\textbf{{Yes}} \\\\
 
 
 def export_leakage() -> None:
+    pos_path = RESULTS / "xes3g5m_fold0_hyperedge_audit_positive_control.json"
+    if pos_path.exists():
+        payload = json.loads(pos_path.read_text(encoding="utf-8"))
+        train = payload["train_only"]
+        full = payload["full_log_positive_control"]
+        n_train = f"{train['n_hyperedges']:,}".replace(",", "{,}")
+        n_full = f"{full['n_hyperedges']:,}".replace(",", "{,}")
+        body = f"""% Auto-derived from {pos_path.name}
+\\begin{{table}}[!t]
+\\caption{{Path-derived concept-group hyperedge audit on XES3G5M fold~0.
+\\textbf{{Train-only}} uses P0's audited $E_{{\\mathrm{{pre}}}}^f$; \\textbf{{Full-log}}
+is a deliberate positive control (GS Hau A4). TBMR/$|\\rho|$ use a $10^5$-pair
+subsample when the projection exceeds the implementation cap.}}
+\\label{{tab:leakage-measured}}
+\\centering
+\\footnotesize
+\\begin{{tabular}}{{@{{}}lcc@{{}}}}
+\\toprule
+Metric & Train-only & Full-log (pos.\\ control) \\\\
+\\midrule
+Hyperedges & {n_train} & {n_full} \\\\
+$\\mathrm{{ECR}}^{{\\mathrm{{flag}}}}$ & {train['ecr_flag']} & {full['ecr_flag']} \\\\
+Group-membership leak rate & {train['group_membership_leak_rate']} & \\textbf{{{full['group_membership_leak_rate']}}} \\\\
+TBMR (sampled) & {train['tbmr']:.3f} & {full['tbmr']:.3f} \\\\
+$|\\rho|$ (sampled) & {train['rho']} & {full['rho']} \\\\
+\\bottomrule
+\\end{{tabular}}
+\\end{{table}}"""
+        _write("table_leakage_audit.tex", body)
+        return
     a = json.loads((RESULTS / "xes3g5m_fold0_hyperedge_audit.json").read_text())
     n_he = f"{a['n_hyperedges']:,}".replace(",", "{,}")
     body = f"""% Auto-derived from results/tables/xes3g5m_fold0_hyperedge_audit.json
