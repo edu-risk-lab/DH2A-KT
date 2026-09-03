@@ -20,7 +20,7 @@
 \draw[->, thick] (enc) -- (out);
 % Diagnostic / secondary paths (not the headline encoder)
 \node[dashbox, minimum width=2.6cm, below=0.42cm of he] (diag) {HypergraphConv\\diagnostic (App.)};
-\node[dashbox, minimum width=2.6cm, below=0.42cm of enc] (fa) {FA session+Hint /\\observational ATE};
+\node[dashbox, minimum width=2.6cm, below=0.42cm of enc] (fa) {FA session+Hint\\(secondary)};
 \draw[->, densely dashed, thick] (diag) -- (enc);
 \draw[->, densely dashed, thick] (fa) -- (enc);
 % Freeze label
@@ -46,12 +46,12 @@
 \end{pgfonlayer}
 \end{tikzpicture}
 \caption{Two-tier DH$^2$A-KT architecture. Solid Tier~1 path: leakage-audited
-construction, then the recommended v4 LSTM with Q$\leftarrow$KC incidence
-and Linear $\Delta t$ (no concept-stack HypergraphConv). Dashed: graph-only
-HypergraphConv diagnostic (Appendix~\ref{app:graph-only}) and
-FoundationalASSIST session+Hint / observational ATE (secondary). After
-freezing, Tier~2 agents explain and gate those outputs: Diagnostician
-$\rightarrow$ Critic $\rightarrow$ Tutor, with session hyperedge write-back
-at pilot scale.}
+construction, then the recommended tracer QKC-T (LSTM with Q$\leftarrow$KC
+incidence and Linear $\Delta t$; no concept-stack HypergraphConv). Dashed:
+graph-only HypergraphConv diagnostic (Appendix~\ref{app:graph-only}) and
+FoundationalASSIST session+Hint (secondary). Dashed Tier~2 row: an
+exploratory Critic-gated survey over frozen scores
+(Section~\ref{sec:tier2}), not a claimed contribution. Session hyperedge
+write-back is a log path; the frozen tracer does not consume those edges.}
 \label{fig:architecture}
 \end{figure*}

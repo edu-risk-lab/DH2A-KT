@@ -1,15 +1,20 @@
 \begin{table}[!t]
 \caption{Test-only AUC on XES3G5M fold~0 under the \emph{clean} protocol:
-mask-repeats, chunked windows, max seq.\ len.\ 400. DH$^2$-KT and pyKT rows
-marked with $\pm$ report mean$\pm$SD over five training seeds (42, 17, 1234,
-0, 2024; A2 matrix); others are single-seed fold~0 runs. DH$^2$-KT uses a v4
-LSTM with question embeddings; Q$\leftarrow$KC is bipartite incidence
-(\texttt{--question-graph}), not hypergraph convolution; $+\Delta t$ is a
-Linear $\log(1{+}\mathrm{gap})$ branch into LSTM and next-step query
-(\texttt{--time-gap}, both). pyKT \cite{liu2022pykt} baselines are retrained
-under the same export and masking rules; P0 published numbers use a different
-(leaky) protocol and are not comparable. GIKT is matched to the DH$^2$ budget
-(batch 16, cap 30 epochs, patience 5). Learner-level bootstrap (1000
+mask-repeats, chunked windows, max seq.\ len.\ 400. All models are scored
+on an identical set of $1{,}093{,}720$ target positions. DH$^2$-KT and pyKT
+rows marked with $\pm$ report mean$\pm$SD over five training seeds (42, 17,
+1234, 0, 2024; A2 matrix); others are single-seed fold~0 runs. DH$^2$-KT
+uses a v4 LSTM with question embeddings; Q$\leftarrow$KC is bipartite
+incidence (\texttt{--question-graph}), not hypergraph convolution;
+$+\Delta t$ is Linear $\log(1{+}\mathrm{gap})$ into LSTM and next-step
+query (\texttt{--time-gap}, both). The history-only row is
+\texttt{--time-gap-mode lstm} (observed gaps only, no query-side wait),
+seed~42 (Table~\ref{tab:a7-query-dt}); it fails the $\Delta\mathrm{val}$
+gate. pyKT \cite{liu2022pykt} baselines are retrained under the same
+export and masking rules; P0 published numbers use a different (leaky)
+protocol and are not comparable. GIKT is matched to the DH$^2$
+\emph{compute} envelope (batch 16, cap 30 epochs, patience 5), not to a
+hyperparameter search (Appendix~\ref{app:hparams}). Learner-level bootstrap (1000
 resamples, 3614 learners): Q$\leftarrow$KC$+\Delta t$ minus simpleKT is
 $+0.00966$, 95\% CI $[+0.00916,+0.01013]$; minus AKT is $+0.00745$, 95\%
 CI $[+0.00703,+0.00792]$. DyGKT at $L{=}400$ failed to converge
@@ -23,8 +28,9 @@ graph-only v2 table (Appendix~\ref{app:graph-only}).}
 Model & Test AUC & $n$ scored \\
 \midrule
 DH$^2$-KT Q$\leftarrow$KC $+\Delta t$ & $0.8296{\pm}0.0001$ & 1{,}093{,}720 \\
+DH$^2$-KT Q$\leftarrow$KC $+\Delta t$ history-only & 0.8289 & 1{,}093{,}720 \\
 DH$^2$-KT Q$\leftarrow$KC & $0.8270{\pm}0.0002$ & 1{,}093{,}720 \\
-GIKT (matched budget) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 \\
+GIKT (compute-matched) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 \\
 AKT ($L{=}400$) & $0.8223{\pm}0.0001$ & 1{,}093{,}720 \\
 DH$^2$-KT Q$\leftarrow$KC off (twin) & $0.8206{\pm}0.0002$ & 1{,}093{,}720 \\
 \textit{simpleKT} ($L{=}400$) & $0.8214{\pm}0.0007$ & 1{,}093{,}720 \\
