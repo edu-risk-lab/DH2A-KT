@@ -1,0 +1,77 @@
+==> C:\Users\EDM\AppData\Local\Python\pythoncore-3.14-64\python.exe D:\TUAN\DH2A-KT\DH2A-KT\scripts\05_run_manipulation_check.py configs\xes3g5m.yaml --fold 1 --device cuda --load-checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold1.pt --operator degree_preserving_rewire
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 4490412, 'valid': 641760, 'test': 1281181}
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 windows (mode=first) from 1922941 interactions
+[fold 1] loaded checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold1.pt architecture=v2
+[fold 1] manipulation_check p=0.9 operator=degree_preserving_rewire hyperedge_source=chain graph_sensitivity_weight=1.0
+INFO:src.dag_disruption:Computing DDR original_shape=(11025583, 3) augmented_shape=(11025583, 3)
+INFO:src.dag_disruption:DDR=0.058120613023097664
+INFO:dh2a_kt.eval.tier1_eval:manipulation_check passes=True auc_drop=0.0341 verdict=AUC drop 0.0341 under degree_preserving_rewire (structure check, p unused). Encoder is sensitive to relation structure / kind labels.
+passes_manipulation_check=True
+auc_clean=0.7511 auc_destroyed=0.7170 drop=0.0341
+ddr=0.0581
+verdict: AUC drop 0.0341 under degree_preserving_rewire (structure check, p unused). Encoder is sensitive to relation structure / kind labels.
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold1_manipulation_check_degree_preserving_rewire.json
+==> C:\Users\EDM\AppData\Local\Python\pythoncore-3.14-64\python.exe D:\TUAN\DH2A-KT\DH2A-KT\scripts\05_run_manipulation_check.py configs\xes3g5m.yaml --fold 1 --device cuda --load-checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold1.pt --operator relation_label_permute
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 4490412, 'valid': 641760, 'test': 1281181}
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 windows (mode=first) from 1922941 interactions
+[fold 1] loaded checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold1.pt architecture=v2
+[fold 1] manipulation_check p=0.9 operator=relation_label_permute hyperedge_source=chain graph_sensitivity_weight=1.0
+INFO:src.dag_disruption:Computing DDR original_shape=(11025583, 3) augmented_shape=(11025583, 3)
+INFO:src.dag_disruption:DDR=0.0
+INFO:dh2a_kt.eval.tier1_eval:manipulation_check passes=False auc_drop=0.0000 verdict=AUC drop 0.0000 under relation_label_permute (structure check, p unused). Little movement: node-drop dependence does not imply correct use of relation structure (Hau B12).
+passes_manipulation_check=False
+auc_clean=0.7511 auc_destroyed=0.7511 drop=0.0000
+ddr=0.0000
+verdict: AUC drop 0.0000 under relation_label_permute (structure check, p unused). Little movement: node-drop dependence does not imply correct use of relation structure (Hau B12).
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold1_manipulation_check_relation_label_permute.json
+==> C:\Users\EDM\AppData\Local\Python\pythoncore-3.14-64\python.exe D:\TUAN\DH2A-KT\DH2A-KT\scripts\05_run_manipulation_check.py configs\xes3g5m.yaml --fold 2 --device cuda --load-checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold2.pt --operator degree_preserving_rewire
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 4490412, 'valid': 641760, 'test': 1281181}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=44
+INFO:src.split_checker:Created split sizes={'train': 4493120, 'valid': 640606, 'test': 1279627}
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 windows (mode=first) from 1920233 interactions
+[fold 2] loaded checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold2.pt architecture=v2
+[fold 2] manipulation_check p=0.9 operator=degree_preserving_rewire hyperedge_source=chain graph_sensitivity_weight=1.0
+INFO:src.dag_disruption:Computing DDR original_shape=(11403393, 3) augmented_shape=(11403393, 3)
+INFO:src.dag_disruption:DDR=0.05703215441680251
+INFO:dh2a_kt.eval.tier1_eval:manipulation_check passes=True auc_drop=0.0351 verdict=AUC drop 0.0351 under degree_preserving_rewire (structure check, p unused). Encoder is sensitive to relation structure / kind labels.
+passes_manipulation_check=True
+auc_clean=0.7521 auc_destroyed=0.7170 drop=0.0351
+ddr=0.0570
+verdict: AUC drop 0.0351 under degree_preserving_rewire (structure check, p unused). Encoder is sensitive to relation structure / kind labels.
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold2_manipulation_check_degree_preserving_rewire.json
+==> C:\Users\EDM\AppData\Local\Python\pythoncore-3.14-64\python.exe D:\TUAN\DH2A-KT\DH2A-KT\scripts\05_run_manipulation_check.py configs\xes3g5m.yaml --fold 2 --device cuda --load-checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold2.pt --operator relation_label_permute
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\xes3g5m.parquet
+INFO:src.io_utils:Loaded interactions shape=(6413353, 5)
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 4490513, 'valid': 640917, 'test': 1281923}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 4490412, 'valid': 641760, 'test': 1281181}
+INFO:src.split_checker:Creating learner split shape=(6413353, 6) ratios=(0.7, 0.1, 0.2) seed=44
+INFO:src.split_checker:Created split sizes={'train': 4493120, 'valid': 640606, 'test': 1279627}
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5420 windows (mode=first) from 1920233 interactions
+[fold 2] loaded checkpoint D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold2.pt architecture=v2
+[fold 2] manipulation_check p=0.9 operator=relation_label_permute hyperedge_source=chain graph_sensitivity_weight=1.0
+INFO:src.dag_disruption:Computing DDR original_shape=(11403393, 3) augmented_shape=(11403393, 3)
+INFO:src.dag_disruption:DDR=0.0
+INFO:dh2a_kt.eval.tier1_eval:manipulation_check passes=False auc_drop=-0.0000 verdict=AUC drop -0.0000 under relation_label_permute (structure check, p unused). Little movement: node-drop dependence does not imply correct use of relation structure (Hau B12).
+passes_manipulation_check=False
+auc_clean=0.7521 auc_destroyed=0.7521 drop=-0.0000
+ddr=0.0000
+verdict: AUC drop -0.0000 under relation_label_permute (structure check, p unused). Little movement: node-drop dependence does not imply correct use of relation structure (Hau B12).
+written: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\xes3g5m_fold2_manipulation_check_relation_label_permute.json
+B12 structure checks finished. JSON under results/tables/

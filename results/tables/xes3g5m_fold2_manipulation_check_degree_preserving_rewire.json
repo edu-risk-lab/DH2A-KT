@@ -1,0 +1,13 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 2,
+  "ddr": 0.05703215441680251,
+  "auc_clean": 0.7521190810426871,
+  "auc_destroyed": 0.716975948721249,
+  "auc_drop": 0.035143132321438064,
+  "passes_manipulation_check": true,
+  "verdict": "AUC drop 0.0351 under degree_preserving_rewire (structure check, p unused). Encoder is sensitive to relation structure / kind labels.",
+  "p": 0.9,
+  "operator": "degree_preserving_rewire",
+  "seed": 42
+}

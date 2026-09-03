@@ -510,14 +510,15 @@ hyperedges moves AUC. We report near-total node-drop $p{=}0.90$ on the
 graph-only diagnostic encoder (Appendix~\ref{app:graph-only}). That check
 confirms \emph{dependence} on some graph input: deleting 90\% of nodes will
 drop AUC for any encoder that reads those nodes. It does \emph{not} confirm
-that the encoder uses the correct relation structure. On fold~0,
-degree-preserving rewiring drops AUC by $0.0235$ (pass), while
-relation-label permutation is near-null (${\approx}0$; expected for a
-single-kind encoder) --- see Table~\ref{tab:manipulation}. An earlier
-pairwise$+$exercise path was graph-inert ($\Delta$AUC$\approx 0.0003$).
-The recommended tracer does not take this check: concept-stack
-\texttt{HypergraphConv} is off, and Q$\leftarrow$KC incidence is a
-bipartite membership matrix rather than a new multi-way graph.
+that the encoder uses the correct relation structure. Degree-preserving
+rewiring passes on folds~0--2 ($\Delta$AUC $0.0235$/$0.0341$/$0.0351$),
+while relation-label permutation is near-null on every fold
+(${\approx}0$; expected for a single-kind encoder) --- see
+Table~\ref{tab:manipulation}. An earlier pairwise$+$exercise path was
+graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended tracer does
+not take this check: concept-stack \texttt{HypergraphConv} is off, and
+Q$\leftarrow$KC incidence is a bipartite membership matrix rather than a
+new multi-way graph.
 
 \label{sec:eval}
 \label{sec:results}
@@ -834,10 +835,11 @@ passes on all three folds ($\Delta$AUC $0.038$/$0.043$/$0.047$);
 P0 GKT also drops after retraining on a destroyed pairwise graph
 ($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
 confirms dependence of this diagnostic encoder on some graph input; it
-does not show correct use of relation structure. On fold~0,
-degree-preserving rewiring drops AUC by $0.0235$, while relation-label
-permutation is near-null (${\approx}0$; expected for a single-kind
-encoder; Table~\ref{tab:manipulation}). We do not deploy this encoder.
+does not show correct use of relation structure. Degree-preserving
+rewiring drops AUC by $0.0235$/$0.0341$/$0.0351$ on folds~0--2, while
+relation-label permutation is near-null on every fold (${\approx}0$;
+expected for a single-kind encoder; Table~\ref{tab:manipulation}). We do
+not deploy this encoder.
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
