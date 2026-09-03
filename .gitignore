@@ -60,6 +60,8 @@ results/tables/*
 !results/tables/dh2_kt_v3_vs_p0.csv
 !results/tables/review2_auc_and_manipulation_stats.json
 !results/tables/xes3g5m_fold0_manipulation_check.json
+!results/tables/xes3g5m_fold0_manipulation_check_degree_preserving_rewire.json
+!results/tables/xes3g5m_fold0_manipulation_check_relation_label_permute.json
 !results/tables/xes3g5m_fold0_manipulation_check_v3.json
 !results/tables/xes3g5m_fold0_manipulation_check_no_laux.json
 !results/tables/xes3g5m_fold0_no_laux.log
