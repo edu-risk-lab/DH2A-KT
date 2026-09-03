@@ -1,0 +1,29 @@
+\begin{table}[!t]
+\caption{Training recipes for every model in Table~\ref{tab:auc-xes3g5m}.
+``Configs tried'' counts distinct hyperparameter vectors, not seeds.
+DH$^2$-KT's \emph{architecture} was chosen from a pre-specified ablation
+ladder (Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and three
+$\Delta t$ injection sites); its \emph{optimiser} recipe is a single
+vector. GIKT/AKT/\textit{simpleKT}/DKT/DGEKT each used one inherited
+\textsc{pyKT} vector \cite{liu2022pykt}. AKT and \textit{simpleKT} were
+not retuned when $L$ moved from P0's 200 to 400. GIKT seed~42 (log
+\texttt{C\_gikt\_clean\_L400\_e30b16}) restored best valid AUC at epoch~8
+and stopped by epoch~13 under patience~5 (cap~30).}
+\label{tab:hparams}
+\centering
+\footnotesize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Model & Parameter & Range searched & Selected & How chosen ($n$ configs) \\
+\midrule
+DH$^2$-KT tracer & architecture & ablation ladder & v4 Q$\leftarrow$KC $+\Delta t$ both & pre-specified gate \\
+DH$^2$-KT tracer & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & one recipe $\times$ 5 seeds \\
+GIKT & batch / epochs / patience / $L$ & --- & 16 / 30 / 5 / 400 & match DH$^2$ compute ($n{=}1$) \\
+GIKT & remaining pyKT hparams & none & P0/pyKT defaults & inherited ($n{=}1$) \\
+AKT & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\
+AKT & lr / dropout / d\_model & none at $L{=}400$ & P0/pyKT defaults & inherited from $L{=}200$ recipe \\
+\textit{simpleKT} & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$, 5 seeds) \\
+DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$ seed) \\
+\bottomrule
+\end{tabular}
+\end{table}

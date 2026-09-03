@@ -57,6 +57,29 @@ python scripts/05_run_manipulation_check.py configs/xes3g5m.yaml --fold 2 --devi
 python scripts/18_run_kbs_faithfulness_suite.py --mode smoke --sample-size 20
 ```
 
+## 5. B12 structure checks (rewire + label permute) — run on GPU
+
+Frozen-weight checks on the **graph-only v2 diagnostic encoder**, not QKC-T.
+Node-drop already shows dependence; these two ask whether the encoder uses
+the *correct* relation structure.
+
+```bash
+git pull
+python scripts/32_b12_structure_checks.py --device cuda
+# or one fold:
+python scripts/32_b12_structure_checks.py --device cuda --folds 0
+```
+
+Needs `results/checkpoints/xes3g5m_fold{0,1,2}.pt`. Writes (gitignored until
+allowlisted):
+
+- `results/tables/xes3g5m_foldN_manipulation_check_degree_preserving_rewire.json`
+- `results/tables/xes3g5m_foldN_manipulation_check_relation_label_permute.json`
+
+On a single-kind v2 graph, relation-label permutation is expected near-null.
+Paste `auc_drop` into `paper/tables/table_manipulation.tex` (rows currently
+`not run`). Do not invent numbers.
+
 ## Notes
 
 - StubLLM IG keeps the same `GroundedKCs` trailer construction as grounded

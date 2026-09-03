@@ -5,6 +5,10 @@ from __future__ import annotations
 import pandas as pd
 
 from dh2a_kt.hyperedge.construction import Hyperedge
+from dh2a_kt.hyperedge.rewire import (
+    degree_preserving_rewire_hyperedges,
+    permute_relation_labels,
+)
 from dh2a_kt.p0_bridge import apply_edge_drop, apply_node_drop
 
 try:
@@ -51,7 +55,16 @@ def destroy_hyperedges(
     seed: int,
     operator: str = "node_drop",
 ) -> list[Hyperedge]:
-    """Return hyperedges that still have at least one surviving pairwise link."""
+    """Return a destroyed or structure-shuffled hyperedge list.
+
+    ``node_drop`` / ``edge_drop`` keep hyperedges that still have a surviving
+    pairwise link. ``degree_preserving_rewire`` and ``relation_label_permute``
+    keep cardinality (B12); ``p`` is ignored for those two.
+    """
+    if operator == "degree_preserving_rewire":
+        return degree_preserving_rewire_hyperedges(hyperedges, seed=seed)
+    if operator == "relation_label_permute":
+        return permute_relation_labels(hyperedges, seed=seed)
     edges = hyperedges_to_pairwise_edges(hyperedges)
     if edges.empty:
         return []
@@ -60,7 +73,10 @@ def destroy_hyperedges(
     elif operator == "edge_drop":
         surviving = apply_edge_drop(edges, p, seed)
     else:
-        raise ValueError(f"Unsupported operator {operator!r}; use node_drop or edge_drop")
+        raise ValueError(
+            f"Unsupported operator {operator!r}; use node_drop, edge_drop, "
+            "degree_preserving_rewire, or relation_label_permute"
+        )
     return filter_hyperedges_by_pairwise_survivors(hyperedges, surviving)
 
 

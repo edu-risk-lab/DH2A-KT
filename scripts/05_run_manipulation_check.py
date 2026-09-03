@@ -53,6 +53,17 @@ def main() -> int:
         help="Score a saved DH2-KT fold instead of retraining (required for v3 M6 after 03).",
     )
     parser.add_argument(
+        "--operator",
+        choices=(
+            "node_drop",
+            "edge_drop",
+            "degree_preserving_rewire",
+            "relation_label_permute",
+        ),
+        default=None,
+        help="Override configs.manipulation_check.operator (B12 structure ops included).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -62,7 +73,9 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO)
 
     dh2_cfg, p0_cfg, _ = load_configs(REPO_ROOT / args.config)
-    mc_cfg = dh2_cfg.get("manipulation_check", {})
+    mc_cfg = dict(dh2_cfg.get("manipulation_check", {}))
+    if args.operator is not None:
+        mc_cfg["operator"] = args.operator
     train_cfg = dh2_cfg.get("training", {})
     budget = resolve_training_budget(
         p0_cfg,
@@ -136,13 +149,18 @@ def main() -> int:
         if trained is not None
         else str(train_cfg.get("architecture", "v2"))
     )
-    output = args.output or (
-        REPO_ROOT / "results" / "tables" / (
-            f"{dataset}_fold{args.fold}_manipulation_check.json"
+    op = str(mc_cfg.get("operator", "node_drop"))
+    if args.output:
+        output = args.output
+    else:
+        stem = (
+            f"{dataset}_fold{args.fold}_manipulation_check"
             if arch == "v2"
-            else f"{dataset}_fold{args.fold}_manipulation_check_{arch}.json"
+            else f"{dataset}_fold{args.fold}_manipulation_check_{arch}"
         )
-    )
+        if op != "node_drop":
+            stem = f"{stem}_{op}"
+        output = REPO_ROOT / "results" / "tables" / f"{stem}.json"
     write_manipulation_check_result(
         result,
         dataset=dataset,

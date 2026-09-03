@@ -21,8 +21,8 @@
 
 \begin{frontmatter}
 
-\title{DH$^2$A-KT: Leakage-Audited Knowledge Construction, Time-Aware
-Tracing, and Critic-Gated Explanations}
+\title{DH$^2$A-KT: Leakage-Audited Knowledge Attribution for
+Knowledge Tracing}
 
 \author[utehy]{Tuan Dao Minh}
 \author[utehy]{Khanh-Trinh Nguyen}
@@ -44,42 +44,35 @@ city={Hanoi},
 country={Vietnam}}
 
 \begin{abstract}
-Graph-augmented knowledge tracing (KT) often skips leakage audits of the
-auxiliary knowledge it constructs, then reports a single AUC as if every
-graph component contributed. We present DH$^2$A-KT, a two-tier knowledge
-system that is tractable on a single consumer GPU. \textbf{Tier~1
-(DH$^2$-KT)} reuses the leakage-controlled, train-only protocol of companion
-paper P0, extends it with hyperedge-level diagnostics, and then
-\emph{ablates which knowledge predicts}. Registered gates
+Graph-augmented knowledge tracing (KT) often constructs auxiliary
+knowledge without a leakage audit, then reports a single AUC as if every
+graph component contributed. This paper asks a leakage-audited
+attribution question: which structural and temporal knowledge survives a
+controlled ablation? DH$^2$A-KT is an attribution pipeline that is
+tractable on a single consumer GPU (the $^2$ marks heterogeneous
+hypergraph \emph{interfaces}; the recommended tracer does not use
+hypergraph convolution). It reuses the train-only protocol of companion
+paper P0, extends the audit to hyperedges, and then ablates which
+knowledge predicts. Pre-specified gates
 ($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin) show that bipartite
 question--KC incidence and inter-step timing carry next-step accuracy,
 whereas hypergraph convolution, hint-item hyperedges, a full Q-matrix,
 teacher grouping, an expert DAG, and per-concept exponential forgetting
 do not. On XES3G5M fold~0 under a clean protocol (mask-repeats, chunked
-windows, $L{=}400$, test-only), the recommended tracer --- a v4 LSTM with
-Q$\leftarrow$KC incidence and a linear $\log(1{+}\Delta t)$ branch ---
-reaches test AUC $0.8296{\pm}0.0001$ over five training seeds on fold~0
-versus matched-budget GIKT $0.8258{\pm}0.0001$ and \textit{simpleKT}
-$0.8214{\pm}0.0007$ under the same clean protocol (learner-level
-bootstrap 95\% CI of each difference excludes $0$; Q$\leftarrow$KC alone
-is $0.8270{\pm}0.0002$, 5/5 PASS vs.\ twin). The same recipe on folds~1--2
-stays within $0.001$ (mean $0.8295{\pm}0.0004$ over learner folds). Timing is attempt context
-(query at $t{+}1$), not per-concept forgetting.
-\textbf{Tier~2 (AgentDG-KT)} is a Critic-gated agent layer over
-\emph{frozen} Tier~1 scores. On the recommended tracer, grounded vs.\
-independent-generation flag rates are $0.018$/$0.766$ with mean
-ID-anchored KC-Jaccard $0.161$/$0.152$ ($n{=}500$). Dual-rater Likert
-faithfulness $4.01{\pm}1.07$ / usefulness $3.52{\pm}0.71$ ($n{=}40$) was
-collected on the graph-only v2 checkpoint, not on that tracer. A limited
-observational hint ATE on FoundationalASSIST is reported as an
-identification check with weak propensity overlap, not as a primary
-claim. Graph-only v2 AUC $0.752$ and three-fold manipulation checks are a
-forced-reliance diagnostic in the appendix, not the recommended tracer.
+windows, $L{=}400$, test-only), the recommended tracer (QKC-T: LSTM with
+Q$\leftarrow$KC incidence and a linear $\log(1{+}\Delta t)$ branch)
+reaches test AUC $0.8296{\pm}0.0001$ over five training seeds versus
+compute-matched GIKT $0.8258{\pm}0.0001$ and \textit{simpleKT}
+$0.8214{\pm}0.0007$ (learner-level bootstrap 95\% CI of each difference
+excludes $0$). The same recipe on folds~1--2 stays within $0.001$
+(mean $0.8295{\pm}0.0004$). On this backbone the exponential forgetting
+form (P4) does not outperform Linear $\log(1{+}\Delta t)$; LSTM-only
+$\Delta t$ fails the gate. A graph-only diagnostic encoder (AUC $0.752$)
+is in the appendix, not the recommended tracer.
 \end{abstract}
 
 \begin{keyword}
-Knowledge tracing \sep graph-structured knowledge \sep data leakage
-\sep large language model agents \sep explanation faithfulness
+Knowledge tracing \sep knowledge attribution \sep data leakage
 \sep educational data mining
 \end{keyword}
 
@@ -100,13 +93,12 @@ relations among knowledge components \cite{thmn2025,hgkt2025,htkt2025} and
 dynamic, temporally-evolving graph structure \cite{dygkt2024}.
 
 This paper builds on \cite{daominh2026p0}'s train-only leakage protocol.
-Tier~1 constructs and audits graph-structured knowledge, then asks which
-artefacts change next-step AUC under a registered gate. The recommended
-tracer is a GIKT-family v4 LSTM with Q$\leftarrow$KC incidence and a
+DH$^2$A-KT is a leakage-audited \emph{attribution} setting: construct,
+audit, then ask which knowledge predicts. The recommended
+tracer (QKC-T) is a GIKT-family LSTM with Q$\leftarrow$KC incidence and a
 linear $\Delta t$ branch (Section~\ref{sec:encoding}); hypergraph
 convolution fails that gate (Section~\ref{sec:results}). Teacher, forum,
-and video members remain interfaces. Tier~2 explains frozen scores with
-a Critic (Section~\ref{sec:tier2}). Fig.~\ref{fig:architecture} is the
+and video members remain interfaces. Fig.~\ref{fig:architecture} is the
 pipeline.
 
 \subsection{Motivation}
@@ -124,34 +116,27 @@ Three concrete gaps motivate this work:
   log before a learner-based train/test split lets held-out information
   reach a graph-augmented KT model even when the sequence optimizer itself
   trains only on the training fold. \cite{daominh2026p0}'s protocol audits
-  this channel for \emph{pairwise} prerequisite/similarity edges; no
-  published audit protocol currently covers \emph{hyperedges}.
-  \item \textbf{Explanations of KT scores are rarely gated against a frozen
-  predictor.} LLM rationales can ignore the numeric score they purport to
-  explain. A knowledge system needs a leakage-closed explanation layer over
-  frozen $P(\mathrm{correct})$, not a second model that re-infers mastery.
+  this channel for \emph{pairwise} prerequisite/similarity edges; published
+  hyperedge-level audits remain scarce.
 \end{itemize}
 
 \subsection{Research Questions}
 \label{sec:rqs}
 This work is motivated by a broader question: \emph{which leakage-audited
-knowledge actually improves or explains next-step KT?} We decompose this
-into three questions, plus entities this paper does not claim to have
-learned:
+knowledge actually improves next-step KT?} We decompose this into two
+questions, plus entities this paper does not claim to have learned:
 \begin{itemize}
   \item \textbf{RQ1} (\S\ref{sec:results}): Under a leakage audit, which
   structural knowledge improves next-step AUC?
-  \item \textbf{RQ2} (\S\ref{sec:time-result}): Does temporal knowledge
-  contribute as forgetting of latent mastery, or as attempt-context at
-  the scored step?
-  \item \textbf{RQ3} (\S\ref{sec:tier2-faithfulness-result}): Can a
-  Critic-gated LLM-agent layer explain frozen Tier~1 scores without
-  reopening leakage?
+  \item \textbf{RQ2} (\S\ref{sec:time-result}): On this backbone, does a
+  Linear $\log(1{+}\Delta t)$ branch outperform the per-concept exponential
+  forgetting form we test, and is the surviving timing gain available as
+  LSTM-side attempt context?
 \end{itemize}
-An observational hint ATE on FoundationalASSIST is reported as a
-secondary identification check (Section~\ref{sec:foundational-assist}),
-not as a fourth research question. Interactions involving
-\emph{teacher}, \emph{forum/discussion}, and \emph{video} nodes are
+An exploratory Critic-gated survey over frozen scores is reported after
+the predictive results (Section~\ref{sec:tier2}); it is not a third
+research question and not a contribution.
+Teacher, forum/discussion, and video nodes are
 defined in the schema (Section~\ref{sec:prelim}) but remain data-blocked
 on every corpus we use (Section~\ref{sec:limitations}): this paper
 establishes an interface for those entities, not empirical evidence of
@@ -165,34 +150,27 @@ check remain available as a forced-reliance diagnostic
   \cite{daominh2026p0}'s audited, acyclic prerequisite edges into
   \emph{path-derived concept-group} chain hyperedges (unordered member
   sets along directed paths; Section~\ref{sec:tier1-graph}) and names
-  three leakage classes a pairwise audit cannot detect
+  three leakage classes that a pairwise projection does not express
   (Section~\ref{sec:leakage-ext});
   session+Hint hyperedges on FoundationalASSIST
   \cite{foundationalassist2026} (Section~\ref{sec:foundational-assist}).
   Discussion-thread and teacher-intervention types remain data-blocked
   (Section~\ref{sec:limitations}). Construction is not claimed as an AUC
   lift.
-  \item \textbf{C2 (which knowledge predicts).} A pre-registered ablation
-  (gate $\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin) plus a
+  \item \textbf{C2 (which knowledge predicts).} A pre-specified ablation
+  (gate $\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin; an internal
+  convention locked before the ladder, not a public registry) plus a
   clean-protocol tracer: Q$\leftarrow$KC incidence passes on all five
   training seeds ($5/5$ PASS); a Linear $\log(1{+}\Delta t)$ branch on
   that backbone passes ($5/5$ PASS; test AUC $0.8296{\pm}0.0001$ on
   XES3G5M fold~0, mean $0.8295{\pm}0.0004$ across three learner folds).
   HypergraphConv, hint-item hyperedges, a full Q-matrix, teacher
-  grouping, an expert DAG, and per-concept forgetting fail
-  (Table~\ref{tab:negative-knowledge}). Versus matched-budget GIKT
+  grouping, an expert DAG, and per-concept exponential forgetting (P4) fail
+  (Table~\ref{tab:negative-knowledge}). Versus compute-matched GIKT
   $0.8258{\pm}0.0001$, the recommended tracer's learner-level bootstrap
   95\% CI excludes $0$ (Table~\ref{tab:auc-xes3g5m}). Graph-only v2 mean AUC
   $0.752$ versus GKT $0.834$ is an appendix diagnostic, not the
   recommended tracer.
-  \item \textbf{C3 (Critic-gated explanations).} A Tier~2 pilot
-  (AgentDG-KT, Section~\ref{sec:tier2}) over frozen Tier~1 scores at
-  $n{=}500$ on a consumer GPU. On the recommended tracer, grounded vs.\
-  independent-generation flag rates are $0.018$/$0.766$ (mean JC
-  $0.161$/$0.152$). Dual-rater Likert ($n{=}40$) is reported on the v2
-  checkpoint (Table~\ref{tab:human-eval}). Comparison with
-  \cite{ni2026ikteia} is a probability gate, not synonym-aware KC overlap
-  or an AUC contest --- pilot evidence, not a classroom RCT.
 \end{itemize}
 
 % =============================================================================
@@ -204,38 +182,53 @@ Pairwise KT graphs \cite{nakagawa2019gkt,yang2021gikt} and dynamic
 variants \cite{dygkt2024} propagate over edges; hypergraph KT
 \cite{thmn2025,hgkt2025,htkt2025} and heterogeneous node types
 \cite{psykt2024,hhskt2023} still draw members from KC/exercise/learner
-sets. None treat Teacher, Hint, Forum, or Video as first-class hyperedge
-members with KCs --- C1's \emph{interface}. This paper's quantitative
-core is a GIKT-class LSTM with audited Q$\leftarrow$KC incidence
-(Section~\ref{sec:encoding}); hypergraph operators are registered
-failures (Table~\ref{tab:negative-knowledge}).
+sets. Among the hypergraph-KT systems we read
+\cite{thmn2025,hgkt2025,htkt2025,psykt2024,hhskt2023}, Teacher, Hint,
+Forum, and Video appear as interfaces here rather than as evaluated
+members. This paper's quantitative core is a GIKT-class LSTM with audited
+Q$\leftarrow$KC incidence (Section~\ref{sec:encoding}); hypergraph
+operators are pre-specified failures (Table~\ref{tab:negative-knowledge}).
+
+\subsection{Forgetting and temporal effects in KT}
+Sequence KT models have long treated elapsed time as a forgetting cue.
+\cite{nagatani2019forget} extend DKT with multiple forgetting-related
+features (lag from the previous interaction and past trial counts).
+HawkesKT \cite{wang2021hawkeskt} models skill-to-skill temporal
+cross-effects with a Hawkes-process kernel (WSDM 2021). Our P4 arm is
+narrower: a per-concept exponential
+$\exp(-\mathrm{softplus}(\theta_c)\cdot\mathrm{gap})$ on the same v4
+backbone as Linear $\log(1{+}\Delta t)$. A FAIL of that one form does
+not rule out power-law decay, data-driven half-lives, or Hawkes kernels;
+we do not claim to have tested those alternatives.
 
 \subsection{LLM agents and explanation faithfulness}
 Closest in scope is \cite{ni2026ikteia}, which aligns LLM mastery reports
 with implicit DLKT states and evaluates explanation faithfulness with
 KC-overlap, an independent-generation control, and paired ablations.
-AgentDG-KT (Section~\ref{sec:tier2}) complements that line: we audit the
-auxiliary graph before explanation, gate rationales with a Critic over
-\emph{frozen} $P(\mathrm{correct})$, and use ID-anchored KC-Jaccard
-because XES3G5M has no in-repo synonym KC vocabulary. Broader LLM-agent
+Section~\ref{sec:tier2} is a scoped survey in that line, not a third
+pillar: we gate rationales with a Critic over \emph{frozen}
+$P(\mathrm{correct})$ and use ID-anchored KC-Jaccard because XES3G5M has
+no in-repo synonym KC vocabulary. Broader LLM-agent
 surveys \cite{llmedu2025,agentcat2026,graphaugmentedllm2025,graphrag2025}
 motivate the frozen-core split: re-inferring mastery with a multi-agent
 LLM over millions of interactions is not tractable on one consumer GPU.
 
 \subsection{Leakage-controlled evaluation}
 \label{sec:related-leakage}
-\cite{daominh2026p0} (companion P0, under review) shows that pooling a
-KC graph from the full log before a learner split leaks held-out
-information through the graph even if the sequence optimizer trains only
-on the training fold. We reuse its train-only construction, four
-pairwise diagnostics, and pinned artefacts
-(Section~\ref{sec:p0-selfcontained}). This paper extends the audit from
-pairwise edges to hyperedges (Section~\ref{sec:leakage-ext}).
+We searched ACM Digital Library, IEEE Xplore, and Scopus through July 2026
+with the terms ``hypergraph knowledge tracing'', ``leakage audit'', and
+``graph provenance''. \cite{daominh2026p0} (companion P0, under review)
+audits pairwise prerequisite/similarity edges under train-only
+construction. Within that search we found no published protocol that
+applies the same leakage diagnostics to \emph{hyperedges}; this paper
+extends the audit from pairwise edges to hyperedges
+(Section~\ref{sec:leakage-ext}). We reuse P0's train-only construction,
+four pairwise diagnostics, and pinned artefacts
+(Section~\ref{sec:p0-selfcontained}).
 
 Observational treatment-effect estimators in education
 \cite{kaur2019causal,kumar2023causal,minn2022interpretable} are
-background only: our IPW hint ATE is a secondary identification check,
-not a primary contribution (Section~\ref{sec:causal}).
+background only.
 
 % =============================================================================
 \section{Preliminaries}
@@ -289,7 +282,8 @@ and used in FAIL/diagnostic arms; they do \emph{not} enter the
 recommended tracer (Table~\ref{tab:auc-xes3g5m}). Teacher/forum/video
 kinds are interfaces; session write-backs appear only in the Tier~2
 pilot. The recommended tracer consumes train-only Q$\leftarrow$KC
-incidence and timestamps inside a v4 LSTM (Section~\ref{sec:encoding}).
+incidence and timestamps inside the recommended tracer
+(Section~\ref{sec:encoding}).
 
 % =============================================================================
 \section{Tier 1: DH$^2$-KT}
@@ -300,15 +294,13 @@ incidence and timestamps inside a v4 LSTM (Section~\ref{sec:encoding}).
 \subsection{Heterogeneous hypergraph construction}
 \label{sec:tier1-graph}
 
-Concept-prerequisite hyperedges are bounded-length simple directed paths
-on audited, acyclic $E_{\mathrm{pre}}^f$ (Algorithm~1). We call the
-resulting hyperedges \emph{path-derived concept-group} hyperedges: each
-hyperedge collects the concepts visited along a directed path in
-$E_{\mathrm{pre}}^f$, but Algorithm~1 emits an \emph{unordered} member
-set, so prerequisite direction is not retained in the hyperedge
-representation. This grouping is used for audit and for optional
-\texttt{HypergraphConv} diagnostic arms; it is not prerequisite-preserving
-message passing and is not part of the recommended Q$\leftarrow$KC tracer.
+Path-derived concept-group hyperedges are bounded-length simple directed
+paths on audited, acyclic $E_{\mathrm{pre}}^f$ (Algorithm~1). Each
+hyperedge collects the concepts visited along a directed path, but
+Algorithm~1 emits an \emph{unordered} member set, so path direction is
+not retained in the hyperedge representation. This grouping is used for
+audit and for optional \texttt{HypergraphConv} diagnostic arms; it is not
+part of the recommended Q$\leftarrow$KC tracer.
 
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} $E_{\mathrm{pre}}^f$; bounds $[\ell_{\min},\ell_{\max}]$
@@ -339,7 +331,7 @@ The four pairwise diagnostics of Section~\ref{sec:p0-selfcontained} are
 reused on the pairwise projection of a hyperedge set. Pairwise
 TBMR/$|\rho|$ are skipped when that projection exceeds the implementation
 cap (Table~\ref{tab:leakage-measured}). Table~\ref{tab:leakage-taxonomy}
-adds three classes a pairwise audit cannot express.
+adds three classes that a pairwise projection does not express.
 
 \begin{table}[!t]
 \caption{Hyperedge-level leakage taxonomy (extends \cite{daominh2026p0}
@@ -375,12 +367,15 @@ $0$; pairwise TBMR on a $10^5$-pair subsample is similar across arms
 design rather than a blind audit.
 \input{tables/table_leakage_audit}
 
-\subsection{Recommended tracer: v4 LSTM with Q$\leftarrow$KC and time}
+\subsection{Recommended tracer: LSTM with Q$\leftarrow$KC and time}
 \label{sec:encoding}
-The recommended DH$^2$-KT tracer is architecture v4 with
-\texttt{--question-graph} and \texttt{--no-graph} on the concept stack:
-path-derived concept-group chain hyperedges are \emph{not} consumed by
-\texttt{HypergraphConv} on this path. Let $A\in\mathbb{R}^{N_q\times N_c}$
+The recommended tracer, denoted QKC-T, is an LSTM backbone with train-only
+question--KC incidence and a linear $\log(1{+}\Delta t)$ branch; no
+convolution is applied on the concept stack. (Implementation flags
+\texttt{--question-graph} and \texttt{--no-graph} turn incidence on and
+concept-stack \texttt{HypergraphConv} off; Table~\ref{tab:aliases}.)
+Path-derived concept-group chain hyperedges are not consumed on this
+path. Let $A\in\mathbb{R}^{N_q\times N_c}$
 be the train-only question--KC incidence, row-normalized to $\bar{A}$.
 Each item $q$ has an embedding $e_q$; each KC $c$ has $e_c$. One
 propagation step, in the spirit of GIKT \cite{yang2021gikt} rather than
@@ -389,81 +384,50 @@ hypergraph convolution, is
 \tilde{e}_q = \tanh\bigl(W(e_q + \bar{A}_{q,:}\,E_c)\bigr),
 \label{eq:qkc}
 \end{equation}
-with a dedicated linear $W$ so the mix cannot collapse into $e_c$
-(registered twin: same LSTM without this branch). Interaction embeddings
+with a dedicated linear $W$ (matched twin: same LSTM without this branch).
+Interaction embeddings
 of $(c_t,y_t)$ plus Rasch-style item parameters feed an LSTM. The next
 step is scored by reading a query vector at the \emph{known} identity of
 item/KC $t{+}1$ (standard next-step KT: the model is told \emph{what} will
 be asked, not whether the learner will be correct).
 
-When \texttt{--time-gap} is on (mode \texttt{both} on XES3G5M), a
-dedicated linear map of $\log(1+\Delta t)$ is added on the LSTM input and
-on that query, where $\Delta t$ is the inter-step gap aligned with the
-row being encoded. The query-side gap is the wait until the scored item;
-that item's identity is part of the prediction request, so the gap is
-attempt context rather than a post-hoc peek at duration after $y_{t+1}$
-is observed. We do not feed the scored step's own response into the
-query. Per-concept exponential forgetting is a registered alternative
-that fails the gate (P4). HypergraphConv on multi-KC item hyperedges,
-hint-item hypergraphs, dual-gated graph-only $x_t$, and the
-graph-sensitivity auxiliary loss $L_{\mathrm{aux}}$ belong to the v2
-diagnostic encoder (Appendix~\ref{app:graph-only}) or to FAIL arms
+When \texttt{--time-gap} is on, a dedicated linear map of
+$\log(1+\Delta t)$ can be added on the LSTM input, on the next-step
+query, or both. We treat the prediction time as \emph{attempt-onset
+correctness prediction}: the score is produced when the learner opens
+item $t{+}1$, whose identity is already the query, not when the system
+first recommends that item. LSTM-side $\Delta t$ uses only gaps between
+already-observed steps (\emph{history-only}). The query-side gap is the
+wait until the scored item; that item's identity is part of the
+prediction request, so the gap is attempt context rather than a post-hoc
+peek at duration after $y_{t+1}$ is observed. We do not feed the scored
+step's own response into the query. We report a history-only $\Delta t$
+row (\texttt{--time-gap-mode lstm}): fold~0 seed~42 test AUC $0.8289$,
+$\Delta\mathrm{val}{+}0.00170$ (FAIL; Table~\ref{tab:auc-xes3g5m},
+Table~\ref{tab:a7-query-dt}). Query-only also fails
+($+0.00069$); only \texttt{both} passes. Per-concept exponential
+forgetting is a pre-specified alternative that fails the gate (P4).
+HypergraphConv on multi-KC item hyperedges, hint-item hypergraphs,
+dual-gated graph-only $x_t$, and the graph-sensitivity auxiliary loss
+$L_{\mathrm{aux}}$ belong to the v2 diagnostic encoder
+(Appendix~\ref{app:graph-only}) or to FAIL arms
 (Table~\ref{tab:negative-knowledge}), not to Eq.~\eqref{eq:qkc}.
-
-\subsection{Observational ATE (secondary)}
-\label{sec:causal}
-On FoundationalASSIST we report a standard inverse-propensity (IPW)
-average treatment effect of $\texttt{hint\_used}_t$ on
-$\texttt{correct}_{t+1}$, with logistic propensity on pre-$t$ summaries
-and clipping documented in Section~\ref{sec:foundational-assist}.
-Unconfoundedness is assumed, not proven. Same-step
-\texttt{discrete\_score} is not the outcome (it is mechanically tied to
-hint requests). No ATE is reported on XES3G5M (no hint logs). This check
-is not a primary contribution.
-
-% =============================================================================
-\section{Tier 2: AgentDG-KT pilot}
-\label{sec:tier2}
-% =============================================================================
-
-Tier~2 is deliberately scoped as a pilot, not a benchmark at Tier~1's
-quantitative rigor: a full multi-agent LLM pipeline that re-infers
-knowledge state over millions of interactions is not tractable on a
-single consumer GPU within a realistic project timeline. Three agents
-operate on Tier~1's \emph{frozen} output rather than re-inferring
-knowledge state:
-
-\begin{itemize}
-  \item \textbf{Diagnostician Agent} produces a natural-language rationale
-  for a given Tier-1 prediction, explicitly instructed not to override the
-  given probability.
-  \item \textbf{Tutor/Hint Agent} proposes the next hint/exercise and writes
-  a new session hyperedge back into the graph (the agentic closed loop).
-  \item \textbf{Critic Agent} is a \emph{mandatory} quality gate that flags
-  any Diagnostician output contradicting or ignoring the Tier-1 number it
-  was meant to explain, before anything is treated as ground truth in a
-  case study.
-\end{itemize}
-
-We ran a 500-sample pilot on XES3G5M fold~0 (seed 42, Qwen2.5-7B via
-Ollama) on the graph-only v2 checkpoint and re-ran the same prompt on
-the recommended tracer (Section~\ref{sec:encoding}). The Diagnostician
-emits a \texttt{GroundedKCs} trailer for ID-anchored KC-Jaccard; IG omits
-frozen $P(\mathrm{correct})$ from that prompt while the Critic still sees
-the true score. Flag rates and JC are in
-Section~\ref{sec:tier2-faithfulness-result}. The Tutor wrote 500 session
-hyperedges at pilot scale.
-\input{tables/table_tier2}
 
 % =============================================================================
 \section{Experimental setup}
 % =============================================================================
 
+Table~\ref{tab:aliases} maps development labels that appear in logs to
+the architecture names used in the text and table captions.
+\input{tables/table_aliases}
+
 \subsection{Datasets}
 \label{sec:reuse}
-Following \cite{daominh2026p0}, XES3G5M \cite{liu2023xes3g5m}
-(18{,}066 learners, 7{,}652 items, 865 KCs, 6{,}413{,}353 interactions)
-is the primary predictive benchmark. ASSISTments~2012 GKT AUC from P0 is
+Following \cite{daominh2026p0}, XES3G5M \cite{liu2023xes3g5m} is the
+primary predictive benchmark: 18{,}066 learners, 7{,}652 items, 865~KCs
+and 5{,}549{,}635 recorded attempts, which expand to 6{,}413{,}353
+KC-level rows under the standard multi-KC expansion
+(Section~\ref{sec:clean-protocol}). ASSISTments~2012 GKT AUC from P0 is
 not reused as a comparison column. FoundationalASSIST
 \cite{foundationalassist2026} is a secondary fold with synchronized
 hints (Section~\ref{sec:foundational-assist}), not interchangeable with
@@ -473,16 +437,24 @@ tracer there.
 
 \subsection{Baselines reused from P0}
 \label{sec:baselines-reuse}
-Sequence baselines (DKT, AKT, simpleKT, GIKT, DyGKT, DGEKT) are trained
+Sequence baselines (DKT \cite{piech2015dkt}, AKT \cite{ghosh2020akt},
+simpleKT \cite{liu2023simplekt}, GIKT \cite{yang2021gikt},
+DyGKT \cite{dygkt2024}, DGEKT \cite{dgekt2024}) are trained
 with the vendored \textsc{pyKT} implementations \cite{liu2022pykt} under
 our clean chunked protocol (Section~\ref{sec:clean-protocol}); we treat them as
-fair comparisons, not as novel KT architectures discovered here
-\cite{liu2023simplekt,ghosh2020akt,yang2021gikt,dygkt2024,hgkt2025}.
-We reuse \cite{daominh2026p0}'s published results for BKT, GKT, and SKT
+fair comparisons, not as novel KT architectures discovered here.
+We reuse \cite{daominh2026p0}'s published results for BKT
+\cite{corbett1995bkt}, GKT \cite{nakagawa2019gkt}, and SKT
+\cite{tong2020skt}
 under train-only graph construction (vendored CSVs at commit
 \texttt{5e3d6a0}), except GIKT, AKT, simpleKT, DKT, DyGKT, and DGEKT on
 XES3G5M, which we retrain under the clean $L{=}400$ protocol
-(Table~\ref{tab:auc-xes3g5m}). A config-checksum script confirms the
+(Table~\ref{tab:auc-xes3g5m}). GIKT shares DH$^2$-KT's compute envelope
+(batch 16, epoch cap 30, patience 5); AKT and simpleKT inherit
+\textsc{pyKT}/P0 defaults with only $L$ raised to 400. That is a matched
+\emph{compute} budget, not a matched tuning search
+(Appendix~\ref{app:hparams}; cf.\ \cite{pineau2021repro}). A
+config-checksum script confirms the
 XES3G5M P0 config match. The companion PDF is available to reviewers as
 supplementary material on request.
 
@@ -496,18 +468,40 @@ answerable by copying the input label. We therefore mask repeat-row targets
 (\texttt{--mask-repeats}) in both our models and retrained pyKT baselines,
 use chunked windows (\texttt{--window-mode chunked}) with
 $L{=}400$, and report test-only AUC on the remaining scored positions
-($n_{\mathrm{scored}}\approx 1.09\times 10^6$ on XES3G5M fold~0).
+($n_{\mathrm{scored}}\approx 1.09\times 10^6$ on XES3G5M fold~0). The
+6{,}413{,}353 KC-expanded rows versus 5{,}549{,}635 recorded attempts in
+\cite{liu2023xes3g5m} is the same multi-KC expansion pyKT warns about;
+we score the masked remainder, not every expanded row.
 Published P0 numbers that score every KC row are not comparable to this
 table. Our contribution is a fair retrain under the shared masking rules,
 not the discovery of KC-level row repeats.
 
+\subsection{Credit gate}
+\label{sec:credit-gate}
+A knowledge type is credited only if the pre-specified
+$\Delta\mathrm{val}\ge{+}0.002$ vs.\ its matched twin. This is an internal
+convention, not a timestamped public registry. Five-seed validation AUC SD is $0.00015$ on
+the recommended tracer and $0.00023$ on Q$\leftarrow$KC
+(Table~\ref{tab:auc-xes3g5m} arms); $+0.002$ is $\approx$9--13$\times$
+those SDs. We test eight credit arms (six FAIL rows in
+Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and Linear
+$\Delta t$) without a family-wise correction: the gate is a credit
+threshold, not a claim of simultaneous significance.
+
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
-hyperedges moves AUC (near-total node-drop $p{=}0.90$). The graph-only v2
-encoder passes on all three XES3G5M folds
-(Appendix~\ref{app:graph-only}); an earlier pairwise$+$exercise path was
-graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended v4 tracer uses
-\texttt{--no-graph} and is not claimed to pass this destruction check.
+hyperedges moves AUC. We report near-total node-drop $p{=}0.90$ on the
+graph-only diagnostic encoder (Appendix~\ref{app:graph-only}). That check
+confirms \emph{dependence} on some graph input: deleting 90\% of nodes will
+drop AUC for any encoder that reads those nodes. It does \emph{not} confirm
+that the encoder uses the correct relation structure. On fold~0,
+degree-preserving rewiring drops AUC by $0.0235$ (pass), while
+relation-label permutation is near-null (${\approx}0$; expected for a
+single-kind encoder) --- see Table~\ref{tab:manipulation}. An earlier
+pairwise$+$exercise path was graph-inert ($\Delta$AUC$\approx 0.0003$).
+The recommended tracer does not take this check: concept-stack
+\texttt{HypergraphConv} is off, and Q$\leftarrow$KC incidence is a
+bipartite membership matrix rather than a new multi-way graph.
 
 \label{sec:eval}
 \label{sec:results}
@@ -523,11 +517,11 @@ $L{=}400$). Table~\ref{tab:auc-xes3g5m} lists fold~0 point estimates;
 Table~\ref{tab:auc-p0-dt-folds} adds learner-fold and training-seed
 stability. Over five training seeds (A2 matrix), DH$^2$-KT with
 Q$\leftarrow$KC incidence reaches $0.8270{\pm}0.0002$ versus
-matched-budget GIKT $0.8258{\pm}0.0001$, AKT $0.8223{\pm}0.0001$, and
+compute-matched GIKT $0.8258{\pm}0.0001$, AKT $0.8223{\pm}0.0001$, and
 \textit{simpleKT} $0.8214{\pm}0.0007$ (all retrained under the same
 masking rules); the no-graph twin is $0.8206{\pm}0.0002$. The
 Q$\leftarrow$KC vs.\ twin gate passes on all five seeds ($5/5$ PASS at
-$\Delta\mathrm{val}\ge{+}0.002$). Learner-level bootstrap (1000
+the pre-specified $\Delta\mathrm{val}\ge{+}0.002$). Learner-level bootstrap (1000
 resamples, 3614 learners) for Q$\leftarrow$KC minus GIKT is
 $+0.00117$, 95\% CI $[+0.00078,+0.00153]$ (excludes $0$). Adding Linear
 $\log(1{+}\Delta t)$ reaches test AUC $0.8296{\pm}0.0001$ ($5/5$ PASS vs.\
@@ -541,7 +535,7 @@ $0.8296{\pm}0.0001$ over five training seeds on fold~0;
 Table~\ref{tab:auc-p0-dt-folds}).
 \input{tables/table_auc_p0_dt_folds}
 
-Table~\ref{tab:negative-knowledge} lists registered failures
+Table~\ref{tab:negative-knowledge} lists pre-specified failures
 ($\Delta\mathrm{val}$ gate ${+}0.002$, not loosened). HypergraphConv on
 multi-KC item hyperedges (K), hint-item session hyperedges on
 FoundationalASSIST (L), a full Q-matrix (M1), teacher grouping (M4), a
@@ -555,23 +549,26 @@ did not pass.
 \subsection{Time as attempt context (RQ2)}
 \label{sec:time-result}
 On XES3G5M, Linear $\Delta t$ into both LSTM and next-step query passes
-against Q$\leftarrow$KC on all five training seeds ($5/5$ PASS at
-$\Delta\mathrm{val}\ge{+}0.002$; test-only $0.8296{\pm}0.0001$ vs.\
+against Q$\leftarrow$KC on all five training seeds ($5/5$ PASS at the
+pre-specified $\Delta\mathrm{val}\ge{+}0.002$; test-only $0.8296{\pm}0.0001$ vs.\
 $0.8270{\pm}0.0002$, mean difference $+0.00261$, learner-level 95\% CI
 $[+0.00225,+0.00298]$). A quartile slice of $\log(1{+}\mathrm{gap})$
 collapses to two bins: short gaps ($\lesssim$18\,min) $\Delta{+}0.0028$,
 long gaps $\Delta{+}0.0019$, both CIs excluding $0$ --- not a long-horizon
-forgetting signature. Table~\ref{tab:a7-query-dt} ablates injection site on
-XES3G5M: only \texttt{--time-gap-mode both} passes the registered gate at
-seed~42 ($\Delta\mathrm{val}{+}0.00280$); LSTM-only ($+0.00170$) and
-query-only ($+0.00069$) fail in isolation, so the branches are complementary
-rather than redundant. On FoundationalASSIST, query-only $\Delta t$ keeps
+exponential-decay pattern under P4's form. Table~\ref{tab:a7-query-dt} ablates injection site on
+XES3G5M. History-only LSTM $\Delta t$ (observed gaps, no query-side wait)
+reaches test AUC $0.8289$ and fails the gate
+($\Delta\mathrm{val}{+}0.00170$); query-only fails ($+0.00069$); only
+\texttt{--time-gap-mode both} passes at seed~42
+($+0.00280$). The branches are complementary: the recommended tracer's
+timing credit is not available under a history-only deployment. On FoundationalASSIST, query-only $\Delta t$ keeps
 most of the M2 gain ($+0.01471$ vs.\ off) while LSTM-only is
 $+0.00280$; combining time with prior-step \texttt{saw\_answer} is additive
 ($+0.00297$ vs.\ M2).
 \input{tables/table_a7_query_dt} Per-concept $\exp(-\mathrm{softplus}(\theta_c)\cdot
-\mathrm{gap})$ fails versus Linear (P4). We treat time as attempt-context
-knowledge, not as a hypergraph effect. Query-side $\Delta t$ uses the
+\mathrm{gap})$ fails versus Linear (P4). We treat Linear $\Delta t$ as
+attempt-context knowledge on this backbone, not as a hypergraph effect,
+and we do not generalise that to every forgetting form. Query-side $\Delta t$ uses the
 gap to the item whose identity is already the next-step query; it is not
 the duration of a step whose correctness has been observed. Against AKT
 at the same $L{=}400$ clean protocol (test AUC $0.8223{\pm}0.0001$ over
@@ -588,12 +585,34 @@ on is slightly miscalibrated high (ECE $0.0103$). We report calibration as a
 diagnostic, not as a primary claim.
 \input{tables/table_calibration_xes3g5m}
 
+\subsection{Exploratory survey: Critic-gated explanations}
+\label{sec:tier2}
+\label{sec:tier2-faithfulness-result}
+This subsection is a scoped survey after the Tier~1 results, not a
+contribution. Three agents read frozen DH$^2$-KT scores: a Diagnostician
+writes a rationale, a Critic flags output that contradicts the frozen
+$P(\mathrm{correct})$ (15-bin ECE $0.0056$ on the recommended tracer;
+Table~\ref{tab:calibration-xes3g5m}), and a Tutor writes session
+hyperedges that the frozen tracer does not consume. We ran $n{=}500$
+prompts (XES3G5M fold~0, seed 42, Qwen2.5-7B via Ollama) on the
+graph-only v2 checkpoint and again on the recommended tracer. Following
+\cite{ni2026ikteia}, we report Critic flag rate and ID-anchored
+KC-Jaccard. Independent generation (IG) omits $P(\mathrm{correct})$ from
+the Diagnostician prompt while the Critic still sees the true score, so
+the flag-rate gap is largely definitional and is not a content finding.
+On the recommended tracer, grounded/IG flags are $0.018$/$0.766$ with
+mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
+(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Dual-rater Likert
+($n{=}40$) was collected on the v2 checkpoint, not on the recommended
+tracer (Table~\ref{tab:human-eval}).
+\input{tables/table_tier2}
+\input{tables/table_kc_jaccard_ig}
+\input{tables/table_human_eval}
+
 \subsection{Paired diagnostic knobs}
-Table~\ref{tab:paired-ablation} pairs remaining diagnostic knobs with
-Tier~2 faithfulness knobs. Removing the Critic sets the flag rate to $0$ by
-construction while leaving ID-anchored KC-Jaccard unchanged; IG mainly
-inflates the Critic flag rate ($0.026\rightarrow 0.768$) with only a small JC
-shift. Dropping $L_{\mathrm{aux}}$
+Table~\ref{tab:paired-ablation} pairs remaining diagnostic knobs with the
+survey's faithfulness knobs. Removing the Critic sets the flag rate to $0$ by
+construction while leaving ID-anchored KC-Jaccard unchanged. Dropping $L_{\mathrm{aux}}$
 (\texttt{graph\_sensitivity\_weight}${}=0$) on the graph-only fold~0 track
 still yields clean AUC $0.754$ and $\Delta$AUC$=0.039$ (pass); that track
 is the appendix diagnostic, not Table~\ref{tab:auc-xes3g5m}.
@@ -613,36 +632,6 @@ evidence that chain hyperedges improve predictive KT on Junyi --- full
 DH$^2$-KT training on Junyi (25M interactions) was not run.
 \input{tables/table_junyi_gt}
 
-\subsection{Tier~2 faithfulness pilot (RQ3)}
-\label{sec:tier2-faithfulness-result}
-See Table~\ref{tab:tier2} and Section~\ref{sec:tier2}. The Tutor wrote 500
-session hyperedges at pilot scale. Following \cite{ni2026ikteia}'s use of a
-corpus-wide KC-overlap faithfulness metric and an independent-generation
-negative control, we additionally compute \emph{ID-anchored KC-Jaccard}
-over Diagnostician outputs: the model must emit a structured
-\texttt{GroundedKCs: $[\ldots]$} trailer; support is the target concept,
-KCs in the recent history window, and their 1-hop neighbors on audited
-train-only $E_{\mathrm{pre}}$. The IG arm uses the same history but omits
-frozen $P(\mathrm{correct})$ from the Diagnostician prompt while the Critic
-still sees the true Tier~1 score (Table~\ref{tab:kc-jaccard-ig}). On
-Qwen2.5-7B (Ollama, $n{=}500$), grounded explanations have flag rate
-$0.026$ and mean JC $0.152$; IG raises the Critic flag rate to $0.768$
-while mean JC stays near $0.142$ ($\Delta$JC$\approx{+}0.010$), so the
-gate mainly catches probability-ungrounded rationales rather than
-rewriting KC overlap. The same prompt on the recommended
-Q$\leftarrow$KC$+\Delta t$ checkpoint (fold~0, $n{=}500$) reproduces the
-pattern: grounded/IG flag $0.018$/$0.766$, mean JC $0.161$/$0.152$.
-StubLLM harness rows ($n{=}20$) validate the
-pipeline (flag $0.0$ vs.\ $1.0$ at matched JC). From the calibrated
-Ollama v2 run we drew a fixed 40-sample pack (seed 42) for two
-independent raters (A1, B1) on Likert faithfulness and usefulness (1--5).
-Pooled means are $4.01{\pm}1.07$ (faithfulness) and $3.52{\pm}0.71$
-(usefulness); pairwise Spearman $\rho{=}0.71$ / $0.58$ and within-$\pm$1
-rates of 92.5\% / 97.5\% (Table~\ref{tab:human-eval}). A third rater was
-optional and not required for this pilot report.
-\input{tables/table_kc_jaccard_ig}
-\input{tables/table_human_eval}
-
 \subsection{Secondary corpus: FoundationalASSIST}
 \label{sec:foundational-assist}
 FoundationalASSIST \cite{foundationalassist2026} provides
@@ -657,16 +646,10 @@ DH$^2$-KT fold~0 AUC is 0.720 with path-derived concept-group hyperedges alone
 ($n{=}298{,}500$ predictions). Adding up to 20k multi-concept session
 hyperedges (Hint-preferring selection; concept co-occurrence projection)
 raises AUC to 0.722 ($\Delta{+}0.002$) --- a small positive shift under the
-same local budget, not a matched GKT comparison. Using the causal layer on
-train transitions, the
-IPW ATE of hint use on \emph{next-step} correctness is $-0.207$
-(naive mean difference $-0.255$; trimmed IPW $-0.211$;
-bootstrap 95\% CI $[-0.230,\,-0.187]$ on 50k-row resamples;
-$n_{\mathrm{treated}}{=}36{,}151$).
-Propensity scores hit the clip floor ($[0.05,\,0.219]$), indicating weak
-overlap: struggling learners disproportionately request hints, so the
-negative association is \emph{not} interpretable as a proven causal
-penalty of giving hints. Table~\ref{tab:foundational-assist} summarizes.
+same local budget, not a matched GKT comparison. Table~\ref{tab:foundational-assist}
+summarizes the corpus and those AUCs. An IPW identification check of hint
+use, with weak positivity, is in Appendix~\ref{app:ate}; it is not a
+contribution.
 \input{tables/table_foundational_assist}
 
 % =============================================================================
@@ -674,54 +657,90 @@ penalty of giving hints. Table~\ref{tab:foundational-assist} summarizes.
 % =============================================================================
 
 \subsection{Threats to validity}
+\label{sec:threats}
 Headline AUCs (Table~\ref{tab:auc-xes3g5m}) are clean $L{=}400$,
 test-only. Q$\leftarrow$KC$+\Delta t$ is also on folds~1--2;
-matched-budget GIKT/AKT remain fold~0. Other baselines come from reused
+compute-matched GIKT/AKT remain fold~0. Other baselines come from reused
 P0 tables on the older budget. The GIKT edge is small; we report
 learner-level bootstrap CIs, not a SOTA headline. HypergraphConv and
-hint-item hyperedges fail the registered gate, so we do not credit
-multi-way message passing. The v2 destruction check
-(Appendix~\ref{app:graph-only}) shows that \emph{a} backbone can be
-forced to use a hypergraph; it does not identify which row of
-Table~\ref{tab:negative-knowledge} drives the recommended tracer.
+hint-item hyperedges fail the pre-specified gate, so we do not credit
+multi-way message passing. The node-drop check
+(Appendix~\ref{app:graph-only}) is run on the graph-only diagnostic
+encoder, not on the recommended tracer. It confirms that encoder's
+\emph{dependence} on some graph input under $p{=}0.9$ node deletion; it
+does not show correct use of relation structure, and it does not support
+graph-structure claims about QKC-T. Q$\leftarrow$KC incidence is a
+bipartite membership matrix, not a new multi-way graph.
 
-\subsection{What KBS should take from a small AUC edge}
+\paragraph{Deployment availability of the query-side gap.}
+Attempt-onset scoring (this paper's protocol) produces $P(y_{t+1}{=}1)$
+when the learner opens item $t{+}1$, so the query-side wait has already
+elapsed. History-only / recommend-before-return uses only LSTM-side gaps
+already in the log; that arm is the history-only row (test AUC $0.8289$,
+FAIL; Table~\ref{tab:a7-query-dt}). Serving a next item before the
+learner returns is earlier still: the wait has not occurred, so
+query-side $\Delta t$ must be omitted or replaced by a planned-gap proxy
+we do not evaluate. The recommended tracer therefore assumes attempt-onset
+availability; a history-only deployment should use the LSTM-only arm and
+must not claim the $+0.00280$ both-mode credit.
+
+\subsection{Interpretation of the empirical findings}
 \label{sec:auc-tradeoff}
-DH$^2$-KT is a leakage-audited knowledge system, not ``hypergraph NNs
-beat GIKT'': (i)~hyperedge diagnostics beyond pairwise $E_{\mathrm{pre}}$;
-(ii)~a registered map of which knowledge predicts; (iii)~a Critic gate
-over frozen $P(\mathrm{correct})$, vs.\ \cite{ni2026ikteia} as a
-probability gate rather than synonym-aware KC overlap. The $\approx$8
-point gap versus GKT is the cost of the graph-only diagnostic, not of
-Table~\ref{tab:auc-xes3g5m}. The hint ATE is a weak-overlap check, not a
-fourth pillar. Dual-rater Likert ($n{=}40$) is on v2; automatic flag/JC
-in the abstract use the recommended tracer.
+The results answer an attribution question, not ``hypergraph NNs beat
+GIKT.'' Each paragraph below asks whether one knowledge type survived
+the pre-specified ablation, and what that means for a system builder.
+
+\paragraph{Question--KC incidence.}
+Survives: $5/5$ PASS versus the matched twin
+(Table~\ref{tab:auc-xes3g5m}). Train-only bipartite membership is the
+structural knowledge the recommended tracer actually uses.
+
+\paragraph{Linear $\log(1{+}\Delta t)$.}
+Survives on this backbone when both LSTM-side and query-side gaps are
+present ($5/5$ PASS). History-only $\Delta t$ fails the gate
+(Table~\ref{tab:a7-query-dt}): the credited timing is attempt-onset
+context, not a history-only forgetting cue.
+
+\paragraph{Hypergraph convolution and path-derived concept groups.}
+Do not survive as predictive knowledge: \texttt{HypergraphConv} on chain
+hyperedges fails the gate (Table~\ref{tab:negative-knowledge}). Those
+groups remain an audit/diagnostic artefact. The $\approx$8 point gap
+versus GKT is the cost of the graph-only diagnostic encoder, not of
+QKC-T.
+
+\paragraph{Hint-item hyperedges, full Q-matrix, teacher grouping, expert
+DAG, exponential forgetting.}
+Do not survive (Table~\ref{tab:negative-knowledge}). Session+Hint on
+FoundationalASSIST ($0.720\rightarrow 0.722$) is a small local shift, not
+credited as multi-way graph novelty.
+
+The Critic survey in Section~\ref{sec:tier2} is exploratory and is not
+part of this attribution map.
 
 \subsection{Limitations}
 \label{sec:limitations}
 \begin{itemize}
   \item Discussion-thread and teacher-intervention hyperedges remain
   data-blocked; session+Hint hyperedges on FoundationalASSIST shift AUC
-  $0.720\rightarrow 0.722$ under concept projection, but the registered
+  $0.720\rightarrow 0.722$ under concept projection, but the pre-specified
   hint-item hypergraph arm fails the $+0.002$ gate (L in
   Table~\ref{tab:negative-knowledge}) and is not claimed as hypergraph
   novelty.
-  \item The causal-effect layer's identification assumption (no unmeasured
-  confounding given observed features) is stated, not proven; the
-  FoundationalASSIST hint ATE shows weak propensity overlap and should not
-  be read as a recommendation against hints.
+  \item Appendix~\ref{app:ate} reports an IPW hint check with weak
+  positivity; it is not a contribution and must not be read as a
+  recommendation against hints.
   \item The hyperedge leakage audit's pairwise-projection approximation
   (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
   hyperedge-native statistic is future work.
-  \item Tier~2 pilot: one fold, one local 7B LLM; human ratings use $n{=}40$
-  and two raters on the \emph{v2} graph-only checkpoint (no third rater;
-  not a classroom deployment study; not the recommended tracer).
-  Automatic flag/JC numbers in the abstract use the
-  Q$\leftarrow$KC$+\Delta t$ re-run. ID-anchored KC-Jaccard is not
-  synonym-aware (XES3G5M lacks an in-repo KC name vocabulary); the
-  grounded--IG $\Delta$JC is small ($\approx{+}0.010$), so KC-overlap
-  alone is a weak separator relative to Critic flag rate. An LLM-scale
-  sensitivity sweep remains optional future work.
+  \item Exploratory Critic survey: one fold, one local 7B LLM; human
+  ratings use $n{=}40$ and two raters on the \emph{v2} graph-only
+  checkpoint (no third rater; not the recommended tracer). The
+  grounded--IG flag gap is largely definitional because IG withholds
+  $P(\mathrm{correct})$ from the Diagnostician while the Critic scores
+  against that number. ID-anchored KC-Jaccard is not synonym-aware
+  (XES3G5M lacks an in-repo KC name vocabulary); the JC gap is
+  $\approx{+}0.010$. An LLM-scale sensitivity sweep remains optional
+  future work.
   \item Reproduction environment: Windows workstation, single RTX~3090;
   unit tests pass in the released codebase.
 \end{itemize}
@@ -729,17 +748,17 @@ in the abstract use the recommended tracer.
 % =============================================================================
 \section{Conclusion and future work}
 % =============================================================================
-We presented DH$^2$A-KT: leakage-audited construction, a registered map
-of which knowledge predicts (Q$\leftarrow$KC and Linear $\Delta t$ live;
-hypergraph convolution and several metadata sources fail), and a
-Critic-gated explanation layer over frozen scores. On XES3G5M (clean
+We presented DH$^2$A-KT as leakage-audited knowledge attribution: which
+structural and temporal knowledge survives a controlled ablation.
+Q$\leftarrow$KC incidence and Linear $\Delta t$ survive; hypergraph
+convolution and several metadata sources fail. On XES3G5M (clean
 $L{=}400$, test-only), the recommended tracer reaches
 $0.8296{\pm}0.0001$ over five training seeds on fold~0 versus
-matched-budget GIKT $0.8258{\pm}0.0001$ ($0.8295{\pm}0.0004$ over three
-learner folds). Timing is attempt context, not concept-forget. Tier~2 grounded/IG
-flag rates on that tracer are $0.018$/$0.766$. Future work: matched
-GIKT/AKT on folds~1--2, human ratings on the recommended tracer,
-hyperedge-native leakage statistics, and richer ATE confounders.
+compute-matched GIKT $0.8258{\pm}0.0001$ ($0.8295{\pm}0.0004$ over three
+learner folds). History-only $\Delta t$ does not pass the gate; only
+LSTM+query timing does. Future work: a tuning search for GIKT/AKT at
+$L{=}400$, human ratings on the recommended tracer, and
+hyperedge-native leakage statistics.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
@@ -782,19 +801,54 @@ Hugging Face dataset's Responsible Use Guidelines for this study.
 \section{Graph-only encoder as a forced-reliance diagnostic}
 \label{app:graph-only}
 \label{sec:manipulation-result}
-The recommended tracer is v4 with Q$\leftarrow$KC and Linear $\Delta t$
-(Table~\ref{tab:auc-xes3g5m}). A graph-only v2 encoder (chain
-hyperedges, no question LSTM path) exists so a destruction check is
-interpretable: mean test AUC $0.7516{\pm}0.0015$ vs.\ reused GKT
+The recommended tracer is QKC-T
+(Table~\ref{tab:auc-xes3g5m}). A graph-only diagnostic encoder (chain
+hyperedges, no question LSTM path; log label v2) exists so a destruction
+check is interpretable: mean test AUC $0.7516{\pm}0.0015$ vs.\ reused GKT
 $0.8336{\pm}0.0010$ under P0's GKT budget ($L{=}200$;
 Table~\ref{tab:auc-xes3g5m-v2}). Frozen-weight node-drop $p{=}0.9$
 passes on all three folds ($\Delta$AUC $0.038$/$0.043$/$0.047$);
 P0 GKT also drops after retraining on a destroyed pairwise graph
-($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). We do not
-deploy this encoder.
+($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
+confirms dependence of this diagnostic encoder on some graph input; it
+does not show correct use of relation structure. On fold~0,
+degree-preserving rewiring drops AUC by $0.0235$, while relation-label
+permutation is near-null (${\approx}0$; expected for a single-kind
+encoder; Table~\ref{tab:manipulation}). We do not deploy this encoder.
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
+\FloatBarrier
+
+\section{Hyperparameters for Table~\ref{tab:auc-xes3g5m}}
+\label{app:hparams}
+Table~\ref{tab:hparams} records, for each model in
+Table~\ref{tab:auc-xes3g5m}, which knobs were searched, which value was
+used, and how many distinct configurations were tried
+\cite{pineau2021repro}. We do not claim a matched \emph{tuning} budget.
+\input{tables/table_hparams}
+\FloatBarrier
+
+\section{Observational hint identification check}
+\label{app:ate}
+\label{sec:causal}
+On FoundationalASSIST we report a standard inverse-propensity (IPW)
+average treatment effect of $\texttt{hint\_used}_t$ on
+$\texttt{correct}_{t+1}$, with logistic propensity on pre-$t$ summaries
+and clipping. Unconfoundedness is assumed, not proven. Same-step
+\texttt{discrete\_score} is not the outcome (it is mechanically tied to
+hint requests). No estimate is reported on XES3G5M (no hint logs). This
+check is not a contribution.
+
+Using train transitions, the IPW estimate of hint use on \emph{next-step}
+correctness is $-0.207$ (naive mean difference $-0.255$; trimmed IPW
+$-0.211$; bootstrap 95\% CI $[-0.230,\,-0.187]$ on 50k-row resamples;
+$n_{\mathrm{treated}}{=}36{,}151$). Propensity scores hit the clip floor
+($[0.05,\,0.219]$), indicating weak overlap. The negative sign reflects
+that weaker learners request more hints; it must \emph{not} be read as
+the effect of providing hints, and it is not a recommendation against
+hints. We did not compute Rosenbaum bounds or an E-value.
+\input{tables/table_hint_ate}
 \FloatBarrier
 \clearpage
 

@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\caption{FoundationalASSIST fold~0 IPW identification check of
+\texttt{hint\_used}$_t$ on \texttt{correct}$_{t+1}$ under pre-$t$
+confounders. Propensity mass hits the clip floor. The negative IPW
+estimate reflects that weaker learners request more hints; it is
+\emph{not} the effect of providing hints.}
+\label{tab:hint-ate}
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Hint ATE (IPW) / naive mean diff & $-0.207$ / $-0.255$ \\
+\quad trimmed IPW (propensity 10--90\%) & $-0.211$ \\
+\quad bootstrap 95\% CI (subsample) & $[-0.230,\,-0.187]$ \\
+\quad $n$ treated / control (train transitions) & 36{,}151 / 660{,}321 \\
+\quad propensity $[\min,\max]$ & $[0.05,\,0.219]$ \\
+\bottomrule
+\end{tabular}
+\end{table}

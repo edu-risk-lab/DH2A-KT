@@ -59,6 +59,22 @@ def test_run_manipulation_check_records_verdict():
     assert result.auc_clean >= result.auc_destroyed or result.auc_drop <= 0
 
 
+def test_run_manipulation_check_rewire_operator():
+    def eval_fn(hyperedges: list[Hyperedge]) -> float:
+        members = {m[1] for he in hyperedges for m in he.members}
+        return 0.80 if 0 in members and 1 in members else 0.70
+
+    result = run_manipulation_check(
+        _toy_hyperedges(20),
+        eval_auc_fn=eval_fn,
+        operator="degree_preserving_rewire",
+        seed=42,
+    )
+    assert result.auc_clean == 0.80
+    assert isinstance(result.verdict, str)
+    assert "structure check" in result.verdict
+
+
 def _synthetic_logs(n_users: int = 12, seq_len: int = 10) -> pd.DataFrame:
     rows = []
     for u in range(n_users):

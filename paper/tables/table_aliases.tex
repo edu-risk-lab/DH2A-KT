@@ -1,0 +1,19 @@
+\begin{table}[!t]
+\caption{Architecture names used in this paper. Flags in parentheses are
+implementation aliases from training logs, not model names.}
+\label{tab:aliases}
+\centering
+\begin{tabular}{@{}p{3.6cm}p{8.6cm}@{}}
+\toprule
+Name in this paper & Architecture \\
+\midrule
+Recommended tracer (QKC-T) & LSTM with train-only Q$\leftarrow$KC
+incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
+off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\
+Q$\leftarrow$KC only & Same LSTM without the $\Delta t$ branch \\
+No-graph twin & Same LSTM without the Q$\leftarrow$KC branch \\
+Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
+question LSTM path (\texttt{v2}) \\
+\bottomrule
+\end{tabular}
+\end{table}
