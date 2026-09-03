@@ -381,10 +381,14 @@ Each item $q$ has an embedding $e_q$; each KC $c$ has $e_c$. One
 propagation step, in the spirit of GIKT \cite{yang2021gikt} rather than
 hypergraph convolution, is
 \begin{equation}
-\tilde{e}_q = \tanh\bigl(W(e_q + \bar{A}_{q,:}\,E_c)\bigr),
+\tilde{e}_q = \tanh\bigl(W_q e_q + W_c\,\bar{A}_{q,:}\,E_c\bigr),
 \label{eq:qkc}
 \end{equation}
-with a dedicated linear $W$ (matched twin: same LSTM without this branch).
+implemented with a single shared matrix ($W_q{=}W_c{=}W$) on the sum
+$e_q+\bar{A}_{q,:}E_c$, then a separate input projection into the LSTM.
+We do not claim a non-collapsible dual-map form: the tied-$W$
+implementation is equivalent to one linear on the sum. The matched twin
+keeps the same LSTM without this Q$\leftarrow$KC branch.
 Interaction embeddings
 of $(c_t,y_t)$ plus Rasch-style item parameters feed an LSTM. The next
 step is scored by reading a query vector at the \emph{known} identity of
@@ -467,8 +471,14 @@ share the same timestamp and answer, so a large share of eval positions are
 answerable by copying the input label. We therefore mask repeat-row targets
 (\texttt{--mask-repeats}) in both our models and retrained pyKT baselines,
 use chunked windows (\texttt{--window-mode chunked}) with
-$L{=}400$, and report test-only AUC on the remaining scored positions
-($n_{\mathrm{scored}}\approx 1.09\times 10^6$ on XES3G5M fold~0). The
+$L{=}400$, and report test-only AUC on the remaining scored positions.
+Table~\ref{tab:auc-xes3g5m} uses a shared pyKT-aligned intersection of
+$n_{\mathrm{scored}}{=}1{,}093{,}720$ positions across all listed models.
+Native DH$^2$ scoring of the same clean mask yields
+$1{,}093{,}755$ positions (difference of 35); calibration
+(Table~\ref{tab:calibration-xes3g5m}) reports the native count. We do
+not collapse multi-KC rows back to attempt level for the headline AUC:
+each masked KC-row target is scored once. The
 6{,}413{,}353 KC-expanded rows versus 5{,}549{,}635 recorded attempts in
 \cite{liu2023xes3g5m} is the same multi-KC expansion pyKT warns about;
 we score the masked remainder, not every expanded row.
@@ -483,10 +493,16 @@ $\Delta\mathrm{val}\ge{+}0.002$ vs.\ its matched twin. This is an internal
 convention, not a timestamped public registry. Five-seed validation AUC SD is $0.00015$ on
 the recommended tracer and $0.00023$ on Q$\leftarrow$KC
 (Table~\ref{tab:auc-xes3g5m} arms); $+0.002$ is $\approx$9--13$\times$
-those SDs. We test eight credit arms (six FAIL rows in
-Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and Linear
-$\Delta t$) without a family-wise correction: the gate is a credit
-threshold, not a claim of simultaneous significance.
+those SDs. For the two five-seed XES credit tests we also report paired
+one-sided $t$-tests on $\Delta\mathrm{val}$: Q$\leftarrow$KC vs.\ twin
+mean $+0.00578$ ($t_4{=}31.92$, $p{=}2.87{\times}10^{-6}$); Linear
+$\Delta t$ vs.\ Q$\leftarrow$KC mean $+0.00274$ ($t_4{=}23.99$,
+$p{=}8.95{\times}10^{-6}$). Holm--Bonferroni at $\alpha{=}0.05$ among these
+two tests (and conservatively among all eight credit arms) leaves both
+significant. The six FAIL rows in
+Table~\ref{tab:negative-knowledge} remain single-seed and are judged only
+by the $+0.002$ gate, not by $p$-values: the gate is a credit threshold
+anchored to seed SD, not a claim of simultaneous significance.
 
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
@@ -584,6 +600,7 @@ tracer is best calibrated (ECE $0.0056$) despite higher AUC; Q$\leftarrow$KC
 on is slightly miscalibrated high (ECE $0.0103$). We report calibration as a
 diagnostic, not as a primary claim.
 \input{tables/table_calibration_xes3g5m}
+\input{figures/fig_reliability_xes3g5m}
 
 \subsection{Exploratory survey: Critic-gated explanations}
 \label{sec:tier2}
@@ -603,8 +620,12 @@ the flag-rate gap is largely definitional and is not a content finding.
 On the recommended tracer, grounded/IG flags are $0.018$/$0.766$ with
 mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
 (Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Dual-rater Likert
-($n{=}40$) was collected on the v2 checkpoint, not on the recommended
-tracer (Table~\ref{tab:human-eval}).
+($n{=}40$) was collected on the v2 checkpoint
+(Table~\ref{tab:human-eval}). Following GS Hau B10 we extend human
+rating to the recommended tracer: a blinded pack of $n{=}100$
+grounded explanations (seed~42 subsample of the $n{=}500$ Ollama run)
+is prepared for $\ge$3 independent raters; ratings and agreement
+statistics will replace the v2-only Likert row once returned.
 \input{tables/table_tier2}
 \input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
@@ -732,15 +753,17 @@ part of this attribution map.
   \item The hyperedge leakage audit's pairwise-projection approximation
   (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
   hyperedge-native statistic is future work.
-  \item Exploratory Critic survey: one fold, one local 7B LLM; human
-  ratings use $n{=}40$ and two raters on the \emph{v2} graph-only
-  checkpoint (no third rater; not the recommended tracer). The
-  grounded--IG flag gap is largely definitional because IG withholds
-  $P(\mathrm{correct})$ from the Diagnostician while the Critic scores
-  against that number. ID-anchored KC-Jaccard is not synonym-aware
-  (XES3G5M lacks an in-repo KC name vocabulary); the JC gap is
-  $\approx{+}0.010$. An LLM-scale sensitivity sweep remains optional
-  future work.
+  \item Exploratory Critic survey: one fold, one local 7B LLM. The
+  published dual-rater Likert ($n{=}40$) is on the \emph{v2} graph-only
+  checkpoint (Table~\ref{tab:human-eval}). A blinded $n{=}100$ pack on
+  the recommended tracer (seed~42 subsample of the $n{=}500$ grounded
+  Ollama run; $\ge$3 raters) is in collection and will replace that
+  row when returned. The grounded--IG flag gap is largely definitional
+  because IG withholds $P(\mathrm{correct})$ from the Diagnostician
+  while the Critic scores against that number. ID-anchored KC-Jaccard
+  is not synonym-aware (XES3G5M lacks an in-repo KC name vocabulary);
+  the JC gap is $\approx{+}0.010$. An LLM-scale sensitivity sweep
+  remains optional future work.
   \item Reproduction environment: Windows workstation, single RTX~3090;
   unit tests pass in the released codebase.
 \end{itemize}
