@@ -33,6 +33,63 @@ def test_destroy_hyperedges_reduces_set():
     assert len(destroyed) < len(_chain_hyperedges())
 
 
+def test_degree_preserving_rewire_keeps_degrees_and_sizes():
+    from dh2a_kt.hyperedge.rewire import (
+        concept_hyperdegrees,
+        degree_preserving_rewire_hyperedges,
+    )
+
+    hes = [
+        Hyperedge(
+            hyperedge_id=f"h{i}",
+            kind="concept_prerequisite",
+            fold=0,
+            train_only=True,
+            members=[("concept", i), ("concept", i + 1), ("concept", i + 2)],
+        )
+        for i in range(8)
+    ]
+    rewired = degree_preserving_rewire_hyperedges(hes, seed=0, n_swaps=400)
+    assert concept_hyperdegrees(rewired) == concept_hyperdegrees(hes)
+    assert [len(he.members) for he in rewired] == [len(he.members) for he in hes]
+    orig = {frozenset(m[1] for m in he.members) for he in hes}
+    new = {frozenset(m[1] for m in he.members) for he in rewired}
+    assert orig != new
+
+
+def test_relation_label_permute_keeps_members():
+    from dh2a_kt.hyperedge.rewire import permute_relation_labels
+
+    hes = [
+        Hyperedge(
+            hyperedge_id="a",
+            kind="concept_prerequisite",
+            fold=0,
+            train_only=True,
+            members=[("concept", 0), ("concept", 1)],
+        ),
+        Hyperedge(
+            hyperedge_id="b",
+            kind="session",
+            fold=0,
+            train_only=True,
+            members=[("concept", 2), ("concept", 3)],
+        ),
+    ]
+    out = permute_relation_labels(hes, seed=1)
+    assert [he.members for he in out] == [he.members for he in hes]
+    assert {he.kind for he in out} == {he.kind for he in hes}
+
+
+def test_destroy_hyperedges_structure_ops():
+    hes = _chain_hyperedges()
+    rewired = destroy_hyperedges(hes, p=0.9, seed=0, operator="degree_preserving_rewire")
+    labeled = destroy_hyperedges(hes, p=0.9, seed=0, operator="relation_label_permute")
+    assert len(rewired) == len(hes)
+    assert len(labeled) == len(hes)
+    assert [he.kind for he in labeled] == [he.kind for he in hes]
+
+
 def test_hyperedge_index_preserves_kinds():
     hes = _chain_hyperedges() + [
         Hyperedge(

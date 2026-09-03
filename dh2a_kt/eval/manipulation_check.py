@@ -22,6 +22,7 @@ import pandas as pd
 
 from dh2a_kt.hyperedge.construction import Hyperedge
 from dh2a_kt.hyperedge.indexing import destroy_hyperedges, hyperedges_to_pairwise_edges
+from dh2a_kt.hyperedge.rewire import STRUCTURE_OPERATORS
 from dh2a_kt.p0_bridge import apply_node_drop, apply_edge_drop, compute_dag_disruption_rate
 
 logger = logging.getLogger(__name__)
@@ -58,24 +59,32 @@ def run_manipulation_check(
             and returns test AUC. Left as a callback because Tier-1 training
             is Pha 2/3 work (docs/idea-D-plan.md), not something this eval
             module should own.
-        p: destruction strength; P0 anchors this check at p=0.90.
-        operator: "node_drop" or "edge_drop" (P0's DDR operator families —
-            see dh2a_kt.p0_bridge for the other three: attr_mask, subgraph,
-            prereq_preserve).
+        p: destruction strength; P0 anchors node/edge-drop at p=0.90.
+            Ignored for ``degree_preserving_rewire`` / ``relation_label_permute``.
+        operator: ``node_drop``, ``edge_drop``, ``degree_preserving_rewire``,
+            or ``relation_label_permute``.
     """
     edges = _hyperedges_to_pairwise_edges(hyperedges)
     auc_clean = eval_auc_fn(hyperedges)
 
+    destroyed_hyperedges = destroy_hyperedges(hyperedges, p=p, seed=seed, operator=operator)
     if operator == "node_drop":
         destroyed_edges = apply_node_drop(edges, p, seed)
     elif operator == "edge_drop":
         destroyed_edges = apply_edge_drop(edges, p, seed)
+    elif operator in STRUCTURE_OPERATORS:
+        destroyed_edges = _hyperedges_to_pairwise_edges(destroyed_hyperedges)
     else:
-        raise ValueError(f"Unsupported operator {operator!r}; use node_drop or edge_drop")
+        raise ValueError(
+            f"Unsupported operator {operator!r}; use node_drop, edge_drop, "
+            "degree_preserving_rewire, or relation_label_permute"
+        )
 
-    ddr = compute_dag_disruption_rate(edges, destroyed_edges)
+    if edges.empty or destroyed_edges.empty:
+        ddr = 1.0 if operator not in STRUCTURE_OPERATORS else 0.0
+    else:
+        ddr = compute_dag_disruption_rate(edges, destroyed_edges)
 
-    destroyed_hyperedges = destroy_hyperedges(hyperedges, p=p, seed=seed, operator=operator)
     auc_destroyed = eval_auc_fn(destroyed_hyperedges)
     auc_drop = auc_clean - auc_destroyed
 
@@ -85,13 +94,24 @@ def run_manipulation_check(
     # the null-shift benchmarks in P0 Table 7/10, |delta AUC| <= 0.003 there);
     # report auc_drop and let the paper's own ablation table interpret it.
     passes = auc_drop > 0.003
-    verdict = (
-        f"AUC drop {auc_drop:.4f} at p={p} ({operator}). "
-        + ("DH2-KT reads the hypergraph (graph-reliant)." if passes
-           else "AUC barely moved — check whether DH2-KT is graph-inert before "
-                "interpreting any ablation result as evidence of graph benefit "
-                "(see P0 Section 4.7).")
-    )
+    if operator in STRUCTURE_OPERATORS:
+        verdict = (
+            f"AUC drop {auc_drop:.4f} under {operator} (structure check, p unused). "
+            + (
+                "Encoder is sensitive to relation structure / kind labels."
+                if passes
+                else "Little movement: node-drop dependence does not imply correct "
+                "use of relation structure (Hau B12)."
+            )
+        )
+    else:
+        verdict = (
+            f"AUC drop {auc_drop:.4f} at p={p} ({operator}). "
+            + ("DH2-KT reads the hypergraph (graph-reliant)." if passes
+               else "AUC barely moved — check whether DH2-KT is graph-inert before "
+                    "interpreting any ablation result as evidence of graph benefit "
+                    "(see P0 Section 4.7).")
+        )
     return ManipulationCheckResult(
         ddr=ddr, auc_clean=auc_clean, auc_destroyed=auc_destroyed, auc_drop=auc_drop,
         passes_manipulation_check=passes, verdict=verdict,
