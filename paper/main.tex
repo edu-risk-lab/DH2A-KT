@@ -511,15 +511,14 @@ hyperedges moves AUC. Near-total node-drop $p{=}0.90$ on the graph-only
 diagnostic encoder (Appendix~\ref{app:graph-only}) confirms
 \emph{dependence} on some graph input. Degree-preserving rewiring asks
 whether that encoder also uses \emph{which} concepts co-occur: it passes
-on folds~1--2 ($\Delta$AUC $0.0341$/$0.0351$; clean AUC $\approx 0.75$,
-matched to node-drop). The fold~0 rewiring run scored clean AUC $0.535$
-and is omitted from that claim (Table~\ref{tab:manipulation}).
-Relation-label permutation is near-null on the valid folds (expected for
-a single-kind encoder). An earlier pairwise$+$exercise path was
-graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended tracer does
-not take this check: concept-stack \texttt{HypergraphConv} is off, and
-Q$\leftarrow$KC incidence is a bipartite membership matrix rather than a
-new multi-way graph.
+on folds~0--2 ($\Delta$AUC $0.0318$/$0.0341$/$0.0351$; clean AUC
+$\approx 0.75$, matched to node-drop;
+Table~\ref{tab:manipulation}). Relation-label permutation is near-null
+on every fold (expected for a single-kind encoder). An earlier
+pairwise$+$exercise path was graph-inert ($\Delta$AUC$\approx 0.0003$).
+The recommended tracer does not take this check: concept-stack
+\texttt{HypergraphConv} is off, and Q$\leftarrow$KC incidence is a
+bipartite membership matrix rather than a new multi-way graph.
 
 \label{sec:eval}
 \label{sec:results}
@@ -852,11 +851,10 @@ Table~\ref{tab:auc-xes3g5m-v2}). Frozen-weight node-drop $p{=}0.9$
 passes on all three folds ($\Delta$AUC $0.038$/$0.043$/$0.047$);
 P0 GKT also drops after retraining on a destroyed pairwise graph
 ($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
-confirms dependence on some graph input. Degree-preserving rewiring on
-folds~1--2 drops AUC by $0.0341$/$0.0351$ (clean AUC $\approx 0.75$);
-the fold~0 rewiring run (clean AUC $0.535$) is an eval mismatch and is
-not in that claim. Relation-label permutation is near-null on the valid
-folds (Table~\ref{tab:manipulation}). We do not deploy this encoder.
+confirms dependence on some graph input. Degree-preserving rewiring
+passes on folds~0--2 ($\Delta$AUC $0.0318$/$0.0341$/$0.0351$; clean AUC
+$\approx 0.75$). Relation-label permutation is near-null on every fold
+(Table~\ref{tab:manipulation}). We do not deploy this encoder.
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
