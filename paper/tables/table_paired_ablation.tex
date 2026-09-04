@@ -19,21 +19,21 @@ AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
 \label{tab:paired-ablation}
 \centering
 \footnotesize
-\begin{tabular}{@{}llccl@{}}
+\begin{tabular}{@{}lllccl@{}}
 \toprule
-Setting & AUC & Gate / note & Flag & Mean JC \\
+Setting & Corpus & AUC & Gate / note & Flag & Mean JC \\
 \midrule
-Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296{\pm}0.0001$ & 5/5 PASS @ pre-specified $\Delta\mathrm{val}{\ge}0.002$ & --- & --- \\
-Q$\leftarrow$KC on & $0.8270{\pm}0.0002$ & 5/5 PASS @ pre-specified $\Delta\mathrm{val}{\ge}0.002$ & --- & --- \\
-Q$\leftarrow$KC off (twin) & $0.8206{\pm}0.0002$ & twin baseline & --- & --- \\
-HypergraphConv (val) & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
-Grounded + Critic (v2 ckpt) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
-IG (v2) & --- & --- & $0.768$ & $0.142$ \\
-Grounded + Critic (v4 $+\Delta t$) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
-IG (v4 $+\Delta t$) & --- & --- & $0.766$ & $0.152$ \\
-w/o Critic & --- & --- & $0.000$ & $0.152$ \\
-FA: concept-only & $0.720$ & --- & --- & --- \\
-FA: + session HE & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
+Q$\leftarrow$KC $+\Delta t$ (recommended) & XES & $0.8296{\pm}0.0001$ & 5/5 PASS @ pre-specified $\Delta\mathrm{val}{\ge}0.002$ & --- & --- \\
+Q$\leftarrow$KC on & XES & $0.8270{\pm}0.0002$ & 5/5 PASS @ pre-specified $\Delta\mathrm{val}{\ge}0.002$ & --- & --- \\
+Q$\leftarrow$KC off (twin) & XES & $0.8206{\pm}0.0002$ & twin baseline & --- & --- \\
+HypergraphConv (val) & XES & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
+Grounded + Critic (v2 ckpt) & XES & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
+IG (v2) & XES & --- & --- & $0.768$ & $0.142$ \\
+Grounded + Critic (v4 $+\Delta t$) & XES & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
+IG (v4 $+\Delta t$) & XES & --- & --- & $0.766$ & $0.152$ \\
+w/o Critic & XES & --- & --- & $0.000$ & $0.152$ \\
+FA: concept-only & FA & $0.720$ & --- & --- & --- \\
+FA: + session HE & FA & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

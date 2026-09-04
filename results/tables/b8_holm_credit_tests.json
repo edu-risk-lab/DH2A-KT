@@ -1,0 +1,38 @@
+{
+  "source": "results/tables/a2_multiseed_matrix.csv",
+  "seeds": [
+    "42",
+    "17",
+    "1234",
+    "0",
+    "2024"
+  ],
+  "alpha": 0.05,
+  "tests": [
+    {
+      "name": "qkc_vs_twin",
+      "n": 5,
+      "mean_delta_val": 0.005779684386236372,
+      "sd_delta_val": 0.00040486807768288276,
+      "t": 31.92093397455098,
+      "p_one_sided": 2.8706666521215865e-06,
+      "p_holm_m2": 5.741333304243173e-06,
+      "reject_holm_m2_alpha05": true,
+      "p_holm_m8": 2.2965333216972692e-05,
+      "reject_holm_m8_alpha05": true
+    },
+    {
+      "name": "dt_vs_qkc",
+      "n": 5,
+      "mean_delta_val": 0.002735278054813972,
+      "sd_delta_val": 0.00025492347990057143,
+      "t": 23.992563063680848,
+      "p_one_sided": 8.949559766705897e-06,
+      "p_holm_m2": 8.949559766705897e-06,
+      "reject_holm_m2_alpha05": true,
+      "p_holm_m8": 6.264691836694127e-05,
+      "reject_holm_m8_alpha05": true
+    }
+  ],
+  "note": "FAIL arms in table_negative_knowledge.tex remain single-seed and are judged only by the +0.002 gate."
+}

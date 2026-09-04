@@ -381,10 +381,14 @@ Each item $q$ has an embedding $e_q$; each KC $c$ has $e_c$. One
 propagation step, in the spirit of GIKT \cite{yang2021gikt} rather than
 hypergraph convolution, is
 \begin{equation}
-\tilde{e}_q = \tanh\bigl(W(e_q + \bar{A}_{q,:}\,E_c)\bigr),
+\tilde{e}_q = \tanh\bigl(W_q e_q + W_c\,\bar{A}_{q,:}\,E_c\bigr),
 \label{eq:qkc}
 \end{equation}
-with a dedicated linear $W$ (matched twin: same LSTM without this branch).
+implemented with a single shared matrix ($W_q{=}W_c{=}W$) on the sum
+$e_q+\bar{A}_{q,:}E_c$, then a separate input projection into the LSTM.
+We do not claim a non-collapsible dual-map form: the tied-$W$
+implementation is equivalent to one linear on the sum. The matched twin
+keeps the same LSTM without this Q$\leftarrow$KC branch.
 Interaction embeddings
 of $(c_t,y_t)$ plus Rasch-style item parameters feed an LSTM. The next
 step is scored by reading a query vector at the \emph{known} identity of
@@ -467,8 +471,14 @@ share the same timestamp and answer, so a large share of eval positions are
 answerable by copying the input label. We therefore mask repeat-row targets
 (\texttt{--mask-repeats}) in both our models and retrained pyKT baselines,
 use chunked windows (\texttt{--window-mode chunked}) with
-$L{=}400$, and report test-only AUC on the remaining scored positions
-($n_{\mathrm{scored}}\approx 1.09\times 10^6$ on XES3G5M fold~0). The
+$L{=}400$, and report test-only AUC on the remaining scored positions.
+Table~\ref{tab:auc-xes3g5m} uses a shared pyKT-aligned intersection of
+$n_{\mathrm{scored}}{=}1{,}093{,}720$ positions across all listed models.
+Native DH$^2$ scoring of the same clean mask yields
+$1{,}093{,}755$ positions (difference of 35); calibration
+(Table~\ref{tab:calibration-xes3g5m}) reports the native count. We do
+not collapse multi-KC rows back to attempt level for the headline AUC:
+each masked KC-row target is scored once. The
 6{,}413{,}353 KC-expanded rows versus 5{,}549{,}635 recorded attempts in
 \cite{liu2023xes3g5m} is the same multi-KC expansion pyKT warns about;
 we score the masked remainder, not every expanded row.
@@ -483,10 +493,16 @@ $\Delta\mathrm{val}\ge{+}0.002$ vs.\ its matched twin. This is an internal
 convention, not a timestamped public registry. Five-seed validation AUC SD is $0.00015$ on
 the recommended tracer and $0.00023$ on Q$\leftarrow$KC
 (Table~\ref{tab:auc-xes3g5m} arms); $+0.002$ is $\approx$9--13$\times$
-those SDs. We test eight credit arms (six FAIL rows in
-Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and Linear
-$\Delta t$) without a family-wise correction: the gate is a credit
-threshold, not a claim of simultaneous significance.
+those SDs. For the two five-seed XES credit tests we also report paired
+one-sided $t$-tests on $\Delta\mathrm{val}$: Q$\leftarrow$KC vs.\ twin
+mean $+0.00578$ ($t_4{=}31.92$, $p{=}2.87{\times}10^{-6}$); Linear
+$\Delta t$ vs.\ Q$\leftarrow$KC mean $+0.00274$ ($t_4{=}23.99$,
+$p{=}8.95{\times}10^{-6}$). Holm--Bonferroni at $\alpha{=}0.05$ among these
+two tests (and conservatively among all eight credit arms) leaves both
+significant. The six FAIL rows in
+Table~\ref{tab:negative-knowledge} remain single-seed and are judged only
+by the $+0.002$ gate, not by $p$-values: the gate is a credit threshold
+anchored to seed SD, not a claim of simultaneous significance.
 
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
@@ -494,14 +510,15 @@ hyperedges moves AUC. We report near-total node-drop $p{=}0.90$ on the
 graph-only diagnostic encoder (Appendix~\ref{app:graph-only}). That check
 confirms \emph{dependence} on some graph input: deleting 90\% of nodes will
 drop AUC for any encoder that reads those nodes. It does \emph{not} confirm
-that the encoder uses the correct relation structure. On fold~0,
-degree-preserving rewiring drops AUC by $0.0235$ (pass), while
-relation-label permutation is near-null (${\approx}0$; expected for a
-single-kind encoder) --- see Table~\ref{tab:manipulation}. An earlier
-pairwise$+$exercise path was graph-inert ($\Delta$AUC$\approx 0.0003$).
-The recommended tracer does not take this check: concept-stack
-\texttt{HypergraphConv} is off, and Q$\leftarrow$KC incidence is a
-bipartite membership matrix rather than a new multi-way graph.
+that the encoder uses the correct relation structure. Degree-preserving
+rewiring passes on folds~0--2 ($\Delta$AUC $0.0235$/$0.0341$/$0.0351$),
+while relation-label permutation is near-null on every fold
+(${\approx}0$; expected for a single-kind encoder) --- see
+Table~\ref{tab:manipulation}. An earlier pairwise$+$exercise path was
+graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended tracer does
+not take this check: concept-stack \texttt{HypergraphConv} is off, and
+Q$\leftarrow$KC incidence is a bipartite membership matrix rather than a
+new multi-way graph.
 
 \label{sec:eval}
 \label{sec:results}
@@ -584,6 +601,7 @@ tracer is best calibrated (ECE $0.0056$) despite higher AUC; Q$\leftarrow$KC
 on is slightly miscalibrated high (ECE $0.0103$). We report calibration as a
 diagnostic, not as a primary claim.
 \input{tables/table_calibration_xes3g5m}
+\input{figures/fig_reliability_xes3g5m}
 
 \subsection{Exploratory survey: Critic-gated explanations}
 \label{sec:tier2}
@@ -602,9 +620,13 @@ the Diagnostician prompt while the Critic still sees the true score, so
 the flag-rate gap is largely definitional and is not a content finding.
 On the recommended tracer, grounded/IG flags are $0.018$/$0.766$ with
 mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
-(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Dual-rater Likert
-($n{=}40$) was collected on the v2 checkpoint, not on the recommended
-tracer (Table~\ref{tab:human-eval}).
+(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Blinded Likert
+ratings on a seed~42 subsample of $n{=}100$ grounded tracer explanations
+(3 independent raters) give faithfulness $4.55{\pm}0.63$ and usefulness
+$4.01{\pm}0.74$ (mean pairwise Spearman $\rho{=}0.43$/$0.34$;
+within$\pm$1 $95.0\%$/$94.7\%$; Table~\ref{tab:human-eval}). An earlier
+dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived and
+not the primary human-eval row.
 \input{tables/table_tier2}
 \input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
@@ -732,12 +754,15 @@ part of this attribution map.
   \item The hyperedge leakage audit's pairwise-projection approximation
   (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
   hyperedge-native statistic is future work.
-  \item Exploratory Critic survey: one fold, one local 7B LLM; human
-  ratings use $n{=}40$ and two raters on the \emph{v2} graph-only
-  checkpoint (no third rater; not the recommended tracer). The
-  grounded--IG flag gap is largely definitional because IG withholds
-  $P(\mathrm{correct})$ from the Diagnostician while the Critic scores
-  against that number. ID-anchored KC-Jaccard is not synonym-aware
+  \item Exploratory Critic survey: one fold, one local 7B LLM. Blinded
+  Likert on the recommended tracer ($n{=}100$, 3 raters) is reported in
+  Table~\ref{tab:human-eval}; mean pairwise Spearman is moderate
+  ($\rho{\approx}0.43$/$0.34$) while within$\pm$1 agreement is high
+  (${\approx}95\%$), consistent with compressed high scores. An earlier
+  dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived
+  only. The grounded--IG flag gap is largely definitional because IG
+  withholds $P(\mathrm{correct})$ from the Diagnostician while the Critic
+  scores against that number. ID-anchored KC-Jaccard is not synonym-aware
   (XES3G5M lacks an in-repo KC name vocabulary); the JC gap is
   $\approx{+}0.010$. An LLM-scale sensitivity sweep remains optional
   future work.
@@ -757,8 +782,7 @@ $0.8296{\pm}0.0001$ over five training seeds on fold~0 versus
 compute-matched GIKT $0.8258{\pm}0.0001$ ($0.8295{\pm}0.0004$ over three
 learner folds). History-only $\Delta t$ does not pass the gate; only
 LSTM+query timing does. Future work: a tuning search for GIKT/AKT at
-$L{=}400$, human ratings on the recommended tracer, and
-hyperedge-native leakage statistics.
+$L{=}400$, and hyperedge-native leakage statistics.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
@@ -811,10 +835,11 @@ passes on all three folds ($\Delta$AUC $0.038$/$0.043$/$0.047$);
 P0 GKT also drops after retraining on a destroyed pairwise graph
 ($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
 confirms dependence of this diagnostic encoder on some graph input; it
-does not show correct use of relation structure. On fold~0,
-degree-preserving rewiring drops AUC by $0.0235$, while relation-label
-permutation is near-null (${\approx}0$; expected for a single-kind
-encoder; Table~\ref{tab:manipulation}). We do not deploy this encoder.
+does not show correct use of relation structure. Degree-preserving
+rewiring drops AUC by $0.0235$/$0.0341$/$0.0351$ on folds~0--2, while
+relation-label permutation is near-null on every fold (${\approx}0$;
+expected for a single-kind encoder; Table~\ref{tab:manipulation}). We do
+not deploy this encoder.
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
@@ -851,6 +876,17 @@ hints. We did not compute Rosenbaum bounds or an E-value.
 \input{tables/table_hint_ate}
 \FloatBarrier
 \clearpage
+
+\section*{Declaration of generative AI and AI-assisted technologies
+in the manuscript preparation process}
+During the preparation of this work the authors used Cursor (Composer)
+in order to draft and revise LaTeX wording, tables, and cover-letter
+text under author direction. After using this tool, the authors reviewed
+and edited the content as needed and take full responsibility for the
+content of the published article. The Tier~2 Diagnostician/Critic/Tutor
+agents (Qwen2.5-7B via Ollama) are experimental components of the
+reported system, not manuscript-writing tools, and are described in
+Section~\ref{sec:tier2}.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}

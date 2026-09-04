@@ -1,0 +1,13 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 1,
+  "ddr": 0.0,
+  "auc_clean": 0.7510897309198393,
+  "auc_destroyed": 0.7510897297842264,
+  "auc_drop": 1.1356129370199142e-09,
+  "passes_manipulation_check": false,
+  "verdict": "AUC drop 0.0000 under relation_label_permute (structure check, p unused). Little movement: node-drop dependence does not imply correct use of relation structure (Hau B12).",
+  "p": 0.9,
+  "operator": "relation_label_permute",
+  "seed": 42
+}

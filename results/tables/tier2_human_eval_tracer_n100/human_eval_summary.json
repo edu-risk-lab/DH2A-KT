@@ -1,0 +1,69 @@
+{
+  "n_ratings": 300,
+  "n_samples": 100,
+  "n_raters": 3,
+  "raters": [
+    "A",
+    "B",
+    "C"
+  ],
+  "faithfulness_mean": 4.55,
+  "faithfulness_sd": 0.6341718324267314,
+  "usefulness_mean": 4.006666666666667,
+  "usefulness_sd": 0.736044446333792,
+  "per_rater": {
+    "A": {
+      "n": 100,
+      "faithfulness_mean": 4.83,
+      "faithfulness_sd": 0.42770234150550657,
+      "usefulness_mean": 4.14,
+      "usefulness_sd": 0.4927760980691767
+    },
+    "B": {
+      "n": 100,
+      "faithfulness_mean": 4.57,
+      "faithfulness_sd": 0.6552815726036705,
+      "usefulness_mean": 4.03,
+      "usefulness_sd": 0.7971540286886503
+    },
+    "C": {
+      "n": 100,
+      "faithfulness_mean": 4.25,
+      "faithfulness_sd": 0.6571287406727709,
+      "usefulness_mean": 3.85,
+      "usefulness_sd": 0.8453676505795952
+    }
+  },
+  "agreement": {
+    "pairwise": [
+      {
+        "pair": "A-vs-B",
+        "faithfulness_spearman": 0.33335910672013547,
+        "usefulness_spearman": 0.30191602654111005,
+        "faithfulness_within_1": 0.95,
+        "usefulness_within_1": 0.95,
+        "n_paired": 100
+      },
+      {
+        "pair": "A-vs-C",
+        "faithfulness_spearman": 0.37694692162792054,
+        "usefulness_spearman": 0.03825665054627976,
+        "faithfulness_within_1": 0.93,
+        "usefulness_within_1": 0.91,
+        "n_paired": 100
+      },
+      {
+        "pair": "B-vs-C",
+        "faithfulness_spearman": 0.5804572425857337,
+        "usefulness_spearman": 0.6781637248899909,
+        "faithfulness_within_1": 0.97,
+        "usefulness_within_1": 0.98,
+        "n_paired": 100
+      }
+    ],
+    "faithfulness_spearman_mean": 0.4302544236445966,
+    "usefulness_spearman_mean": 0.33944546732579356,
+    "faithfulness_within_1_mean": 0.9499999999999998,
+    "usefulness_within_1_mean": 0.9466666666666667
+  }
+}
