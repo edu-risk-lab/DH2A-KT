@@ -61,6 +61,7 @@ pytest tests/ -v
 Checklist đầy đủ cho việc push lên GitHub và train trên GPU server khác máy
 (môi trường cần gì, commit/checksum nào phải khớp, thư mục nào không được
 commit) nằm ở [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
+Bảng/hình trong bản thảo KBS map sang script ở [`docs/paper-artifacts.md`](docs/paper-artifacts.md).
 
 ## Cấu trúc dự án
 

@@ -70,8 +70,9 @@ python scripts/32_b12_structure_checks.py --device cuda
 python scripts/32_b12_structure_checks.py --device cuda --folds 0
 ```
 
-Needs `results/checkpoints/xes3g5m_fold{0,1,2}.pt`. Writes (gitignored until
-allowlisted):
+Needs `results/checkpoints/xes3g5m_fold{0,1,2}.pt`. The driver **aborts** if
+a v2 full-eval clean AUC is below 0.65 (fold~0 once scored 0.535 — do not
+keep that JSON as a result). Writes:
 
 - `results/tables/xes3g5m_foldN_manipulation_check_degree_preserving_rewire.json`
 - `results/tables/xes3g5m_foldN_manipulation_check_relation_label_permute.json`

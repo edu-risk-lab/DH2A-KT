@@ -26,14 +26,14 @@ the title and from the contribution list.
 2. **Negative knowledge table.** HypergraphConv, hint-item HE, full Q-matrix, teacher grouping, Junyi DAG, and exponential concept-forget are reported as FAIL under the pre-specified gate — we do not loosen the gate to manufacture a hypergraph-AUC story.
 3. **Observational identification check.** Moved to the appendix. Weak positivity; the negative IPW estimate must not be read as “hints harm.” Not a contribution.
 4. **Compute vs tuning (B11).** GIKT shares DH²-KT’s compute envelope (batch 16, epoch cap 30, patience 5). AKT/simpleKT inherit pyKT/P0 defaults with only L raised to 400; we did not retune learning rate or dropout at L=400. Appendix table lists configs tried.
-5. **Graph-only diagnostic (appendix).** All three XES3G5M folds of the diagnostic encoder pass frozen-weight node-drop *p*=0.9 (ΔAUC 0.038 / 0.043 / 0.047). Degree-preserving rewiring also passes on folds 0–2 (ΔAUC 0.0235 / 0.0341 / 0.0351); relation-label permutation is near-null (expected for a single-kind encoder). This confirms dependence on graph structure for the diagnostic encoder, not a claim about QKC-T. This is not the headline system.
+5. **Graph-only diagnostic (appendix).** All three XES3G5M folds of the diagnostic encoder pass frozen-weight node-drop *p*=0.9 (ΔAUC 0.038 / 0.043 / 0.047). Degree-preserving rewiring also passes on folds 0–2 (ΔAUC 0.0318 / 0.0341 / 0.0351; clean AUC ≈0.75 after retrain of fold 0). Relation-label permutation is near-null (expected for a single-kind encoder). This is not the headline system.
 6. **Research questions.** RQ1–RQ2 ask which audited knowledge predicts and whether Linear Δt on this backbone outperforms the exponential forgetting form we test. Teacher / forum / video remain interface-only.
 
 **Companion paper P0** is cited as an unpublished submission with public code/artefacts; the manuscript is self-contained (Section on the reused P0 protocol). We can attach the P0 PDF as supplementary material on request.
 
 **Dataset access.** FoundationalASSIST is used under Hugging Face Responsible Use Guidelines; we confirm authorized access for this study. P0’s baseline results are vendored verbatim at a pinned commit, not re-derived. GIKT/AKT under the clean L=400 protocol were retrained in this repository.
 
-**Required Elsevier sections** (CRediT authorship contribution statement, Declaration of competing interest, Data availability) are included in the manuscript and have been confirmed by all co-authors. Code: `https://github.com/edu-risk-lab/DH2A-KT`. Corresponding author: Le Hoang Son (`sonlh@vnu.edu.vn`).
+**Required Elsevier sections** (CRediT authorship contribution statement, Declaration of competing interest, Data availability, Declaration of generative AI, Ethics) are included in the manuscript. Code: `https://github.com/edu-risk-lab/DH2A-KT` (commit `ea55ce7`; Zenodo DOI at submission). Corresponding author: Le Hoang Son (`sonlh@vnu.edu.vn`).
 
 Thank you for your consideration.
 

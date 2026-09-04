@@ -161,6 +161,23 @@ def main() -> int:
         if op != "node_drop":
             stem = f"{stem}_{op}"
         output = REPO_ROOT / "results" / "tables" / f"{stem}.json"
+    print(f"passes_manipulation_check={result.passes_manipulation_check}")
+    print(f"auc_clean={result.auc_clean:.4f} auc_destroyed={result.auc_destroyed:.4f} drop={result.auc_drop:.4f}")
+    print(f"ddr={result.ddr:.4f}")
+    print(f"verdict: {result.verdict}")
+    if (
+        trained is not None
+        and args.max_users is None
+        and arch == "v2"
+        and result.auc_clean < 0.65
+    ):
+        print(
+            f"ERROR: v2 clean AUC {result.auc_clean:.4f} < 0.65; checkpoint/eval "
+            "mismatch (expected ~0.75). JSON not written. "
+            "Use the node-drop checkpoint that scored ~0.75.",
+            file=sys.stderr,
+        )
+        return 3
     write_manipulation_check_result(
         result,
         dataset=dataset,
@@ -172,11 +189,6 @@ def main() -> int:
             "seed": int(mc_cfg.get("seed", 42)),
         },
     )
-
-    print(f"passes_manipulation_check={result.passes_manipulation_check}")
-    print(f"auc_clean={result.auc_clean:.4f} auc_destroyed={result.auc_destroyed:.4f} drop={result.auc_drop:.4f}")
-    print(f"ddr={result.ddr:.4f}")
-    print(f"verdict: {result.verdict}")
     print(f"written: {output}")
     return 0
 
