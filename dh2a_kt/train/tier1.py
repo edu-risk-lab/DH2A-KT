@@ -774,6 +774,7 @@ if _TORCH_AVAILABLE:
         recap_attention: bool = False,
         question_kc_agg: bool = False,
         question_graph: bool = False,
+        question_incidence_control: str = "observed",
         question_hypergraph: bool = False,
         hint_hypergraph: bool = False,
         time_gap: bool = False,
@@ -807,6 +808,7 @@ if _TORCH_AVAILABLE:
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
+            question_incidence_control=question_incidence_control,
             question_hypergraph=question_hypergraph,
             hint_hypergraph=hint_hypergraph,
             time_gap=time_gap,
@@ -859,6 +861,7 @@ def train_fold(
     recap_attention: bool = False,
     question_kc_agg: bool = False,
     question_graph: bool = False,
+    question_incidence_control: str = "observed",
     question_hypergraph: bool = False,
     hint_hypergraph: bool = False,
     hint_hyperedges: list[Hyperedge] | None = None,
@@ -875,6 +878,16 @@ def train_fold(
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
+    if question_incidence_control not in ("observed", "zero"):
+        raise ValueError(
+            "question_incidence_control must be 'observed' or 'zero', "
+            f"got {question_incidence_control!r}"
+        )
+    if question_incidence_control != "observed" and not question_graph:
+        raise ValueError(
+            "question_incidence_control requires question_graph=True so the "
+            "question pathway and parameter count stay matched"
+        )
 
     from dh2a_kt.hyperedge.indexing import select_session_hyperedges_for_training
 
@@ -1008,6 +1021,7 @@ def train_fold(
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
+        question_incidence_control=question_incidence_control,
         question_hypergraph=question_hypergraph,
         hint_hypergraph=hint_hypergraph,
         time_gap=time_gap,
@@ -1051,15 +1065,26 @@ def train_fold(
                 for k in kcs:
                     if k in kc_to_idx:
                         A_qs[item_idx, kc_to_idx[k]] = 1.0
+            observed_links = int(A_qs.sum().item())
+            observed_linked_items = int((A_qs.sum(dim=1) > 0).sum().item())
+            if question_incidence_control == "zero":
+                # Capacity-matched Q←KC twin: retain question_embed,
+                # question_gcn_linear and question_in_proj, but remove only
+                # the incidence message A_norm @ concept_embed.
+                A_qs.zero_()
             model.set_question_kc_incidence(A_qs)
             n_linked = int((A_qs.sum(dim=1) > 0).sum().item())
             logger.info(
                 "question_graph: registered Q–KC incidence for %d/%d items "
-                "(mean degree=%.2f, full_qmatrix=%s)",
+                "(mean degree=%.2f, full_qmatrix=%s, control=%s; "
+                "observed links=%d across %d items)",
                 n_linked,
                 len(item_to_idx),
                 float(A_qs.sum().item()) / max(len(item_to_idx), 1),
                 full_qmatrix,
+                question_incidence_control,
+                observed_links,
+                observed_linked_items,
             )
     if hint_hypergraph and architecture == "v4":
         from dh2a_kt.hyperedge.indexing import (
@@ -1211,6 +1236,7 @@ def train_and_evaluate_fold(
     recap_attention: bool = False,
     question_kc_agg: bool = False,
     question_graph: bool = False,
+    question_incidence_control: str = "observed",
     question_hypergraph: bool = False,
     hint_hypergraph: bool = False,
     hint_hyperedges: list[Hyperedge] | None = None,
@@ -1265,6 +1291,7 @@ def train_and_evaluate_fold(
         recap_attention=recap_attention,
         question_kc_agg=question_kc_agg,
         question_graph=question_graph,
+        question_incidence_control=question_incidence_control,
         question_hypergraph=question_hypergraph,
         hint_hypergraph=hint_hypergraph,
         hint_hyperedges=hint_hyperedges,

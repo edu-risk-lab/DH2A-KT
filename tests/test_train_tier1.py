@@ -282,6 +282,7 @@ def test_clean_protocol_scores_fewer_positions_than_p0_protocol():
 
 def test_responses_for_model_alignment_per_architecture():
     torch = pytest.importorskip("torch")
+    pytest.importorskip("torch_geometric")
     from dh2a_kt.train.tier1 import build_model, responses_for_model
 
     batch = {
@@ -323,6 +324,43 @@ def test_train_and_evaluate_fold_toy_v4(use_questions: bool):
     assert np.isfinite(result.auc)
     # chunked windows must score more positions than one window per user would.
     assert result.n_predictions > 8 * 9
+
+
+def test_zero_incidence_control_keeps_question_pathway_and_clears_links():
+    pytest.importorskip("torch_geometric")
+    torch = pytest.importorskip("torch")
+    from dh2a_kt.train.tier1 import train_fold
+
+    train_df = _synthetic_logs(n_users=8, seq_len=10)
+    eval_df = _synthetic_logs(n_users=4, seq_len=10)
+    e_pre = pd.DataFrame(
+        {"src_kc": [0, 1], "dst_kc": [1, 2], "weight": [1.0, 1.0]}
+    )
+    budget = TrainingBudget(
+        reference_model="gkt",
+        batch_size=4,
+        epochs=1,
+        lr=1e-2,
+        max_seq_len=10,
+        matched_p0=False,
+    )
+    trained = train_fold(
+        train_df,
+        eval_df,
+        e_pre,
+        budget,
+        device="cpu",
+        hidden_dim=16,
+        architecture="v4",
+        use_questions=True,
+        question_graph=True,
+        question_incidence_control="zero",
+        use_graph=False,
+        seed=42,
+    )
+    assert trained.model.config.question_incidence_control == "zero"
+    assert hasattr(trained.model, "question_embed")
+    assert torch.count_nonzero(trained.model.A_qs_norm).item() == 0
 
 
 def test_same_seed_reproduces_auc_and_different_seed_does_not():

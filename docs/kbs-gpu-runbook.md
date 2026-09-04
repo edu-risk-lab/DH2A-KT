@@ -81,6 +81,39 @@ On a single-kind v2 graph, relation-label permutation is expected near-null.
 Paste `auc_drop` into `paper/tables/table_manipulation.tex` (rows currently
 `not run`). Do not invent numbers.
 
+## 6. Capacity-matched Q←KC attribution — required rerun
+
+The historical `hg_qkc_off` arm removed the whole question pathway and is
+not a valid attribution twin. This rerun keeps `question_embed`,
+`question_gcn_linear`, and `question_in_proj` in both arms; only the
+train-only incidence message is removed in the `zero` arm.
+
+```bash
+git fetch origin
+git checkout qkc-capacity-matched
+git pull --ff-only
+python scripts/34_qkc_capacity_matched.py --device cuda
+```
+
+For a one-seed smoke run before launching all ten jobs:
+
+```bash
+python scripts/34_qkc_capacity_matched.py --device cuda --seeds 42
+```
+
+Outputs:
+
+- `results/tables/qkc_capacity_matched_matrix.csv`
+- `results/tables/qkc_capacity_matched_summary.json`
+- `results/tables/qkc_capacity_matched_logs/`
+- `results/checkpoints/xes3g5m_fold0_qkc_cm_{observed,zero}_sSEED.pt`
+
+The driver refuses a result if the two arms have different checkpoint state
+shapes/element counts, if the observed arm has no Q–KC links, or if the zero
+arm retains any links. Do not update the manuscript until all five paired
+seeds finish. The claim passes only when the measured paired validation
+difference supports it; do not reuse the legacy hard-off delta.
+
 ## Notes
 
 - StubLLM IG keeps the same `GroundedKCs` trailer construction as grounded

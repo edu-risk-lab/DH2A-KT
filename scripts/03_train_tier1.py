@@ -191,7 +191,15 @@ def main() -> int:
         "--question-graph",
         action="store_true",
         help="v4: GIKT-style question embedding refined by observed Q–KC incidence "
-        "(no response transport). Hard ablation twin: omit this flag.",
+        "(no response transport).",
+    )
+    parser.add_argument(
+        "--question-incidence-control",
+        choices=("observed", "zero"),
+        default=None,
+        help="Incidence inside --question-graph. 'zero' keeps the complete "
+        "question embedding/projection pathway and removes only A_norm @ KC, "
+        "providing the capacity-matched Q←KC twin.",
     )
     parser.add_argument(
         "--question-hypergraph",
@@ -358,6 +366,15 @@ def main() -> int:
     recap_attention = bool(args.recap_attention or train_cfg.get("recap_attention", False))
     question_kc_agg = bool(args.question_kc_agg or train_cfg.get("question_kc_agg", False))
     question_graph = bool(args.question_graph or train_cfg.get("question_graph", False))
+    question_incidence_control = str(
+        args.question_incidence_control
+        or train_cfg.get("question_incidence_control", "observed")
+    )
+    if question_incidence_control != "observed" and not question_graph:
+        raise SystemExit(
+            "--question-incidence-control zero requires --question-graph so "
+            "the question pathway remains capacity-matched"
+        )
     question_hypergraph = bool(
         args.question_hypergraph or train_cfg.get("question_hypergraph", False)
     )
@@ -430,7 +447,9 @@ def main() -> int:
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
           f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
-          f"question_graph={question_graph} question_hypergraph={question_hypergraph} "
+          f"question_graph={question_graph} "
+          f"question_incidence_control={question_incidence_control} "
+          f"question_hypergraph={question_hypergraph} "
           f"hint_hypergraph={hint_hypergraph} "
           f"full_qmatrix={full_qmatrix} time_gap={time_gap} "
           f"time_gap_mode={time_gap_mode} time_split={time_split} "
@@ -620,6 +639,7 @@ def main() -> int:
             recap_attention=recap_attention,
             question_kc_agg=question_kc_agg,
             question_graph=question_graph,
+            question_incidence_control=question_incidence_control,
             question_hypergraph=question_hypergraph,
             hint_hypergraph=hint_hypergraph,
             hint_hyperedges=hint_hyperedges,

@@ -445,9 +445,38 @@ def test_v4_question_graph_ablation_differs_from_full():
     with torch.no_grad():
         empty = model(batch)
     assert (full - empty).abs().max().item() > 1e-4
-    # Twin without the module must not have question_embed.
+    # The legacy hard-off arm changes capacity and is not a valid attribution twin.
     off = DH2KT(_v4_config(use_questions=True, question_graph=False))
     assert not hasattr(off, "question_embed")
+
+
+def test_v4_zero_incidence_twin_has_identical_trainable_capacity():
+    observed = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            question_incidence_control="observed",
+        )
+    )
+    zero = DH2KT(
+        _v4_config(
+            use_questions=True,
+            question_graph=True,
+            question_incidence_control="zero",
+        )
+    )
+    observed_shapes = {
+        name: tuple(parameter.shape) for name, parameter in observed.named_parameters()
+    }
+    zero_shapes = {
+        name: tuple(parameter.shape) for name, parameter in zero.named_parameters()
+    }
+    assert observed_shapes == zero_shapes
+    assert sum(p.numel() for p in observed.parameters()) == sum(
+        p.numel() for p in zero.parameters()
+    )
+    assert hasattr(observed, "question_embed")
+    assert hasattr(zero, "question_embed")
 
 
 def test_v4_question_graph_no_future_leak():

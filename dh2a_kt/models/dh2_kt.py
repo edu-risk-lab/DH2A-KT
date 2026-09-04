@@ -127,6 +127,12 @@ class DH2KTConfig:
 
     ``q_gcn = tanh(W(q_emb + A_norm @ concept_emb))`` — no response transport.
     """
+    question_incidence_control: str = "observed"
+    """Incidence used by ``question_graph``: observed links or a zero-link twin.
+
+    Both modes instantiate the identical question embedding and projection
+    pathway; ``zero`` removes only the ``A_norm @ concept_embed`` message.
+    """
     question_hypergraph: bool = False
     """v4 only: HypergraphConv on observed multi-KC ``question_concepts`` edges.
 
