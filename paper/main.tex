@@ -620,13 +620,13 @@ the Diagnostician prompt while the Critic still sees the true score, so
 the flag-rate gap is largely definitional and is not a content finding.
 On the recommended tracer, grounded/IG flags are $0.018$/$0.766$ with
 mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
-(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Dual-rater Likert
-($n{=}40$) was collected on the v2 checkpoint
-(Table~\ref{tab:human-eval}). Following GS Hau B10 we extend human
-rating to the recommended tracer: a blinded pack of $n{=}100$
-grounded explanations (seed~42 subsample of the $n{=}500$ Ollama run)
-is prepared for $\ge$3 independent raters; ratings and agreement
-statistics will replace the v2-only Likert row once returned.
+(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Blinded Likert
+ratings on a seed~42 subsample of $n{=}100$ grounded tracer explanations
+(3 independent raters) give faithfulness $4.55{\pm}0.63$ and usefulness
+$4.01{\pm}0.74$ (mean pairwise Spearman $\rho{=}0.43$/$0.34$;
+within$\pm$1 $95.0\%$/$94.7\%$; Table~\ref{tab:human-eval}). An earlier
+dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived and
+not the primary human-eval row.
 \input{tables/table_tier2}
 \input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
@@ -754,17 +754,18 @@ part of this attribution map.
   \item The hyperedge leakage audit's pairwise-projection approximation
   (Section~\ref{sec:leakage-ext}) weights all projected pairs equally; a
   hyperedge-native statistic is future work.
-  \item Exploratory Critic survey: one fold, one local 7B LLM. The
-  published dual-rater Likert ($n{=}40$) is on the \emph{v2} graph-only
-  checkpoint (Table~\ref{tab:human-eval}). A blinded $n{=}100$ pack on
-  the recommended tracer (seed~42 subsample of the $n{=}500$ grounded
-  Ollama run; $\ge$3 raters) is in collection and will replace that
-  row when returned. The grounded--IG flag gap is largely definitional
-  because IG withholds $P(\mathrm{correct})$ from the Diagnostician
-  while the Critic scores against that number. ID-anchored KC-Jaccard
-  is not synonym-aware (XES3G5M lacks an in-repo KC name vocabulary);
-  the JC gap is $\approx{+}0.010$. An LLM-scale sensitivity sweep
-  remains optional future work.
+  \item Exploratory Critic survey: one fold, one local 7B LLM. Blinded
+  Likert on the recommended tracer ($n{=}100$, 3 raters) is reported in
+  Table~\ref{tab:human-eval}; mean pairwise Spearman is moderate
+  ($\rho{\approx}0.43$/$0.34$) while within$\pm$1 agreement is high
+  (${\approx}95\%$), consistent with compressed high scores. An earlier
+  dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived
+  only. The grounded--IG flag gap is largely definitional because IG
+  withholds $P(\mathrm{correct})$ from the Diagnostician while the Critic
+  scores against that number. ID-anchored KC-Jaccard is not synonym-aware
+  (XES3G5M lacks an in-repo KC name vocabulary); the JC gap is
+  $\approx{+}0.010$. An LLM-scale sensitivity sweep remains optional
+  future work.
   \item Reproduction environment: Windows workstation, single RTX~3090;
   unit tests pass in the released codebase.
 \end{itemize}
@@ -781,7 +782,7 @@ $0.8296{\pm}0.0001$ over five training seeds on fold~0 versus
 compute-matched GIKT $0.8258{\pm}0.0001$ ($0.8295{\pm}0.0004$ over three
 learner folds). History-only $\Delta t$ does not pass the gate; only
 LSTM+query timing does. Future work: a tuning search for GIKT/AKT at
-$L{=}400$, human ratings on the recommended tracer, and
+$L{=}400$, a tuning search for GIKT/AKT at $L{=}400$, and
 hyperedge-native leakage statistics.
 
 \section*{CRediT authorship contribution statement}

@@ -112,6 +112,7 @@ results/figures/*
 !results/tables/xes3g5m_fold0_greykt_train_v3_predictive_obs_b64_amp_freeze.log
 # Skip redundant archive if unpacked tree is tracked
 results/tables/tier2_human_eval/distribution.rar
+results/tables/tier2_human_eval_tracer_n100/distribution.rar
 
 # Local Python virtual environment created by scripts/00_setup_p0_submodule.sh
 .venv/
