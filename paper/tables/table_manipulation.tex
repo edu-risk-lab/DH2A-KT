@@ -1,20 +1,18 @@
 \begin{table}[htbp]
-\caption{Manipulation check on XES3G5M. Reported destruction is node-drop
-$p{=}0.9$ on the graph-only diagnostic encoder (log label v2): train on
-clean hyperedges, re-evaluate frozen weights on destroyed hyperedges
-(folds~0--2). This confirms dependence on some graph input, not correct
-use of relation structure. Degree-preserving rewiring and relation-label
-permutation (Hau B12) use the same frozen checkpoints
-(\texttt{xes3g5m\_fold\{0,1,2\}.pt}). Rewiring passes on all three folds
-($\Delta$AUC $0.0235$--$0.0351$); label permutation is near-null
-(expected for a single-kind encoder). Fold~0 rewiring reports a lower
-clean AUC than node-drop on the same fold because the structure-check
-eval path differs from the node-drop path; $\Delta$AUC remains the
-manipulation signal. GKT: P0 DDR-downstream mean $\Delta$AUC over
-$n{=}9$ fold--seed runs (\cite{daominh2026p0}; retrain on destroyed
-pairwise graph). simpleKT has no concept-graph input, so graph
-destruction is undefined. The recommended tracer (QKC-T) does not take
-this check.}
+\caption{Manipulation check on XES3G5M. Node-drop $p{=}0.9$ is a frozen-weight
+destruction of the graph-only diagnostic encoder (log label v2; folds~0--2).
+That check confirms dependence on some graph input. Degree-preserving
+rewiring (Hau B12) is the structure check: we claim only folds~1--2
+($\Delta$AUC $0.0341$/$0.0351$), where clean AUC matches the node-drop
+encoder ($\approx 0.75$). Fold~0 rewiring/label-permute scored clean AUC
+$0.535$ against node-drop $0.753$ on the same fold --- an eval/checkpoint
+mismatch; those two rows are shown for completeness and are \emph{not}
+in the structure-check claim. Relation-label permutation is near-null on
+the valid folds (expected for a single-kind encoder). GKT: P0
+DDR-downstream mean $\Delta$AUC over $n{=}9$ fold--seed runs
+(\cite{daominh2026p0}; retrain on destroyed pairwise graph). simpleKT has
+no concept-graph input. The recommended tracer (QKC-T) does not take this
+check.}
 \label{tab:manipulation}
 \centering
 \begin{tabular}{@{}lcccc@{}}
@@ -24,10 +22,10 @@ Model / destruction & AUC clean & $\Delta$AUC & DDR & Pass? \\
 Diagnostic encoder, node-drop $p{=}0.9$ (fold~0) & 0.753 & 0.0380 & 0.990 & Yes \\
 Diagnostic encoder, node-drop $p{=}0.9$ (fold~1) & 0.749 & 0.0432 & 0.990 & Yes \\
 Diagnostic encoder, node-drop $p{=}0.9$ (fold~2) & 0.753 & 0.0469 & 0.990 & Yes \\
-Diagnostic encoder, degree-preserving rewiring (fold~0) & 0.535 & 0.0235 & 0.057 & Yes \\
+Diagnostic encoder, degree-preserving rewiring (fold~0) & 0.535$^\ast$ & 0.0235$^\ast$ & 0.057 & --- \\
 Diagnostic encoder, degree-preserving rewiring (fold~1) & 0.751 & 0.0341 & 0.058 & Yes \\
 Diagnostic encoder, degree-preserving rewiring (fold~2) & 0.752 & 0.0351 & 0.057 & Yes \\
-Diagnostic encoder, relation-label permutation (fold~0) & 0.535 & ${\approx}0$ & 0.000 & No \\
+Diagnostic encoder, relation-label permutation (fold~0) & 0.535$^\ast$ & ${\approx}0$$^\ast$ & 0.000 & --- \\
 Diagnostic encoder, relation-label permutation (fold~1) & 0.751 & ${\approx}0$ & 0.000 & No \\
 Diagnostic encoder, relation-label permutation (fold~2) & 0.752 & ${\approx}0$ & 0.000 & No \\
 GKT (P0, mean$\pm$SD), node-drop $p{=}0.9$ & --- & $0.0877{\pm}0.0009$ & 0.990 & Yes \\

@@ -303,7 +303,7 @@ audit and for optional \texttt{HypergraphConv} diagnostic arms; it is not
 part of the recommended Q$\leftarrow$KC tracer.
 
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} $E_{\mathrm{pre}}^f$; bounds $[\ell_{\min},\ell_{\max}]$
+\STATE \textbf{Input:} $E_{\mathrm{pre}}^f$; bounds $[\ell_{\min},\ell_{\max}]=[3,8]$
 \STATE \textbf{Output:} path-derived concept-group set $\mathcal{E}^{\mathrm{path}}_f$
 \STATE Build directed graph $G$ from $E_{\mathrm{pre}}^f$
 \FOR{each root $r$ with in-degree 0 in $G$}
@@ -314,7 +314,8 @@ part of the recommended Q$\leftarrow$KC tracer.
 \end{algorithmic}
 \noindent\textbf{Algorithm 1.} Path-derived concept-group hyperedges from
 audited $E_{\mathrm{pre}}^f$ (member set is unordered; path direction is
-not encoded).
+not encoded). Chain length bounds $[3,8]$ match
+\texttt{hyperedge.concept\_prerequisite} in \texttt{configs/xes3g5m.yaml}.
 \label{alg:concept-hyperedge}
 
 Discussion-thread and teacher-intervention hyperedges are data-blocked on
@@ -506,15 +507,15 @@ anchored to seed SD, not a claim of simultaneous significance.
 
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
-hyperedges moves AUC. We report near-total node-drop $p{=}0.90$ on the
-graph-only diagnostic encoder (Appendix~\ref{app:graph-only}). That check
-confirms \emph{dependence} on some graph input: deleting 90\% of nodes will
-drop AUC for any encoder that reads those nodes. It does \emph{not} confirm
-that the encoder uses the correct relation structure. Degree-preserving
-rewiring passes on folds~0--2 ($\Delta$AUC $0.0235$/$0.0341$/$0.0351$),
-while relation-label permutation is near-null on every fold
-(${\approx}0$; expected for a single-kind encoder) --- see
-Table~\ref{tab:manipulation}. An earlier pairwise$+$exercise path was
+hyperedges moves AUC. Near-total node-drop $p{=}0.90$ on the graph-only
+diagnostic encoder (Appendix~\ref{app:graph-only}) confirms
+\emph{dependence} on some graph input. Degree-preserving rewiring asks
+whether that encoder also uses \emph{which} concepts co-occur: it passes
+on folds~1--2 ($\Delta$AUC $0.0341$/$0.0351$; clean AUC $\approx 0.75$,
+matched to node-drop). The fold~0 rewiring run scored clean AUC $0.535$
+and is omitted from that claim (Table~\ref{tab:manipulation}).
+Relation-label permutation is near-null on the valid folds (expected for
+a single-kind encoder). An earlier pairwise$+$exercise path was
 graph-inert ($\Delta$AUC$\approx 0.0003$). The recommended tracer does
 not take this check: concept-stack \texttt{HypergraphConv} is off, and
 Q$\leftarrow$KC incidence is a bipartite membership matrix rather than a
@@ -623,7 +624,8 @@ mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
 (Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Blinded Likert
 ratings on a seed~42 subsample of $n{=}100$ grounded tracer explanations
 (3 independent raters) give faithfulness $4.55{\pm}0.63$ and usefulness
-$4.01{\pm}0.74$ (mean pairwise Spearman $\rho{=}0.43$/$0.34$;
+$4.01{\pm}0.74$ (ordinal Krippendorff $\alpha{=}0.52$/$0.56$;
+mean pairwise Spearman $\rho{=}0.43$/$0.34$;
 within$\pm$1 $95.0\%$/$94.7\%$; Table~\ref{tab:human-eval}). An earlier
 dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived and
 not the primary human-eval row.
@@ -688,9 +690,11 @@ learner-level bootstrap CIs, not a SOTA headline. HypergraphConv and
 hint-item hyperedges fail the pre-specified gate, so we do not credit
 multi-way message passing. The node-drop check
 (Appendix~\ref{app:graph-only}) is run on the graph-only diagnostic
-encoder, not on the recommended tracer. It confirms that encoder's
-\emph{dependence} on some graph input under $p{=}0.9$ node deletion; it
-does not show correct use of relation structure, and it does not support
+encoder, not on the recommended tracer. Node-drop confirms
+\emph{dependence} on some graph input. Degree-preserving rewiring on
+folds~1--2 additionally moves AUC ($0.0341$/$0.0351$), which is evidence
+that this diagnostic encoder is sensitive to co-occurrence structure, not
+only to the presence of nodes. That check still does not support
 graph-structure claims about QKC-T. Q$\leftarrow$KC incidence is a
 bipartite membership matrix, not a new multi-way graph.
 
@@ -756,7 +760,8 @@ part of this attribution map.
   hyperedge-native statistic is future work.
   \item Exploratory Critic survey: one fold, one local 7B LLM. Blinded
   Likert on the recommended tracer ($n{=}100$, 3 raters) is reported in
-  Table~\ref{tab:human-eval}; mean pairwise Spearman is moderate
+  Table~\ref{tab:human-eval}; ordinal Krippendorff $\alpha$ is $0.52$
+  (faithfulness) / $0.56$ (usefulness). Mean pairwise Spearman is moderate
   ($\rho{\approx}0.43$/$0.34$) while within$\pm$1 agreement is high
   (${\approx}95\%$), consistent with compressed high scores. An earlier
   dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived
@@ -802,16 +807,29 @@ The authors declare that they have no known competing financial interests
 or personal relationships that could have appeared to influence the work
 reported in this paper.
 
+\section*{Ethics}
+The Likert study rates de-identified, model-generated explanations. It
+does not recruit learners, collect new educational records, or intervene
+in instruction. The three raters scored system output already produced
+from the public XES3G5M release. The authors' institutions do not require
+research-ethics board review for this form of expert rating of model
+output.
+
 \section*{Data availability}
 Code for DH$^2$A-KT is available at
-\url{https://github.com/edu-risk-lab/DH2A-KT}.
+\url{https://github.com/edu-risk-lab/DH2A-KT}
+(default branch, commit \texttt{ea55ce7}; a Zenodo snapshot DOI will be
+minted at submission).
 P0's audited edges and reused baselines are vendored under
-\cite{daominh2026p0}'s release terms (pinned commit,
+\cite{daominh2026p0}'s release terms (pinned commit
+\texttt{5e3d6a0},
 Section~\ref{sec:baselines-reuse}); the companion PDF can be supplied as
 journal supplementary material while that manuscript is under review.
 FoundationalASSIST~\cite{foundationalassist2026} must be obtained from
 Hugging Face under its Responsible Use Guidelines and cannot be
 redistributed by the authors.
+A table-to-script map is in the repository file
+\texttt{docs/paper-artifacts.md}.
 
 \section*{Acknowledgment}
 All Tier~1 experiments in this paper are designed to run on a single
@@ -834,12 +852,11 @@ Table~\ref{tab:auc-xes3g5m-v2}). Frozen-weight node-drop $p{=}0.9$
 passes on all three folds ($\Delta$AUC $0.038$/$0.043$/$0.047$);
 P0 GKT also drops after retraining on a destroyed pairwise graph
 ($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
-confirms dependence of this diagnostic encoder on some graph input; it
-does not show correct use of relation structure. Degree-preserving
-rewiring drops AUC by $0.0235$/$0.0341$/$0.0351$ on folds~0--2, while
-relation-label permutation is near-null on every fold (${\approx}0$;
-expected for a single-kind encoder; Table~\ref{tab:manipulation}). We do
-not deploy this encoder.
+confirms dependence on some graph input. Degree-preserving rewiring on
+folds~1--2 drops AUC by $0.0341$/$0.0351$ (clean AUC $\approx 0.75$);
+the fold~0 rewiring run (clean AUC $0.535$) is an eval mismatch and is
+not in that claim. Relation-label permutation is near-null on the valid
+folds (Table~\ref{tab:manipulation}). We do not deploy this encoder.
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
