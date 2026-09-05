@@ -11,7 +11,10 @@ Recommended tracer (QKC-T) & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\
 Q$\leftarrow$KC only & Same LSTM without the $\Delta t$ branch \\
-No-graph twin & Same LSTM without the Q$\leftarrow$KC branch \\
+Pathway-off twin & Same LSTM with the question pathway removed
+(historical hard-off; capacity-mismatched) \\
+Capacity-matched zero twin & Same question pathway with incidence matrix
+zeroed (\texttt{--question-incidence-control zero}) \\
 Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
 question LSTM path (\texttt{v2}) \\
 \bottomrule

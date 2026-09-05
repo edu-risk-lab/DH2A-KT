@@ -1,0 +1,59 @@
+{
+  "comparison": "observed Q-KC incidence minus zero-incidence capacity twin",
+  "val_gate": 0.002,
+  "paired_seeds": [
+    0,
+    17,
+    42,
+    1234,
+    2024
+  ],
+  "n_pairs": 5,
+  "k_gate_pass": 0,
+  "mean_delta_val": -0.00010313749160788533,
+  "sd_delta_val": 0.0003397508284768126,
+  "mean_delta_test": 3.7746526547732805e-05,
+  "sd_delta_test": 0.0001974215137093852,
+  "pairs": [
+    {
+      "seed": 0,
+      "delta_val_observed_minus_zero": -0.0005622772954489985,
+      "delta_test_observed_minus_zero": -0.00020361220185749485,
+      "gate_pass": false,
+      "identical_state_shapes": true,
+      "identical_state_numel": true
+    },
+    {
+      "seed": 17,
+      "delta_val_observed_minus_zero": -0.00010027612489682536,
+      "delta_test_observed_minus_zero": -0.00014333157779866657,
+      "gate_pass": false,
+      "identical_state_shapes": true,
+      "identical_state_numel": true
+    },
+    {
+      "seed": 42,
+      "delta_val_observed_minus_zero": -0.00020690228145847644,
+      "delta_test_observed_minus_zero": 0.00012787305348238576,
+      "gate_pass": false,
+      "identical_state_shapes": true,
+      "identical_state_numel": true
+    },
+    {
+      "seed": 1234,
+      "delta_val_observed_minus_zero": 0.00038098411607134786,
+      "delta_test_observed_minus_zero": 0.00017633503188385635,
+      "gate_pass": false,
+      "identical_state_shapes": true,
+      "identical_state_numel": true
+    },
+    {
+      "seed": 2024,
+      "delta_val_observed_minus_zero": -2.7215872306474154e-05,
+      "delta_test_observed_minus_zero": 0.00023146832702858333,
+      "gate_pass": false,
+      "identical_state_shapes": true,
+      "identical_state_numel": true
+    }
+  ]
+}
