@@ -31,6 +31,8 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 PYTHON = Path(os.environ.get("DH2A_PYTHON", sys.executable))
 DEFAULT_SEEDS = [42, 17, 1234, 0, 2024]
 ARMS = ("observed", "zero", "zero_time")
