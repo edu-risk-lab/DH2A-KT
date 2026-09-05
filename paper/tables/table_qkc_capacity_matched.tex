@@ -3,7 +3,7 @@
 (clean protocol). Both arms keep \texttt{--question-graph} (same
 \texttt{question\_embed}, GCN linear, and input projection); only the
 train-only incidence matrix is replaced by zeros in the twin
-(\texttt{--question-incidence-control zero}). Gate:
+(\texttt{--question-incidence-control zero}). Pre-specified gate:
 $\Delta\mathrm{val}\ge{+}0.002$. Checkpoint state shapes match on every
 seed; observed nonzero links $=8848$, zero arm $=0$. Mean
 $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$; mean
@@ -17,7 +17,7 @@ test-only AUC (1{,}093{,}755 scored positions).}
 \footnotesize
 \begin{tabular}{@{}rrrrrl@{}}
 \toprule
-Seed & Observed val & Zero val & $\Delta$val & $\Delta$test & Gate \\
+Seed & Observed val & Zero val & $\Delta$val & $\Delta$test-only & Gate \\
 \midrule
 0 & 0.82554 & 0.82610 & $-0.00056$ & $-0.00007$ & FAIL \\
 17 & 0.82579 & 0.82589 & $-0.00010$ & $-0.00018$ & FAIL \\

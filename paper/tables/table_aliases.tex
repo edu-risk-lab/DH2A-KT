@@ -7,7 +7,9 @@ implementation aliases from training logs, not model names.}
 \toprule
 Name in this paper & Architecture \\
 \midrule
-Recommended tracer (QKC-T) & LSTM with train-only Q$\leftarrow$KC
+DH$^2$A-KT & Attribution pipeline: train-only construction, leakage audit,
+matched twins, credit gate, and knowledge map; not one predictor \\
+QKC-T reference arm & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\
 Q$\leftarrow$KC only & Same LSTM without the $\Delta t$ branch \\
@@ -15,7 +17,7 @@ Pathway-off twin & Same LSTM with the question pathway removed
 (historical hard-off; capacity-mismatched) \\
 Capacity-matched zero twin & Same question pathway with incidence matrix
 zeroed (\texttt{--question-incidence-control zero}) \\
-Zero-incidence$+\Delta t$ & Capacity-matched zero twin plus Linear
+Zero-incidence$+\Delta t$ (minimal positive control) & Capacity-matched zero twin plus Linear
 $\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}) \\
 Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
 question LSTM path (\texttt{v2}) \\

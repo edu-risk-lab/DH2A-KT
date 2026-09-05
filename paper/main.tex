@@ -9,9 +9,10 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{tabularx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,positioning,backgrounds}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 \usepackage[section]{placeins}
 
@@ -68,8 +69,8 @@ windows, $L{=}400$, test-only), the recommended tracer (QKC-T: LSTM with
 the Q$\leftarrow$KC pathway and a linear $\log(1{+}\Delta t)$ branch)
 reaches test AUC $0.8296{\pm}0.0001$ over five training seeds versus
 compute-matched GIKT $0.8258{\pm}0.0001$ and \textit{simpleKT}
-$0.8214{\pm}0.0007$ (learner-level bootstrap 95\% CI of each difference
-excludes $0$). The same recipe on folds~1--2 stays within $0.001$ (mean
+$0.8214{\pm}0.0007$ (five-seed mean gaps $+0.0038$ and $+0.0082$;
+paired learner-level bootstrap 95\% CIs exclude $0$). The same recipe on folds~1--2 stays within $0.001$ (mean
 $0.8295{\pm}0.0004$). On this backbone the exponential forgetting form
 (P4) does not outperform Linear $\log(1{+}\Delta t)$; LSTM-only $\Delta t$
 fails the gate. A graph-only diagnostic encoder (AUC $0.752$) is in the
@@ -175,8 +176,8 @@ check remain available as a forced-reliance diagnostic
   HypergraphConv, hint-item hyperedges, a full Q-matrix, teacher grouping,
   an expert DAG, and per-concept exponential forgetting (P4) also fail
   (Table~\ref{tab:negative-knowledge}). Versus compute-matched GIKT
-  $0.8258{\pm}0.0001$, the recommended tracer's learner-level bootstrap
-  95\% CI excludes $0$ (Table~\ref{tab:auc-xes3g5m}). Graph-only v2 mean AUC
+  $0.8258{\pm}0.0001$, the five-seed mean gap is $+0.0038$ and a paired
+  learner-level bootstrap 95\% CI excludes $0$ (Table~\ref{tab:auc-xes3g5m}). Graph-only v2 mean AUC
   $0.752$ versus GKT $0.834$ is an appendix diagnostic, not the
   recommended tracer.
 \end{itemize}
@@ -560,8 +561,8 @@ mean $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$). Learner-level
 bootstrap (1000 resamples, 3614 learners) for Q$\leftarrow$KC minus GIKT
 is $+0.00117$, 95\% CI $[+0.00078,+0.00153]$ (excludes $0$). Adding Linear
 $\log(1{+}\Delta t)$ reaches test AUC $0.8296{\pm}0.0001$ ($5/5$ PASS vs.\
-the no-$\Delta t$ twin; minus GIKT: $+0.00378$, 95\% CI
-$[+0.00342,+0.00413]$). We do not credit hypergraph convolution for these
+the no-$\Delta t$ twin; five-seed mean gap vs.\ GIKT $+0.0038$; a paired
+learner-level bootstrap 95\% CI $[+0.00342,+0.00413]$ excludes $0$). We do not credit hypergraph convolution for these
 numbers: that arm is \texttt{--no-graph} on the concept stack.
 \input{tables/table_auc_xes3g5m}
 \input{tables/table_qkc_capacity_matched}
@@ -613,9 +614,13 @@ and we do not generalise that to every forgetting form. Query-side $\Delta t$ us
 gap to the item whose identity is already the next-step query; it is not
 the duration of a step whose correctness has been observed. Against AKT
 at the same $L{=}400$ clean protocol (test AUC $0.8223{\pm}0.0001$ over
-five seeds), Q$\leftarrow$KC$+\Delta t$ is ahead by $+0.00745$ versus AKT
-and by $+0.00966$ versus \textit{simpleKT} (learner-level 95\% CIs
-$[+0.00703,+0.00792]$ and $[+0.00916,+0.01013]$, respectively).
+five seeds), the five-seed mean gaps are $+0.0074$ versus AKT and
+$+0.0082$ versus \textit{simpleKT}. A paired learner-level bootstrap
+(1000 resamples, 3614 learners) on one canonical fold-0 prediction file
+(not the subtraction of those $\pm$ rows) gives 95\% CIs
+$[+0.00703,+0.00792]$ vs.\ AKT and $[+0.00916,+0.01013]$ vs.\
+\textit{simpleKT}; vs.\ GIKT the paired CI is $[+0.00342,+0.00413]$
+(Table~\ref{tab:auc-xes3g5m}).
 
 \subsection{Calibration (A6)}
 \label{sec:calibration}
@@ -844,10 +849,11 @@ research-ethics board review for this form of expert rating of model
 output.
 
 \section*{Data availability}
-Code for DH$^2$A-KT is available at
+Code matching this manuscript is at
 \url{https://github.com/edu-risk-lab/DH2A-KT}
-(default branch, commit \texttt{ea55ce7}; a Zenodo snapshot DOI will be
-minted at submission).
+(default branch, commit \texttt{c69bce9}; a Zenodo snapshot DOI will be
+minted at submission). The repository will be made public at submission;
+until then, reviewers may request access from the corresponding author.
 P0's audited edges and reused baselines are vendored under
 \cite{daominh2026p0}'s release terms (pinned commit
 \texttt{5e3d6a0},

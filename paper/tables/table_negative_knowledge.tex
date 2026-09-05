@@ -1,27 +1,23 @@
 \begin{table}[!t]
 \caption{Negative results under a pre-specified validation gate
-($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin; Section~\ref{sec:credit-gate}).
-Six arms in this table are single-seed FAIL rows; capacity-matched
-Q$\leftarrow$KC incidence is a separate five-seed FAIL
-(Table~\ref{tab:qkc-capacity}). Linear $\Delta t$ remains the five-seed
-XES PASS arm (Section~\ref{sec:credit-gate}). All runs keep a separate
-Linear/embedding branch (no absorption into \texttt{concept\_embed}). FAIL
-means the knowledge type is \emph{not} credited as predictive. Hypergraph
-convolution and hint-item hyperedges are among the failures; they are not
-AUC novelty.}
+($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin). All runs keep a
+separate Linear/embedding branch (no absorption into
+\texttt{concept\_embed}). FAIL means the knowledge type is \emph{not}
+credited as predictive. Hypergraph convolution and hint-item hyperedges
+are among the failures; they are not AUC novelty.}
 \label{tab:negative-knowledge}
 \centering
 \footnotesize
-\begin{tabular}{@{}lllrrrl@{}}
+\begin{tabular}{@{}llrrrrl@{}}
 \toprule
-ID & Knowledge & Corpus & Twin val & ON val & $\Delta$val & Gate \\
+ID & Knowledge (corpus) & Twin val & ON val & $\Delta$val & Gate \\
 \midrule
-K & HypergraphConv, multi-KC item HE & XES3G5M & 0.82598 & 0.82623 & $+0.00025$ & FAIL \\
-L & Hint-item session HE & FA & 0.80861 & 0.80868 & $+0.00007$ & FAIL \\
-M1 & Full Q-matrix incidence & FA & 0.80834 & 0.80824 & $-0.00010$ & FAIL \\
-M4 & Teacher grouping & ASSIST2012 & 0.76435 & 0.76577 & $+0.00142$ & FAIL \\
-M5 & Expert prerequisite DAG (5k) & Junyi & 0.7640 & 0.76456 & $+0.00056$ & FAIL \\
-P4 & Per-concept exp.\ forget vs.\ Linear $\Delta t$ & XES3G5M & 0.82878 & 0.82620 & $-0.00258$ & FAIL \\
+K & HypergraphConv, multi-KC HE (XES) & 0.82598 & 0.82623 & $+0.00025$ & FAIL \\
+L & Hint-item session HE (FA) & 0.80861 & 0.80868 & $+0.00007$ & FAIL \\
+M1 & Full Q-matrix incidence (FA) & 0.80834 & 0.80824 & $-0.00010$ & FAIL \\
+M4 & Teacher grouping (ASSIST2012) & 0.76435 & 0.76577 & $+0.00142$ & FAIL \\
+M5 & Expert prereq.\ DAG (Junyi 5k) & 0.7640 & 0.76456 & $+0.00056$ & FAIL \\
+P4 & Per-concept exp.\ forgetting (XES) & 0.82878 & 0.82620 & $-0.00258$ & FAIL \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -11,8 +11,9 @@ not retuned when $L$ moved from P0's 200 to 400. GIKT seed~42 (log
 and stopped by epoch~13 under patience~5 (cap~30).}
 \label{tab:hparams}
 \centering
-\footnotesize
-\begin{tabular}{@{}lllll@{}}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}lXlXX@{}}
 \toprule
 Model & Parameter & Range searched & Selected & How chosen ($n$ configs) \\
 \midrule
@@ -25,5 +26,5 @@ AKT & lr / dropout / d\_model & none at $L{=}400$ & P0/pyKT defaults & inherited
 \textit{simpleKT} & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$, 5 seeds) \\
 DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$ seed) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}

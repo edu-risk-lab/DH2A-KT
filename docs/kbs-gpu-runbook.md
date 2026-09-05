@@ -1,6 +1,12 @@
 # KBS GPU runbook — faithfulness + manipulation folds
 
-**Status 2026-08-13:** Core GPU loop **done** and merged to `main`
+**Status 2026-09-05:** Core GPU loop, B12 folds 0–2, and capacity-matched
+Q←KC / Zero$+\Delta t$ are **done**. Do not treat remaining sections as
+open blockers. Optional remaining GPU work (not submission blockers) is
+listed in [`docs/gpu-remaining-tasks.md`](gpu-remaining-tasks.md).
+Historical optional: LLM-scale sweep (`--run-scale`).
+
+**Earlier 2026-08-13 note (historical):** Core GPU loop merged to `main`
 (`4cda173`, `7d1d04b`):
 
 | Item | Result |
