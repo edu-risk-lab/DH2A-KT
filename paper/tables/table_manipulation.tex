@@ -11,11 +11,13 @@ node-drop encoder); label permutation is near-null (expected for a
 single-kind encoder). GKT: P0 DDR-downstream mean $\Delta$AUC over
 $n{=}9$ fold--seed runs (\cite{daominh2026p0}; retrain on destroyed
 pairwise graph). simpleKT has no concept-graph input, so graph
-destruction is undefined. The recommended tracer (QKC-T) does not take
+destruction is undefined. QKC-T and Zero$+\Delta t$ do not take
 this check.}
 \label{tab:manipulation}
 \centering
-\begin{tabular}{@{}lcccc@{}}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xcccc@{}}
 \toprule
 Model / destruction & AUC clean & $\Delta$AUC & DDR & Pass? \\
 \midrule
@@ -31,5 +33,5 @@ Diagnostic encoder, relation-label permutation (fold~2) & 0.752 & ${\approx}0$ &
 GKT (P0, mean$\pm$SD), node-drop $p{=}0.9$ & --- & $0.0877{\pm}0.0009$ & 0.990 & Yes \\
 simpleKT (P0) & --- & N/A & --- & N/A \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}

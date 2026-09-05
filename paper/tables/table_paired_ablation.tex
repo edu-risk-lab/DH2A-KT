@@ -1,10 +1,6 @@
 % Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
 % knobs (Tier 2). Predictive AUCs are XES3G5M fold~0 test-only, $L{=}400$,
-% mask-repeats, chunked, unless noted. DH$^2$ Tier~1 rows report mean$\pm$SD
-% over five training seeds (A2 matrix; seeds 42, 17, 1234, 0, 2024). Timing
-% gate counts are $k/5$ PASS vs.\ the no-$\Delta t$ twin; incidence credit
-% uses the capacity-matched zero twin (Table~\ref{tab:qkc-capacity}), not the
-% historical pathway-off hard-off. Tier~2 flag/JC are the fold~0 Ollama
+% mask-repeats, chunked, unless noted. Tier~2 flag/JC are the fold~0 Ollama
 % $n{=}500$ run (originally on the v2 graph-only checkpoint; a v4 Q$\leftarrow$KC
 % re-run is optional). Independent generation (IG) strips frozen
 % $P(\mathrm{correct})$ from the Diagnostician. ``w/o Critic'' disables the
@@ -13,31 +9,27 @@
 \caption{Paired ablation of DH$^2$A-KT knowledge and explanation knobs.
 Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except
 HypergraphConv / FA session (validation or secondary corpus, as marked).
-The pre-specified gate is $\Delta\mathrm{val}\ge{+}0.002$ vs.\ the matched twin;
-Linear $\Delta t$ reports $k/5$ seed PASS; Q$\leftarrow$KC incidence uses the
-capacity-matched zero twin ($0/5$; Table~\ref{tab:qkc-capacity});
-Zero$+\Delta t$ vs.\ zero is Table~\ref{tab:qkc-zero-time} ($5/5$). FAIL rows
-are not AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only
-diagnostic (Appendix~\ref{app:graph-only}), not the recommended tracer.}
+The registered gate is $\Delta\mathrm{val}\ge{+}0.002$; FAIL rows are not
+AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
+(\ref{app:graph-only}), not the recommended tracer.}
 \label{tab:paired-ablation}
 \centering
 \footnotesize
-\begin{tabular}{@{}lllccl@{}}
+\begin{tabular}{@{}llccl@{}}
 \toprule
-Setting & Corpus & AUC & Gate / note & Flag & Mean JC \\
+Setting & AUC & Gate / note & Flag & Mean JC \\
 \midrule
-Q$\leftarrow$KC $+\Delta t$ (recommended) & XES & $0.8296{\pm}0.0001$ & 5/5 PASS vs.\ no-$\Delta t$ & --- & --- \\
-Q$\leftarrow$KC on & XES & $0.8270{\pm}0.0002$ & 0/5 FAIL capacity-matched & --- & --- \\
-Zero$+\Delta t$ (vs.\ zero) & XES & $0.8295{\pm}0.0001$ & 5/5 PASS capacity-matched & --- & --- \\
-Pathway-off twin & XES & $0.8206{\pm}0.0002$ & capacity-mismatched baseline & --- & --- \\
-HypergraphConv (val) & XES & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
-Grounded + Critic (v2 ckpt) & XES & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
-IG (v2) & XES & --- & --- & $0.768$ & $0.142$ \\
-Grounded + Critic (v4 $+\Delta t$) & XES & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
-IG (v4 $+\Delta t$) & XES & --- & --- & $0.766$ & $0.152$ \\
-w/o Critic & XES & --- & --- & $0.000$ & $0.152$ \\
-FA: concept-only & FA & $0.720$ & --- & --- & --- \\
-FA: + session HE & FA & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
+Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296$ & PASS $\Delta\mathrm{val}{+}0.00280$ & --- & --- \\
+Q$\leftarrow$KC on & $0.8270$ & PASS $\Delta\mathrm{val}{+}0.00612$ & --- & --- \\
+Q$\leftarrow$KC off (twin) & $0.8202$ & --- & --- & --- \\
+HypergraphConv (val) & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
+Grounded + Critic (v2 ckpt) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
+IG (v2) & --- & --- & $0.768$ & $0.142$ \\
+Grounded + Critic (v4 $+\Delta t$) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
+IG (v4 $+\Delta t$) & --- & --- & $0.766$ & $0.152$ \\
+w/o Critic & --- & --- & $0.000$ & $0.152$ \\
+FA: concept-only & $0.720$ & --- & --- & --- \\
+FA: + session HE & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

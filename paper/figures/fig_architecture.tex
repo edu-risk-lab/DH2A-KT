@@ -1,57 +1,40 @@
-% Fig. 1 — Two-tier DH$^2$A-KT architecture (TikZ)
+% Fig. 1 — DH$^2$A-KT attribution pipeline (TikZ)
 \begin{figure*}[!t]
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
   font=\footnotesize\sffamily,
   >=Stealth,
   box/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
               minimum height=0.95cm, fill=white},
-  tierbox/.style={draw, thick, rounded corners=3pt, inner sep=7pt},
-  dashbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
-                  inner sep=3pt, fill=white},
+  passbox/.style={draw, rounded corners=2pt, align=center, inner sep=4pt,
+                  minimum height=0.95cm, fill=green!6},
+  failbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
+                  inner sep=4pt, minimum height=0.95cm, fill=white},
 ]
-% ===== Tier 1 row (recommended tracer) =====
-\node[box, minimum width=2.5cm] (p0) {P0 audited\\$E_{\mathrm{pre}}$ / Q--KC};
-\node[box, minimum width=2.7cm, right=0.28cm of p0] (he) {Hyperedge audit\\(not in LSTM)};
-\node[box, minimum width=2.9cm, right=0.28cm of he] (enc) {v4 LSTM\\Q$\leftarrow$KC + Linear $\Delta t$};
-\node[box, minimum width=2.9cm, right=0.28cm of enc] (out) {Frozen $P(\mathrm{correct})$\\+ concept state};
-\draw[->, thick] (p0) -- (he);
-\draw[->, thick] (he) -- (enc);
-\draw[->, thick] (enc) -- (out);
-% Diagnostic / secondary paths (not the headline encoder)
-\node[dashbox, minimum width=2.6cm, below=0.42cm of he] (diag) {HypergraphConv\\diagnostic (App.)};
-\node[dashbox, minimum width=2.6cm, below=0.42cm of enc] (fa) {FA session+Hint\\(secondary)};
-\draw[->, densely dashed, thick] (diag) -- (enc);
-\draw[->, densely dashed, thick] (fa) -- (enc);
-% Freeze label
-\node[anchor=north] (frz) at ([yshift=-0.28cm]enc |- fa.south)
-  {\textit{freeze after training}};
-\begin{pgfonlayer}{background}
-\node[tierbox, fill=blue!3, fit=(p0)(he)(enc)(out)(diag)(fa)(frz),
-      label={[font=\small\bfseries]above:Tier 1 --- DH$^2$-KT (quantitative)}] {};
-\end{pgfonlayer}
+\node[box, minimum width=2.6cm] (p0) {Train-only construction\\$E_{\mathrm{pre}}$ / Q--KC};
+\node[box, minimum width=2.5cm, right=0.28cm of p0] (audit) {Hyperedge leakage\\audit};
+\node[box, minimum width=2.7cm, right=0.28cm of audit] (twins) {Capacity-matched\\twins};
+\node[box, minimum width=2.5cm, right=0.28cm of twins] (gate) {Pre-specified gate\\$\Delta\mathrm{val}\ge{+}0.002$};
+\draw[->, thick] (p0) -- (audit);
+\draw[->, thick] (audit) -- (twins);
+\draw[->, thick] (twins) -- (gate);
 
-% ===== Tier 2 row =====
-\node[box, minimum width=2.5cm, below=0.5cm of frz] (diagA) {Diagnostician};
-\node[box, minimum width=2.3cm, right=0.32cm of diagA] (crit) {Critic gate};
-\node[box, minimum width=2.5cm, right=0.32cm of crit] (tut) {Tutor / Hint};
-\node[box, minimum width=3.0cm, below=0.38cm of crit] (sess) {Session hyperedge write-back};
-\draw[->, thick] (frz.south) -- (diagA.north);
-\draw[->, thick] (diagA) -- (crit);
-\draw[->, thick] (crit) -- (tut);
-\draw[->, thick] (tut.south) |- (sess.east);
-\begin{pgfonlayer}{background}
-\node[tierbox, fill=orange!5, fit=(diagA)(crit)(tut)(sess),
-      label={[font=\small\bfseries]below:Tier 2 --- AgentDG-KT (pilot)}] {};
-\end{pgfonlayer}
+\node[passbox, minimum width=4.2cm, below=0.42cm of twins] (pass)
+  {Credited: Linear $\Delta t$\\(observed and zero incidence)};
+\node[failbox, minimum width=4.4cm, below=0.42cm of gate] (fail)
+  {Not credited: incidence message,\\HypergraphConv, metadata forms};
+\draw[->, thick] (gate.south) -- (fail.north);
+\draw[->, thick] (gate.south) -| (pass.east);
 \end{tikzpicture}
-\caption{Two-tier DH$^2$A-KT architecture. Solid Tier~1 path: leakage-audited
-construction, then the recommended tracer QKC-T (LSTM with Q$\leftarrow$KC
-incidence and Linear $\Delta t$; no concept-stack HypergraphConv). Dashed:
-graph-only HypergraphConv diagnostic (Appendix~\ref{app:graph-only}) and
-FoundationalASSIST session+Hint (secondary). Dashed Tier~2 row: an
-exploratory Critic-gated survey over frozen scores
-(Section~\ref{sec:tier2}), not a claimed contribution. Session hyperedge
-write-back is a log path; the frozen tracer does not consume those edges.}
+}
+\caption{DH$^2$A-KT is an attribution pipeline, not a single predictor.
+Train-only knowledge is constructed and audited, then compared against
+capacity-matched twins. Only Linear $\log(1{+}\Delta t)$ survives the
+credit gate on XES3G5M; the question--KC incidence message and the tested
+hypergraph/metadata forms do not. QKC-T is the observed-incidence
+evaluation arm; Zero$+\Delta t$ is the minimalist positive control.
+The dashed graph-only encoder and the exploratory Critic survey are not
+part of this credited map (\ref{app:graph-only}, \ref{sec:tier2}).}
 \label{fig:architecture}
 \end{figure*}
