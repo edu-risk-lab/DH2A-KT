@@ -147,12 +147,17 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         n_groups=config.n_groups,
         expert_graph=config.expert_graph,
     )
-    dev = torch.device(device)
-    model = model.to(dev)
     state = payload["model_state"]
+    if config.question_graph and "A_qs_norm" in state:
+        # The saved incidence buffer is data-shaped; allocate that shape before
+        # strict state loading. Re-normalizing an already row-normalized matrix
+        # is idempotent, including the all-zero capacity-matched control.
+        model.set_question_kc_incidence(state["A_qs_norm"])
     if config.hint_hypergraph and "hint_edge_index" in state:
         # Buffer length is data-dependent; allocate before load_state_dict.
         model.set_hint_hyperedge_index(state["hint_edge_index"])
+    dev = torch.device(device)
+    model = model.to(dev)
     model.load_state_dict(state)
     kc_to_idx = {int(k): int(v) for k, v in payload["kc_to_idx"].items()}
     item_to_idx = {int(k): int(v) for k, v in payload["item_to_idx"].items()}
