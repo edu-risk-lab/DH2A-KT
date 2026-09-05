@@ -15,7 +15,8 @@ Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except
 HypergraphConv / FA session (validation or secondary corpus, as marked).
 The pre-specified gate is $\Delta\mathrm{val}\ge{+}0.002$ vs.\ the matched twin;
 Linear $\Delta t$ reports $k/5$ seed PASS; Q$\leftarrow$KC incidence uses the
-capacity-matched zero twin ($0/5$; Table~\ref{tab:qkc-capacity}). FAIL rows
+capacity-matched zero twin ($0/5$; Table~\ref{tab:qkc-capacity});
+Zero$+\Delta t$ vs.\ zero is Table~\ref{tab:qkc-zero-time} ($5/5$). FAIL rows
 are not AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only
 diagnostic (Appendix~\ref{app:graph-only}), not the recommended tracer.}
 \label{tab:paired-ablation}
@@ -27,6 +28,7 @@ Setting & Corpus & AUC & Gate / note & Flag & Mean JC \\
 \midrule
 Q$\leftarrow$KC $+\Delta t$ (recommended) & XES & $0.8296{\pm}0.0001$ & 5/5 PASS vs.\ no-$\Delta t$ & --- & --- \\
 Q$\leftarrow$KC on & XES & $0.8270{\pm}0.0002$ & 0/5 FAIL capacity-matched & --- & --- \\
+Zero$+\Delta t$ (vs.\ zero) & XES & $0.8295{\pm}0.0001$ & 5/5 PASS capacity-matched & --- & --- \\
 Pathway-off twin & XES & $0.8206{\pm}0.0002$ & capacity-mismatched baseline & --- & --- \\
 HypergraphConv (val) & XES & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
 Grounded + Critic (v2 ckpt) & XES & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\

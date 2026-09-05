@@ -109,18 +109,11 @@ Outputs:
 - `results/checkpoints/xes3g5m_fold0_qkc_cm_{observed,zero,zero_time}_sSEED.pt`
 
 The driver refuses a result if the two arms have different checkpoint state
-shapes/element counts, if the observed arm has no Q–KC links, or if the zero
-arm retains any links. Five paired seeds are complete on this workstation
-(`results/tables/qkc_capacity_matched_*.{csv,json}`): **0/5 PASS**, mean
-Δval ≈ −0.0001. The continuation adds `zero_time` (zero incidence plus
-LSTM+query timing) and compares it with the existing zero arm.
-
-Every checkpoint is now re-scored on the outer **test split only**. Existing
-`observed`/`zero` checkpoints are reused when present; only `zero_time` needs
-training. The old 1,640,242-position valid+test score is retained as
-`combined_eval_auc`, never as `test_auc`. Do not reuse the legacy hard-off
-delta for incidence credit or update the paper before all five timing pairs
-finish.
+shapes/element counts for incidence pairs, if the observed arm has no Q–KC
+links, or if the zero arm retains any links. Five paired seeds are complete:
+incidence **0/5 PASS** (mean Δval ≈ −0.0001); timing on zero incidence
+**5/5 PASS** (mean Δval +0.00255, mean test-only Δ +0.00269). Do not reuse
+the legacy hard-off delta for incidence credit.
 
 ## Notes
 

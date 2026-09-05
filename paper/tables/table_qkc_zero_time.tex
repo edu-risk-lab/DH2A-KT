@@ -1,0 +1,25 @@
+\begin{table}[!t]
+\caption{Linear $\Delta t$ on the capacity-matched \emph{zero-incidence}
+backbone (XES3G5M fold~0, clean protocol). Both arms keep zero Q--KC
+incidence; \texttt{zero\_time} adds LSTM+query
+$\log(1{+}\Delta t)$ (\texttt{--time-gap-mode both}). Gate:
+$\Delta\mathrm{val}\ge{+}0.002$. Mean
+$\Delta\mathrm{val}{=}{+}0.00255{\pm}0.00015$; mean
+$\Delta\mathrm{test\text{-}only}{=}{+}0.00269{\pm}0.00012$. $5/5$ PASS:
+timing credit is not an artefact of nonzero incidence. State shapes
+differ by the timing parameters (expected).}
+\label{tab:qkc-zero-time}
+\centering
+\footnotesize
+\begin{tabular}{@{}rrrrrl@{}}
+\toprule
+Seed & Zero val & Zero$+\Delta t$ val & $\Delta$val & $\Delta$test & Gate \\
+\midrule
+0 & 0.82610 & 0.82852 & $+0.00242$ & $+0.00270$ & PASS \\
+17 & 0.82589 & 0.82835 & $+0.00245$ & $+0.00258$ & PASS \\
+42 & 0.82619 & 0.82862 & $+0.00243$ & $+0.00255$ & PASS \\
+1234 & 0.82567 & 0.82837 & $+0.00270$ & $+0.00282$ & PASS \\
+2024 & 0.82610 & 0.82882 & $+0.00272$ & $+0.00280$ & PASS \\
+\bottomrule
+\end{tabular}
+\end{table}
