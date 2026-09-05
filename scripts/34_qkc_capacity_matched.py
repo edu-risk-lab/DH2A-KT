@@ -3,11 +3,14 @@
 
 Both arms instantiate the same question embedding and projection pathway:
 
-* observed — use the train-only Q–KC incidence matrix.
-* zero     — replace only that incidence matrix with zeros.
+* observed  — use the train-only Q–KC incidence matrix.
+* zero      — replace only that incidence matrix with zeros.
+* zero_time — keep zero incidence and add Linear log(1+gap) at LSTM + query.
 
-The driver trains both arms at five paired seeds, verifies identical checkpoint
-state shapes, and writes a matrix plus paired summary under ``results/tables``.
+The driver trains the requested arms at five paired seeds, verifies checkpoint
+capacity, then re-scores every checkpoint on the outer test split only. The
+``combined_eval_auc`` column is retained explicitly for diagnostics; it is the
+historical valid+test frame and must not be called test AUC.
 
 GPU usage:
 
@@ -28,13 +31,16 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 PYTHON = Path(os.environ.get("DH2A_PYTHON", sys.executable))
 DEFAULT_SEEDS = [42, 17, 1234, 0, 2024]
-ARMS = ("observed", "zero")
+ARMS = ("observed", "zero", "zero_time")
 MATRIX = REPO_ROOT / "results" / "tables" / "qkc_capacity_matched_matrix.csv"
 SUMMARY = REPO_ROOT / "results" / "tables" / "qkc_capacity_matched_summary.json"
 LOG_DIR = REPO_ROOT / "results" / "tables" / "qkc_capacity_matched_logs"
 VAL_GATE = 0.002
+_TEST_CONTEXT: tuple[object, object] | None = None
 
 COMMON_ARGS = [
     "scripts/03_train_tier1.py",
@@ -92,6 +98,16 @@ def _paths(arm: str, seed: int) -> tuple[str, Path, Path, Path]:
     return tag, output, checkpoint, log
 
 
+def _control_for_arm(arm: str) -> str:
+    return "observed" if arm == "observed" else "zero"
+
+
+def _extra_args_for_arm(arm: str) -> list[str]:
+    if arm == "zero_time":
+        return ["--time-gap", "--time-gap-mode", "both"]
+    return []
+
+
 def _checkpoint_facts(path: Path) -> dict[str, object]:
     import torch
 
@@ -114,11 +130,71 @@ def _checkpoint_facts(path: Path) -> dict[str, object]:
     }
 
 
+def _read_matrix() -> pd.DataFrame:
+    rows = pd.read_csv(MATRIX)
+    # Results produced before the test-only audit used valid+test as eval_df.
+    # Preserve those values, but remove the misleading "test" label.
+    return rows.rename(
+        columns={
+            "test_auc": "combined_eval_auc",
+            "n_predictions": "n_combined_predictions",
+        }
+    )
+
+
+def _test_only_score(path: Path, device: str) -> tuple[float, int]:
+    global _TEST_CONTEXT
+
+    from dh2a_kt.hyperedge.p0_inputs import (
+        get_fold_splits,
+        load_configs,
+        load_interactions_with_ids,
+    )
+    from dh2a_kt.models.dh2_kt import empty_hyperedge_index
+    from dh2a_kt.train.checkpoint import load_trained_fold
+    from dh2a_kt.train.greykt import make_sequence_loader
+    from dh2a_kt.train.tier1 import evaluate_auc, resolve_training_budget
+
+    if _TEST_CONTEXT is None:
+        dh2_cfg, p0_cfg, _ = load_configs(
+            REPO_ROOT / "configs" / "xes3g5m.yaml"
+        )
+        train_cfg = dh2_cfg.get("training", {})
+        budget = resolve_training_budget(
+            p0_cfg,
+            reference_model=train_cfg.get("budget_reference", "gkt"),
+            lr=float(train_cfg.get("lr", 0.001)),
+            max_seq_len=400,
+        )
+        budget.batch_size = 16
+        interactions = load_interactions_with_ids(p0_cfg)
+        test_df = get_fold_splits(interactions, p0_cfg, 0)["test"]
+        _TEST_CONTEXT = (test_df, budget)
+    test_df, budget = _TEST_CONTEXT
+    trained = load_trained_fold(path, device=device)
+    index = trained.clean_hyperedge_index
+    if not trained.clean_hyperedges:
+        index = empty_hyperedge_index(
+            trained.device, kinds=tuple(trained.model.config.hyperedge_kinds)
+        )
+    loader = make_sequence_loader(
+        test_df, trained, budget, shuffle=False, window_mode="chunked"
+    )
+    auc, n_scored = evaluate_auc(
+        trained.model,
+        loader,
+        index,
+        trained.device,
+        mask_repeats=True,
+    )
+    return float(auc), int(n_scored)
+
+
 def _upsert(row: dict[str, object]) -> None:
     MATRIX.parent.mkdir(parents=True, exist_ok=True)
     frame = pd.DataFrame([row])
     if MATRIX.exists():
-        old = pd.read_csv(MATRIX)
+        old = _read_matrix()
         duplicate = (old["arm"] == row["arm"]) & (old["seed"] == row["seed"])
         frame = pd.concat([old.loc[~duplicate], frame], ignore_index=True)
     frame.sort_values(["seed", "arm"]).to_csv(MATRIX, index=False)
@@ -127,9 +203,19 @@ def _upsert(row: dict[str, object]) -> None:
 def _already_done(arm: str, seed: int, force: bool) -> bool:
     if force or not MATRIX.exists():
         return False
-    rows = pd.read_csv(MATRIX)
+    _tag, output, checkpoint, _log = _paths(arm, seed)
+    if not output.exists() or not checkpoint.exists():
+        return False
+    rows = _read_matrix()
     match = (rows["arm"] == arm) & (rows["seed"] == seed)
-    return bool(match.any() and rows.loc[match].iloc[-1].get("status") == "ok")
+    if not match.any():
+        return False
+    row = rows.loc[match].iloc[-1]
+    return bool(
+        row.get("status") == "ok"
+        and pd.notna(row.get("test_only_auc"))
+        and pd.notna(row.get("n_test_predictions"))
+    )
 
 
 def _run(arm: str, seed: int, device: str, *, force: bool, dry_run: bool) -> int:
@@ -145,28 +231,32 @@ def _run(arm: str, seed: int, device: str, *, force: bool, dry_run: bool) -> int
         "--seed",
         str(seed),
         "--question-incidence-control",
-        arm,
+        _control_for_arm(arm),
+        *_extra_args_for_arm(arm),
         "--tag",
         tag,
         "--output",
         str(output.relative_to(REPO_ROOT)),
     ]
-    print("==>", " ".join(cmd), flush=True)
+    reuse_checkpoint = not force and output.exists() and checkpoint.exists()
+    action = "RESCORE" if reuse_checkpoint else "TRAIN"
+    print(f"{action} ==>", " ".join(cmd), flush=True)
     if dry_run:
         return 0
 
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     started = time.time()
-    with log.open("w", encoding="utf-8") as stream:
-        proc = subprocess.run(
-            cmd,
-            cwd=REPO_ROOT,
-            stdout=stream,
-            stderr=subprocess.STDOUT,
-        )
-    if proc.returncode:
-        print(f"FAIL arm={arm} seed={seed}; see {log}", file=sys.stderr)
-        return proc.returncode
+    if not reuse_checkpoint:
+        with log.open("w", encoding="utf-8") as stream:
+            proc = subprocess.run(
+                cmd,
+                cwd=REPO_ROOT,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+            )
+        if proc.returncode:
+            print(f"FAIL arm={arm} seed={seed}; see {log}", file=sys.stderr)
+            return proc.returncode
     if not output.exists() or not checkpoint.exists():
         print(f"Missing output/checkpoint for {tag}", file=sys.stderr)
         return 4
@@ -175,15 +265,20 @@ def _run(arm: str, seed: int, device: str, *, force: bool, dry_run: bool) -> int
     fold_rows = results[results["fold"].astype(str) == "0"]
     result = fold_rows.iloc[0] if len(fold_rows) else results.iloc[0]
     facts = _checkpoint_facts(checkpoint)
-    if facts["checkpoint_control"] != arm:
-        print(f"Checkpoint control mismatch: expected {arm}, got {facts}", file=sys.stderr)
+    expected_control = _control_for_arm(arm)
+    if facts["checkpoint_control"] != expected_control:
+        print(
+            f"Checkpoint control mismatch: expected {expected_control}, got {facts}",
+            file=sys.stderr,
+        )
         return 5
-    if arm == "zero" and facts["incidence_nonzero"] != 0:
+    if expected_control == "zero" and facts["incidence_nonzero"] != 0:
         print("Zero-control checkpoint contains nonzero incidence", file=sys.stderr)
         return 6
-    if arm == "observed" and int(facts["incidence_nonzero"]) <= 0:
+    if expected_control == "observed" and int(facts["incidence_nonzero"]) <= 0:
         print("Observed checkpoint contains no incidence links", file=sys.stderr)
         return 7
+    test_only_auc, n_test_predictions = _test_only_score(checkpoint, device)
 
     _upsert(
         {
@@ -191,8 +286,10 @@ def _run(arm: str, seed: int, device: str, *, force: bool, dry_run: bool) -> int
             "seed": seed,
             "fold": 0,
             "val_auc": float(result["val_auc"]),
-            "test_auc": float(result["dh2_kt_auc"]),
-            "n_predictions": int(result["n_predictions"]),
+            "combined_eval_auc": float(result["dh2_kt_auc"]),
+            "n_combined_predictions": int(result["n_predictions"]),
+            "test_only_auc": test_only_auc,
+            "n_test_predictions": n_test_predictions,
             **facts,
             "minutes": round((time.time() - started) / 60.0, 2),
             "status": "ok",
@@ -200,62 +297,111 @@ def _run(arm: str, seed: int, device: str, *, force: bool, dry_run: bool) -> int
     )
     print(
         f"DONE arm={arm} seed={seed} val={float(result['val_auc']):.6f} "
-        f"test={float(result['dh2_kt_auc']):.6f}",
+        f"test_only={test_only_auc:.6f} n={n_test_predictions}",
         flush=True,
     )
     return 0
 
 
-def _write_summary(seeds: list[int]) -> int:
-    rows = pd.read_csv(MATRIX)
-    rows = rows[(rows["seed"].isin(seeds)) & (rows["status"] == "ok")]
-    observed = rows[rows["arm"] == "observed"].set_index("seed")
-    zero = rows[rows["arm"] == "zero"].set_index("seed")
-    paired_seeds = sorted(set(observed.index) & set(zero.index))
+def _comparison_summary(
+    rows: pd.DataFrame,
+    *,
+    treatment: str,
+    control: str,
+    require_identical_state: bool,
+) -> dict[str, object] | None:
+    treated = rows[rows["arm"] == treatment].set_index("seed")
+    baseline = rows[rows["arm"] == control].set_index("seed")
+    paired_seeds = sorted(set(treated.index) & set(baseline.index))
     if not paired_seeds:
-        return 0
+        return None
 
     pairs: list[dict[str, object]] = []
     for seed in paired_seeds:
         same_shape = (
-            observed.loc[seed, "state_shape_signature"]
-            == zero.loc[seed, "state_shape_signature"]
+            treated.loc[seed, "state_shape_signature"]
+            == baseline.loc[seed, "state_shape_signature"]
         )
-        same_numel = int(observed.loc[seed, "state_numel"]) == int(
-            zero.loc[seed, "state_numel"]
+        same_numel = int(treated.loc[seed, "state_numel"]) == int(
+            baseline.loc[seed, "state_numel"]
         )
-        if not same_shape or not same_numel:
+        if require_identical_state and (not same_shape or not same_numel):
             raise SystemExit(f"Capacity mismatch remains at seed {seed}")
-        delta_val = float(observed.loc[seed, "val_auc"] - zero.loc[seed, "val_auc"])
-        delta_test = float(observed.loc[seed, "test_auc"] - zero.loc[seed, "test_auc"])
+        delta_val = float(
+            treated.loc[seed, "val_auc"] - baseline.loc[seed, "val_auc"]
+        )
         pairs.append(
             {
                 "seed": int(seed),
-                "delta_val_observed_minus_zero": delta_val,
-                "delta_test_observed_minus_zero": delta_test,
+                "delta_val": delta_val,
+                "delta_combined_eval": float(
+                    treated.loc[seed, "combined_eval_auc"]
+                    - baseline.loc[seed, "combined_eval_auc"]
+                ),
+                "delta_test_only": float(
+                    treated.loc[seed, "test_only_auc"]
+                    - baseline.loc[seed, "test_only_auc"]
+                ),
                 "gate_pass": delta_val >= VAL_GATE,
-                "identical_state_shapes": True,
-                "identical_state_numel": True,
+                "identical_state_shapes": bool(same_shape),
+                "identical_state_numel": bool(same_numel),
             }
         )
 
-    val_deltas = pd.Series(
-        [float(pair["delta_val_observed_minus_zero"]) for pair in pairs]
-    )
-    test_deltas = pd.Series(
-        [float(pair["delta_test_observed_minus_zero"]) for pair in pairs]
-    )
-    payload = {
-        "comparison": "observed Q-KC incidence minus zero-incidence capacity twin",
-        "val_gate": VAL_GATE,
+    def stats(key: str) -> tuple[float, float | None]:
+        values = pd.Series([float(pair[key]) for pair in pairs])
+        return (
+            float(values.mean()),
+            float(values.std(ddof=1)) if len(values) > 1 else None,
+        )
+
+    mean_val, sd_val = stats("delta_val")
+    mean_combined, sd_combined = stats("delta_combined_eval")
+    mean_test, sd_test = stats("delta_test_only")
+    return {
+        "comparison": f"{treatment} minus {control}",
         "paired_seeds": paired_seeds,
         "n_pairs": len(pairs),
         "k_gate_pass": int(sum(bool(pair["gate_pass"]) for pair in pairs)),
-        "mean_delta_val": float(val_deltas.mean()),
-        "sd_delta_val": float(val_deltas.std(ddof=1)) if len(pairs) > 1 else None,
-        "mean_delta_test": float(test_deltas.mean()),
-        "sd_delta_test": float(test_deltas.std(ddof=1)) if len(pairs) > 1 else None,
+        "mean_delta_val": mean_val,
+        "sd_delta_val": sd_val,
+        "mean_delta_combined_eval": mean_combined,
+        "sd_delta_combined_eval": sd_combined,
+        "mean_delta_test_only": mean_test,
+        "sd_delta_test_only": sd_test,
         "pairs": pairs,
+    }
+
+
+def _write_summary(seeds: list[int]) -> int:
+    rows = _read_matrix()
+    rows = rows[(rows["seed"].isin(seeds)) & (rows["status"] == "ok")]
+    comparisons = {
+        "incidence_observed_vs_zero": _comparison_summary(
+            rows,
+            treatment="observed",
+            control="zero",
+            require_identical_state=True,
+        ),
+        "timing_on_zero_incidence": _comparison_summary(
+            rows,
+            treatment="zero_time",
+            control="zero",
+            require_identical_state=False,
+        ),
+    }
+    comparisons = {key: value for key, value in comparisons.items() if value}
+    if not comparisons:
+        return 0
+    payload = {
+        "protocol": {
+            "fold": 0,
+            "validation": "internal train-user holdout used by the credit gate",
+            "combined_eval": "outer valid+test; diagnostic only",
+            "test_only": "outer test split, native DH2 clean mask, chunked L=400",
+            "val_gate": VAL_GATE,
+        },
+        "comparisons": comparisons,
     }
     SUMMARY.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"Wrote {MATRIX.relative_to(REPO_ROOT)}", flush=True)

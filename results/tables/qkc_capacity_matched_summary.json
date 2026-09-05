@@ -1,59 +1,141 @@
 {
-  "comparison": "observed Q-KC incidence minus zero-incidence capacity twin",
-  "val_gate": 0.002,
-  "paired_seeds": [
-    0,
-    17,
-    42,
-    1234,
-    2024
-  ],
-  "n_pairs": 5,
-  "k_gate_pass": 0,
-  "mean_delta_val": -0.00010313749160788533,
-  "sd_delta_val": 0.0003397508284768126,
-  "mean_delta_test": 3.7746526547732805e-05,
-  "sd_delta_test": 0.0001974215137093852,
-  "pairs": [
-    {
-      "seed": 0,
-      "delta_val_observed_minus_zero": -0.0005622772954489985,
-      "delta_test_observed_minus_zero": -0.00020361220185749485,
-      "gate_pass": false,
-      "identical_state_shapes": true,
-      "identical_state_numel": true
+  "protocol": {
+    "fold": 0,
+    "validation": "internal train-user holdout used by the credit gate",
+    "combined_eval": "outer valid+test; diagnostic only",
+    "test_only": "outer test split, native DH2 clean mask, chunked L=400",
+    "val_gate": 0.002
+  },
+  "comparisons": {
+    "incidence_observed_vs_zero": {
+      "comparison": "observed minus zero",
+      "paired_seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "n_pairs": 5,
+      "k_gate_pass": 0,
+      "mean_delta_val": -0.00010313749160788533,
+      "sd_delta_val": 0.0003397508284768126,
+      "mean_delta_combined_eval": 3.7746526547732805e-05,
+      "sd_delta_combined_eval": 0.0001974215137093852,
+      "mean_delta_test_only": 3.6366474037219374e-05,
+      "sd_delta_test_only": 0.0001582348480831659,
+      "pairs": [
+        {
+          "seed": 0,
+          "delta_val": -0.0005622772954489985,
+          "delta_combined_eval": -0.00020361220185749485,
+          "delta_test_only": -7.469163085915831e-05,
+          "gate_pass": false,
+          "identical_state_shapes": true,
+          "identical_state_numel": true
+        },
+        {
+          "seed": 17,
+          "delta_val": -0.00010027612489682536,
+          "delta_combined_eval": -0.00014333157779866657,
+          "delta_test_only": -0.0001796894018349926,
+          "gate_pass": false,
+          "identical_state_shapes": true,
+          "identical_state_numel": true
+        },
+        {
+          "seed": 42,
+          "delta_val": -0.00020690228145847644,
+          "delta_combined_eval": 0.00012787305348238576,
+          "delta_test_only": 9.747218788114242e-05,
+          "gate_pass": false,
+          "identical_state_shapes": true,
+          "identical_state_numel": true
+        },
+        {
+          "seed": 1234,
+          "delta_val": 0.00038098411607134786,
+          "delta_combined_eval": 0.00017633503188385635,
+          "delta_test_only": 0.00013755145344873654,
+          "gate_pass": false,
+          "identical_state_shapes": true,
+          "identical_state_numel": true
+        },
+        {
+          "seed": 2024,
+          "delta_val": -2.7215872306474154e-05,
+          "delta_combined_eval": 0.00023146832702858333,
+          "delta_test_only": 0.00020118976155036883,
+          "gate_pass": false,
+          "identical_state_shapes": true,
+          "identical_state_numel": true
+        }
+      ]
     },
-    {
-      "seed": 17,
-      "delta_val_observed_minus_zero": -0.00010027612489682536,
-      "delta_test_observed_minus_zero": -0.00014333157779866657,
-      "gate_pass": false,
-      "identical_state_shapes": true,
-      "identical_state_numel": true
-    },
-    {
-      "seed": 42,
-      "delta_val_observed_minus_zero": -0.00020690228145847644,
-      "delta_test_observed_minus_zero": 0.00012787305348238576,
-      "gate_pass": false,
-      "identical_state_shapes": true,
-      "identical_state_numel": true
-    },
-    {
-      "seed": 1234,
-      "delta_val_observed_minus_zero": 0.00038098411607134786,
-      "delta_test_observed_minus_zero": 0.00017633503188385635,
-      "gate_pass": false,
-      "identical_state_shapes": true,
-      "identical_state_numel": true
-    },
-    {
-      "seed": 2024,
-      "delta_val_observed_minus_zero": -2.7215872306474154e-05,
-      "delta_test_observed_minus_zero": 0.00023146832702858333,
-      "gate_pass": false,
-      "identical_state_shapes": true,
-      "identical_state_numel": true
+    "timing_on_zero_incidence": {
+      "comparison": "zero_time minus zero",
+      "paired_seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "n_pairs": 5,
+      "k_gate_pass": 5,
+      "mean_delta_val": 0.002546974435463101,
+      "sd_delta_val": 0.00014984693538832843,
+      "mean_delta_combined_eval": 0.0027306495471969504,
+      "sd_delta_combined_eval": 8.567660508469499e-05,
+      "mean_delta_test_only": 0.0026887025692500675,
+      "sd_delta_test_only": 0.00011976084549823951,
+      "pairs": [
+        {
+          "seed": 0,
+          "delta_val": 0.002424532262463419,
+          "delta_combined_eval": 0.002753353532913283,
+          "delta_test_only": 0.0026950593927904665,
+          "gate_pass": true,
+          "identical_state_shapes": false,
+          "identical_state_numel": false
+        },
+        {
+          "seed": 17,
+          "delta_val": 0.0024545051475142188,
+          "delta_combined_eval": 0.0027273790223019123,
+          "delta_test_only": 0.002581497974357916,
+          "gate_pass": true,
+          "identical_state_shapes": false,
+          "identical_state_numel": false
+        },
+        {
+          "seed": 42,
+          "delta_val": 0.002434835440393579,
+          "delta_combined_eval": 0.002585825320700952,
+          "delta_test_only": 0.0025545345889799176,
+          "gate_pass": true,
+          "identical_state_shapes": false,
+          "identical_state_numel": false
+        },
+        {
+          "seed": 1234,
+          "delta_val": 0.0027000687806615353,
+          "delta_combined_eval": 0.002792972978122088,
+          "delta_test_only": 0.002816702284778705,
+          "gate_pass": true,
+          "identical_state_shapes": false,
+          "identical_state_numel": false
+        },
+        {
+          "seed": 2024,
+          "delta_val": 0.0027209305462827515,
+          "delta_combined_eval": 0.0027937168819465175,
+          "delta_test_only": 0.0027957186053433336,
+          "gate_pass": true,
+          "identical_state_shapes": false,
+          "identical_state_numel": false
+        }
+      ]
     }
-  ]
+  }
 }

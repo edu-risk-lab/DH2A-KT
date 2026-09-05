@@ -55,20 +55,21 @@ hypergraph convolution). It reuses the train-only protocol of companion
 paper P0, extends the audit to hyperedges, and then ablates which
 knowledge predicts. Pre-specified gates
 ($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin) show that Linear
-$\log(1{+}\Delta t)$ carries next-step accuracy on this backbone, whereas a
-capacity-matched zeroing of the train-only question--KC incidence
-\emph{message} fails ($0/5$ PASS; mean $\Delta\mathrm{val}{\approx}{-}0.0001$),
-as do hypergraph convolution, hint-item hyperedges, a full Q-matrix,
-teacher grouping, an expert DAG, and per-concept exponential forgetting.
-An older hard-off twin that removed the whole question pathway is
-capacity-mismatched and is not used to credit incidence. On XES3G5M
-fold~0 under a clean protocol (mask-repeats, chunked windows, $L{=}400$,
-test-only), the recommended tracer (QKC-T: LSTM with the Q$\leftarrow$KC
-pathway and a linear $\log(1{+}\Delta t)$ branch) reaches test AUC
-$0.8296{\pm}0.0001$ over five training seeds versus compute-matched GIKT
-$0.8258{\pm}0.0001$ and \textit{simpleKT} $0.8214{\pm}0.0007$
-(learner-level bootstrap 95\% CI of each difference excludes $0$). The
-same recipe on folds~1--2 stays within $0.001$ (mean
+$\log(1{+}\Delta t)$ carries next-step accuracy on this backbone---including
+on a capacity-matched zero-incidence twin ($5/5$ PASS; mean
+$\Delta\mathrm{val}{+}0.00255$)---whereas zeroing only the train-only
+question--KC incidence \emph{message} fails ($0/5$ PASS; mean
+$\Delta\mathrm{val}{\approx}{-}0.0001$), as do hypergraph convolution,
+hint-item hyperedges, a full Q-matrix, teacher grouping, an expert DAG, and
+per-concept exponential forgetting. An older hard-off twin that removed the
+whole question pathway is capacity-mismatched and is not used to credit
+incidence. On XES3G5M fold~0 under a clean protocol (mask-repeats, chunked
+windows, $L{=}400$, test-only), the recommended tracer (QKC-T: LSTM with
+the Q$\leftarrow$KC pathway and a linear $\log(1{+}\Delta t)$ branch)
+reaches test AUC $0.8296{\pm}0.0001$ over five training seeds versus
+compute-matched GIKT $0.8258{\pm}0.0001$ and \textit{simpleKT}
+$0.8214{\pm}0.0007$ (learner-level bootstrap 95\% CI of each difference
+excludes $0$). The same recipe on folds~1--2 stays within $0.001$ (mean
 $0.8295{\pm}0.0004$). On this backbone the exponential forgetting form
 (P4) does not outperform Linear $\log(1{+}\Delta t)$; LSTM-only $\Delta t$
 fails the gate. A graph-only diagnostic encoder (AUC $0.752$) is in the
@@ -166,11 +167,13 @@ check remain available as a forced-reliance diagnostic
   convention locked before the ladder, not a public registry) plus a
   clean-protocol tracer: Linear $\log(1{+}\Delta t)$ on the QKC-T backbone
   passes ($5/5$ PASS; test AUC $0.8296{\pm}0.0001$ on XES3G5M fold~0, mean
-  $0.8295{\pm}0.0004$ across three learner folds). A capacity-matched
-  zero-incidence twin fails ($0/5$ PASS; Table~\ref{tab:qkc-capacity}), so
-  the incidence \emph{message} is not credited. HypergraphConv, hint-item
-  hyperedges, a full Q-matrix, teacher grouping, an expert DAG, and
-  per-concept exponential forgetting (P4) also fail
+  $0.8295{\pm}0.0004$ across three learner folds), and the same timing
+  branch also passes on a capacity-matched zero-incidence twin ($5/5$ PASS;
+  Table~\ref{tab:qkc-zero-time}). A capacity-matched zero-incidence twin
+  for the incidence \emph{message} fails ($0/5$ PASS;
+  Table~\ref{tab:qkc-capacity}), so incidence content is not credited.
+  HypergraphConv, hint-item hyperedges, a full Q-matrix, teacher grouping,
+  an expert DAG, and per-concept exponential forgetting (P4) also fail
   (Table~\ref{tab:negative-knowledge}). Versus compute-matched GIKT
   $0.8258{\pm}0.0001$, the recommended tracer's learner-level bootstrap
   95\% CI excludes $0$ (Table~\ref{tab:auc-xes3g5m}). Graph-only v2 mean AUC
@@ -509,13 +512,15 @@ capacity-matched zero incidence (Table~\ref{tab:qkc-capacity}): mean
 $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$ over five seeds ($0/5$ PASS),
 so incidence content is not credited. A historical hard-off comparison that
 removed the whole question pathway is capacity-mismatched and is not a
-credit test. The five-seed timing credit test remains: Linear $\Delta t$
-vs.\ Q$\leftarrow$KC mean $+0.00274$ ($t_4{=}23.99$,
-$p{=}8.95{\times}10^{-6}$); Holm--Bonferroni at $\alpha{=}0.05$ among the
-remaining XES credit arms leaves this timing test significant. The six
-FAIL rows in Table~\ref{tab:negative-knowledge} remain single-seed and are
-judged only by the $+0.002$ gate, not by $p$-values: the gate is a credit
-threshold anchored to seed SD, not a claim of simultaneous significance.
+credit test. Timing is credited twice: Linear $\Delta t$ vs.\ Q$\leftarrow$KC
+mean $+0.00274$ ($t_4{=}23.99$, $p{=}8.95{\times}10^{-6}$), and Linear
+$\Delta t$ on the zero-incidence backbone
+(Table~\ref{tab:qkc-zero-time}) mean $+0.00255{\pm}0.00015$ ($5/5$ PASS).
+Holm--Bonferroni at $\alpha{=}0.05$ among the remaining XES credit arms
+leaves the QKC-backbone timing test significant. The six FAIL rows in
+Table~\ref{tab:negative-knowledge} remain single-seed and are judged only
+by the $+0.002$ gate, not by $p$-values: the gate is a credit threshold
+anchored to seed SD, not a claim of simultaneous significance.
 
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
@@ -560,6 +565,7 @@ $[+0.00342,+0.00413]$). We do not credit hypergraph convolution for these
 numbers: that arm is \texttt{--no-graph} on the concept stack.
 \input{tables/table_auc_xes3g5m}
 \input{tables/table_qkc_capacity_matched}
+\input{tables/table_qkc_zero_time}
 The same Q$\leftarrow$KC$+\Delta t$ recipe on folds~1 and~2 stays within
 $0.001$ of fold~0 (mean $0.8295{\pm}0.0004$ over learner folds;
 $0.8296{\pm}0.0001$ over five training seeds on fold~0;
@@ -583,7 +589,11 @@ On XES3G5M, Linear $\Delta t$ into both LSTM and next-step query passes
 against Q$\leftarrow$KC on all five training seeds ($5/5$ PASS at the
 pre-specified $\Delta\mathrm{val}\ge{+}0.002$; test-only $0.8296{\pm}0.0001$ vs.\
 $0.8270{\pm}0.0002$, mean difference $+0.00261$, learner-level 95\% CI
-$[+0.00225,+0.00298]$). A quartile slice of $\log(1{+}\mathrm{gap})$
+$[+0.00225,+0.00298]$). The same timing branch also passes when the
+backbone has \emph{zero} Q--KC incidence ($5/5$ PASS; mean
+$\Delta\mathrm{val}{+}0.00255$, mean $\Delta\mathrm{test\text{-}only}{+}0.00269$;
+Table~\ref{tab:qkc-zero-time}), so the timing credit is not an artefact of
+nonzero incidence. A quartile slice of $\log(1{+}\mathrm{gap})$
 collapses to two bins: short gaps ($\lesssim$18\,min) $\Delta{+}0.0028$,
 long gaps $\Delta{+}0.0019$, both CIs excluding $0$ --- not a long-horizon
 exponential-decay pattern under P4's form. Table~\ref{tab:a7-query-dt} ablates injection site on
@@ -738,7 +748,8 @@ what the gate attributes.
 
 \paragraph{Linear $\log(1{+}\Delta t)$.}
 Survives on this backbone when both LSTM-side and query-side gaps are
-present ($5/5$ PASS). History-only $\Delta t$ fails the gate
+present ($5/5$ PASS vs.\ Q$\leftarrow$KC; $5/5$ PASS vs.\ zero incidence;
+Table~\ref{tab:qkc-zero-time}). History-only $\Delta t$ fails the gate
 (Table~\ref{tab:a7-query-dt}): the credited timing is attempt-onset
 context, not a history-only forgetting cue.
 
@@ -795,15 +806,16 @@ part of this attribution map.
 % =============================================================================
 We presented DH$^2$A-KT as leakage-audited knowledge attribution: which
 structural and temporal knowledge survives a controlled ablation.
-Linear $\Delta t$ survives on the QKC-T backbone; capacity-matched
-zeroing of the question--KC incidence message fails, as do hypergraph
-convolution and several metadata sources. On XES3G5M (clean $L{=}400$,
-test-only), the recommended tracer reaches $0.8296{\pm}0.0001$ over five
-training seeds on fold~0 versus compute-matched GIKT
-$0.8258{\pm}0.0001$ ($0.8295{\pm}0.0004$ over three learner folds).
-History-only $\Delta t$ does not pass the gate; only LSTM+query timing
-does. Future work: a tuning search for GIKT/AKT at $L{=}400$, and
-hyperedge-native leakage statistics.
+Linear $\Delta t$ survives on the QKC-T backbone and on a
+capacity-matched zero-incidence twin; capacity-matched zeroing of the
+question--KC incidence message fails, as do hypergraph convolution and
+several metadata sources. On XES3G5M (clean $L{=}400$, test-only), the
+recommended tracer reaches $0.8296{\pm}0.0001$ over five training seeds on
+fold~0 versus compute-matched GIKT $0.8258{\pm}0.0001$
+($0.8295{\pm}0.0004$ over three learner folds). History-only $\Delta t$
+does not pass the gate; only LSTM+query timing does. Future work: a
+tuning search for GIKT/AKT at $L{=}400$, and hyperedge-native leakage
+statistics.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,

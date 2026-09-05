@@ -90,12 +90,12 @@ train-only incidence message is removed in the `zero` arm.
 
 ```bash
 git fetch origin
-git checkout qkc-capacity-matched
+git checkout qkc-zero-time
 git pull --ff-only
 python scripts/34_qkc_capacity_matched.py --device cuda
 ```
 
-For a one-seed smoke run before launching all ten jobs:
+For a one-seed smoke run:
 
 ```bash
 python scripts/34_qkc_capacity_matched.py --device cuda --seeds 42
@@ -106,13 +106,14 @@ Outputs:
 - `results/tables/qkc_capacity_matched_matrix.csv`
 - `results/tables/qkc_capacity_matched_summary.json`
 - `results/tables/qkc_capacity_matched_logs/`
-- `results/checkpoints/xes3g5m_fold0_qkc_cm_{observed,zero}_sSEED.pt`
+- `results/checkpoints/xes3g5m_fold0_qkc_cm_{observed,zero,zero_time}_sSEED.pt`
 
 The driver refuses a result if the two arms have different checkpoint state
-shapes/element counts, if the observed arm has no Q–KC links, or if the zero
-arm retains any links. Five paired seeds are complete on this workstation
-(`results/tables/qkc_capacity_matched_*.{csv,json}`): **0/5 PASS**, mean
-Δval ≈ −0.0001. Do not reuse the legacy hard-off delta for incidence credit.
+shapes/element counts for incidence pairs, if the observed arm has no Q–KC
+links, or if the zero arm retains any links. Five paired seeds are complete:
+incidence **0/5 PASS** (mean Δval ≈ −0.0001); timing on zero incidence
+**5/5 PASS** (mean Δval +0.00255, mean test-only Δ +0.00269). Do not reuse
+the legacy hard-off delta for incidence credit.
 
 ## Notes
 

@@ -7,6 +7,7 @@ under `results/tables/` is allowlisted when it is a reported number.
 |---|---|---|
 | Table AUC XES3G5M (clean L=400) | `scripts/03_train_tier1.py`, pyKT retrains | `paper/tables/table_auc_xes3g5m.tex` |
 | Table QKC capacity-matched | `scripts/34_qkc_capacity_matched.py` | `results/tables/qkc_capacity_matched_{matrix.csv,summary.json}` |
+| Table QKC zero-incidence + Δt | same (`zero_time` arm) | `paper/tables/table_qkc_zero_time.tex` |
 | Table A7 history-only Δt | `scripts/03_train_tier1.py --time-gap-mode lstm` | `paper/tables/table_a7_query_dt.tex` |
 | Table calibration | `scripts/30_a6_calibration_metrics.py` | `paper/tables/table_calibration_xes3g5m.tex` |
 | Fig. reliability | same | `paper/figures/fig_reliability_xes3g5m.pdf` |
@@ -22,5 +23,5 @@ under `results/tables/` is allowlisted when it is a reported number.
 | Holm B8 | `scripts/33_b8_holm_credit_tests.py` | `results/tables/b8_holm_credit_tests.json` |
 
 B12 fold~0–2 rewiring is on `main` (ΔAUC 0.0318 / 0.0341 / 0.0351). Capacity-matched
-Q←KC (`scripts/34_qkc_capacity_matched.py`) finished: **0/5 PASS**, mean Δval ≈ −0.0001
-(do not reuse the historical pathway-off twin for incidence credit).
+Q←KC finished: incidence **0/5 PASS**, mean Δval ≈ −0.0001; Linear Δt on zero incidence
+**5/5 PASS**, mean Δval +0.00255 (test-only Δ +0.00269).
