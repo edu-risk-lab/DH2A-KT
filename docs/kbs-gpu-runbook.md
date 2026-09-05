@@ -110,9 +110,9 @@ Outputs:
 
 The driver refuses a result if the two arms have different checkpoint state
 shapes/element counts, if the observed arm has no Q–KC links, or if the zero
-arm retains any links. Do not update the manuscript until all five paired
-seeds finish. The claim passes only when the measured paired validation
-difference supports it; do not reuse the legacy hard-off delta.
+arm retains any links. Five paired seeds are complete on this workstation
+(`results/tables/qkc_capacity_matched_*.{csv,json}`): **0/5 PASS**, mean
+Δval ≈ −0.0001. Do not reuse the legacy hard-off delta for incidence credit.
 
 ## Notes
 

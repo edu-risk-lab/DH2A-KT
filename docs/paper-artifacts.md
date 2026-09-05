@@ -6,6 +6,7 @@ under `results/tables/` is allowlisted when it is a reported number.
 | Paper table / figure | Script | Result file |
 |---|---|---|
 | Table AUC XES3G5M (clean L=400) | `scripts/03_train_tier1.py`, pyKT retrains | `paper/tables/table_auc_xes3g5m.tex` |
+| Table QKC capacity-matched | `scripts/34_qkc_capacity_matched.py` | `results/tables/qkc_capacity_matched_{matrix.csv,summary.json}` |
 | Table A7 history-only Δt | `scripts/03_train_tier1.py --time-gap-mode lstm` | `paper/tables/table_a7_query_dt.tex` |
 | Table calibration | `scripts/30_a6_calibration_metrics.py` | `paper/tables/table_calibration_xes3g5m.tex` |
 | Fig. reliability | same | `paper/figures/fig_reliability_xes3g5m.pdf` |
@@ -20,11 +21,6 @@ under `results/tables/` is allowlisted when it is a reported number.
 | Table human Likert n=100 | pack in `results/tables/tier2_human_eval_tracer_n100/` | `paper/tables/table_human_eval.tex` |
 | Holm B8 | `scripts/33_b8_holm_credit_tests.py` | `results/tables/b8_holm_credit_tests.json` |
 
-B12 fold~0 rewiring JSON exists but is **not** in the paper's structure-check
-claim (clean AUC 0.535 vs node-drop 0.753). Rerun:
-
-```bash
-python scripts/32_b12_structure_checks.py --device cuda --folds 0
-```
-
-The driver now exits with code 3 if v2 clean AUC < 0.65 (full eval).
+B12 fold~0–2 rewiring is on `main` (ΔAUC 0.0318 / 0.0341 / 0.0351). Capacity-matched
+Q←KC (`scripts/34_qkc_capacity_matched.py`) finished: **0/5 PASS**, mean Δval ≈ −0.0001
+(do not reuse the historical pathway-off twin for incidence credit).

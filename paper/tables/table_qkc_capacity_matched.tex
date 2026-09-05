@@ -1,0 +1,28 @@
+\begin{table}[!t]
+\caption{Capacity-matched Q$\leftarrow$KC attribution on XES3G5M fold~0
+(clean protocol). Both arms keep \texttt{--question-graph} (same
+\texttt{question\_embed}, GCN linear, and input projection); only the
+train-only incidence matrix is replaced by zeros in the twin
+(\texttt{--question-incidence-control zero}). Gate:
+$\Delta\mathrm{val}\ge{+}0.002$. Checkpoint state shapes match on every
+seed; observed nonzero links $=8848$, zero arm $=0$. Mean
+$\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$; mean
+$\Delta\mathrm{test}{\approx}{+}0.00004$. $0/5$ PASS: the incidence
+\emph{message} is not credited. The older hard-off twin that removed the
+whole question pathway is not used for this claim
+(Section~\ref{sec:credit-gate}).}
+\label{tab:qkc-capacity}
+\centering
+\footnotesize
+\begin{tabular}{@{}rrrrrl@{}}
+\toprule
+Seed & Observed val & Zero val & $\Delta$val & $\Delta$test & Gate \\
+\midrule
+0 & 0.82554 & 0.82610 & $-0.00056$ & $-0.00020$ & FAIL \\
+17 & 0.82579 & 0.82589 & $-0.00010$ & $-0.00014$ & FAIL \\
+42 & 0.82598 & 0.82619 & $-0.00021$ & $+0.00013$ & FAIL \\
+1234 & 0.82605 & 0.82567 & $+0.00038$ & $+0.00018$ & FAIL \\
+2024 & 0.82608 & 0.82610 & $-0.00003$ & $+0.00023$ & FAIL \\
+\bottomrule
+\end{tabular}
+\end{table}
