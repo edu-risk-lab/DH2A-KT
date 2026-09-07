@@ -160,7 +160,7 @@ Không có file → `SKIP: checkpoint missing` trong log. Không train simpleKT 
 Không đưa vào hàng đợi máy:
 
 1. Mở `https://github.com/edu-risk-lab/DH2A-KT` hoặc kho ẩn danh sống (hiện 404).
-2. Sau commit này: sửa Data availability pin từ `ca8bc2b` sang `git rev-parse --short HEAD`.
+2. Sau commit `499b21f`: pin Data availability đã trỏ `499b21f`. Commit pin-bump tiếp theo sẽ lệch một hash — cập nhật lại khi nộp PDF cuối.
 3. Zenodo DOI lúc nộp.
 4. Compile `paper/main.pdf`, lướt hidelinks.
 5. Không sửa Abstract bằng số S3/S4 trừ khi tác giả chốt (sáu FAIL một seed đã ra khỏi Abstract).
