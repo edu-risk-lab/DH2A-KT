@@ -421,10 +421,10 @@ wait until the scored item; that item's identity is part of the
 prediction request, so the gap is attempt context rather than a post-hoc
 peek at duration after $y_{t+1}$ is observed. We do not feed the scored
 step's own response into the query. We report a history-only $\Delta t$
-row (\texttt{--time-gap-mode lstm}): fold~0 seed~42 test AUC $0.8289$,
-$\Delta\mathrm{val}{+}0.00170$ (FAIL; Table~\ref{tab:auc-xes3g5m},
-Table~\ref{tab:a7-query-dt}). Query-only also fails
-($+0.00069$); only \texttt{both} passes. Per-concept exponential
+row (\texttt{--time-gap-mode lstm}): five-seed mean $\Delta\mathrm{val}{+}0.00193$
+($2/5$ PASS; Table~\ref{tab:auc-xes3g5m}, Table~\ref{tab:a7-query-dt}).
+Query-only fails on all five seeds (mean $+0.00099$); only \texttt{both}
+passes $5/5$. Per-concept exponential
 forgetting is a pre-specified alternative that fails the gate (P4).
 HypergraphConv on multi-KC item hyperedges, hint-item hypergraphs,
 dual-gated graph-only $x_t$, and the graph-sensitivity auxiliary loss
@@ -599,10 +599,10 @@ collapses to two bins: short gaps ($\lesssim$18\,min) $\Delta{+}0.0028$,
 long gaps $\Delta{+}0.0019$, both CIs excluding $0$ --- not a long-horizon
 exponential-decay pattern under P4's form. Table~\ref{tab:a7-query-dt} ablates injection site on
 XES3G5M. History-only LSTM $\Delta t$ (observed gaps, no query-side wait)
-reaches test AUC $0.8289$ and fails the gate
-($\Delta\mathrm{val}{+}0.00170$); query-only fails ($+0.00069$); only
-\texttt{--time-gap-mode both} passes at seed~42
-($+0.00280$). The branches are complementary: the recommended tracer's
+reaches five-seed test AUC $0.8288{\pm}0.0002$ and fails as a credit claim
+(mean $\Delta\mathrm{val}{+}0.00193$, $2/5$ PASS); query-only fails
+($0/5$, mean $+0.00099$); only \texttt{--time-gap-mode both} passes on all
+five seeds (mean $+0.00274$). The branches are complementary: the recommended tracer's
 timing credit is not available under a history-only deployment. On FoundationalASSIST, query-only $\Delta t$ keeps
 most of the M2 gain ($+0.01471$ vs.\ off) while LSTM-only is
 $+0.00280$; combining time with prior-step \texttt{saw\_answer} is additive
@@ -730,8 +730,8 @@ bipartite membership matrix, not a new multi-way graph.
 Attempt-onset scoring (this paper's protocol) produces $P(y_{t+1}{=}1)$
 when the learner opens item $t{+}1$, so the query-side wait has already
 elapsed. History-only / recommend-before-return uses only LSTM-side gaps
-already in the log; that arm is the history-only row (test AUC $0.8289$,
-FAIL; Table~\ref{tab:a7-query-dt}). Serving a next item before the
+already in the log; that arm is the history-only row (five-seed mean
+$\Delta\mathrm{val}$ FAIL, $2/5$ PASS; Table~\ref{tab:a7-query-dt}). Serving a next item before the
 learner returns is earlier still: the wait has not occurred, so
 query-side $\Delta t$ must be omitted or replaced by a planned-gap proxy
 we do not evaluate. The recommended tracer therefore assumes attempt-onset

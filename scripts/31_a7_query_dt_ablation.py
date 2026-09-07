@@ -7,10 +7,12 @@ Trains three time-gap injection modes under the clean L=400 protocol:
   * query  — gap to the scored next-step query only
 
 Twin for the registered gate is hg_qkc_on (same seed, no time-gap).
-Skips arms already present in ``results/tables/a7_query_dt_ablation.csv``.
+Skips (arm, seed) pairs already present in
+``results/tables/a7_query_dt_ablation.csv``.
 
 Usage:
     python scripts/31_a7_query_dt_ablation.py --device cuda
+    python scripts/31_a7_query_dt_ablation.py --device cuda --seed 17
     python scripts/31_a7_query_dt_ablation.py --device cuda --force
 """
 from __future__ import annotations
@@ -25,6 +27,8 @@ from pathlib import Path
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 OUTPUT = REPO_ROOT / "results" / "tables" / "a7_query_dt_ablation.csv"
 LOG = REPO_ROOT / "results" / "tables" / "a7_query_dt_ablation.log"
 RUN_LOG_DIR = REPO_ROOT / "results" / "tables" / "a7_run_logs"
@@ -86,23 +90,26 @@ def _log(msg: str) -> None:
         fh.write(line + "\n")
 
 
-def _already_done(arm: str, force: bool) -> bool:
+def _already_done(arm: str, seed: int, force: bool) -> bool:
     if force or not OUTPUT.exists():
         return False
     df = pd.read_csv(OUTPUT)
-    return (df["arm"] == arm).any()
+    match = (df["arm"] == arm) & (df["seed"].astype(int) == int(seed))
+    return bool(match.any())
 
 
 def _append_row(row: dict) -> None:
     table = pd.DataFrame([row])
     if OUTPUT.exists():
         existing = pd.read_csv(OUTPUT)
-        dup = existing["arm"] == row["arm"]
+        dup = (existing["arm"] == row["arm"]) & (
+            existing["seed"].astype(int) == int(row["seed"])
+        )
         if dup.any():
             existing = existing.loc[~dup]
         table = pd.concat([existing, table], ignore_index=True)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(OUTPUT, index=False)
+    table.sort_values(["seed", "arm"]).to_csv(OUTPUT, index=False)
 
 
 def _twin_val(seed: int) -> float | None:
@@ -160,13 +167,13 @@ def _import_both_from_a2(seed: int) -> bool:
 
 
 def run_arm(arm: str, seed: int, device: str, force: bool, dry_run: bool) -> int:
-    if _already_done(arm, force):
-        _log(f"SKIP {arm} (already in {OUTPUT.name})")
+    if _already_done(arm, seed, force):
+        _log(f"SKIP {arm} seed={seed} (already in {OUTPUT.name})")
         return 0
     if arm == "dt_both" and not force and _import_both_from_a2(seed):
         return 0
     spec = ARMS[arm]
-    tag = str(spec["tag"])
+    tag = f"{spec['tag']}_s{seed}"
     out_csv = REPO_ROOT / "results" / "tables" / f"a7_{arm}_s{seed}.csv"
     cmd = [
         str(PYTHON),
@@ -191,7 +198,7 @@ def run_arm(arm: str, seed: int, device: str, force: bool, dry_run: bool) -> int
     with run_log.open("w", encoding="utf-8") as fh:
         proc = subprocess.run(cmd, cwd=REPO_ROOT, stdout=fh, stderr=subprocess.STDOUT)
     if proc.returncode != 0:
-        _log(f"FAIL {arm} exit={proc.returncode} (see {run_log.name})")
+        _log(f"FAIL {arm} seed={seed} exit={proc.returncode} (see {run_log.name})")
         return proc.returncode
     res = pd.read_csv(out_csv)
     row = _fold0_row(res)
@@ -215,7 +222,10 @@ def run_arm(arm: str, seed: int, device: str, force: bool, dry_run: bool) -> int
             "status": "ok",
         }
     )
-    _log(f"DONE {arm} val_auc={val_auc} test_auc={test_auc} delta_val={delta_val} pass={gate_pass}")
+    _log(
+        f"DONE {arm} seed={seed} val_auc={val_auc} test_auc={test_auc} "
+        f"delta_val={delta_val} pass={gate_pass}"
+    )
     return 0
 
 
