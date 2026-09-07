@@ -1,10 +1,20 @@
 # DH2A-KT
 
+Leakage-audited knowledge attribution for knowledge tracing. The KBS
+manuscript is `paper/main.tex`; table-to-script map is
+[`docs/paper-artifacts.md`](docs/paper-artifacts.md). DH²A-KT is an
+attribution pipeline (construct → audit → matched twins → credit gate),
+not a hypergraph predictor. Headline evidence is on XES3G5M under a
+clean $L{=}400$ protocol.
+
+Historical scaffold notes below describe the early repository layout.
+They are **not** the current submission status.
+
 **Idea D**: Dynamic Heterogeneous Hypergraph + Agentic Knowledge Tracing, xây trực tiếp trên nền [P0](https://github.com/edu-risk-lab/leakage-controlled-kt-audit) (*Leakage-Controlled Concept Graph Construction and Cold-Start Diagnostic Protocol for Knowledge Tracing*, Dao Minh Tuan et al., APIN submission).
 
-Kế hoạch đầy đủ (kiến trúc, câu hỏi nghiên cứu, timeline, bảng rủi ro) nằm ở [`docs/idea-D-plan.md`](docs/idea-D-plan.md). README này chỉ nói về **cách dự án được scaffold và cách chạy nó**.
+Kế hoạch đầy đủ (kiến trúc, câu hỏi nghiên cứu, timeline, bảng rủi ro) nằm ở [`docs/idea-D-plan.md`](docs/idea-D-plan.md).
 
-## Trạng thái hiện tại: scaffold, không phải implementation đầy đủ
+## Historical scaffold notes (superseded by the KBS draft)
 
 Đây là bộ khung dự án (project scaffold), được dựng trong một phiên làm việc — **không phải** kết quả của 15 tuần thực nghiệm mô tả trong `docs/idea-D-plan.md`. Cụ thể, những gì **đã thực sự chạy được**:
 

@@ -15,6 +15,15 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{xurl}
 \usepackage[section]{placeins}
+% Elsevier-like float spacing (review 12pt, one column). Avoid [!t],
+% which ignores \topfraction and leaves near-empty pages.
+\setlength{\textfloatsep}{18pt plus 4pt minus 4pt}
+\setlength{\floatsep}{12pt plus 2pt minus 2pt}
+\setlength{\intextsep}{14pt plus 2pt minus 4pt}
+\setlength{\dbltextfloatsep}{18pt plus 4pt minus 4pt}
+\setlength{\dblfloatsep}{12pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{8pt plus 1pt minus 1pt}
+\setlength{\belowcaptionskip}{6pt plus 1pt minus 1pt}
 
 \journal{Knowledge-Based Systems}
 
@@ -72,8 +81,8 @@ compute-matched GIKT $0.8258{\pm}0.0001$ and \textit{simpleKT}
 $0.8214{\pm}0.0007$ (five-seed mean gaps $+0.0038$ and $+0.0082$;
 paired learner-level bootstrap 95\% CIs exclude $0$). The same recipe on folds~1--2 stays within $0.001$ (mean
 $0.8295{\pm}0.0004$). On this backbone the exponential forgetting form
-(P4) does not outperform Linear $\log(1{+}\Delta t)$; LSTM-only $\Delta t$
-fails the gate. A graph-only diagnostic encoder (AUC $0.752$) is in the
+(P4) does not outperform Linear $\log(1{+}\Delta t)$; history-only
+LSTM $\Delta t$ fails the gate ($2/5$ PASS). A graph-only diagnostic encoder (AUC $0.752$) is in the
 appendix, not the recommended tracer.
 \end{abstract}
 
@@ -343,12 +352,17 @@ TBMR/$|\rho|$ are skipped when that projection exceeds the implementation
 cap (Table~\ref{tab:leakage-measured}). Table~\ref{tab:leakage-taxonomy}
 adds three classes that a pairwise projection does not express.
 
-\begin{table}[!t]
+\begin{table}[t]
 \caption{Hyperedge-level leakage taxonomy (extends \cite{daominh2026p0}
 Table~1)}
 \label{tab:leakage-taxonomy}
 \centering
-\begin{tabular}{@{}p{2.2cm}p{3.0cm}p{3.4cm}@{}}
+\small
+\begin{tabularx}{\textwidth}{@{}
+  >{\raggedright\arraybackslash}p{3.35cm}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+  @{}}
 \toprule
 Class & Source & Diagnostic \\
 \midrule
@@ -363,7 +377,7 @@ chosen using knowledge of the student's later correctness & Not
 instantiated for Teacher; Hint members on FoundationalASSIST use
 train-only session construction (group-membership leak $0$) \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Measured values on XES3G5M fold~0 appear in Table~\ref{tab:leakage-measured}.
@@ -514,7 +528,7 @@ $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$ over five seeds ($0/5$ PASS),
 so incidence content is not credited. A historical hard-off comparison that
 removed the whole question pathway is capacity-mismatched and is not a
 credit test. Timing is credited twice: Linear $\Delta t$ vs.\ Q$\leftarrow$KC
-mean $+0.00274$ ($t_4{=}23.99$, $p{=}8.95{\times}10^{-6}$), and Linear
+mean $+0.00274$ ($t_4{=}23.99$, two-sided $p{=}1.79{\times}10^{-5}$), and Linear
 $\Delta t$ on the zero-incidence backbone
 (Table~\ref{tab:qkc-zero-time}) mean $+0.00255{\pm}0.00015$ ($5/5$ PASS).
 Holm--Bonferroni at $\alpha{=}0.05$ among the remaining XES credit arms
@@ -554,7 +568,8 @@ stability. Over five training seeds (A2 matrix), DH$^2$-KT with the
 Q$\leftarrow$KC pathway reaches $0.8270{\pm}0.0002$ versus
 compute-matched GIKT $0.8258{\pm}0.0001$, AKT $0.8223{\pm}0.0001$, and
 \textit{simpleKT} $0.8214{\pm}0.0007$ (all retrained under the same
-masking rules); the pathway-off baseline is $0.8206{\pm}0.0002$. Under the
+masking rules). Retrained DKT and DGEKT are $0.8009{\pm}0.0002$ and
+$0.7850{\pm}0.0001$; the pathway-off baseline is $0.8206{\pm}0.0002$. Under the
 capacity-matched zero-incidence twin (Table~\ref{tab:qkc-capacity}), the
 incidence \emph{message} fails the gate on all five seeds ($0/5$ PASS;
 mean $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$). Learner-level
@@ -567,6 +582,7 @@ numbers: that arm is \texttt{--no-graph} on the concept stack.
 \input{tables/table_auc_xes3g5m}
 \input{tables/table_qkc_capacity_matched}
 \input{tables/table_qkc_zero_time}
+\input{tables/table_attribution_summary}
 The same Q$\leftarrow$KC$+\Delta t$ recipe on folds~1 and~2 stays within
 $0.001$ of fold~0 (mean $0.8295{\pm}0.0004$ over learner folds;
 $0.8296{\pm}0.0001$ over five training seeds on fold~0;
@@ -736,7 +752,7 @@ learner returns is earlier still: the wait has not occurred, so
 query-side $\Delta t$ must be omitted or replaced by a planned-gap proxy
 we do not evaluate. The recommended tracer therefore assumes attempt-onset
 availability; a history-only deployment should use the LSTM-only arm and
-must not claim the $+0.00280$ both-mode credit.
+must not claim the both-mode $5/5$ credit (mean $\Delta\mathrm{val}{+}0.00274$).
 
 \subsection{Interpretation of the empirical findings}
 \label{sec:auc-tradeoff}
@@ -851,7 +867,7 @@ output.
 \section*{Data availability}
 Code matching this manuscript is at
 \url{https://github.com/edu-risk-lab/DH2A-KT}
-(default branch, commit \texttt{c69bce9}; a Zenodo snapshot DOI will be
+(default branch, commit \texttt{b60e6b8}; a Zenodo snapshot DOI will be
 minted at submission). The repository will be made public at submission;
 until then, reviewers may request access from the corresponding author.
 P0's audited edges and reused baselines are vendored under

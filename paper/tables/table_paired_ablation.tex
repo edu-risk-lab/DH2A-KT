@@ -1,15 +1,15 @@
-% Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
+﻿% Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
 % knobs (Tier 2). Predictive AUCs are XES3G5M fold~0 test-only, $L{=}400$,
 % mask-repeats, chunked, unless noted. Tier~2 flag/JC are the fold~0 Ollama
 % $n{=}500$ run (originally on the v2 graph-only checkpoint; a v4 Q$\leftarrow$KC
 % re-run is optional). Independent generation (IG) strips frozen
 % $P(\mathrm{correct})$ from the Diagnostician. ``w/o Critic'' disables the
 % gate (flag $0$ by construction; JC unchanged).
-\begin{table}[!t]
+\begin{table}[t]
 \caption{Paired ablation of DH$^2$A-KT knowledge and explanation knobs.
 Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except
 HypergraphConv / FA session (validation or secondary corpus, as marked).
-The registered gate is $\Delta\mathrm{val}\ge{+}0.002$; FAIL rows are not
+The pre-specified gate is $\Delta\mathrm{val}\ge{+}0.002$; FAIL rows are not
 AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
 (\ref{app:graph-only}), not the recommended tracer.}
 \label{tab:paired-ablation}
@@ -19,9 +19,9 @@ AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
 \toprule
 Setting & AUC & Gate / note & Flag & Mean JC \\
 \midrule
-Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296$ & PASS $\Delta\mathrm{val}{+}0.00280$ & --- & --- \\
-Q$\leftarrow$KC on & $0.8270$ & PASS $\Delta\mathrm{val}{+}0.00612$ & --- & --- \\
-Q$\leftarrow$KC off (twin) & $0.8202$ & --- & --- & --- \\
+Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296{\pm}0.0001$ & $5/5$ PASS $+0.00274$ & --- & --- \\
+Q$\leftarrow$KC on & $0.8270{\pm}0.0002$ & not an incidence credit & --- & --- \\
+Q$\leftarrow$KC off (twin) & $0.8206{\pm}0.0002$ & mismatched & --- & --- \\
 HypergraphConv (val) & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
 Grounded + Critic (v2 ckpt) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
 IG (v2) & --- & --- & $0.768$ & $0.142$ \\

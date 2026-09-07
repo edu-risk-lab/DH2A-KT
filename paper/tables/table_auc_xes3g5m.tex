@@ -1,9 +1,8 @@
-\begin{table}[!t]
+﻿\begin{table}[t]
 \caption{Test-only AUC on XES3G5M fold~0 under the \emph{clean} protocol:
 mask-repeats, chunked windows, max seq.\ len.\ 400. All models are scored
-on an identical set of $1{,}093{,}720$ target positions. DH$^2$-KT and pyKT
-rows marked with $\pm$ report mean$\pm$SD over five training seeds (42, 17,
-1234, 0, 2024; A2 matrix); others are single-seed fold~0 runs. DH$^2$-KT
+on an identical set of $1{,}093{,}720$ target positions. Every row is
+mean$\pm$SD over five training seeds (42, 17, 1234, 0, 2024). DH$^2$-KT
 uses a v4 LSTM with question embeddings; Q$\leftarrow$KC is bipartite
 incidence (\texttt{--question-graph}), not hypergraph convolution;
 $+\Delta t$ is Linear $\log(1{+}\mathrm{gap})$ into LSTM and next-step

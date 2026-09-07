@@ -9,11 +9,11 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 |---|---|---|
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table aliases | hand-maintained | `paper/tables/table_aliases.tex` |
-| Table AUC XES3G5M (clean L=400) | `scripts/03_train_tier1.py`, pyKT retrains | `results/tables/a2_multiseed_matrix.csv` |
+| Table AUC XES3G5M (clean L=400) | `scripts/03_train_tier1.py`, `scripts/24_train_baselines_clean.py`, `scripts/27_a2_multiseed_matrix.py` | `results/tables/a2_multiseed_matrix.csv`, `results/tables/xes3g5m_fold0_baselines_protocol.csv` |
 | Table attribution summary | `scripts/33_b8_holm_credit_tests.py`, `scripts/34_qkc_capacity_matched.py` | `results/tables/b8_holm_credit_tests.json`, `qkc_capacity_matched_summary.json` |
 | Table QKC capacity-matched (app.) | `scripts/34_qkc_capacity_matched.py` | `results/tables/qkc_capacity_matched_{matrix.csv,summary.json}` |
 | Table QKC zero-incidence + Δt (app.) | same (`zero_time` arm) | `paper/tables/table_qkc_zero_time.tex` |
-| Table A7 history-only Δt | `scripts/03_train_tier1.py --time-gap-mode lstm` | `paper/tables/table_a7_query_dt.tex` |
+| Table A7 history-only Δt | `scripts/31_a7_query_dt_ablation.py` | `results/tables/a7_query_dt_ablation.csv`, `paper/tables/table_a7_query_dt.tex` |
 | Table AUC folds 1–2 (QKC-T only) | `scripts/03_train_tier1.py` | `paper/tables/table_auc_p0_dt_folds.tex` |
 | Table calibration | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
 | Fig. reliability | same | `paper/figures/fig_reliability_xes3g5m.pdf` |

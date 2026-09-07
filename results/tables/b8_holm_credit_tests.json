@@ -1,5 +1,8 @@
 {
-  "source": "results/tables/a2_multiseed_matrix.csv",
+  "sources": [
+    "results/tables/a2_multiseed_matrix.csv",
+    "results/tables/qkc_capacity_matched_matrix.csv"
+  ],
   "seeds": [
     "42",
     "17",
@@ -10,29 +13,50 @@
   "alpha": 0.05,
   "tests": [
     {
-      "name": "qkc_vs_twin",
+      "name": "timing_on_zero_incidence",
       "n": 5,
-      "mean_delta_val": 0.005779684386236372,
-      "sd_delta_val": 0.00040486807768288276,
-      "t": 31.92093397455098,
-      "p_one_sided": 2.8706666521215865e-06,
-      "p_holm_m2": 5.741333304243173e-06,
-      "reject_holm_m2_alpha05": true,
-      "p_holm_m8": 2.2965333216972692e-05,
-      "reject_holm_m8_alpha05": true
+      "mean_delta_val": 0.002546974435463101,
+      "sd_delta_val": 0.00014984693538832843,
+      "ci95_delta_val": [
+        0.0023609148905502477,
+        0.002733033980375954
+      ],
+      "t": 38.00683650880487,
+      "p_one_sided_positive": 1.431108913990583e-06,
+      "p_two_sided": 2.862217827981166e-06,
+      "p_holm_m3": 4.293326741971749e-06,
+      "reject_holm_m3_alpha05": true
     },
     {
-      "name": "dt_vs_qkc",
+      "name": "timing_on_observed_incidence",
       "n": 5,
       "mean_delta_val": 0.002735278054813972,
       "sd_delta_val": 0.00025492347990057143,
+      "ci95_delta_val": [
+        0.0024187487475246113,
+        0.003051807362103333
+      ],
       "t": 23.992563063680848,
-      "p_one_sided": 8.949559766705897e-06,
-      "p_holm_m2": 8.949559766705897e-06,
-      "reject_holm_m2_alpha05": true,
-      "p_holm_m8": 6.264691836694127e-05,
-      "reject_holm_m8_alpha05": true
+      "p_one_sided_positive": 8.949559766705887e-06,
+      "p_two_sided": 1.7899119533411773e-05,
+      "p_holm_m3": 1.7899119533411773e-05,
+      "reject_holm_m3_alpha05": true
+    },
+    {
+      "name": "incidence_observed_vs_zero",
+      "n": 5,
+      "mean_delta_val": -0.00010313749160788533,
+      "sd_delta_val": 0.0003397508284768126,
+      "ci95_delta_val": [
+        -0.0005249938636874465,
+        0.0003187188804716759
+      ],
+      "t": -0.6787987634878873,
+      "p_one_sided_positive": 0.7327452127881129,
+      "p_two_sided": 0.5345095744237743,
+      "p_holm_m3": 0.7327452127881129,
+      "reject_holm_m3_alpha05": false
     }
   ],
-  "note": "FAIL arms in table_negative_knowledge.tex remain single-seed and are judged only by the +0.002 gate."
+  "note": "FAIL arms in table_negative_knowledge.tex remain single-seed and are judged only by the +0.002 gate. The historical pathway-off comparison is excluded because it is capacity-mismatched."
 }

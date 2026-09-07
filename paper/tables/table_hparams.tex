@@ -1,4 +1,4 @@
-\begin{table}[!t]
+﻿\begin{table}[t]
 \caption{Training recipes for every model in Table~\ref{tab:auc-xes3g5m}.
 ``Configs tried'' counts distinct hyperparameter vectors, not seeds.
 DH$^2$-KT's \emph{architecture} was chosen from a pre-specified ablation
@@ -24,7 +24,7 @@ GIKT & remaining pyKT hparams & none & P0/pyKT defaults & inherited ($n{=}1$) \\
 AKT & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\
 AKT & lr / dropout / d\_model & none at $L{=}400$ & P0/pyKT defaults & inherited from $L{=}200$ recipe \\
 \textit{simpleKT} & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$, 5 seeds) \\
-DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$ seed) \\
+DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + P0 defaults & inherited ($n{=}1$, 5 seeds) \\
 \bottomrule
 \end{tabularx}
 \end{table}

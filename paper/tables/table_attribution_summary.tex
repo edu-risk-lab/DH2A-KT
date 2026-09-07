@@ -1,4 +1,4 @@
-\begin{table}[!t]
+﻿\begin{table}[t]
 \caption{Leakage-audited knowledge attribution summary. Multi-seed XES3G5M
 rows use five paired seeds; other rows are pre-specified single-seed
 diagnostics and are not significance tests. The pre-specified credit convention is
@@ -15,6 +15,7 @@ Knowledge message & Matched twin & Corpus / seeds & Mean $\Delta$val & Credit \\
 \midrule
 Q$\leftarrow$KC incidence & Zero incidence & XES / 5 & $-0.00010{\pm}0.00034$ & 0/5 FAIL \\
 Linear $\Delta t$ (both) & No $\Delta t$, observed incidence & XES / 5 & $+0.00274{\pm}0.00025$ & 5/5 PASS \\
+Linear $\Delta t$ (history-only) & No $\Delta t$, observed incidence & XES / 5 & $+0.00193$ & 2/5 FAIL \\
 Linear $\Delta t$ (both) & No $\Delta t$, zero incidence & XES / 5 & $+0.00255{\pm}0.00015$ & 5/5 PASS \\
 HypergraphConv & No concept convolution & XES / 1 & $+0.00025$ & FAIL \\
 Hint-item session HE & No hint-item HE & FA / 1 & $+0.00007$ & FAIL \\

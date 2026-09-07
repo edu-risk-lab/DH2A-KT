@@ -44,7 +44,7 @@ K.~Cheng, L.~Peng, P.~Wang, J.~Ye, L.~Sun, B.~Du, \href{https://doi.org/10.1145/
 D.~M. Tuan, K.-T. Nguyen, D.~N. Tien, Q.~K. Ngo, V.-H. Nguyen, L.~H. Son, Leakage-controlled concept graph construction and cold-start diagnostic protocol for knowledge tracing, submitted to Applied Intelligence (APIN); code and artefacts at \url{https://github.com/edu-risk-lab/leakage-controlled-kt-audit} (2026).
 
 \bibitem{foundationalassist2026}
-{ASSISTments Foundation}, \href{https://doi.org/10.48550/arXiv.2602.00070}{{FoundationalASSIST}: An educational dataset for foundational knowledge tracing and pedagogical grounding of {LLMs}}, arXiv:2602.00070, hugging Face dataset: \url{https://huggingface.co/datasets/ASSISTments/FoundationalASSIST} (2026).
+E.~Worden, C.~Heffernan, N.~Heffernan, S.~Sonkar, \href{https://doi.org/10.48550/arXiv.2602.00070}{{FoundationalASSIST}: An educational dataset for foundational knowledge tracing and pedagogical grounding of {LLMs}}, arXiv:2602.00070, hugging Face dataset: \url{https://huggingface.co/datasets/ASSISTments/FoundationalASSIST} (2026).
 \newblock \href {https://doi.org/10.48550/arXiv.2602.00070} {\path{doi:10.48550/arXiv.2602.00070}}.
 \newline\urlprefix\url{https://doi.org/10.48550/arXiv.2602.00070}
 
@@ -84,7 +84,7 @@ W.~Zhou, H.~Ma, X.~Yu, C.~Wang, S.~Yang, X.~Zhang, \href{https://doi.org/10.4855
 \newline\urlprefix\url{https://doi.org/10.48550/arXiv.2606.21832}
 
 \bibitem{graphaugmentedllm2025}
-Y.~Liu, G.~Zhang, K.~Wang, S.~Li, S.~Pan, \href{https://doi.org/10.1109/MIS.2025.3642667}{Graph-augmented large language model agents: Current progress and future prospects}, IEEE Intelligent Systems (2025).
+Y.~Liu, G.~Zhang, K.~Wang, S.~Li, S.~Pan, B.~An, \href{https://doi.org/10.1109/MIS.2025.3642667}{Graph-augmented large language model agents: Current progress and future prospects}, IEEE Intelligent Systems 41~(2) (2025) 45--55.
 \newblock \href {https://doi.org/10.1109/MIS.2025.3642667} {\path{doi:10.1109/MIS.2025.3642667}}.
 \newline\urlprefix\url{https://doi.org/10.1109/MIS.2025.3642667}
 
