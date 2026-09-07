@@ -24,8 +24,8 @@ Quy ước: `[x]` = đã sửa trong bản thảo lần này. `[ ]` = cố ý ch
 ## C — tuỳ chọn / không đụng máy
 
 - [x] hidelinks đã có — *vẫn phải mở PDF bằng mắt trước khi nộp.*
-- [ ] Rà DOI toàn bộ `references.bib` (Gate 0 còn lại, không chặn luận đề).
-- [ ] Nhãn v2/v4: giữ bảng alias; không viết lại phụ lục.
+- [x] **Rà DOI** `paper/references.bib` (Crossref/OpenAlex/ACL Anthology, 07/09/2026): sửa DOI AKT `…3403288`→`…3403282` (DOI cũ trỏ bài Joglekar); pyKT thêm `10.52202/068431-1347` (NeurIPS **35**, tr. 18542–18555); simpleKT/Badran thêm DOI arXiv; Chu et al. ACL tr. **13782–13810**; ES-KT-24 tr. **259–273**; GraphRAG AAAI thêm tr. 14610–14620; GIKT năm LNCS 2021; IEEE IS năm 2026. P0 unpublished không DOI. Pineau JMLR không có DOI Crossref (giữ URL JMLR + eprint `2003.12206`).
+- [x] **Nhãn v2/v4:** giữ `paper/tables/table_aliases.tex`; không viết lại phụ lục (C3).
 
 ## Cấm khi sửa
 
@@ -35,7 +35,10 @@ Quy ước: `[x]` = đã sửa trong bản thảo lần này. `[ ]` = cố ý ch
 
 ## Việc máy — server chạy theo hướng dẫn
 
-Chi tiết copy-paste: [`docs/HuongDan_Checklist_GPU_2026-09-07.md`](HuongDan_Checklist_GPU_2026-09-07.md). Kết quả trên `main` (fast-forward từ `gpu-checklist-2026-09-07`, `d613fd6`).
+**Đợt 08/09 (còn mở):** chấm lại test-only A2/A7 + chẩn đoán Δt hàng lặp.
+Copy-paste: [`docs/HuongDan_Rescore_TestOnly_2026-09-08.md`](HuongDan_Rescore_TestOnly_2026-09-08.md).
+
+Đợt 07/09 (đã xong): [`docs/HuongDan_Checklist_GPU_2026-09-07.md`](HuongDan_Checklist_GPU_2026-09-07.md). Kết quả trên `main` (fast-forward từ `gpu-checklist-2026-09-07`, `d613fd6`).
 
 - [x] **S1** ECE/Brier/NLL pyKT — 3 hàng, `n=1,093,720`. ECE GIKT 0.0073 / AKT 0.0047 / simpleKT 0.0100 (cả ba < 0.05; không temperature scaling)
 - [x] **S2** Bootstrap learner-level — 3614 học viên; CI hiệu AUC không chứa 0. Khoảng 35 hàng còn (1,093,755 vs 1,093,720)

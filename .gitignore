@@ -276,6 +276,12 @@ temp/_diag_pykt_smask/
 !results/tables/gpu_checklist_2026-09-07.log
 !results/tables/xes3g5m_fold0_hyperedge_audit_positive_control.json
 !results/tables/b8_holm_credit_tests.json
+!results/tables/table5_testonly_rebuild.csv
+!results/tables/a2_testonly_rescore.csv
+!results/tables/a2_testonly_rescore_summary.json
+!results/tables/rescore_testonly_2026-09-08.log
+!results/tables/a3_dt_repeat_dist.json
+!results/tables/a3_dt_repeat_diag.log
 !results/tables/qkc_capacity_matched_matrix.csv
 !results/tables/qkc_capacity_matched_summary.json
 !results/tables/qkc_cm_*.csv

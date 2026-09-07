@@ -9,7 +9,10 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 |---|---|---|
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table aliases | hand-maintained | `paper/tables/table_aliases.tex` |
-| Table AUC XES3G5M (clean L=400) | `scripts/03_train_tier1.py`, `scripts/24_train_baselines_clean.py`, `scripts/27_a2_multiseed_matrix.py` | `results/tables/a2_multiseed_matrix.csv`, `results/tables/xes3g5m_fold0_baselines_protocol.csv` |
+| Table AUC XES3G5M (clean L=400, test-only rebuild) | hand-checked from capacity-matched + pyKT CSVs | `results/tables/table5_testonly_rebuild.csv`, `qkc_capacity_matched_matrix.csv`, `a2_multiseed_summary.csv`, `xes3g5m_fold0_baselines_protocol.csv` |
+| A2/A7 test-only rescore (server 08/09) | `scripts/36_rescore_a2_testonly.py` | `results/tables/a2_testonly_rescore.csv`, `a2_testonly_rescore_summary.json` |
+| A3 Δt-at-repeats diagnosis | `scripts/37_a3_dt_repeat_diag.py` | `results/tables/a3_dt_repeat_dist.json` |
+| Table protocol residual (A3) | stored rescores | `p0_dt_testonly_clean.csv`, `p0_dt_fold{1,2}_testonly_clean.csv`, `xes3g5m_fold0_p0parity_protocol.csv` |
 | Table attribution summary | `scripts/33_b8_holm_credit_tests.py`, `scripts/34_qkc_capacity_matched.py` | `results/tables/b8_holm_credit_tests.json`, `qkc_capacity_matched_summary.json` |
 | Table QKC capacity-matched (app.) | `scripts/34_qkc_capacity_matched.py` | `results/tables/qkc_capacity_matched_{matrix.csv,summary.json}` |
 | Table QKC zero-incidence + Δt (app.) | same (`zero_time` arm) | `paper/tables/table_qkc_zero_time.tex` |
