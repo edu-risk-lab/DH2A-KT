@@ -13,7 +13,7 @@
               inner sep=6pt, text width=5.15cm, minimum height=1.22cm,
               fill=green!8},
   failbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
-              inner sep=6pt, text width=5.15cm, minimum height=1.22cm,
+              inner sep=6pt, text width=5.15cm, minimum height=1.48cm,
               fill=white},
 ]
 \node[box] (p0) {Train-only construction\\$E_{\mathrm{pre}}$ / Q--KC};
@@ -25,8 +25,8 @@
 \draw[->, thick] (twins.east) -- (gate.west);
 
 % Both outcomes hang off the gate (T-junction), not off earlier stages.
-\node[failbox, anchor=north east] (fail) at ([yshift=-1.18cm]gate.south east)
-  {Not credited: incidence message,\\HypergraphConv, metadata forms};
+\node[failbox, anchor=north east] (fail) at ([yshift=-1.32cm]gate.south east)
+  {Not credited at 5 seeds: incidence\\message. 1-seed: HypergraphConv,\\metadata forms};
 \node[passbox, anchor=north east] (pass) at ([yshift=0cm, xshift=-0.32cm]fail.north west)
   {Credited: Linear $\log(1{+}\Delta t)$\\(observed and zero incidence)};
 \coordinate (fork) at ([yshift=-0.40cm]gate.south);
@@ -38,9 +38,10 @@
 \caption{DH$^2$A-KT is an attribution pipeline, not a single predictor.
 Train-only knowledge is constructed and audited, then compared against
 capacity-matched twins. Only Linear $\log(1{+}\Delta t)$ survives the
-credit gate on XES3G5M; the question--KC incidence message and the tested
-hypergraph/metadata forms do not. QKC-T is the observed-incidence
-evaluation arm; Zero$+\Delta t$ is the minimalist positive control.
+credit gate on XES3G5M (five seeds); the question--KC incidence message
+does not. Hypergraph/metadata forms in the dashed box are single-seed
+diagnostics, not five-seed credit tests. QKC-T is the observed-incidence
+evaluation arm; Zero$+\Delta t$ is the credited-minimal positive control.
 The dashed graph-only encoder and the exploratory Critic survey are not
 part of this credited map (\ref{app:graph-only}, \ref{sec:tier2}).}
 \label{fig:architecture}

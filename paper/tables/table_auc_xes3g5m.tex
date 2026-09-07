@@ -18,8 +18,9 @@ to the DH$^2$ \emph{compute} envelope (batch 16, cap 30 epochs,
 patience 5), not to a hyperparameter search
 (Appendix~\ref{app:hparams}). Five-seed mean gaps on this table are
 $+0.0038$ vs.\ GIKT, $+0.0074$ vs.\ AKT, and $+0.0082$ vs.\
-\textit{simpleKT}. Paired learner-level bootstrap CIs on one canonical
-fold-0 file (not those mean gaps) exclude $0$
+\textit{simpleKT}. Learner-level bootstrap CIs on one canonical
+fold-0 checkpoint pair measure learner sampling, not training-seed
+variance, and are not those five-seed mean gaps
 (Section~\ref{sec:time-result}). DyGKT at $L{=}400$ failed to converge
 (valid AUC ${\approx}0.60$); a clean rerun at $L{=}200$ reached
 $0.6756$ and is omitted here. This is \emph{not} the three-fold

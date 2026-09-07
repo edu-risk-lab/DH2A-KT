@@ -1,10 +1,11 @@
 ﻿\begin{table}[t]
 \caption{Negative results under a pre-specified validation gate
-($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin). All runs keep a
-separate Linear/embedding branch (no absorption into
-\texttt{concept\_embed}). FAIL means the knowledge type is \emph{not}
-credited as predictive. Hypergraph convolution and hint-item hyperedges
-are among the failures; they are not AUC novelty.}
+($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin). \emph{Single-seed}
+diagnostics: FAIL means the form is not credited in the configuration we
+ran, not that the knowledge type is valueless, and not a five-seed test.
+All runs keep a separate Linear/embedding branch (no absorption into
+\texttt{concept\_embed}). Hypergraph convolution and hint-item hyperedges
+are among these diagnostics; they are not AUC novelty.}
 \label{tab:negative-knowledge}
 \centering
 \footnotesize
