@@ -24,7 +24,7 @@ Two hooks:
 
 **Dataset access.** XES3G5M is the public release of Liu et al. FoundationalASSIST is used under Hugging Face Responsible Use Guidelines. GIKT/AKT/simpleKT under the clean L=400 protocol were retrained in this repository under a shared compute envelope, not a matched tuning search.
 
-**Required Elsevier sections** (Highlights, CRediT, competing interest, Funding, Ethics, Data availability, generative AI) are included. This research received no specific grant. Code: `https://github.com/edu-risk-lab/DH2A-KT` (default branch, commit `499b21f`; public at submission). Corresponding author: Le Hoang Son (`sonlh@vnu.edu.vn`).
+**Required Elsevier sections** (Highlights, CRediT, competing interest, Funding, Ethics, Data availability, generative AI) are included. This research received no specific grant. Code: `https://github.com/edu-risk-lab/DH2A-KT` (default branch, commit `09e0b96`; public at submission). Corresponding author: Le Hoang Son (`sonlh@vnu.edu.vn`).
 
 Thank you for your consideration.
 
