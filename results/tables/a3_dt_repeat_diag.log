@@ -1,0 +1,4 @@
+n_test_rows=1281923 n_repeat=183741 frac_repeat_log1p_zero=1.0
+P0 targets=1278309 clean=1094568 repeat_share_of_p0=0.14373754702501507
+Wrote results\tables\a3_dt_repeat_dist.json
+STOP: do not start attempt-collapse from this run.

@@ -1,0 +1,47 @@
+{
+  "protocol": {
+    "dataset": "xes3g5m",
+    "fold": 0,
+    "split": "test",
+    "sort": "user_id, timestamp, item_id",
+    "trained": false,
+    "attempt_collapse": false
+  },
+  "counts": {
+    "n_test_rows": 1281923,
+    "n_repeat_rows": 183741,
+    "repeat_share_of_rows": 0.14333232183212252,
+    "n_p0_targets": 1278309,
+    "n_clean_targets": 1094568,
+    "n_p0_targets_that_are_repeats": 183741,
+    "repeat_share_of_p0_targets": 0.14373754702501507,
+    "n_dropped_by_mask_repeats": 183741
+  },
+  "delta_t": {
+    "frac_repeat_raw_dt_zero": 1.0,
+    "frac_repeat_log1p_zero": 1.0,
+    "repeat_log1p": {
+      "p0": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 0.0,
+      "p90": 0.0,
+      "p99": 0.0,
+      "p100": 0.0
+    },
+    "fresh_log1p": {
+      "p0": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 6.983789920806885,
+      "p90": 11.376401901245117,
+      "p99": 14.356132507324219,
+      "p100": 17.94615936279297
+    },
+    "note": "Repeat rows share timestamp with the previous row, so raw \u0394t and log1p(\u0394t) are 0 by construction. Query-side \u0394t at a repeat target is therefore a zero injection into the time branch."
+  },
+  "decision": {
+    "run_attempt_collapse": false,
+    "reason": "Cheap diagnosis only. Headline stays mask-target. Do not train a collapsed export unless the author authorizes P1."
+  }
+}
