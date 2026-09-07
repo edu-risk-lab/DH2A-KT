@@ -1,22 +1,21 @@
-% Auto-derived from results/tables/a7_query_dt_ablation.csv (seed 42, fold 0)
+% Auto-derived from results/tables/a7_query_dt_ablation.csv (five seeds)
 \begin{table}[!t]
 \caption{Query-side vs.\ history-only Linear $\Delta t$ on XES3G5M
-fold~0 (clean $L{=}400$, seed~42). Twin is Q$\leftarrow$KC without time-gap
-(val AUC $0.82598$). Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$.
-\texttt{lstm} is the history-only arm (observed gaps only). Only
-\texttt{both} passes; the credited both-mode timing is not
-available under a history-only deployment.}
+fold~0 (clean $L{=}400$, five training seeds). Twin is Q$\leftarrow$KC
+without time-gap. Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$.
+\texttt{lstm} is the history-only arm (observed gaps only). Mean$\pm$SD
+test AUC over seeds; gate column is $k/5$ PASS. Only \texttt{both}
+passes on all five seeds.}
 \label{tab:a7-query-dt}
 \centering
 \footnotesize
 \begin{tabular}{@{}llcc@{}}
 \toprule
-Mode & Injection site & Test AUC & $\Delta$val / gate \\
+Mode & Injection site & Test AUC & Gate ($k/5$) \\
 \midrule
-\texttt{both} & LSTM + query & 0.8298 & PASS $+0.00280$ \\
-\texttt{lstm} (history-only) & LSTM only (observed gaps) & 0.8289 & FAIL $+0.00170$ \\
-\texttt{query} & next-step query only & 0.8277 & FAIL $+0.00069$ \\
-Q$\leftarrow$KC (twin) & --- & 0.8270 & baseline \\
+\texttt{both} & LSTM + query & $0.8296{\pm}0.0001$ & $5/5$ (mean $\Delta$val $+0.00274$) \\
+\texttt{lstm} (history-only) & LSTM only (observed gaps) & $0.8288{\pm}0.0002$ & $2/5$ (mean $\Delta$val $+0.00193$) \\
+\texttt{query} & next-step query only & $0.8279{\pm}0.0002$ & $0/5$ (mean $\Delta$val $+0.00099$) \\
 \bottomrule
 \end{tabular}
 \end{table}
