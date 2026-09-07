@@ -17,7 +17,7 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 | Table AUC folds 1–2 (QKC-T only) | `scripts/03_train_tier1.py` | `paper/tables/table_auc_p0_dt_folds.tex` |
 | Table calibration (DH²) | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
 | Table calibration (pyKT) | `scripts/35_pykt_calibration_from_npz.py` | `results/tables/a6_calibration_pykt_xes3g5m_fold0.csv` |
-| Bootstrap QKC-T vs GIKT/AKT/simpleKT | `scripts/25_bootstrap_protocol_ci.py` | `results/tables/b10_bootstrap_qkct_vs_{gikt,akt,simplekt}.csv` |
+| Table bootstrap (app.) | `scripts/25_bootstrap_protocol_ci.py` | `results/tables/b10_bootstrap_qkct_vs_{gikt,akt,simplekt}.csv`, `paper/tables/table_bootstrap_qkct.tex` |
 | P4 concept-forget 5-seed | `scripts/03_train_tier1.py` (`--concept-forget`) | `results/tables/p4_forget_5seed.csv` |
 | M4 teacher-group 5-seed | `scripts/03_train_tier1.py` (`--group-embed`) | `results/tables/m4_group_5seed.csv` |
 | Fig. reliability | same | `paper/figures/fig_reliability_xes3g5m.pdf` |
@@ -41,3 +41,6 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 Capacity-matched Q←KC: incidence **0/5 PASS**, mean Δval ≈ −0.0001;
 Linear Δt on zero incidence **5/5 PASS**, mean Δval +0.00255
 (test-only Δ +0.00269).
+P4 concept-forget **0/5 PASS**, mean Δval −0.00252;
+M4 teacher-group **0/5 PASS**, mean Δval +0.00025.
+pyKT ECE (seed 42, n=1,093,720): GIKT 0.0073 / AKT 0.0047 / simpleKT 0.0100.

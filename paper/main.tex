@@ -82,8 +82,10 @@ five training seeds versus compute-matched GIKT $0.8258{\pm}0.0001$ and
 \textit{simpleKT} $0.8214{\pm}0.0007$ (five-seed mean gaps $+0.0038$ and
 $+0.0082$; compute-matched, not a matched tuning search). The same recipe
 on folds~1--2 stays within $0.001$ (mean $0.8295{\pm}0.0004$).
-Single-seed diagnostics of other knowledge forms are reported only in
-Table~\ref{tab:negative-knowledge}; they are not five-seed credit tests.
+Other pre-specified forms are reported only in
+Table~\ref{tab:negative-knowledge} (teacher grouping and exponential
+forgetting $0/5$ FAIL; HypergraphConv and remaining metadata remain
+single-seed); they are not credited.
 A graph-only diagnostic encoder (AUC $0.752$) is in the appendix, not a
 recommended tracer.
 \end{abstract}
@@ -188,12 +190,12 @@ check remain available as a forced-reliance diagnostic
   QKC-T is the observed-incidence evaluation arm; Zero$+\Delta t$
   ($0.8295{\pm}0.0001$) is the credited-minimal control. Versus
   compute-matched GIKT $0.8258{\pm}0.0001$, the five-seed mean gap is
-  $+0.0038$ (Table~\ref{tab:auc-xes3g5m}). Single-seed diagnostics
-  (HypergraphConv, hint-item hyperedges, a full Q-matrix, teacher
-  grouping, an expert DAG subsample, and a per-concept exponential
-  forgetting form) did not meet the gate
-  (Table~\ref{tab:negative-knowledge}); they are not five-seed credit
-  tests. Graph-only v2 mean AUC $0.752$ versus GKT $0.834$ is an appendix
+  $+0.0038$ (Table~\ref{tab:auc-xes3g5m}). Teacher grouping and
+  per-concept exponential forgetting also fail at five seeds ($0/5$ PASS;
+  Table~\ref{tab:negative-knowledge}). HypergraphConv, hint-item
+  hyperedges, a full Q-matrix, and a Junyi DAG subsample remain
+  single-seed FAIL rows and are not five-seed credit tests.
+  Graph-only v2 mean AUC $0.752$ versus GKT $0.834$ is an appendix
   diagnostic, not a recommended tracer.
 \end{itemize}
 
@@ -461,8 +463,8 @@ step's own response into the query. We report a history-only $\Delta t$
 row (\texttt{--time-gap-mode lstm}): five-seed mean $\Delta\mathrm{val}{+}0.00193$
 ($2/5$ PASS; Table~\ref{tab:auc-xes3g5m}, Table~\ref{tab:a7-query-dt}).
 Query-only fails on all five seeds (mean $+0.00099$); only \texttt{both}
-passes $5/5$. A per-concept exponential forgetting form is a
-pre-specified single-seed alternative that did not meet the gate (P4;
+passes $5/5$. A per-concept exponential forgetting form fails versus Linear on all
+five seeds (P4; mean $\Delta\mathrm{val}{-}0.00252$;
 Table~\ref{tab:negative-knowledge}).
 HypergraphConv on multi-KC item hyperedges, hint-item hypergraphs,
 dual-gated graph-only $x_t$, and the graph-sensitivity auxiliary loss
@@ -562,10 +564,11 @@ mean $+0.00274$ ($t_4{=}23.99$, two-sided $p{=}1.79{\times}10^{-5}$), and Linear
 $\Delta t$ on the zero-incidence backbone
 (Table~\ref{tab:qkc-zero-time}) mean $+0.00255{\pm}0.00015$ ($5/5$ PASS).
 Holm--Bonferroni at $\alpha{=}0.05$ among the remaining XES credit arms
-leaves the QKC-backbone timing test significant. The six FAIL rows in
-Table~\ref{tab:negative-knowledge} remain single-seed and are judged only
-by the $+0.002$ gate, not by $p$-values: the gate is a credit threshold
-anchored to seed SD, not a claim of simultaneous significance.
+leaves the QKC-backbone timing test significant. Table~\ref{tab:negative-knowledge}
+is judged only by the $+0.002$ gate, not by $p$-values: M4 and P4 are
+five-seed ($0/5$ PASS); K, L, M1, and M5 remain single-seed. The gate is a
+credit threshold anchored to seed SD, not a claim of simultaneous
+significance.
 
 \subsection{Manipulation check}
 A hypergraph ablation is interpretable only if destroying the constructed
@@ -617,15 +620,15 @@ $0.8296{\pm}0.0001$ over five training seeds on fold~0;
 Table~\ref{tab:auc-p0-dt-folds}).
 \input{tables/table_auc_p0_dt_folds}
 
-Table~\ref{tab:negative-knowledge} lists \emph{single-seed} pre-specified
-diagnostics ($\Delta\mathrm{val}$ gate ${+}0.002$, not loosened). They
-are not five-seed credit tests. HypergraphConv on multi-KC item
-hyperedges (K), hint-item session hyperedges on FoundationalASSIST (L), a
-full Q-matrix (M1), teacher grouping (M4), a Junyi expert DAG on a
-5k-user subsample (M5), and per-concept exponential forgetting (P4) did
-not meet the gate in the configuration we ran. FAIL here means the form
-is not credited in that configuration, not that the knowledge type is
-valueless. The small FoundationalASSIST session-HE shift
+Table~\ref{tab:negative-knowledge} lists pre-specified diagnostics
+($\Delta\mathrm{val}$ gate ${+}0.002$, not loosened). HypergraphConv on
+multi-KC item hyperedges (K), hint-item session hyperedges on
+FoundationalASSIST (L), a full Q-matrix (M1), and a Junyi expert DAG on a
+5k-user subsample (M5) remain single-seed. Teacher grouping (M4; ASSIST2012
+$L{=}200$) and per-concept exponential forgetting (P4; XES $L{=}400$) are
+now five-seed and fail on every seed ($0/5$ PASS; mean $\Delta\mathrm{val}$
+$+0.00025$ and $-0.00252$). FAIL here means the form is not credited in
+that configuration, not that the knowledge type is valueless. The small FoundationalASSIST session-HE shift
 $0.720\rightarrow 0.722$ (concept projection; Table~\ref{tab:paired-ablation})
 is therefore not a hypergraph-AUC claim: the isolated hint-item HE arm
 did not pass.
@@ -644,7 +647,7 @@ Table~\ref{tab:qkc-zero-time}), so the timing credit is not an artefact of
 nonzero incidence. A quartile slice of $\log(1{+}\mathrm{gap})$
 collapses to two bins: short gaps ($\lesssim$18\,min) $\Delta{+}0.0028$,
 long gaps $\Delta{+}0.0019$, both CIs excluding $0$ --- not a long-horizon
-exponential-decay pattern under P4's form. Table~\ref{tab:a7-query-dt} ablates injection site on
+exponential-decay pattern under P4's form ($0/5$ FAIL vs.\ Linear). Table~\ref{tab:a7-query-dt} ablates injection site on
 XES3G5M. History-only LSTM $\Delta t$ (observed gaps, no query-side wait)
 reaches five-seed test AUC $0.8288{\pm}0.0002$ and fails as a credit claim
 (mean $\Delta\mathrm{val}{+}0.00193$, $2/5$ PASS); query-only fails
@@ -655,7 +658,8 @@ most of the M2 gain ($+0.01471$ vs.\ off) while LSTM-only is
 $+0.00280$; combining time with prior-step \texttt{saw\_answer} is additive
 ($+0.00297$ vs.\ M2).
 \input{tables/table_a7_query_dt} Per-concept $\exp(-\mathrm{softplus}(\theta_c)\cdot
-\mathrm{gap})$ fails versus Linear (P4). We treat Linear $\Delta t$ as
+\mathrm{gap})$ fails versus Linear on all five seeds (P4; mean
+$\Delta\mathrm{val}{-}0.00252$). We treat Linear $\Delta t$ as
 attempt-context knowledge on this backbone, not as a hypergraph effect,
 and we do not generalise that to every forgetting form. Query-side $\Delta t$ uses the
 gap to the item whose identity is already the next-step query; it is not
@@ -665,19 +669,21 @@ five seeds), the five-seed mean gaps are $+0.0074$ versus AKT and
 $+0.0082$ versus \textit{simpleKT}. As a secondary diagnostic, a paired
 learner-level bootstrap (1000 resamples, 3614 learners) on one canonical
 fold-0 prediction file---not the subtraction of the five-seed $\pm$
-rows---gives 95\% CIs $[+0.00703,+0.00792]$ vs.\ AKT,
-$[+0.00916,+0.01013]$ vs.\ \textit{simpleKT}, and $[+0.00342,+0.00413]$
-vs.\ GIKT. Those intervals measure learner sampling on a fixed
-checkpoint pair; they do not quantify training-seed variance
-(Table~\ref{tab:auc-xes3g5m}).
+rows---gives 95\% CIs $[+0.0035,+0.0043]$ vs.\ GIKT,
+$[+0.0068,+0.0077]$ vs.\ AKT, and $[+0.0088,+0.0098]$ vs.\
+\textit{simpleKT} (Table~\ref{tab:bootstrap-qkct}). Those intervals measure
+learner sampling on a fixed checkpoint pair; they do not quantify
+training-seed variance (Table~\ref{tab:auc-xes3g5m}).
 
 \subsection{Calibration (A6)}
 \label{sec:calibration}
 Table~\ref{tab:calibration-xes3g5m} reports 15-bin ECE, Brier score, and NLL
-on fold~0 test predictions under the same clean protocol. The recommended
-tracer is best calibrated (ECE $0.0056$) despite higher AUC; Q$\leftarrow$KC
-on is slightly miscalibrated high (ECE $0.0103$). We report calibration as a
-diagnostic, not as a primary claim.
+on fold~0 test predictions under the same clean protocol. Among DH$^2$
+arms the recommended tracer is best calibrated (ECE $0.0056$) despite
+higher AUC; Q$\leftarrow$KC on is slightly miscalibrated high (ECE $0.0103$).
+On the pyKT intersection, AKT has the lowest ECE ($0.0047$); GIKT is
+$0.0073$ and \textit{simpleKT} $0.0100$. No reported ECE exceeds $0.05$.
+We report calibration as a diagnostic, not as a primary claim.
 \input{tables/table_calibration_xes3g5m}
 \input{figures/fig_reliability_xes3g5m}
 
@@ -767,7 +773,8 @@ comparisons are five-seed means under a matched \emph{compute} envelope,
 not a matched tuning search (Appendix~\ref{app:hparams}). Learner-level
 bootstrap CIs on one checkpoint are a secondary diagnostic of learner
 sampling, not training-seed CIs. HypergraphConv and
-hint-item hyperedges did not meet the single-seed gate, so we do not
+hint-item hyperedges did not meet the single-seed gate, and teacher
+grouping / exponential forgetting fail at five seeds, so we do not
 credit multi-way message passing from those arms. The node-drop check
 (Appendix~\ref{app:graph-only}) is run on the graph-only diagnostic
 encoder, not on the recommended tracer. Node-drop confirms
@@ -820,10 +827,11 @@ QKC-T.
 
 \paragraph{Hint-item hyperedges, full Q-matrix, teacher grouping, expert
 DAG, exponential forgetting.}
-Did not meet the gate in the single-seed diagnostics we ran
-(Table~\ref{tab:negative-knowledge}). Session+Hint on
-FoundationalASSIST ($0.720\rightarrow 0.722$) is a small local shift, not
-credited as multi-way graph novelty.
+Hint-item HE, full Q-matrix, and the Junyi DAG did not meet the
+single-seed gate. Teacher grouping and per-concept exponential forgetting
+fail at five seeds ($0/5$; Table~\ref{tab:negative-knowledge}).
+Session+Hint on FoundationalASSIST ($0.720\rightarrow 0.722$) is a small
+local shift, not credited as multi-way graph novelty.
 
 The Critic survey in Section~\ref{sec:tier2} is exploratory and is not
 part of this attribution map.
@@ -840,11 +848,15 @@ part of this attribution map.
   \item Appendix~\ref{app:ate} reports an IPW hint check with weak
   positivity; it is not a contribution and must not be read as a
   recommendation against hints.
-  \item The six FAIL rows in Table~\ref{tab:negative-knowledge} are
-  single-seed diagnostics (M4 is $+0.00142$, near the gate). They are
-  not five-seed credit tests.
-  \item Calibration (ECE/Brier/NLL) is reported for three DH$^2$ arms on
-  seed~42, not for GIKT/AKT/\textit{simpleKT}.
+  \item Teacher grouping (M4) and per-concept exponential forgetting (P4)
+  fail the $+0.002$ gate on all five seeds (mean $\Delta\mathrm{val}$
+  $+0.00025$ and $-0.00252$). The remaining four FAIL rows in
+  Table~\ref{tab:negative-knowledge} (K, L, M1, M5) are still single-seed.
+  \item Calibration (ECE/Brier/NLL) is reported for three DH$^2$ arms
+  (native $n{=}1{,}093{,}755$) and for GIKT/AKT/\textit{simpleKT} on the
+  pyKT intersection ($n{=}1{,}093{,}720$), all seed~42. No ECE exceeds
+  $0.05$. A P0 $L{=}200$ \textit{simpleKT} rescore was skipped (no
+  checkpoint).
   \item We do not evaluate a planned-gap proxy for query-side $\Delta t$
   (the wait until a recommended item is actually opened). Deployment
   that scores before the learner returns must omit query-side $\Delta t$
@@ -885,7 +897,8 @@ compute-matched GIKT $0.8258{\pm}0.0001$
 ($0.8295{\pm}0.0004$ over three learner folds). History-only $\Delta t$
 does not pass the five-seed gate; only LSTM+query timing does. Future
 work: a tuning search for GIKT/AKT at $L{=}400$, five-seed repeats of
-the single-seed diagnostics, and hyperedge-native leakage statistics.
+the remaining single-seed diagnostics (K, L, M1, M5), and hyperedge-native
+leakage statistics.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
@@ -967,6 +980,15 @@ Table~\ref{tab:auc-xes3g5m}, which knobs were searched, which value was
 used, and how many distinct configurations were tried
 \cite{pineau2021repro}. We do not claim a matched \emph{tuning} budget.
 \input{tables/table_hparams}
+\FloatBarrier
+
+\section{Learner-level bootstrap on one checkpoint pair}
+\label{app:bootstrap}
+Table~\ref{tab:bootstrap-qkct} records the learner-level paired bootstrap
+used as a secondary diagnostic in Section~\ref{sec:time-result}. It
+resamples 3614 learners that appear on both sides of each contrast; it
+does not intersect the 35-row position gap, and it is not a five-seed CI.
+\input{tables/table_bootstrap_qkct}
 \FloatBarrier
 
 \section{Observational hint identification check}

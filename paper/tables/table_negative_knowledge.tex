@@ -1,11 +1,12 @@
 ﻿\begin{table}[t]
 \caption{Negative results under a pre-specified validation gate
-($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin). \emph{Single-seed}
-diagnostics: FAIL means the form is not credited in the configuration we
-ran, not that the knowledge type is valueless, and not a five-seed test.
-All runs keep a separate Linear/embedding branch (no absorption into
-\texttt{concept\_embed}). Hypergraph convolution and hint-item hyperedges
-are among these diagnostics; they are not AUC novelty.}
+($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a matched twin). FAIL means the form is
+not credited in the configuration we ran, not that the knowledge type is
+valueless. All runs keep a separate Linear/embedding branch (no absorption
+into \texttt{concept\_embed}). Hypergraph convolution and hint-item
+hyperedges are among these diagnostics; they are not AUC novelty.
+M4 and P4 are five-seed means (seeds 42, 17, 1234, 0, 2024; $0/5$ PASS);
+K, L, M1, and M5 remain single-seed and are not five-seed credit tests.}
 \label{tab:negative-knowledge}
 \centering
 \footnotesize
@@ -16,9 +17,9 @@ ID & Knowledge (corpus) & Twin val & ON val & $\Delta$val & Gate \\
 K & HypergraphConv, multi-KC HE (XES) & 0.82598 & 0.82623 & $+0.00025$ & FAIL \\
 L & Hint-item session HE (FA) & 0.80861 & 0.80868 & $+0.00007$ & FAIL \\
 M1 & Full Q-matrix incidence (FA) & 0.80834 & 0.80824 & $-0.00010$ & FAIL \\
-M4 & Teacher grouping (ASSIST2012) & 0.76435 & 0.76577 & $+0.00142$ & FAIL \\
+M4 & Teacher grouping (ASSIST2012, 5-seed) & 0.76475 & 0.76499 & $+0.00025$ & FAIL $0/5$ \\
 M5 & Expert prereq.\ DAG (Junyi 5k) & 0.7640 & 0.76456 & $+0.00056$ & FAIL \\
-P4 & Per-concept exp.\ forgetting (XES) & 0.82878 & 0.82620 & $-0.00258$ & FAIL \\
+P4 & Per-concept exp.\ forgetting (XES, 5-seed) & 0.82862 & 0.82610 & $-0.00252$ & FAIL $0/5$ \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -19,7 +19,7 @@ Quy ước: `[x]` = đã sửa trong bản thảo lần này. `[ ]` = cố ý ch
 - [x] **B3 planned-gap:** một bullet Limitations (không đánh giá proxy khoảng chờ kế hoạch).
 - [x] **B6 / B9:** chú thích bảng v2: 0,8747 là protocol P0 cũ, không so với simpleKT clean 0,8214.
 - [x] **B7 tune:** Abstract/Kết luận không đọc như đã thắng GIKT đã tune (đã có compute-matched; giữ câu Appendix hparams).
-- [x] **B4 Abstract:** sáu FAIL một seed không còn trong câu bán hàng (xem A1). Caption bảng negative-knowledge ghi 1 seed.
+- [x] **B4 Abstract:** sáu FAIL một seed không còn trong câu bán hàng (xem A1). Caption bảng negative-knowledge: M4/P4 5-seed $0/5$; K/L/M1/M5 còn 1 seed.
 
 ## C — tuỳ chọn / không đụng máy
 
@@ -35,10 +35,10 @@ Quy ước: `[x]` = đã sửa trong bản thảo lần này. `[ ]` = cố ý ch
 
 ## Việc máy — server chạy theo hướng dẫn
 
-Chi tiết copy-paste: [`docs/HuongDan_Checklist_GPU_2026-09-07.md`](HuongDan_Checklist_GPU_2026-09-07.md). Sau `git pull` trên `main`.
+Chi tiết copy-paste: [`docs/HuongDan_Checklist_GPU_2026-09-07.md`](HuongDan_Checklist_GPU_2026-09-07.md). Kết quả trên `main` (fast-forward từ `gpu-checklist-2026-09-07`, `d613fd6`).
 
-- [ ] **S1** ECE/Brier/NLL pyKT từ npz (`scripts/35_pykt_calibration_from_npz.py`)
-- [ ] **S2** Bootstrap learner-level QKC-T vs GIKT/AKT/simpleKT (`scripts/25_bootstrap_protocol_ci.py`)
-- [ ] **S3** P4 5-seed `--concept-forget` trên XES
-- [ ] **S4** M4 5-seed `--group-embed` trên ASSIST2012
-- [ ] **S5** B9 rescore simpleKT P0 L=200 nếu còn checkpoint; không thì SKIP
+- [x] **S1** ECE/Brier/NLL pyKT — 3 hàng, `n=1,093,720`. ECE GIKT 0.0073 / AKT 0.0047 / simpleKT 0.0100 (cả ba < 0.05; không temperature scaling)
+- [x] **S2** Bootstrap learner-level — 3614 học viên; CI hiệu AUC không chứa 0. Khoảng 35 hàng còn (1,093,755 vs 1,093,720)
+- [x] **S3** P4 5-seed `--concept-forget` — **0/5 PASS**, mean Δval ≈ −0.00252
+- [x] **S4** M4 5-seed `--group-embed` — **0/5 PASS**, mean Δval ≈ +0.00025 (seed 42 +0.00142 gần cửa)
+- [x] **S5** B9 rescore simpleKT P0 L=200 — **SKIP** (không checkpoint)

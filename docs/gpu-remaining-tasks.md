@@ -2,11 +2,11 @@
 
 **Bản thảo:** `origin/main` (attribution / QKC-T).  
 **Máy:** một RTX 3090. Seed cố định `{0, 17, 42, 1234, 2024}`.  
-**Headline hiện tại không phụ thuộc danh sách này.** Capacity-matched Q←KC, Zero+Δt, B12 rewiring, A2 5-seed (hàng cạnh tranh + DKT/DGEKT), A7 5-seed, ECE tracer, leakage full-log đã xong — **cấm chạy lại** trừ khi `--force` có lý do ghi rõ.
+**Headline hiện tại không phụ thuộc danh sách P1.** Capacity-matched Q←KC, Zero+Δt, B12 rewiring, A2 5-seed (hàng cạnh tranh + DKT/DGEKT), A7 5-seed, ECE tracer, leakage full-log, **S1–S5 Gate 0 GPU (07/09)** đã xong — **cấm chạy lại** trừ khi `--force` có lý do ghi rõ.
 
-**Đợt 07/09/2026 (sau Gate 0 chữ):** làm đúng [`docs/HuongDan_Checklist_GPU_2026-09-07.md`](HuongDan_Checklist_GPU_2026-09-07.md) — S1 ECE pyKT, S2 bootstrap, S3 P4 5-seed, S4 M4 5-seed, S5 B9 nếu còn checkpoint. File này giữ hàng đợi lịch sử; **không** bắt đầu P1 A3.
+**Đợt 07/09/2026 (Gate 0 máy):** xong trên nhánh `gpu-checklist-2026-09-07` (`d613fd6`), đã fast-forward vào `main`. S1 ECE pyKT; S2 bootstrap học viên; S3 P4 0/5; S4 M4 0/5; S5 SKIP. File này giữ hàng đợi lịch sử; **không** bắt đầu P1 A3.
 
-Sau `git pull` trên `main` (hoặc nhánh có file này):
+Sau `git pull` trên `main`:
 
 ```bash
 cd /path/to/DH2A-KT

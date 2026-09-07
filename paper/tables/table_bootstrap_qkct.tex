@@ -1,0 +1,23 @@
+% From results/tables/b10_bootstrap_qkct_vs_{gikt,akt,simplekt}.csv
+\begin{table}[t]
+\caption{Learner-level paired bootstrap on one canonical fold-0 checkpoint
+pair (1000 resamples of 3614 learners present on both sides). This is a
+diagnostic of learner sampling, not training-seed variance, and is not the
+five-seed mean gap on Table~\ref{tab:auc-xes3g5m}. QKC-T is scored on
+native $n{=}1{,}093{,}755$ positions; pyKT counterparts on the headline
+intersection $n{=}1{,}093{,}720$ (difference of 35). \textit{simpleKT} AUC
+$0.8203$ is the seed-42 npz, not the five-seed mean $0.8214{\pm}0.0007$.
+All three difference intervals exclude zero.}
+\label{tab:bootstrap-qkct}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Contrast & AUC QKC-T & AUC other & $\Delta$ & 95\% CI of $\Delta$ \\
+\midrule
+vs.\ GIKT & 0.8296 & 0.8257 & $+0.0039$ & $[+0.0035,+0.0043]$ \\
+vs.\ AKT & 0.8296 & 0.8223 & $+0.0073$ & $[+0.0068,+0.0077]$ \\
+vs.\ \textit{simpleKT} & 0.8296 & 0.8203 & $+0.0093$ & $[+0.0088,+0.0098]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
