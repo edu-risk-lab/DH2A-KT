@@ -1,0 +1,4 @@
+model,n_scored,auc,brier,nll,ece,ece_bins,path
+GIKT,1093720,0.825682521867133,0.12194506744231991,0.3864393802764829,0.0073326943452378685,15,results\pykt_work_clean\xes3g5m\fold_0\C_gikt_clean_L400_e30b16_s42\test_predictions.npz
+AKT,1093720,0.8223074588060267,0.12290119494775721,0.3893208033798769,0.004706185723661536,15,results\pykt_work_clean\xes3g5m\fold_0\C_akt_clean_L400_s42\test_predictions.npz
+simpleKT,1093720,0.8203049687824329,0.12364800677464985,0.3916428334631602,0.010030817280411383,15,results\pykt_work_clean\xes3g5m\fold_0\C_simplekt_clean_L400_s42\test_predictions.npz

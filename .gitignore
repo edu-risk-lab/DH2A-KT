@@ -263,10 +263,17 @@ temp/_diag_pykt_smask/
 !results/tables/a2_multiseed_summary.json
 !results/tables/a2_multiseed_latex.txt
 !results/tables/a6_calibration_xes3g5m_fold0.csv
+!results/tables/a6_calibration_pykt_xes3g5m_fold0.csv
 !results/tables/a6_reliability_xes3g5m_fold0.json
 !results/tables/a7_query_dt_ablation.csv
 !results/tables/a7_dt_lstm_s42.csv
 !results/tables/a7_dt_query_s42.csv
+!results/tables/b10_bootstrap_qkct_vs_gikt.csv
+!results/tables/b10_bootstrap_qkct_vs_akt.csv
+!results/tables/b10_bootstrap_qkct_vs_simplekt.csv
+!results/tables/p4_forget_5seed.csv
+!results/tables/m4_group_5seed.csv
+!results/tables/gpu_checklist_2026-09-07.log
 !results/tables/xes3g5m_fold0_hyperedge_audit_positive_control.json
 !results/tables/b8_holm_credit_tests.json
 !results/tables/qkc_capacity_matched_matrix.csv
