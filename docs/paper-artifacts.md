@@ -15,7 +15,11 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 | Table QKC zero-incidence + Δt (app.) | same (`zero_time` arm) | `paper/tables/table_qkc_zero_time.tex` |
 | Table A7 history-only Δt | `scripts/31_a7_query_dt_ablation.py` | `results/tables/a7_query_dt_ablation.csv`, `paper/tables/table_a7_query_dt.tex` |
 | Table AUC folds 1–2 (QKC-T only) | `scripts/03_train_tier1.py` | `paper/tables/table_auc_p0_dt_folds.tex` |
-| Table calibration | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
+| Table calibration (DH²) | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
+| Table calibration (pyKT) | `scripts/35_pykt_calibration_from_npz.py` | `results/tables/a6_calibration_pykt_xes3g5m_fold0.csv` |
+| Bootstrap QKC-T vs GIKT/AKT/simpleKT | `scripts/25_bootstrap_protocol_ci.py` | `results/tables/b10_bootstrap_qkct_vs_{gikt,akt,simplekt}.csv` |
+| P4 concept-forget 5-seed | `scripts/03_train_tier1.py` (`--concept-forget`) | `results/tables/p4_forget_5seed.csv` |
+| M4 teacher-group 5-seed | `scripts/03_train_tier1.py` (`--group-embed`) | `results/tables/m4_group_5seed.csv` |
 | Fig. reliability | same | `paper/figures/fig_reliability_xes3g5m.pdf` |
 | Table negative knowledge (app.) | ablation drivers in `scripts/03_train_tier1.py` | `paper/tables/table_negative_knowledge.tex` |
 | Table leakage taxonomy / measured | hyperedge audit | `paper/tables/table_leakage_audit.tex` |
