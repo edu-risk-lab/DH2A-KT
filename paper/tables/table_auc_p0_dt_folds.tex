@@ -1,21 +1,22 @@
 ﻿\begin{table}[t]
-\caption{Q$\leftarrow$KC$+\Delta t$ test-only AUC on XES3G5M under the clean
-protocol (mask-repeats, chunked, $L{=}400$). \textbf{Rows 0--2:} one model per
-learner fold (P0's three split seeds); mean$\pm$SD is over folds.
-\textbf{Bottom row:} training-seed stability on fold~0 ($n{=}5$ seeds:
-42, 17, 1234, 0, 2024; A2 matrix); mean$\pm$SD is over seeds.}
+\caption{QKC-T \emph{test-only} AUC on XES3G5M under the clean protocol
+(mask-repeats, chunked, $L{=}400$).
+Rows 0--2 are one checkpoint per learner fold (P0 split seeds);
+mean$\pm$SD is over folds, $n$ is native DH$^2$ test positions.
+Fold~0 here is the seed-42 checkpoint ($0.8296$); the five-seed
+test-only mean $0.8295{\pm}0.0001$ is Table~\ref{tab:auc-xes3g5m}.
+The archived A2 combined val+test mean $0.8296{\pm}0.0001$
+($n{=}1{,}640{,}242$) is \emph{not} this column.}
 \label{tab:auc-p0-dt-folds}
 \centering
 \begin{tabular}{@{}lcc@{}}
 \toprule
-Fold & Test AUC & $n$ scored \\
+Fold & Test-only AUC & $n$ scored \\
 \midrule
-0 & 0.8296 & 1{,}093{,}720 \\
+0 & 0.8296 & 1{,}093{,}755 \\
 1 & 0.8298 & 1{,}092{,}664 \\
 2 & 0.8291 & 1{,}090{,}374 \\
 \textbf{Mean$\pm$SD (folds)} & $\mathbf{0.8295{\pm}0.0004}$ & --- \\
-\midrule
-Fold~0, 5 training seeds & $\mathbf{0.8296{\pm}0.0001}$ & 1{,}093{,}720 \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,21 +1,25 @@
-﻿% Auto-derived from results/tables/a7_query_dt_ablation.csv (five seeds)
+﻿% Gate from results/tables/a7_query_dt_ablation.csv (five seeds).
+% Test-only AUC from results/tables/a2_testonly_rescore.csv.
 \begin{table}[t]
 \caption{Query-side vs.\ history-only Linear $\Delta t$ on XES3G5M
 fold~0 (clean $L{=}400$, five training seeds). Twin is Q$\leftarrow$KC
-without time-gap. Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$.
-\texttt{lstm} is the history-only arm (observed gaps only). Mean$\pm$SD
-test AUC over seeds; gate column is $k/5$ PASS. Only \texttt{both}
-passes on all five seeds.}
+without time-gap. Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$
+(validation only; this column is the credit test).
+The AUC column is the same \emph{test-only} metric as
+Table~\ref{tab:auc-xes3g5m} ($n{=}1{,}093{,}755$).
+\texttt{both} is QKC-T (five seeds).
+Only \texttt{both} meets the val gate on all five seeds.
+History-only is $2/5$ seeds pass and is not credited under the $5/5$ rule.}
 \label{tab:a7-query-dt}
 \centering
 \footnotesize
 \begin{tabular}{@{}llcc@{}}
 \toprule
-Mode & Injection site & Test AUC & Gate ($k/5$) \\
+Mode & Injection site & Test-only AUC & Gate ($k/5$) \\
 \midrule
-\texttt{both} & LSTM + query & $0.8296{\pm}0.0001$ & $5/5$ (mean $\Delta$val $+0.00274$) \\
-\texttt{lstm} (history-only) & LSTM only (observed gaps) & $0.8288{\pm}0.0002$ & $2/5$ (mean $\Delta$val $+0.00193$) \\
-\texttt{query} & next-step query only & $0.8279{\pm}0.0002$ & $0/5$ (mean $\Delta$val $+0.00099$) \\
+\texttt{both} & LSTM + query & $0.8295{\pm}0.0001$ & $5/5$ (mean $\Delta$val $+0.00274$) \\
+\texttt{lstm} (history-only) & LSTM only (observed gaps) & $0.8286{\pm}0.0002$ & $2/5$ (mean $\Delta$val $+0.00193$) \\
+\texttt{query} & next-step query only & $0.8278{\pm}0.0002$ & $0/5$ (mean $\Delta$val $+0.00099$) \\
 \bottomrule
 \end{tabular}
 \end{table}

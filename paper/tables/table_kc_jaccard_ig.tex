@@ -6,9 +6,9 @@ generation (IG). ID-anchored KC-Jaccard (JC) measures overlap between
 \texttt{GroundedKCs} trailer IDs and the support set
 $\{\mathrm{target}\}\cup\mathrm{history}\cup 1$-hop $E_{\mathrm{pre}}$.
 IG omits frozen $P(\mathrm{correct})$ from the Diagnostician prompt; the Critic
-still sees the true Tier-1 score. The original Ollama pack used the v2
-graph-only checkpoint (also the human-rating pack). The reported
-Q$\leftarrow$KC$+\Delta t$ checkpoint is a same-prompt re-run ($n{=}500$).}
+still sees the true Tier-1 score. The original Ollama pack used the graph-only diagnostic
+checkpoint. The reported QKC-T checkpoint is a same-prompt re-run
+($n{=}500$).}
 \label{tab:kc-jaccard-ig}
 \centering
 \footnotesize
@@ -18,10 +18,10 @@ Arm & Backbone & Backend & $n$ & Flag & Mean JC \\
 \midrule
 Grounded & --- & StubLLM & 20 & 0.000 & 0.191 \\
 IG & --- & StubLLM & 20 & 1.000 & 0.191 \\
-Grounded & v2 graph-only & qwen2.5:7b & 500 & 0.026 & 0.152 \\
-IG & v2 graph-only & qwen2.5:7b & 500 & 0.768 & 0.142 \\
-Grounded & v4 Q$\leftarrow$KC$+\Delta t$ & qwen2.5:7b & 500 & 0.018 & 0.161 \\
-IG & v4 Q$\leftarrow$KC$+\Delta t$ & qwen2.5:7b & 500 & 0.766 & 0.152 \\
+Grounded & graph-only diagnostic & qwen2.5:7b & 500 & 0.026 & 0.152 \\
+IG & graph-only diagnostic & qwen2.5:7b & 500 & 0.768 & 0.142 \\
+Grounded & QKC-T & qwen2.5:7b & 500 & 0.018 & 0.161 \\
+IG & QKC-T & qwen2.5:7b & 500 & 0.766 & 0.152 \\
 \bottomrule
 \end{tabular}
 \end{table}

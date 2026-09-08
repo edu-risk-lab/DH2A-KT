@@ -3,12 +3,17 @@
 \begin{table}[t]
 \caption{Calibration on XES3G5M fold~0 test predictions under the clean
 protocol (mask-repeats, chunked, $L{=}400$). ECE uses 15 equal-width bins;
-lower is better. DH$^2$ checkpoints: seed~42 A2 matrix (twin AUC $0.8202$ here;
-Table~\ref{tab:auc-xes3g5m} reports the five-seed mean $0.8206{\pm}0.0002$),
+lower is better. DH$^2$ checkpoints: seed~42 (QKC-T AUC $0.8296$ here matches
+Table~\ref{tab:auc-xes3g5m}; Zero$+\Delta t$ $0.8294$ is the same seed-42
+checkpoint as Table~\ref{tab:qkc-zero-time}; the pathway-off twin $0.8202$ is
+calibration-only and is not a Table~\ref{tab:auc-xes3g5m} row),
 scored on native $n{=}1{,}093{,}755$ positions. pyKT GIKT/AKT/\textit{simpleKT}
 use the same seed-42 prediction files as the headline intersection
-($n{=}1{,}093{,}720$; difference of 35). No ECE exceeds $0.05$, so we do not
-apply temperature scaling. Reliability curves (DH$^2$ arms) appear in
+($n{=}1{,}093{,}720$). An occurrence join on (user, dense-KC) matches
+$1{,}093{,}718$ rows; $36$ DH$^2$ rows and $2$ pyKT rows remain unmatched
+(\texttt{b6\_id\_join\_summary.json}). We report
+calibration as a diagnostic and do not apply temperature scaling.
+Reliability curves (DH$^2$ arms, including Zero$+\Delta t$) appear in
 Figure~\ref{fig:reliability-xes3g5m}.}
 \label{tab:calibration-xes3g5m}
 \centering
@@ -18,9 +23,10 @@ Figure~\ref{fig:reliability-xes3g5m}.}
 Model & AUC & Brier & NLL & ECE \\
 \midrule
 Q$\leftarrow$KC $+\Delta t$ & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
+Zero$+\Delta t$ & 0.8294 & 0.1208 & 0.3831 & 0.0072 \\
 Q$\leftarrow$KC on & 0.8270 & 0.1216 & 0.3857 & 0.0103 \\
 Q$\leftarrow$KC off (twin) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\
-GIKT (compute-matched) & 0.8257 & 0.1219 & 0.3864 & 0.0073 \\
+GIKT (training-budget-matched) & 0.8257 & 0.1219 & 0.3864 & 0.0073 \\
 AKT ($L{=}400$) & 0.8223 & 0.1229 & 0.3893 & 0.0047 \\
 \textit{simpleKT} ($L{=}400$) & 0.8203 & 0.1236 & 0.3916 & 0.0100 \\
 \bottomrule

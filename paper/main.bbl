@@ -16,7 +16,7 @@ H.~Nakagawa, Y.~Iwasawa, Y.~Matsuo, \href{https://doi.org/10.1145/3350546.335251
 \newline\urlprefix\url{https://doi.org/10.1145/3350546.3352513}
 
 \bibitem{yang2021gikt}
-Y.~Yang, J.~Shen, Y.~Qu, Y.~Liu, K.~Wang, Y.~Zhu, W.~Zhang, Y.~Yu, \href{https://doi.org/10.1007/978-3-030-67658-2_18}{{GIKT}: A graph-based interaction model for knowledge tracing}, in: Machine Learning and Knowledge Discovery in Databases (ECML-PKDD), 2020, pp. 299--315.
+Y.~Yang, J.~Shen, Y.~Qu, Y.~Liu, K.~Wang, Y.~Zhu, W.~Zhang, Y.~Yu, \href{https://doi.org/10.1007/978-3-030-67658-2_18}{{GIKT}: A graph-based interaction model for knowledge tracing}, in: Machine Learning and Knowledge Discovery in Databases (ECML-PKDD), 2021, pp. 299--315.
 \newblock \href {https://doi.org/10.1007/978-3-030-67658-2_18} {\path{doi:10.1007/978-3-030-67658-2_18}}.
 \newline\urlprefix\url{https://doi.org/10.1007/978-3-030-67658-2_18}
 
@@ -68,13 +68,18 @@ C.~Wang, W.~Ma, M.~Zhang, C.~Lv, F.~Wan, H.~Lin, T.~Tang, Y.~Liu, S.~Ma, \href{h
 \newblock \href {https://doi.org/10.1145/3437963.3441802} {\path{doi:10.1145/3437963.3441802}}.
 \newline\urlprefix\url{https://doi.org/10.1145/3437963.3441802}
 
+\bibitem{badran2025leakage}
+Y.~Badran, C.~Preisach, \href{https://doi.org/10.48550/arXiv.2508.17092}{Enhancing knowledge tracing through leakage-free and recency-aware embeddings}, arXiv preprint arXiv:2508.17092 (2025).
+\newblock \href {https://doi.org/10.48550/arXiv.2508.17092} {\path{doi:10.48550/arXiv.2508.17092}}.
+\newline\urlprefix\url{https://doi.org/10.48550/arXiv.2508.17092}
+
 \bibitem{ni2026ikteia}
 E.~Ni, J.~Wang, J.~Luan, J.~Liu, S.~Xiong, S.~Xu, W.~Cheng, M.~Chen, Y.~Ni, Y.~Li, \href{https://doi.org/10.1016/j.knosys.2026.116071}{Interpretable knowledge tracing via explicit--implicit alignment}, Knowledge-Based Systems 344 (2026) 116071.
 \newblock \href {https://doi.org/10.1016/j.knosys.2026.116071} {\path{doi:10.1016/j.knosys.2026.116071}}.
 \newline\urlprefix\url{https://doi.org/10.1016/j.knosys.2026.116071}
 
 \bibitem{llmedu2025}
-Z.~Chu, S.~Wang, J.~Xie, T.~Zhu, Y.~Yan, J.~Ye, A.~Zhong, X.~Hu, J.~Liang, P.~S. Yu, Q.~Wen, \href{https://doi.org/10.18653/v1/2025.findings-emnlp.743}{{LLM} agents for education: Advances and applications}, in: Findings of the Association for Computational Linguistics: EMNLP 2025, 2025, pp. 13832--13870.
+Z.~Chu, S.~Wang, J.~Xie, T.~Zhu, Y.~Yan, J.~Ye, A.~Zhong, X.~Hu, J.~Liang, P.~S. Yu, Q.~Wen, \href{https://doi.org/10.18653/v1/2025.findings-emnlp.743}{{LLM} agents for education: Advances and applications}, in: Findings of the Association for Computational Linguistics: EMNLP 2025, 2025, pp. 13782--13810.
 \newblock \href {https://doi.org/10.18653/v1/2025.findings-emnlp.743} {\path{doi:10.18653/v1/2025.findings-emnlp.743}}.
 \newline\urlprefix\url{https://doi.org/10.18653/v1/2025.findings-emnlp.743}
 
@@ -84,12 +89,12 @@ W.~Zhou, H.~Ma, X.~Yu, C.~Wang, S.~Yang, X.~Zhang, \href{https://doi.org/10.4855
 \newline\urlprefix\url{https://doi.org/10.48550/arXiv.2606.21832}
 
 \bibitem{graphaugmentedllm2025}
-Y.~Liu, G.~Zhang, K.~Wang, S.~Li, S.~Pan, B.~An, \href{https://doi.org/10.1109/MIS.2025.3642667}{Graph-augmented large language model agents: Current progress and future prospects}, IEEE Intelligent Systems 41~(2) (2025) 45--55.
+Y.~Liu, G.~Zhang, K.~Wang, S.~Li, S.~Pan, B.~An, \href{https://doi.org/10.1109/MIS.2025.3642667}{Graph-augmented large language model agents: Current progress and future prospects}, IEEE Intelligent Systems 41~(2) (2026) 45--55.
 \newblock \href {https://doi.org/10.1109/MIS.2025.3642667} {\path{doi:10.1109/MIS.2025.3642667}}.
 \newline\urlprefix\url{https://doi.org/10.1109/MIS.2025.3642667}
 
 \bibitem{graphrag2025}
-X.~Cheng, Z.~Zhang, J.~Wang, L.~Fang, C.~He, Q.~Guan, S.~Pan, W.~Luo, \href{https://doi.org/10.1609/aaai.v40i17.38479}{{GraphRAG}-induced dual knowledge structure graphs for personalized learning path recommendation}, in: Proceedings of the AAAI Conference on Artificial Intelligence, Vol.~40, 2026.
+X.~Cheng, Z.~Zhang, J.~Wang, L.~Fang, C.~He, Q.~Guan, S.~Pan, W.~Luo, \href{https://doi.org/10.1609/aaai.v40i17.38479}{{GraphRAG}-induced dual knowledge structure graphs for personalized learning path recommendation}, in: Proceedings of the AAAI Conference on Artificial Intelligence, Vol.~40, 2026, pp. 14610--14620.
 \newblock \href {https://doi.org/10.1609/aaai.v40i17.38479} {\path{doi:10.1609/aaai.v40i17.38479}}.
 \newline\urlprefix\url{https://doi.org/10.1609/aaai.v40i17.38479}
 
@@ -114,13 +119,14 @@ Z.~Liu, Q.~Liu, T.~Guo, J.~Chen, S.~Huang, X.~Zhao, J.~Tang, W.~Luo, J.~Weng, \h
 \newline\urlprefix\url{https://doi.org/10.52202/075280-1429}
 
 \bibitem{ghosh2020akt}
-A.~Ghosh, N.~Heffernan, A.~S. Lan, \href{https://doi.org/10.1145/3394486.3403288}{Context-aware attentive knowledge tracing}, in: Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD), 2020, pp. 2330--2339.
-\newblock \href {https://doi.org/10.1145/3394486.3403288} {\path{doi:10.1145/3394486.3403288}}.
-\newline\urlprefix\url{https://doi.org/10.1145/3394486.3403288}
+A.~Ghosh, N.~Heffernan, A.~S. Lan, \href{https://doi.org/10.1145/3394486.3403282}{Context-aware attentive knowledge tracing}, in: Proceedings of the 26th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD), 2020, pp. 2330--2339.
+\newblock \href {https://doi.org/10.1145/3394486.3403282} {\path{doi:10.1145/3394486.3403282}}.
+\newline\urlprefix\url{https://doi.org/10.1145/3394486.3403282}
 
 \bibitem{liu2023simplekt}
-Z.~Liu, Q.~Liu, J.~Chen, S.~Huang, W.~Luo, \href{https://mlanthology.org/iclr/2023/liu2023iclr-simplekt/}{{simpleKT}: A simple but tough-to-beat baseline for knowledge tracing}, in: International Conference on Learning Representations (ICLR), 2023.
-\newline\urlprefix\url{https://mlanthology.org/iclr/2023/liu2023iclr-simplekt/}
+Z.~Liu, Q.~Liu, J.~Chen, S.~Huang, W.~Luo, \href{https://doi.org/10.48550/arXiv.2302.06881}{{simpleKT}: A simple but tough-to-beat baseline for knowledge tracing}, in: International Conference on Learning Representations (ICLR), 2023.
+\newblock \href {https://doi.org/10.48550/arXiv.2302.06881} {\path{doi:10.48550/arXiv.2302.06881}}.
+\newline\urlprefix\url{https://doi.org/10.48550/arXiv.2302.06881}
 
 \bibitem{dgekt2024}
 C.~Cui, Y.~Yao, C.~Zhang, H.~Ma, Y.~Ma, Z.~Ren, C.~Zhang, J.~Ko, \href{https://doi.org/10.1145/3638350}{{DGEKT}: A dual graph ensemble learning method for knowledge tracing}, ACM Transactions on Information Systems 42~(3) (2024) 1--24.
@@ -128,8 +134,9 @@ C.~Cui, Y.~Yao, C.~Zhang, H.~Ma, Y.~Ma, Z.~Ren, C.~Zhang, J.~Ko, \href{https://d
 \newline\urlprefix\url{https://doi.org/10.1145/3638350}
 
 \bibitem{liu2022pykt}
-Z.~Liu, Q.~Liu, J.~Chen, S.~Huang, J.~Tang, W.~Luo, \href{https://mlanthology.org/neurips/2022/liu2022neurips-pykt/}{{pyKT}: A python library to benchmark deep learning based knowledge tracing models}, in: Advances in Neural Information Processing Systems 36 (NeurIPS 2022), Datasets and Benchmarks Track, 2022.
-\newline\urlprefix\url{https://mlanthology.org/neurips/2022/liu2022neurips-pykt/}
+Z.~Liu, Q.~Liu, J.~Chen, S.~Huang, J.~Tang, W.~Luo, \href{https://doi.org/10.52202/068431-1347}{{pyKT}: A python library to benchmark deep learning based knowledge tracing models}, in: Advances in Neural Information Processing Systems 35 (NeurIPS 2022), Datasets and Benchmarks Track, 2022, pp. 18542--18555.
+\newblock \href {https://doi.org/10.52202/068431-1347} {\path{doi:10.52202/068431-1347}}.
+\newline\urlprefix\url{https://doi.org/10.52202/068431-1347}
 
 \bibitem{corbett1995bkt}
 A.~T. Corbett, J.~R. Anderson, \href{https://doi.org/10.1007/BF01099821}{Knowledge tracing: Modeling the acquisition of procedural knowledge}, User Modeling and User-Adapted Interaction 4~(4) (1995) 253--278.
@@ -143,6 +150,7 @@ S.~Tong, Q.~Liu, W.~Huang, Z.~Huang, E.~Chen, C.~Liu, H.~Ma, S.~Wang, \href{http
 
 \bibitem{pineau2021repro}
 J.~Pineau, P.~Vincent-Lamarre, K.~Sinha, V.~Larivi{\`e}re, A.~Beygelzimer, F.~d'Alch{\'e} Buc, E.~Fox, H.~Larochelle, \href{https://www.jmlr.org/papers/v22/20-303.html}{Improving reproducibility in machine learning research (a report from the {NeurIPS} 2019 reproducibility program)}, Journal of Machine Learning Research 22~(164) (2021) 1--20.
+\newblock \href {http://arxiv.org/abs/2003.12206} {\path{arXiv:2003.12206}}.
 \newline\urlprefix\url{https://www.jmlr.org/papers/v22/20-303.html}
 
 \end{thebibliography}

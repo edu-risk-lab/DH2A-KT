@@ -1,0 +1,21 @@
+\begin{table}[t]
+\caption{Two-sided paired $t$-tests on unrounded validation $\Delta$
+(\texttt{b8\_holm\_credit\_tests.json}; $m{=}3$ Holm--Bonferroni).
+The operating rule is $5/5$ seeds with $\Delta\mathrm{val}\ge{+}0.002$;
+it is not $H_0{:}\,\mu_\Delta=0$ and not $H_0{:}\,\mu_\Delta\le 0.002$.
+Holm is applied to the two-sided raw $p$ (a previous draft printed
+Holm on one-sided $p$). History-only, M4, and P4 are judged only by
+the $5/5$ rule.}
+\label{tab:credit-stats}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Contrast & Mean $\Delta$val & $t_4$ & Two-sided $p$ & $p_{\mathrm{Holm}}$ \\
+\midrule
+Linear $\Delta t$ on zero incidence & $+0.00255$ & $38.01$ & $2.86{\times}10^{-6}$ & $8.59{\times}10^{-6}$ \\
+Linear $\Delta t$ on observed incidence & $+0.00274$ & $23.99$ & $1.79{\times}10^{-5}$ & $3.58{\times}10^{-5}$ \\
+Incidence observed vs.\ zero & $-0.00010$ & $-0.68$ & $0.53$ & $0.53$ \\
+\bottomrule
+\end{tabular}
+\end{table}

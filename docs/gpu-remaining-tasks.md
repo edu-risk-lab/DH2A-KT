@@ -1,8 +1,9 @@
 # GPU remaining tasks — DH²A-KT (2026-09-05)
 
-**Đợt 08/09 tối (Hau ver4 A1/A2/B6–B9):** copy-paste
-[`docs/HuongDan_GPU_Hau_ver4_ABC_2026-09-08.md`](HuongDan_GPU_Hau_ver4_ABC_2026-09-08.md).
-Không `--force` script 27/34. Không train lại QKC-T / Zero+Δt.
+**Đợt 08–09/09 (Hau ver4 A1/A2/B6–B9):** **đã xong** trên
+`gpu-hau-ver4-abc-2026-09-08` (`e3a2382`). Không chạy lại
+38–42 / S5–S6. Quyết định A1: `aligned_dt_isolated_from_branch=false`
+(0/5). Laptop đã điền số vào bản thảo.
 
 **Đợt 08/09 (test-only rescore):** đã xong trên
 `gpu-rescore-testonly-2026-09-08`. Không chạy lại

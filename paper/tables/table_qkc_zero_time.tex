@@ -5,8 +5,8 @@ incidence; \texttt{zero\_time} adds LSTM+query
 $\log(1{+}\Delta t)$ (\texttt{--time-gap-mode both}). Pre-specified gate:
 $\Delta\mathrm{val}\ge{+}0.002$. Mean
 $\Delta\mathrm{val}{=}{+}0.00255{\pm}0.00015$; mean
-$\Delta\mathrm{test\text{-}only}{=}{+}0.00269{\pm}0.00012$. $5/5$ PASS:
-timing credit is not an artefact of nonzero incidence. State shapes
+$\Delta\mathrm{test\text{-}only}{=}{+}0.00269{\pm}0.00012$. $5/5$ seeds pass:
+the \emph{branch} credit is not an artefact of nonzero incidence. State shapes
 differ by the timing parameters (expected).}
 \label{tab:qkc-zero-time}
 \centering
@@ -15,11 +15,11 @@ differ by the timing parameters (expected).}
 \toprule
 Seed & Zero val & Zero$+\Delta t$ val & $\Delta$val & $\Delta$test & Gate \\
 \midrule
-0 & 0.82610 & 0.82852 & $+0.00242$ & $+0.00270$ & PASS \\
-17 & 0.82589 & 0.82835 & $+0.00245$ & $+0.00258$ & PASS \\
-42 & 0.82619 & 0.82862 & $+0.00243$ & $+0.00255$ & PASS \\
-1234 & 0.82567 & 0.82837 & $+0.00270$ & $+0.00282$ & PASS \\
-2024 & 0.82610 & 0.82882 & $+0.00272$ & $+0.00280$ & PASS \\
+0 & 0.82610 & 0.82852 & $+0.00242$ & $+0.00270$ & yes \\
+17 & 0.82589 & 0.82835 & $+0.00245$ & $+0.00258$ & yes \\
+42 & 0.82619 & 0.82862 & $+0.00243$ & $+0.00255$ & yes \\
+1234 & 0.82567 & 0.82837 & $+0.00270$ & $+0.00282$ & yes \\
+2024 & 0.82610 & 0.82882 & $+0.00272$ & $+0.00280$ & yes \\
 \bottomrule
 \end{tabular}
 \end{table}

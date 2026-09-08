@@ -1,7 +1,7 @@
 ﻿% Tier-2 Critic flag rates across pilot runs (XES3G5M fold 0, n=500, seed 42).
 \begin{table}[t]
 \caption{Exploratory Critic flag rates (XES3G5M fold~0, $n{=}500$, seed 42,
-Qwen2.5-7B via Ollama unless noted). v1--v2 are historical graph-only
+Qwen2.5-7B via Ollama unless noted). Early rows are historical graph-only
 packs; the QKC-T grounded/IG pair is the reported-checkpoint rerun
 (Table~\ref{tab:kc-jaccard-ig}). This table is not a predictive
 attribution result.}
@@ -14,10 +14,10 @@ attribution result.}
 Run & Backend & Flag rate & Mean $P(\mathrm{correct})$ \\
 \midrule
 Stub (sanity) & StubLLM & 0.000 (0/500) & 0.742 \\
-Ollama v1 & qwen2.5:7b & 0.124 (62/500) & 0.746 \\
-Ollama v2 (format calib.) & qwen2.5:7b & 0.000 (0/500) & 0.753 \\
-Grounded + \texttt{GroundedKCs} (v2) & qwen2.5:7b & 0.026 (13/500) & --- \\
-IG (v2, w/o $P$ in Diag.) & qwen2.5:7b & 0.768 (384/500) & --- \\
+Ollama graph-only (first pack) & qwen2.5:7b & 0.124 (62/500) & 0.746 \\
+Ollama graph-only (format calib.) & qwen2.5:7b & 0.000 (0/500) & 0.753 \\
+Grounded + \texttt{GroundedKCs} (graph-only) & qwen2.5:7b & 0.026 (13/500) & --- \\
+IG (graph-only, w/o $P$ in Diag.) & qwen2.5:7b & 0.768 (384/500) & --- \\
 Grounded + Critic (QKC-T) & qwen2.5:7b & 0.018 (9/500) & --- \\
 IG (QKC-T) & qwen2.5:7b & 0.766 (383/500) & --- \\
 \bottomrule

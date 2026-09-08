@@ -1,12 +1,16 @@
 ﻿\begin{table}[t]
-\caption{Leakage-audited knowledge attribution summary. Multi-seed XES3G5M
-rows use five paired seeds; HypergraphConv, hint-item HE, full Q-matrix,
-and the Junyi DAG remain single-seed diagnostics and are not significance
-tests. Teacher grouping and per-concept exponential forgetting are now
-five-seed ($0/5$ FAIL). The pre-specified credit convention is
-$\Delta\mathrm{val}\ge{+}0.002$ versus the stated twin. ``Observed'' and
-``zero'' refer only to the Q--KC incidence message; both retain the same
-question embedding and projection pathway.}
+\caption{Leakage-audited knowledge attribution summary.
+The upper block is five paired training seeds on XES3G5M (or ASSIST2012
+for teacher grouping) and is the credit map.
+The lower block is single-seed diagnostics and is \emph{not} a
+five-seed credit test.
+``Observed'' and ``zero'' refer only to the Q--KC incidence message;
+both retain the same question embedding and projection pathway.
+The operating rule is
+$\Delta\mathrm{val}\ge{+}0.002$ versus the stated twin on every seed
+($5/5$). Timing \emph{branch} rows add maps as well as gap input;
+the aligned-input row keeps those maps and changes only the gap
+(Table~\ref{tab:a1-timing}).}
 \label{tab:attribution-summary}
 \centering
 \scriptsize
@@ -15,16 +19,20 @@ question embedding and projection pathway.}
 \toprule
 Knowledge message & Matched twin & Corpus / seeds & Mean $\Delta$val & Credit \\
 \midrule
-Q$\leftarrow$KC incidence & Zero incidence & XES / 5 & $-0.00010{\pm}0.00034$ & 0/5 FAIL \\
-Linear $\Delta t$ (both) & No $\Delta t$, observed incidence & XES / 5 & $+0.00274{\pm}0.00025$ & 5/5 PASS \\
-Linear $\Delta t$ (history-only) & No $\Delta t$, observed incidence & XES / 5 & $+0.00193$ & 2/5 FAIL \\
-Linear $\Delta t$ (both) & No $\Delta t$, zero incidence & XES / 5 & $+0.00255{\pm}0.00015$ & 5/5 PASS \\
-HypergraphConv & No concept convolution & XES / 1 & $+0.00025$ & FAIL \\
-Hint-item session HE & No hint-item HE & FA / 1 & $+0.00007$ & FAIL \\
-Full Q-matrix incidence & Matched control & FA / 1 & $-0.00010$ & FAIL \\
-Teacher grouping & Off-group twin & ASSIST2012 / 5 & $+0.00025$ & 0/5 FAIL \\
-Expert prerequisite DAG & Matched control & Junyi / 1 & $+0.00056$ & FAIL \\
-Per-concept exponential gap & Linear $\Delta t$ & XES / 5 & $-0.00252{\pm}0.00019$ & 0/5 FAIL \\
+\multicolumn{5}{@{}l}{\emph{Five-seed credit tests}} \\
+Q$\leftarrow$KC incidence & Zero incidence & XES / 5 & $-0.00010{\pm}0.00034$ & 0/5; not credited \\
+Linear $\Delta t$ (both) & No $\Delta t$, observed incidence & XES / 5 & $+0.00274{\pm}0.00025$ & 5/5; credited package \\
+Linear $\Delta t$ (history-only) & No $\Delta t$, observed incidence & XES / 5 & $+0.00193$ & 2/5; not credited \\
+Linear $\Delta t$ (both) & No $\Delta t$, zero incidence & XES / 5 & $+0.00255{\pm}0.00015$ & 5/5; credited package \\
+Aligned $\Delta t$ input & T-zero (same maps) & XES / 5 & $+0.00183$ & 0/5; not isolated \\
+Teacher grouping & Off-group twin & ASSIST2012 / 5 & $+0.00025$ & 0/5; not credited \\
+Per-concept exponential gap & Linear $\Delta t$ & XES / 5 & $-0.00252{\pm}0.00019$ & 0/5; not credited \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Single-seed diagnostics (not five-seed credit)}} \\
+HypergraphConv & No concept convolution & XES / 1 & $+0.00025$ & below gate \\
+Hint-item session HE & No hint-item HE & FA / 1 & $+0.00007$ & below gate \\
+Full Q-matrix incidence & Matched control & FA / 1 & $-0.00010$ & below gate \\
+Expert prerequisite DAG & Matched control & Junyi 5k / 1 & $+0.00056$ & below gate \\
 \bottomrule
 \end{tabularx}
 \end{table}

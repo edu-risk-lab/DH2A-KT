@@ -18,7 +18,9 @@ Pathway-off twin & Same LSTM with the question pathway removed
 Capacity-matched zero twin & Same question pathway with incidence matrix
 zeroed (\texttt{--question-incidence-control zero}) \\
 Zero-incidence$+\Delta t$ (minimal positive control) & Capacity-matched zero twin plus Linear
-$\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}) \\
+$\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}; T-real) \\
+T-zero / T-misaligned & Same Zero$+\Delta t$ maps with
+\texttt{--time-gap-control zero} or \texttt{misaligned} \\
 Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
 question LSTM path (\texttt{v2}) \\
 \bottomrule

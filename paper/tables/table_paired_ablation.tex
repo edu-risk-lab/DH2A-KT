@@ -1,17 +1,17 @@
 ﻿% Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
-% knobs (Tier 2). Predictive AUCs are XES3G5M fold~0 test-only, $L{=}400$,
-% mask-repeats, chunked, unless noted. Tier~2 flag/JC are the fold~0 Ollama
-% $n{=}500$ run (originally on the v2 graph-only checkpoint; a v4 Q$\leftarrow$KC
-% re-run is optional). Independent generation (IG) strips frozen
-% $P(\mathrm{correct})$ from the Diagnostician. ``w/o Critic'' disables the
-% gate (flag $0$ by construction; JC unchanged).
+% knobs (Tier 2). Predictive AUCs: see notes in the AUC column.
+% Tier~2 flag/JC are the fold~0 Ollama $n{=}500$ run.
 \begin{table}[t]
 \caption{Paired ablation of DH$^2$A-KT knowledge and explanation knobs.
-Predictive rows use the clean $L{=}400$ protocol (fold~0, test-only) except
-HypergraphConv / FA session (validation or secondary corpus, as marked).
-The pre-specified gate is $\Delta\mathrm{val}\ge{+}0.002$; FAIL rows are not
-AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
-(\ref{app:graph-only}), not the recommended tracer.}
+Predictive rows use the clean $L{=}400$ protocol (fold~0) except
+HypergraphConv / FA session.
+QKC-T, Q$\leftarrow$KC, and Zero$+\Delta t$ $\pm$ cells are five-seed
+test-only (Table~\ref{tab:auc-xes3g5m}).
+The $0.8296$ Critic row is the seed-42 checkpoint used for the
+$n{=}500$ prompt pack.
+The pre-specified gate is $\Delta\mathrm{val}\ge{+}0.002$.
+Manipulation $\Delta$AUC is the graph-only diagnostic
+(\ref{app:graph-only}), not QKC-T.}
 \label{tab:paired-ablation}
 \centering
 \footnotesize
@@ -19,17 +19,17 @@ AUC novelty. Manipulation $\Delta$AUC is the v2 graph-only diagnostic
 \toprule
 Setting & AUC & Gate / note & Flag & Mean JC \\
 \midrule
-Q$\leftarrow$KC $+\Delta t$ (recommended) & $0.8296{\pm}0.0001$ & $5/5$ PASS $+0.00274$ & --- & --- \\
-Q$\leftarrow$KC on & $0.8270{\pm}0.0002$ & not an incidence credit & --- & --- \\
-Q$\leftarrow$KC off (twin) & $0.8206{\pm}0.0002$ & mismatched & --- & --- \\
-HypergraphConv (val) & $0.8262$ & FAIL $+0.00025$ & --- & --- \\
-Grounded + Critic (v2 ckpt) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
-IG (v2) & --- & --- & $0.768$ & $0.142$ \\
-Grounded + Critic (v4 $+\Delta t$) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
-IG (v4 $+\Delta t$) & --- & --- & $0.766$ & $0.152$ \\
+QKC-T (eval.\ arm, 5-seed) & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00274$ & --- & --- \\
+Q$\leftarrow$KC (5-seed test-only) & $0.8268{\pm}0.0002$ & not an incidence credit & --- & --- \\
+Zero$+\Delta t$ (credited, 5-seed) & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00255$ & --- & --- \\
+HypergraphConv (val) & $0.8262$ & below gate $+0.00025$ & --- & --- \\
+Grounded + Critic (graph-only diagnostic) & $0.752{\pm}0.002$ & manip.\ $0.038$--$0.047$ & $0.026$ & $0.152$ \\
+IG (graph-only diagnostic) & --- & --- & $0.768$ & $0.142$ \\
+Grounded + Critic (QKC-T) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
+IG (QKC-T) & --- & --- & $0.766$ & $0.152$ \\
 w/o Critic & --- & --- & $0.000$ & $0.152$ \\
 FA: concept-only & $0.720$ & --- & --- & --- \\
-FA: + session HE & $0.722$ & L FAIL $+0.00007$ & --- & --- \\
+FA: + session HE & $0.722$ & L below gate $+0.00007$ & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,13 +1,16 @@
 \begin{table}[htbp]
-\caption{Manipulation check on XES3G5M. Reported destruction is node-drop
-$p{=}0.9$ on the graph-only diagnostic encoder (log label v2): train on
-clean hyperedges, re-evaluate frozen weights on destroyed hyperedges
-(folds~0--2). This confirms dependence on some graph input, not correct
-use of relation structure. Degree-preserving rewiring and relation-label
-permutation (Hau B12) use the same frozen checkpoints
-(\texttt{xes3g5m\_fold\{0,1,2\}.pt}). Rewiring passes on all three folds
-($\Delta$AUC $0.0318$--$0.0351$; clean AUC $\approx 0.75$, matching the
-node-drop encoder); label permutation is near-null (expected for a
+\caption{Manipulation check on XES3G5M. Destruction is node-drop
+$p{=}0.9$, degree-preserving rewiring, and relation-label permutation on
+the graph-only diagnostic encoder (log label v2): train on clean
+hyperedges, re-evaluate frozen weights on destroyed hyperedges
+(folds~0--2). All three operators now share one clean AUC per fold
+(\texttt{b9\_same\_ckpt\_destruction.json}; max
+$|\mathrm{AUC}_{\mathrm{local}}-\mathrm{AUC}_{\mathrm{shared}}|{=}2.0{\times}10^{-9}$).
+The older printed mismatch (fold~0 $0.753$ vs.\ $0.749$) was evaluator
+drift, not an operator effect. Node-drop confirms dependence on some
+graph input, not correct use of relation structure.
+Rewiring moves AUC on all three folds
+($\Delta$AUC $0.0318$--$0.0351$); label permutation is near-null (expected for a
 single-kind encoder). GKT: P0 DDR-downstream mean $\Delta$AUC over
 $n{=}9$ fold--seed runs (\cite{daominh2026p0}; retrain on destroyed
 pairwise graph). simpleKT has no concept-graph input, so graph
@@ -21,15 +24,15 @@ this check.}
 \toprule
 Model / destruction & AUC clean & $\Delta$AUC & DDR & Pass? \\
 \midrule
-Diagnostic encoder, node-drop $p{=}0.9$ (fold~0) & 0.753 & 0.0380 & 0.990 & Yes \\
-Diagnostic encoder, node-drop $p{=}0.9$ (fold~1) & 0.749 & 0.0432 & 0.990 & Yes \\
-Diagnostic encoder, node-drop $p{=}0.9$ (fold~2) & 0.753 & 0.0469 & 0.990 & Yes \\
-Diagnostic encoder, degree-preserving rewiring (fold~0) & 0.749 & 0.0318 & 0.057 & Yes \\
-Diagnostic encoder, degree-preserving rewiring (fold~1) & 0.751 & 0.0341 & 0.058 & Yes \\
-Diagnostic encoder, degree-preserving rewiring (fold~2) & 0.752 & 0.0351 & 0.057 & Yes \\
-Diagnostic encoder, relation-label permutation (fold~0) & 0.749 & ${\approx}0$ & 0.000 & No \\
-Diagnostic encoder, relation-label permutation (fold~1) & 0.751 & ${\approx}0$ & 0.000 & No \\
-Diagnostic encoder, relation-label permutation (fold~2) & 0.752 & ${\approx}0$ & 0.000 & No \\
+Diagnostic encoder, node-drop $p{=}0.9$ (fold~0) & 0.7485 & 0.0323 & 0.990 & Yes \\
+Diagnostic encoder, node-drop $p{=}0.9$ (fold~1) & 0.7511 & 0.0606 & 0.990 & Yes \\
+Diagnostic encoder, node-drop $p{=}0.9$ (fold~2) & 0.7521 & 0.0574 & 0.990 & Yes \\
+Diagnostic encoder, degree-preserving rewiring (fold~0) & 0.7485 & 0.0318 & 0.057 & Yes \\
+Diagnostic encoder, degree-preserving rewiring (fold~1) & 0.7511 & 0.0341 & 0.058 & Yes \\
+Diagnostic encoder, degree-preserving rewiring (fold~2) & 0.7521 & 0.0351 & 0.057 & Yes \\
+Diagnostic encoder, relation-label permutation (fold~0) & 0.7485 & ${\approx}0$ & 0.000 & No \\
+Diagnostic encoder, relation-label permutation (fold~1) & 0.7511 & ${\approx}0$ & 0.000 & No \\
+Diagnostic encoder, relation-label permutation (fold~2) & 0.7521 & ${\approx}0$ & 0.000 & No \\
 GKT (P0, mean$\pm$SD), node-drop $p{=}0.9$ & --- & $0.0877{\pm}0.0009$ & 0.990 & Yes \\
 simpleKT (P0) & --- & N/A & --- & N/A \\
 \bottomrule

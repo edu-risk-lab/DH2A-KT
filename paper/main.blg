@@ -4,49 +4,47 @@ The top-level auxiliary file: main.aux
 The style file: elsarticle-num.bst
 Database file #1: references.bib
 Warning--can't use both volume and number fields in graphrag2025
-Warning--empty pages in graphrag2025
 Warning--can't use both volume and number fields in minn2022interpretable
 Warning--empty pages in liu2023simplekt
-Warning--empty pages in liu2022pykt
-You've used 29 entries,
+You've used 30 entries,
             2952 wiz_defined-function locations,
-            887 strings with 14519 characters,
-and the built_in function-call counts, 13668 in all, are:
-= -- 1279
-> -- 557
-< -- 19
-+ -- 205
-- -- 176
-* -- 1130
-:= -- 1801
-add.period$ -- 54
-call.type$ -- 29
-change.case$ -- 31
+            898 strings with 14791 characters,
+and the built_in function-call counts, 14550 in all, are:
+= -- 1395
+> -- 564
+< -- 21
++ -- 208
+- -- 178
+* -- 1191
+:= -- 1896
+add.period$ -- 59
+call.type$ -- 30
+change.case$ -- 32
 chr.to.int$ -- 0
-cite$ -- 34
-duplicate$ -- 489
-empty$ -- 1458
-format.name$ -- 205
-if$ -- 3505
+cite$ -- 33
+duplicate$ -- 525
+empty$ -- 1536
+format.name$ -- 208
+if$ -- 3740
 int.to.chr$ -- 0
-int.to.str$ -- 29
-missing$ -- 26
-newline$ -- 148
-num.names$ -- 29
-pop$ -- 246
+int.to.str$ -- 30
+missing$ -- 27
+newline$ -- 156
+num.names$ -- 30
+pop$ -- 248
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 819
+skip$ -- 885
 stack$ -- 0
-substring$ -- 677
-swap$ -- 243
-text.length$ -- 19
+substring$ -- 773
+swap$ -- 279
+text.length$ -- 21
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 5
-while$ -- 86
-width$ -- 31
-write$ -- 337
-(There were 5 warnings)
+warning$ -- 3
+while$ -- 93
+width$ -- 32
+write$ -- 356
+(There were 3 warnings)
