@@ -123,6 +123,8 @@ def make_sequence_loader(
             include_saw=bool(getattr(cfg, "saw_input", False)),
             include_group=bool(getattr(cfg, "group_embed", False)),
             include_time_split=bool(getattr(cfg, "time_split", False)),
+            time_gap_control=str(getattr(cfg, "time_gap_control", "real")),
+            time_gap_seed=int(getattr(cfg, "time_gap_seed", 0)),
         ),
         batch_size=budget.batch_size,
         shuffle=shuffle,

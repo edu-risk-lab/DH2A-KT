@@ -55,6 +55,41 @@ def log_time_gaps(timestamps: np.ndarray, user_ids: np.ndarray) -> np.ndarray:
     return dt
 
 
+def apply_time_gap_control(
+    gaps: np.ndarray,
+    user_ids: np.ndarray,
+    control: str,
+    *,
+    seed: int = 0,
+) -> np.ndarray:
+    """Keep the time *branch*; change only the gap *input*.
+
+    ``real`` leaves aligned ``log(1+Δt)``. ``zero`` sets every gap to 0
+    (raw feature zero; ``f(0)=b`` still injects bias). ``misaligned``
+    permutes non-start gaps within each user so the marginal gap
+    distribution is unchanged but alignment is broken.
+    """
+    if control not in ("real", "zero", "misaligned"):
+        raise ValueError(
+            f"time_gap_control must be real/zero/misaligned, got {control!r}"
+        )
+    out = np.asarray(gaps, dtype=np.float32)
+    if control == "real":
+        return out.copy()
+    if control == "zero":
+        return np.zeros_like(out)
+    users = np.asarray(user_ids)
+    rng = np.random.default_rng(int(seed))
+    shuffled = out.copy()
+    for uid in np.unique(users):
+        idx = np.flatnonzero(users == uid)
+        if idx.size < 3:
+            continue
+        body = idx[1:]
+        shuffled[body] = rng.permutation(out[body])
+    return shuffled
+
+
 def infer_timestamp_seconds_scale(timestamps: np.ndarray) -> float:
     """ASSIST2012 P0 stores unix-seconds//1000 (~1e6); XES stores seconds (~1e9)."""
     if len(timestamps) == 0:

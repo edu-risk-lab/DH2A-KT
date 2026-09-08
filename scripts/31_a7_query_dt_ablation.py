@@ -90,8 +90,16 @@ def _log(msg: str) -> None:
         fh.write(line + "\n")
 
 
+def _checkpoint(arm: str, seed: int) -> Path:
+    return REPO_ROOT / "results" / "checkpoints" / f"xes3g5m_fold0_{ARMS[arm]['tag']}_s{seed}.pt"
+
+
 def _already_done(arm: str, seed: int, force: bool) -> bool:
-    if force or not OUTPUT.exists():
+    if force:
+        return False
+    if not _checkpoint(arm, seed).is_file():
+        return False
+    if not OUTPUT.exists():
         return False
     df = pd.read_csv(OUTPUT)
     match = (df["arm"] == arm) & (df["seed"].astype(int) == int(seed))
@@ -233,11 +241,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument(
+        "--arms",
+        default=",".join(ARMS),
+        help="Comma list: dt_both,dt_lstm,dt_query. B7: dt_lstm,dt_query.",
+    )
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    _log(f"=== A7 query-dt ablation seed={args.seed} force={args.force} ===")
-    for arm in ARMS:
+    arms = [a.strip() for a in args.arms.split(",") if a.strip()]
+    unknown = sorted(set(arms) - set(ARMS))
+    if unknown:
+        raise SystemExit(f"Unknown A7 arms: {', '.join(unknown)}")
+    _log(f"=== A7 query-dt ablation seed={args.seed} arms={arms} force={args.force} ===")
+    for arm in arms:
         rc = run_arm(arm, args.seed, args.device, args.force, args.dry_run)
         if rc != 0:
             return rc

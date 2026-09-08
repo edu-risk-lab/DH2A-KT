@@ -257,6 +257,8 @@ if _TORCH_AVAILABLE:
             include_saw: bool = False,
             include_group: bool = False,
             include_time_split: bool = False,
+            time_gap_control: str = "real",
+            time_gap_seed: int = 0,
         ):
             if window_mode not in ("first", "last", "chunked"):
                 raise ValueError(
@@ -301,9 +303,14 @@ if _TORCH_AVAILABLE:
                 else np.zeros(len(sorted_df), dtype=np.int64)
             )
             if include_time_gaps:
-                from dh2a_kt.data.aux_signals import log_time_gaps
+                from dh2a_kt.data.aux_signals import apply_time_gap_control, log_time_gaps
 
-                self._time_gaps = log_time_gaps(timestamps, user_ids)
+                self._time_gaps = apply_time_gap_control(
+                    log_time_gaps(timestamps, user_ids),
+                    user_ids,
+                    time_gap_control,
+                    seed=time_gap_seed,
+                )
             else:
                 self._time_gaps = None
             if include_saw:
@@ -779,6 +786,8 @@ if _TORCH_AVAILABLE:
         hint_hypergraph: bool = False,
         time_gap: bool = False,
         time_gap_mode: str = "both",
+        time_gap_control: str = "real",
+        time_gap_seed: int = 0,
         time_split: bool = False,
         concept_forget: bool = False,
         saw_input: bool = False,
@@ -813,6 +822,8 @@ if _TORCH_AVAILABLE:
             hint_hypergraph=hint_hypergraph,
             time_gap=time_gap,
             time_gap_mode=time_gap_mode,
+            time_gap_control=time_gap_control,
+            time_gap_seed=time_gap_seed,
             time_split=time_split,
             concept_forget=concept_forget,
             saw_input=saw_input,
@@ -867,6 +878,8 @@ def train_fold(
     hint_hyperedges: list[Hyperedge] | None = None,
     time_gap: bool = False,
     time_gap_mode: str = "both",
+    time_gap_control: str = "real",
+    time_gap_seed: int = 0,
     time_split: bool = False,
     concept_forget: bool = False,
     saw_input: bool = False,
@@ -1026,6 +1039,8 @@ def train_fold(
         hint_hypergraph=hint_hypergraph,
         time_gap=time_gap,
         time_gap_mode=time_gap_mode,
+        time_gap_control=time_gap_control,
+        time_gap_seed=time_gap_seed,
         time_split=time_split,
         concept_forget=concept_forget,
         saw_input=saw_input,
@@ -1160,6 +1175,8 @@ def train_fold(
                 include_saw=saw_input,
                 include_group=group_embed,
                 include_time_split=time_split,
+                time_gap_control=time_gap_control,
+                time_gap_seed=time_gap_seed,
             ),
             batch_size=budget.batch_size,
             shuffle=shuffle,
@@ -1242,6 +1259,8 @@ def train_and_evaluate_fold(
     hint_hyperedges: list[Hyperedge] | None = None,
     time_gap: bool = False,
     time_gap_mode: str = "both",
+    time_gap_control: str = "real",
+    time_gap_seed: int = 0,
     time_split: bool = False,
     concept_forget: bool = False,
     saw_input: bool = False,
@@ -1297,6 +1316,8 @@ def train_and_evaluate_fold(
         hint_hyperedges=hint_hyperedges,
         time_gap=time_gap,
         time_gap_mode=time_gap_mode,
+        time_gap_control=time_gap_control,
+        time_gap_seed=time_gap_seed,
         time_split=time_split,
         concept_forget=concept_forget,
         saw_input=saw_input,

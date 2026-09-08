@@ -1,9 +1,12 @@
 # GPU remaining tasks — DH²A-KT (2026-09-05)
 
-**Đợt 08/09/2026 (test-only rescore):** copy-paste
-[`docs/HuongDan_Rescore_TestOnly_2026-09-08.md`](HuongDan_Rescore_TestOnly_2026-09-08.md).
-Chỉ chạy `scripts/36_rescore_a2_testonly.py` rồi `scripts/37_a3_dt_repeat_diag.py`.
-Không train. Không `--force` các script cũ.
+**Đợt 08/09 tối (Hau ver4 A1/A2/B6–B9):** copy-paste
+[`docs/HuongDan_GPU_Hau_ver4_ABC_2026-09-08.md`](HuongDan_GPU_Hau_ver4_ABC_2026-09-08.md).
+Không `--force` script 27/34. Không train lại QKC-T / Zero+Δt.
+
+**Đợt 08/09 (test-only rescore):** đã xong trên
+`gpu-rescore-testonly-2026-09-08`. Không chạy lại
+`scripts/36_rescore_a2_testonly.py` trừ bước S5 (chỉ A7 seed 42).
 
 **Bản thảo:** `origin/main` (attribution / QKC-T).  
 **Máy:** một RTX 3090. Seed cố định `{0, 17, 42, 1234, 2024}`.  

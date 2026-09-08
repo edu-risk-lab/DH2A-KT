@@ -37,6 +37,22 @@ def test_log_time_gaps_resets_at_user_boundary():
     assert gaps[4] == pytest.approx(np.log1p(10))
 
 
+def test_time_gap_control_zero_and_misaligned_keep_starts():
+    from dh2a_kt.data.aux_signals import apply_time_gap_control
+
+    ts = np.array([0, 10, 100, 5, 15], dtype=np.int64)
+    users = np.array([1, 1, 1, 2, 2], dtype=np.int64)
+    gaps = log_time_gaps(ts, users)
+    zeros = apply_time_gap_control(gaps, users, "zero")
+    assert np.all(zeros == 0.0)
+    mis = apply_time_gap_control(gaps, users, "misaligned", seed=7)
+    assert mis[0] == 0.0 and mis[3] == 0.0
+    assert sorted(mis[1:3].tolist()) == sorted(gaps[1:3].tolist())
+    other = apply_time_gap_control(gaps, users, "misaligned", seed=8)
+    # Same multiset per user; seed 7 vs 8 may or may not differ on n=2.
+    assert sorted(other[1:3].tolist()) == sorted(gaps[1:3].tolist())
+
+
 def test_log_duration_idle_subtracts_previous_duration():
     ts = np.array([0, 10, 20], dtype=np.int64)
     users = np.array([1, 1, 1], dtype=np.int64)

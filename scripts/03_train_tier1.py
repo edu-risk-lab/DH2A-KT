@@ -243,6 +243,14 @@ def main() -> int:
         "lstm = forgetting in state; query = gap to the scored next step.",
     )
     parser.add_argument(
+        "--time-gap-control",
+        choices=("real", "zero", "misaligned"),
+        default=None,
+        help="Gap input while the Linear branch stays on. real = aligned "
+        "log1p Δt; zero = all zeros; misaligned = per-user permutation "
+        "(seed = --seed). Requires --time-gap.",
+    )
+    parser.add_argument(
         "--time-split",
         action="store_true",
         help="v4: separate Linear on log1p duration (ms_first_response) and idle "
@@ -385,6 +393,14 @@ def main() -> int:
     time_gap_mode = str(
         args.time_gap_mode or train_cfg.get("time_gap_mode", "both") or "both"
     )
+    time_gap_control = str(
+        args.time_gap_control
+        or train_cfg.get("time_gap_control", "real")
+        or "real"
+    )
+    time_gap_seed = int(args.seed)
+    if time_gap_control != "real" and not time_gap:
+        raise SystemExit("--time-gap-control other than real requires --time-gap")
     time_split = bool(args.time_split or train_cfg.get("time_split", False))
     concept_forget = bool(
         args.concept_forget or train_cfg.get("concept_forget", False)
@@ -452,7 +468,8 @@ def main() -> int:
           f"question_hypergraph={question_hypergraph} "
           f"hint_hypergraph={hint_hypergraph} "
           f"full_qmatrix={full_qmatrix} time_gap={time_gap} "
-          f"time_gap_mode={time_gap_mode} time_split={time_split} "
+          f"time_gap_mode={time_gap_mode} time_gap_control={time_gap_control} "
+          f"time_split={time_split} "
           f"concept_forget={concept_forget} saw_input={saw_input} "
           f"group_embed={group_embed} expert_graph={expert_graph} "
           f"memory_dim={memory_dim} max_degree={max_degree} graph_transport={graph_transport} "
@@ -645,6 +662,8 @@ def main() -> int:
             hint_hyperedges=hint_hyperedges,
             time_gap=time_gap,
             time_gap_mode=time_gap_mode,
+            time_gap_control=time_gap_control,
+            time_gap_seed=time_gap_seed,
             time_split=time_split,
             concept_forget=concept_forget,
             saw_input=saw_input,
