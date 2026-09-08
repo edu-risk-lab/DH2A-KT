@@ -1,0 +1,2 @@
+model,fold,protocol,n_scored,auc,brier,nll,ece,ece_bins,checkpoint
+Zero+Δt,0,clean_test_chunked,1093755,0.8294412808315413,0.12080278138820581,0.38312454510258587,0.007186281424075983,15,results\checkpoints\xes3g5m_fold0_qkc_cm_zero_time_s42.pt

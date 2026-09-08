@@ -1,0 +1,143 @@
+{
+  "protocol": "repeat-target-masked KC-expanded; not pyKT all-in-one",
+  "n_test_rows": 1281923,
+  "n_repeat_rows": 183741,
+  "n_multi_kc_rows": 332131,
+  "n_multi_kc_attempts": 148390,
+  "n_first_of_attempt": 1098182,
+  "chunked_L": 400,
+  "n_windows_starting_on_global_repeat": 208,
+  "n_attempts_split_across_chunk": 208,
+  "examples": [
+    {
+      "user_id": 12361131862671940,
+      "item_id": 57982452320373391,
+      "timestamp": 1621061720,
+      "kc_id": 6417620605101166778,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 41611885473559423,
+      "item_id": 7248903972195788289,
+      "timestamp": 1619344422,
+      "kc_id": 816286915455981984,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 81877283962482266,
+      "item_id": 8719615833537419001,
+      "timestamp": 1618034115,
+      "kc_id": 7802467190713408940,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 131257863411580663,
+      "item_id": 4222643818054694699,
+      "timestamp": 1610272510,
+      "kc_id": 555625984027262014,
+      "correct": 0,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 149531486617323517,
+      "item_id": 6147875086373715622,
+      "timestamp": 1616302278,
+      "kc_id": 677718427031623301,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 353493929595617817,
+      "item_id": 3828334279603049153,
+      "timestamp": 1612101174,
+      "kc_id": 10766877478299942,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 366719688482591232,
+      "item_id": 3047874906070459594,
+      "timestamp": 1619348815,
+      "kc_id": 8952147277934020296,
+      "correct": 0,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 458794676235569015,
+      "item_id": 9115558964403805572,
+      "timestamp": 1618621805,
+      "kc_id": 2322042198017538996,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 460500674160906601,
+      "item_id": 3047874906070459594,
+      "timestamp": 1618401399,
+      "kc_id": 8952147277934020296,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 476902725176398434,
+      "item_id": 6394695383634157230,
+      "timestamp": 1612754770,
+      "kc_id": 7137985937186816118,
+      "correct": 0,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 507746566544729231,
+      "item_id": 4260633770333098180,
+      "timestamp": 1622255502,
+      "kc_id": 5841359775533910823,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    },
+    {
+      "user_id": 563793233634449639,
+      "item_id": 7122625606333777249,
+      "timestamp": 1620202197,
+      "kc_id": 1222407798012817380,
+      "correct": 1,
+      "window_local_index": 0,
+      "global_is_repeat": true,
+      "issue": "chunk_starts_on_global_repeat_row"
+    }
+  ],
+  "assertions": {
+    "headline_masks_repeat_targets": true,
+    "proved_no_same_attempt_label_in_query": false,
+    "proved_chunk_never_promotes_repeat_to_first_target": false,
+    "question_level_all_in_one_run": false
+  },
+  "decision": {
+    "keep_protocol_name": "repeat-target-masked KC-expanded",
+    "do_not_claim_pykt_all_in_one": true
+  }
+}

@@ -76,3 +76,63 @@ DONE a7_dt_both seed=2024 test_only=0.829511 n=1093755
 Wrote results\tables\a2_testonly_rescore.csv
 Wrote results\tables\a2_testonly_rescore_summary.json
 QKC-T 5-seed test-only 0.829492±0.000089 → replace Table 5 seed-42 cell
+OK      p0_dt_on     seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s42.pt
+OK      p0_dt_on     seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s17.pt
+OK      p0_dt_on     seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s1234.pt
+OK      p0_dt_on     seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s0.pt
+OK      p0_dt_on     seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s2024.pt
+OK      hg_qkc_on    seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s42.pt
+OK      hg_qkc_on    seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s17.pt
+OK      hg_qkc_on    seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s1234.pt
+OK      hg_qkc_on    seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s0.pt
+OK      hg_qkc_on    seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s2024.pt
+MISSING a7_dt_lstm   seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s42.pt
+OK      a7_dt_lstm   seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s17.pt
+OK      a7_dt_lstm   seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s1234.pt
+OK      a7_dt_lstm   seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s0.pt
+OK      a7_dt_lstm   seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s2024.pt
+MISSING a7_dt_query  seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s42.pt
+OK      a7_dt_query  seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s17.pt
+OK      a7_dt_query  seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s1234.pt
+OK      a7_dt_query  seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s0.pt
+OK      a7_dt_query  seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s2024.pt
+OK      a7_dt_both   seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s42.pt
+OK      a7_dt_both   seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s17.pt
+OK      a7_dt_both   seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s1234.pt
+OK      a7_dt_both   seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s0.pt
+OK      a7_dt_both   seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s2024.pt
+glob count xes3g5m_fold0_*s*.pt = 60
+python=C:\Users\EDM\AppData\Local\Python\pythoncore-3.14-64\python.exe device=cuda arms=['a7_dt_lstm', 'a7_dt_query'] seeds=[42]
+OK      p0_dt_on     seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s42.pt
+OK      p0_dt_on     seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s17.pt
+OK      p0_dt_on     seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s1234.pt
+OK      p0_dt_on     seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s0.pt
+OK      p0_dt_on     seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s2024.pt
+OK      hg_qkc_on    seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s42.pt
+OK      hg_qkc_on    seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s17.pt
+OK      hg_qkc_on    seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s1234.pt
+OK      hg_qkc_on    seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s0.pt
+OK      hg_qkc_on    seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_hg_qkc_on_s2024.pt
+OK      a7_dt_lstm   seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s42.pt
+OK      a7_dt_lstm   seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s17.pt
+OK      a7_dt_lstm   seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s1234.pt
+OK      a7_dt_lstm   seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s0.pt
+OK      a7_dt_lstm   seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s2024.pt
+OK      a7_dt_query  seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s42.pt
+OK      a7_dt_query  seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s17.pt
+OK      a7_dt_query  seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s1234.pt
+OK      a7_dt_query  seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s0.pt
+OK      a7_dt_query  seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_a7_dt_query_s2024.pt
+OK      a7_dt_both   seed=42    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s42.pt
+OK      a7_dt_both   seed=17    D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s17.pt
+OK      a7_dt_both   seed=1234  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s1234.pt
+OK      a7_dt_both   seed=0     D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s0.pt
+OK      a7_dt_both   seed=2024  D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\xes3g5m_fold0_p0_dt_on_s2024.pt
+glob count xes3g5m_fold0_*s*.pt = 62
+SCORE a7_dt_lstm seed=42 results\checkpoints\xes3g5m_fold0_a7_dt_lstm_s42.pt
+DONE a7_dt_lstm seed=42 test_only=0.828834 n=1093755
+SCORE a7_dt_query seed=42 results\checkpoints\xes3g5m_fold0_a7_dt_query_s42.pt
+DONE a7_dt_query seed=42 test_only=0.827664 n=1093755
+Wrote results\tables\a2_testonly_rescore.csv
+Wrote results\tables\a2_testonly_rescore_summary.json
+QKC-T 5-seed test-only 0.829492±0.000089 → replace Table 5 seed-42 cell

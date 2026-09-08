@@ -1,0 +1,115 @@
+{
+  "protocol": {
+    "backbone": "zero Q-KC incidence + Linear \u0394t branch (both)",
+    "controls": "trained, not inference-only",
+    "val_gate": 0.002,
+    "do_not_retrain_script_34": true
+  },
+  "contrasts": {
+    "t_real_vs_t_zero": {
+      "comparison": "t_real minus t_zero",
+      "paired_seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "k_gate_pass": 0,
+      "mean_delta_val": null,
+      "mean_delta_test_only": 0.0019520092693628755,
+      "pairs": [
+        {
+          "seed": 0,
+          "delta_val": NaN,
+          "delta_test_only": 0.0020121069156596727,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 17,
+          "delta_val": NaN,
+          "delta_test_only": 0.00192727878750254,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 42,
+          "delta_val": NaN,
+          "delta_test_only": 0.001696940632154309,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 1234,
+          "delta_val": NaN,
+          "delta_test_only": 0.0021998538587160166,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 2024,
+          "delta_val": NaN,
+          "delta_test_only": 0.001923866152781839,
+          "gate_pass": false,
+          "identical_numel": true
+        }
+      ]
+    },
+    "t_real_vs_t_misaligned": {
+      "comparison": "t_real minus t_misaligned",
+      "paired_seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "k_gate_pass": 0,
+      "mean_delta_val": null,
+      "mean_delta_test_only": 0.001493810413212171,
+      "pairs": [
+        {
+          "seed": 0,
+          "delta_val": NaN,
+          "delta_test_only": 0.0015661479407020895,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 17,
+          "delta_val": NaN,
+          "delta_test_only": 0.0015615843833445275,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 42,
+          "delta_val": NaN,
+          "delta_test_only": 0.0013970265510101498,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 1234,
+          "delta_val": NaN,
+          "delta_test_only": 0.0014730615445124329,
+          "gate_pass": false,
+          "identical_numel": true
+        },
+        {
+          "seed": 2024,
+          "delta_val": NaN,
+          "delta_test_only": 0.0014712316464916553,
+          "gate_pass": false,
+          "identical_numel": true
+        }
+      ]
+    }
+  },
+  "decision": {
+    "aligned_dt_isolated_from_branch": false,
+    "wording_if_false": "Adding the time branch improves performance in our ablations; the separate contribution of temporal information versus the additional branch has not yet been fully isolated.",
+    "wording_if_true": "Under the specified backbone and evaluation protocol, correctly aligned time gaps improve prediction relative to architecture-matched time-input controls."
+  }
+}

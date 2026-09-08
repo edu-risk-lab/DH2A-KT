@@ -1,0 +1,6 @@
+{
+  "n_rows": 9,
+  "max_operator_local_vs_shared_clean": 2.0185649818316165e-09,
+  "pass_same_clean": true,
+  "csv": "results\\tables\\b9_same_ckpt_destruction.csv"
+}

@@ -73,7 +73,7 @@ def _dh2_scored_keys(checkpoint: Path, device: str) -> pd.DataFrame:
     trained.model.eval()
     with torch.no_grad():
         for batch in loader:
-            lengths = batch["length"].to(trained.device)
+            lengths = batch["lengths"].to(trained.device)
             repeats = batch["is_repeat"].to(trained.device)
             users = batch["user_ids"].cpu().numpy()
             items = batch["exercise_ids"].cpu().numpy()
@@ -129,6 +129,26 @@ def main() -> int:
     missing = {"ts", "ps", "us", "cs"} - set(data.files)
     if missing:
         raise SystemExit(f"{npz_path} missing {sorted(missing)}; holds {data.files}")
+    # pyKT ``cs`` are dense concept indices from train-fold maps; remap DH² hashed
+    # kc_id into the same space so occurrence keys can match.
+    from dh2a_kt.hyperedge.p0_inputs import (
+        get_fold_splits,
+        load_configs,
+        load_interactions_with_ids,
+    )
+
+    sys.path.insert(0, str(REPO_ROOT / "external" / "p0_leakage_audit" / "src"))
+    from pykt_export import build_dense_maps  # noqa: E402
+
+    _, p0_cfg, _ = load_configs(REPO_ROOT / "configs" / "xes3g5m.yaml")
+    train_df = get_fold_splits(load_interactions_with_ids(p0_cfg), p0_cfg, 0)["train"]
+    _q_map, c_map = build_dense_maps(train_df)
+    dh2 = dh2.copy()
+    dh2["kc_id"] = dh2["kc_id"].map(c_map)
+    n_unmapped = int(dh2["kc_id"].isna().sum())
+    dh2 = dh2.dropna(subset=["kc_id"]).copy()
+    dh2["kc_id"] = dh2["kc_id"].astype(np.int64)
+
     pykt = pd.DataFrame(
         {
             "user_id": np.asarray(data["us"]).ravel().astype(np.int64),
@@ -150,17 +170,20 @@ def main() -> int:
         "dh2_checkpoint": str(ckpt.relative_to(REPO_ROOT)),
         "pykt_npz": str(Path(npz_path)),
         "n_dh2": int(len(dh2)),
+        "n_dh2_before_c_map": int(len(dh2) + n_unmapped),
+        "n_dh2_unmapped_kc": n_unmapped,
         "n_pykt": int(len(pykt)),
         "n_joined": int(len(both)),
         "n_only_dh2": int(len(only_dh2)),
         "n_only_pykt": int(len(only_pykt)),
         "label_mismatch_on_join": label_mismatch,
-        "join_key": "user|kc|occurrence_in_scored_set",
+        "join_key": "user|kc_dense|occurrence_in_scored_set",
         "expected_only_dh2": 35,
         "note": (
-            "Join is occurrence-of-(user,kc) in the scored set, not a native "
-            "attempt_id. Headline twins may stay on native n; baseline gaps "
-            "should use n_joined after this file exists."
+            "Join is occurrence-of-(user, dense-kc) in the scored set, not a native "
+            "attempt_id. DH² hashed kc_id remapped via train-fold build_dense_maps. "
+            "Headline twins may stay on native n; baseline gaps should use n_joined "
+            "after this file exists."
         ),
     }
     OUT.write_text(json.dumps(payload, indent=2), encoding="utf-8")

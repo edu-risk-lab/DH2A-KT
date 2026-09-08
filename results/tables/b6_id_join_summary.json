@@ -1,0 +1,15 @@
+{
+  "dh2_checkpoint": "results\\checkpoints\\xes3g5m_fold0_p0_dt_on_s42.pt",
+  "pykt_npz": "D:\\TUAN\\DH2A-KT\\DH2A-KT\\results\\pykt_work_clean\\xes3g5m\\fold_0\\C_gikt_clean_L400_e30b16_s42\\test_predictions.npz",
+  "n_dh2": 1093754,
+  "n_dh2_before_c_map": 1093755,
+  "n_dh2_unmapped_kc": 1,
+  "n_pykt": 1093720,
+  "n_joined": 1093718,
+  "n_only_dh2": 36,
+  "n_only_pykt": 2,
+  "label_mismatch_on_join": 8,
+  "join_key": "user|kc_dense|occurrence_in_scored_set",
+  "expected_only_dh2": 35,
+  "note": "Join is occurrence-of-(user, dense-kc) in the scored set, not a native attempt_id. DH\u00b2 hashed kc_id remapped via train-fold build_dense_maps. Headline twins may stay on native n; baseline gaps should use n_joined after this file exists."
+}
