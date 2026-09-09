@@ -5,6 +5,8 @@ import pandas as pd
 
 from dh2a_kt.eval.event_identity import (
     account_join_counts,
+    account_stable_counts,
+    classify_occurrence_mismatch_keys,
     classify_unmatched_occurrence_keys,
     drop_unmapped_question_kc,
     iter_scored_kc_rows,
@@ -45,6 +47,41 @@ def test_stable_key_separates_those_events():
     k0 = stable_event_key(9, 100, 50, 7)
     k1 = stable_event_key(9, 200, 51, 7)
     assert k0 != k1
+
+
+def test_gpu_stable_join_closes_and_agrees_on_labels():
+    import json
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "results" / "tables" / "a4_event_identity.json"
+    blob = json.loads(path.read_text(encoding="utf-8"))
+    if not blob.get("stable_key_join_run"):
+        return
+    acc = account_stable_counts(
+        n_dh2_stable=blob["n_dh2_stable"],
+        n_pykt_stable=blob["n_pykt_stable"],
+        n_only_dh2_stable=blob["n_only_dh2_stable"],
+        n_only_pykt_stable=blob["n_only_pykt_stable"],
+        n_common_stable=blob["n_common_stable"],
+        n_label_mismatch=blob["n_label_mismatch_on_stable_join"],
+    )
+    assert acc["accounting_ok"]
+    assert acc["same_stable_id_same_label"]
+    assert blob["n_common_stable"] == 1_093_718
+    assert blob["n_only_dh2_stable"] == 37
+    assert blob["n_only_pykt_stable"] == 2
+
+
+def test_classify_mismatch_keys_counts_user_kc_pairs():
+    keys = [
+        "1|10|6",
+        "1|10|8",
+        "2|20|1",
+    ]
+    rec = classify_occurrence_mismatch_keys(keys)
+    assert rec["n_keys"] == 3
+    assert rec["n_users"] == 2
+    assert rec["n_user_kc_pairs"] == 2
 
 
 def test_classify_unmatched_splits_first_vs_later_occurrence():

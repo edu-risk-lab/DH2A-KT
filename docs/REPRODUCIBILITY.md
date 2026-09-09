@@ -1,5 +1,9 @@
 # Reproducibility checklist
 
+English overview: [`README.md`](../README.md). Table-to-script map:
+[`paper-artifacts.md`](paper-artifacts.md). This file lists environment
+pins, data that is **not** in Git, and what not to push.
+
 Mục tiêu file này: liệt kê chính xác những gì cần để (a) một máy khác clone
 repo từ GitHub và tái lập được đúng môi trường, (b) một GPU server bắt đầu
 train được ngay mà không phải đoán cấu trúc thư mục. Không lặp lại nội dung

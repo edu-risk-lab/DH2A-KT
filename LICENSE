@@ -1,0 +1,34 @@
+MIT License
+
+Copyright (c) 2026
+  Tuan Dao Minh, Khanh-Trinh Nguyen, Duong Nguyen Tien,
+  Quoc Khanh Ngo, Van-Hau Nguyen, Le Hoang Son
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party notice
+
+Companion paper P0 is vendored under its own MIT licence
+(`external/p0_leakage_audit/LICENSE`). This repository also depends on the
+pyKT toolkit (MIT Licence; https://github.com/pykt-team/pykt-toolkit).
+Public educational datasets (Junyi Academy / PSLC DataShop, ASSISTments
+2012–2013, XES3G5M, FoundationalASSIST) remain under their provider terms
+and are not redistributed here; see the manuscript Data availability
+statement.

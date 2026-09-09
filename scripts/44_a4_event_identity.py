@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.eval.event_identity import (  # noqa: E402
     account_join_counts,
+    classify_occurrence_mismatch_keys,
     classify_unmatched_occurrence_keys,
     drop_unmapped_question_kc,
     iter_scored_kc_rows,
@@ -30,7 +31,20 @@ from dh2a_kt.eval.event_identity import (  # noqa: E402
 OUT = REPO_ROOT / "results" / "tables" / "a4_event_identity.json"
 B6 = REPO_ROOT / "results" / "tables" / "b6_id_join_summary.json"
 UNMATCHED = REPO_ROOT / "results" / "tables" / "b6_unmatched_dh2_rows.csv"
+UNMATCHED_PYKT = REPO_ROOT / "results" / "tables" / "b6_unmatched_pykt_rows.csv"
+MISMATCH = REPO_ROOT / "results" / "tables" / "b6_label_mismatch_rows.csv"
 PARQUET = REPO_ROOT / "external" / "p0_leakage_audit" / "data" / "processed" / "xes3g5m.parquet"
+STABLE_FIELDS = (
+    "stable_key_join_run",
+    "n_dh2_stable",
+    "n_pykt_stable",
+    "n_common_stable",
+    "n_only_dh2_stable",
+    "n_only_pykt_stable",
+    "n_label_mismatch_on_stable_join",
+    "same_stable_id_same_label",
+    "example_only_dh2",
+)
 
 
 def _from_b6() -> dict:
@@ -54,6 +68,14 @@ def _from_b6() -> dict:
         "n_later_occurrence": None,
     }
     n_mismatch = int(blob["label_mismatch_on_join"])
+    mismatch_keys: list[str] = []
+    if MISMATCH.is_file():
+        mm = pd.read_csv(MISMATCH, dtype={"join_key": str})
+        mismatch_keys = [k for k in mm["join_key"].tolist() if isinstance(k, str) and k]
+    pykt_keys: list[str] = []
+    if UNMATCHED_PYKT.is_file():
+        py = pd.read_csv(UNMATCHED_PYKT, dtype={"join_key": str})
+        pykt_keys = [k for k in py["join_key"].tolist() if isinstance(k, str) and k]
     return {
         "source": "b6_id_join_summary.json",
         "join_key": blob.get("join_key"),
@@ -61,6 +83,14 @@ def _from_b6() -> dict:
         "accounting": acc,
         "dh2_only_occurrence": unmatched,
         "n_label_mismatch_on_occurrence_join": n_mismatch,
+        "occurrence_label_mismatches": classify_occurrence_mismatch_keys(
+            mismatch_keys
+        )
+        if mismatch_keys
+        else {"n_keys": n_mismatch},
+        "pykt_only_occurrence": classify_unmatched_occurrence_keys(pykt_keys)
+        if pykt_keys
+        else {"n_keys": int(blob["n_only_pykt"])},
         "eight_mismatches_dropped": False,
         "occurrence_join_is_stable_event_id": False,
         "reason_occurrence_is_not_identity": (
@@ -123,8 +153,16 @@ def main() -> int:
         print(f"SKIP: missing {B6}", flush=True)
         return 2
     payload = _from_b6()
+    prior = json.loads(OUT.read_text(encoding="utf-8")) if OUT.is_file() else {}
     if PARQUET.is_file():
         payload.update(_stable_join_from_parquet())
+    elif prior.get("stable_key_join_run"):
+        for key in STABLE_FIELDS:
+            if key in prior:
+                payload[key] = prior[key]
+        payload["stable_key_join_note"] = (
+            "preserved GPU stable-key census; parquet absent on this machine"
+        )
     else:
         payload["parquet_present"] = False
         payload["stable_key_join_note"] = (

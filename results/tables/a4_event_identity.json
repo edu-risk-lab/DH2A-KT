@@ -73,6 +73,75 @@
     ]
   },
   "n_label_mismatch_on_occurrence_join": 8,
+  "occurrence_label_mismatches": {
+    "n_keys": 8,
+    "n_users": 5,
+    "n_user_kc_pairs": 6,
+    "pairs": [
+      {
+        "user_id": 1063993888282932119,
+        "kc_dense": 636,
+        "occurrences": [
+          6,
+          10
+        ]
+      },
+      {
+        "user_id": 3050240195338020146,
+        "kc_dense": 402,
+        "occurrences": [
+          2
+        ]
+      },
+      {
+        "user_id": 4725993607927675977,
+        "kc_dense": 233,
+        "occurrences": [
+          6,
+          8
+        ]
+      },
+      {
+        "user_id": 4725993607927675977,
+        "kc_dense": 640,
+        "occurrences": [
+          1
+        ]
+      },
+      {
+        "user_id": 5534219198950304443,
+        "kc_dense": 859,
+        "occurrences": [
+          1
+        ]
+      },
+      {
+        "user_id": 6329260701555520057,
+        "kc_dense": 438,
+        "occurrences": [
+          1
+        ]
+      }
+    ]
+  },
+  "pykt_only_occurrence": {
+    "n_keys": 2,
+    "n_users": 2,
+    "n_first_occurrence": 1,
+    "n_later_occurrence": 1,
+    "max_rows_per_user": 1,
+    "users": [
+      3050240195338020146,
+      4725993607927675977
+    ],
+    "first_occurrence_pairs": [
+      {
+        "user_id": 3050240195338020146,
+        "kc_dense": 773,
+        "occ": 1
+      }
+    ]
+  },
   "eight_mismatches_dropped": false,
   "occurrence_join_is_stable_event_id": false,
   "reason_occurrence_is_not_identity": "Eight joined occurrence keys disagree on the label, so the same (user, dense-kc, occurrence-in-scored-set) can name two different KC-rows after the pipelines filter different rows. pyKT export drops item/KC ids absent from train-fold dense maps before chunking; DH2 native scoring uses checkpoint maps and keeps those rows. The one-row native gap (1,093,755 vs 1,093,754) is the hashed KC that does not map into the train-fold c_map.",
@@ -100,5 +169,6 @@
     "442777101019499837|1611575922|4906611248911600558|6827114036858291371",
     "442777101019499837|1611577674|3778395780164522062|8628686323660025649",
     "442777101019499837|1611724339|2942437326367175018|4560503297887269910"
-  ]
+  ],
+  "stable_key_join_note": "preserved GPU stable-key census; parquet absent on this machine"
 }

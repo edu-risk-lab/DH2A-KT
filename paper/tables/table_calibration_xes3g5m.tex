@@ -10,9 +10,9 @@ calibration-only and is not a Table~\ref{tab:auc-xes3g5m} row),
 scored on native $n{=}1{,}093{,}755$ positions. pyKT GIKT/AKT/\textit{simpleKT}
 use the same seed-42 prediction files as the headline intersection
 ($n{=}1{,}093{,}720$). An occurrence join on (user, dense-KC) matches
-$1{,}093{,}718$ rows; $36$ DH$^2$ and $2$ pyKT keys remain unmatched,
-$8$ joined keys disagree on the label (kept, not dropped), and the
-one-row native gap is the hashed KC absent from the train-fold map
+$1{,}093{,}718$ rows with $8$ label collisions (kept). The pre-chunk
+$\mathrm{user}{+}\mathrm{timestamp}{+}\mathrm{item}{+}\mathrm{KC}$ key
+matches the same $n$ with zero label disagreement
 (\texttt{a4\_event\_identity.json}). Calibration is not event-paired
 across DH$^2$ and pyKT. We report
 calibration as a diagnostic and do not apply temperature scaling.
@@ -29,7 +29,7 @@ Q$\leftarrow$KC $+\Delta t$ & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
 Zero$+\Delta t$ & 0.8294 & 0.1208 & 0.3831 & 0.0072 \\
 Q$\leftarrow$KC on & 0.8270 & 0.1216 & 0.3857 & 0.0103 \\
 Q$\leftarrow$KC off (twin) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\
-GIKT (training-budget-matched) & 0.8257 & 0.1219 & 0.3864 & 0.0073 \\
+GIKT (training-envelope-matched) & 0.8257 & 0.1219 & 0.3864 & 0.0073 \\
 AKT ($L{=}400$) & 0.8223 & 0.1229 & 0.3893 & 0.0047 \\
 \textit{simpleKT} ($L{=}400$) & 0.8203 & 0.1236 & 0.3916 & 0.0100 \\
 \bottomrule

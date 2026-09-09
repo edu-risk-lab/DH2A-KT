@@ -89,12 +89,15 @@ def export_leakage() -> None:
         full = payload["full_log_positive_control"]
         n_train = f"{train['n_hyperedges']:,}".replace(",", "{,}")
         n_full = f"{full['n_hyperedges']:,}".replace(",", "{,}")
+        tbmr = f"{train['tbmr']:.4f}"
+        tbmr_full = f"{full['tbmr']:.4f}"
+        rho_cell = "degenerate ($\\sigma_w{=}0$)"
         body = f"""% Auto-derived from {pos_path.name}
 \\begin{{table}}[!t]
 \\caption{{Path-derived concept-group hyperedge audit on XES3G5M fold~0.
 \\textbf{{Train-only}} uses P0's audited $E_{{\\mathrm{{pre}}}}^f$; \\textbf{{Full-log}}
-is a deliberate positive control (GS Hau A4). TBMR/$|\\rho|$ use a $10^5$-pair
-subsample when the projection exceeds the implementation cap.}}
+is a deliberate positive control. TBMR uses a $10^5$-pair subsample (seed 42).
+$|\\rho|$ is degenerate because all projected pairs have weight 1.}}
 \\label{{tab:leakage-measured}}
 \\centering
 \\footnotesize
@@ -105,8 +108,8 @@ Metric & Train-only & Full-log (pos.\\ control) \\\\
 Hyperedges & {n_train} & {n_full} \\\\
 $\\mathrm{{ECR}}^{{\\mathrm{{flag}}}}$ & {train['ecr_flag']} & {full['ecr_flag']} \\\\
 Group-membership leak rate & {train['group_membership_leak_rate']} & \\textbf{{{full['group_membership_leak_rate']}}} \\\\
-TBMR (sampled) & {train['tbmr']:.3f} & {full['tbmr']:.3f} \\\\
-$|\\rho|$ (sampled) & {train['rho']} & {full['rho']} \\\\
+TBMR (sampled $n{{=}}10^5$) & {tbmr} & {tbmr_full} \\\\
+$|\\rho|$ (sampled) & {rho_cell} & {rho_cell} \\\\
 \\bottomrule
 \\end{{tabular}}
 \\end{{table}}"""

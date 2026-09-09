@@ -1,3 +1,36 @@
+# --- Public-release hygiene (KBS artefact) ---
+reviewer/
+Claude outputs/
+tmp/
+QuyDinhTruocKhiSubmit/
+docs/NhanXet*
+docs/Nhan_xet*
+docs/*.pdf
+docs/*.docx
+temp/
+paper_closedloop_kt/
+*.docx
+paper/report_GS_*
+paper/review*.docx
+paper/Tuan_*.pdf
+paper/main.pdf
+paper/main_ver*
+paper/main_v2.*
+paper/supplement.pdf
+paper/supplement.aux
+paper/supplement.out
+paper/supplement.spl
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.out
+paper/*.spl
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.synctex.gz
+!paper/figures/*.pdf
+!paper/figures/*.png
+
 # Python
 __pycache__/
 *.pyc

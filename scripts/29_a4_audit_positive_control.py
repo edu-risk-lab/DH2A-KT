@@ -18,17 +18,20 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from dh2a_kt.hyperedge.audit import (  # noqa: E402
+    DEGENERATE_CONSTANT_WEIGHT,
     HyperedgeLeakageReport,
     _PAIRWISE_DIAGNOSTIC_MAX_ROWS,
     _flatten_to_pairwise,
     audit_hyperedges,
     compute_group_membership_leakage,
+    pairwise_rho_report,
 )
 from dh2a_kt.hyperedge.construction import build_concept_prerequisite_hyperedges  # noqa: E402
 from dh2a_kt.hyperedge.p0_inputs import (  # noqa: E402
@@ -77,24 +80,32 @@ def _sampled_pairwise_diagnostics(
     *,
     sample_pairs: int,
     seed: int,
-) -> tuple[float, float | None, str]:
-    """Return (tbmr, |rho|, note) on a random pairwise subsample."""
+) -> tuple[float, float | None, str, dict]:
+    """Return (tbmr, |rho|, note, rho_meta) on a random pairwise subsample."""
     pairwise = _flatten_to_pairwise(hyperedges)
     n = len(pairwise)
     if n == 0:
-        return 0.0, None, "no pairwise pairs"
+        return 0.0, None, "no pairwise pairs", {"rho_status": "too_few_pairs", "n_pairs": 0}
     if n > sample_pairs:
         pairwise = pairwise.sample(n=sample_pairs, random_state=seed).reset_index(drop=True)
         note = f"TBMR/|rho| on random sample of {sample_pairs:,} / {n:,} projected pairs (seed={seed})"
     else:
         note = f"TBMR/|rho| on all {n:,} projected pairs"
     tbmr = compute_tbvr(train_df, pairwise[["src_kc", "dst_kc"]])
-    rho = compute_rho_edge_outcome(
-        pairwise.assign(weight=1.0),
-        pd.DataFrame(columns=["src_kc", "dst_kc", "weight"]),
-        test_df,
-    )
-    return tbmr, rho, note
+    rho_meta = pairwise_rho_report(np.ones(len(pairwise), dtype=np.float64))
+    if rho_meta["rho_status"] == DEGENERATE_CONSTANT_WEIGHT:
+        rho = None
+        note = (
+            f"{note}; |rho| degenerate (weight=1, sigma_w=0, n={len(pairwise):,}); "
+            "not a measured near-zero"
+        )
+    else:
+        rho = compute_rho_edge_outcome(
+            pairwise.assign(weight=1.0),
+            pd.DataFrame(columns=["src_kc", "dst_kc", "weight"]),
+            test_df,
+        )
+    return tbmr, rho, note, rho_meta
 
 
 def _audit_arm(
@@ -122,7 +133,7 @@ def _audit_arm(
     if sample_pairs and sample_pairs > 0:
         n_pairwise = sum(len(he.members) * (len(he.members) - 1) // 2 for he in hyperedges)
         if n_pairwise > _PAIRWISE_DIAGNOSTIC_MAX_ROWS:
-            tbmr, rho, note = _sampled_pairwise_diagnostics(
+            tbmr, rho, note, rho_meta = _sampled_pairwise_diagnostics(
                 hyperedges,
                 splits["train"],
                 splits["test"],
@@ -131,6 +142,10 @@ def _audit_arm(
             )
             out["tbmr"] = tbmr
             out["rho"] = rho
+            out["rho_status"] = rho_meta.get("rho_status")
+            out["weight_std"] = rho_meta.get("weight_std")
+            out["n_pairs_sampled"] = sample_pairs
+            out["n_pairs_population"] = n_pairwise
             out["notes"] = list(out.get("notes", [])) + [note]
 
     return out
@@ -216,7 +231,8 @@ def main() -> int:
         print(
             f"  [{key}] n_he={arm['n_hyperedges']:,} "
             f"group_leak={arm['group_membership_leak_rate']:.6f} "
-            f"tbmr={arm['tbmr']:.6f} rho={arm['rho']}"
+            f"tbmr={arm['tbmr']:.6f} rho={arm['rho']} "
+            f"rho_status={arm.get('rho_status')}"
         )
     return 0
 

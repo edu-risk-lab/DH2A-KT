@@ -5,7 +5,12 @@ from __future__ import annotations
 import pandas as pd
 
 from dh2a_kt.hyperedge.construction import Hyperedge, build_concept_prerequisite_hyperedges
-from dh2a_kt.hyperedge.audit import audit_hyperedges, compute_group_membership_leakage
+from dh2a_kt.hyperedge.audit import (
+    DEGENERATE_CONSTANT_WEIGHT,
+    audit_hyperedges,
+    compute_group_membership_leakage,
+    pairwise_rho_report,
+)
 
 
 def test_build_concept_prerequisite_hyperedges_groups_chains():
@@ -45,3 +50,21 @@ def test_audit_hyperedges_empty_set_is_safe():
     report = audit_hyperedges([], splits={}, train_df=pd.DataFrame())
     assert report.n_hyperedges == 0
     assert report.ecr_flag == 0.0
+
+
+def test_constant_weight_rho_is_degenerate_not_zero():
+    import numpy as np
+
+    rec = pairwise_rho_report(np.ones(100_000))
+    assert rec["rho"] is None
+    assert rec["rho_status"] == DEGENERATE_CONSTANT_WEIGHT
+    assert rec["weight_std"] == 0.0
+    assert rec["n_pairs"] == 100_000
+
+
+def test_varying_weight_rho_is_marked_defined():
+    import numpy as np
+
+    rec = pairwise_rho_report(np.array([1.0, 2.0, 3.0, 4.0]))
+    assert rec["rho_status"] == "defined"
+    assert rec["weight_std"] > 0.0

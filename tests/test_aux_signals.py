@@ -37,6 +37,23 @@ def test_log_time_gaps_resets_at_user_boundary():
     assert gaps[4] == pytest.approx(np.log1p(10))
 
 
+def test_xes_start_ms_becomes_log1p_seconds_gap():
+    """P0 maps XES millisecond start times to unix seconds before log1p."""
+    raw_ms = np.array([1_600_000_000_000, 1_600_000_005_000], dtype=np.int64)
+    unix_s = raw_ms // 1000
+    gaps = log_time_gaps(unix_s, np.array([1, 1], dtype=np.int64))
+    assert gaps[0] == 0.0
+    assert gaps[1] == pytest.approx(np.log1p(5.0))
+
+
+def test_shared_start_timestamp_has_zero_gap():
+    ts = np.array([100, 100, 110], dtype=np.int64)
+    users = np.array([1, 1, 1], dtype=np.int64)
+    gaps = log_time_gaps(ts, users)
+    assert gaps[1] == 0.0
+    assert gaps[2] == pytest.approx(np.log1p(10.0))
+
+
 def test_time_gap_control_zero_and_misaligned_keep_starts():
     from dh2a_kt.data.aux_signals import apply_time_gap_control
 

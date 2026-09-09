@@ -136,9 +136,9 @@ questions, plus entities this paper does not claim to have learned:
   Does the timing-branch gain survive under history-only input, and is
   aligned $\Delta t$ isolated from the extra maps?
 \end{itemize}
-An exploratory Critic-gated pilot over frozen scores is reported after
-the predictive results (Section~\ref{sec:tier2}); it is not a third
-research question and not a contribution.
+An exploratory Critic-gated pilot over frozen scores is noted after
+the predictive results and detailed in the Supplementary Material; it is
+not a third research question and not a contribution.
 Teacher, forum/discussion, and video nodes are
 defined in the schema (Section~\ref{sec:prelim}) but remain data-blocked
 on every corpus we use (Section~\ref{sec:limitations}): this paper
@@ -227,9 +227,9 @@ we do not claim to have tested those alternatives.
 Closest in scope is \cite{ni2026ikteia}, which aligns LLM mastery reports
 with implicit DLKT states and evaluates explanation faithfulness with
 KC-overlap, an independent-generation control, and paired ablations.
-Section~\ref{sec:tier2} is an exploratory pilot in that line, not a third
-pillar: we gate rationales with a Critic over \emph{frozen}
-$P(\mathrm{correct})$ and use ID-anchored KC-Jaccard because XES3G5M has
+The Supplementary Material records an exploratory Critic-gated pilot in
+that line, not a third pillar: rationales are gated over \emph{frozen}
+$P(\mathrm{correct})$ with ID-anchored KC-Jaccard because XES3G5M has
 no in-repo synonym KC vocabulary. Broader LLM-agent
 surveys \cite{llmedu2025,agentcat2026,graphaugmentedllm2025,graphrag2025}
 motivate the frozen-core split: re-inferring mastery with a multi-agent
@@ -240,7 +240,7 @@ LLM over millions of interactions is not tractable on one consumer GPU.
 We searched ACM Digital Library, IEEE Xplore, and Scopus through September 2026
 with the terms ``hypergraph knowledge tracing'', ``leakage audit'',
 ``graph provenance'', ``KT label leakage'', ``question-level evaluation'',
-and ``controlled attribution''. \cite{daominh2026p0} (companion P0, under review)
+and ``controlled attribution''. \cite{daominh2026p0} (companion P0)
 audits pairwise prerequisite/similarity edges under train-only
 construction. Within that search we found no published protocol that
 applies the same leakage diagnostics to \emph{hyperedges}; this paper
@@ -277,7 +277,7 @@ remain directly comparable, see Section~\ref{sec:reuse}).
 
 \subsection{Self-contained summary of the reused P0 protocol}
 \label{sec:p0-selfcontained}
-Because \cite{daominh2026p0} is under review, we state the reused pieces
+Because \cite{daominh2026p0} is unpublished, we state the reused pieces
 here. For each learner-based fold, $E_{\mathrm{pre}}^f$ and
 $E_{\mathrm{sim}}^f$ are built from \emph{train-fold interactions only},
 then cycle-pruned to a DAG. Four pairwise diagnostics (P0 Table of
@@ -359,9 +359,10 @@ hyperedges on XES3G5M are audited and used in the graph-only diagnostic
 \label{sec:leakage-ext}
 
 The four pairwise diagnostics of Section~\ref{sec:p0-selfcontained} are
-reused on the pairwise projection of a hyperedge set. Pairwise
-TBMR/$|\rho|$ are skipped when that projection exceeds the implementation
-cap (Table~\ref{tab:leakage-measured}). Table~\ref{tab:leakage-taxonomy}
+reused on the pairwise projection of a hyperedge set. When that
+projection exceeds $10^5$ pairs, TBMR and $|\rho|$ use a seed-42 sample
+of $10^5$ pairs rather than the full projection
+(Table~\ref{tab:leakage-measured}). Table~\ref{tab:leakage-taxonomy}
 adds three classes that a pairwise projection does not express.
 
 \begin{table}[t]
@@ -398,10 +399,16 @@ To verify that the audit can register leakage when it is present, we add a
 pooled before the learner split, with a concept$\rightarrow$interaction map
 from the entire log. Under this deliberately contaminated construction,
 group-membership leak rate reaches $1.0$ while the train-only arm stays at
-$0$. Pairwise TBMR on a $10^5$-pair subsample is similar across arms
-($\approx 0.73$) and sampled $|\rho|$ stays $0$ on both columns, so this
-positive control validates the \emph{membership} diagnostic, not pairwise
-$|\rho|$. The zero train-only membership flag therefore reflects protocol
+$0$. Pairwise TBMR on a $10^5$-pair subsample (seed~42) is
+$0.7341$ vs.\ $0.7357$ and does not separate the arms.
+Sampled $|\rho|$ is \emph{degenerate}, not a measured $0$: the projection
+assigns every pair weight $1$, so Pearson is undefined
+($\sigma_w{=}0$; P0's routine returns $0.0$ in that case).
+This positive control therefore validates the \emph{membership}
+diagnostic, not TBMR and not pairwise $|\rho|$.
+Cross-modal and intervention-timing classes remain uninstantiated
+(Table~\ref{tab:leakage-taxonomy}).
+The zero train-only membership flag therefore reflects protocol
 design rather than a blind audit.
 \input{tables/table_leakage_audit}
 
@@ -426,7 +433,10 @@ hypergraph convolution, is
 \label{eq:qkc}
 \end{equation}
 the implementation we run (one shared $W$ on the sum, then a separate
-LSTM input projection). We do not claim a non-collapsible dual-map form. Attribution of the
+LSTM input projection). We do not claim a non-collapsible dual-map form.
+The capacity-matched null therefore concerns this shared-sum fusion of
+$e_q$ and $\bar{A}E_c$ on this backbone, not question--KC relations under
+a richer gate, untied maps, or a different encoder. Attribution of the
 incidence \emph{message} uses a capacity-matched twin that keeps the same
 question pathway and zeros only $\bar{A}$
 (\texttt{--question-incidence-control zero}); an older hard-off twin that
@@ -443,15 +453,31 @@ When \texttt{--time-gap} is on, a dedicated map
 $f(x)=Wx+b$ of $x=\log(1+\Delta t)$
 (\texttt{nn.Linear(1, hidden)}, bias on) can be added on the LSTM input,
 the next-step query, or both. A raw gap of $0$ therefore yields $f(0)=b$,
-not a proven zero hidden injection. We treat the prediction time as \emph{attempt-onset
+not a proven zero hidden injection.
+XES3G5M's interaction timestamp is the millisecond \emph{start} of
+answering; the release does not record an end time
+\cite{liu2023xes3g5m}.
+P0 maps the raw \texttt{timestamps} column
+(\texttt{configs/xes3g5m.yaml}) and stores unix seconds
+(\texttt{ms}/1000) in the processed parquet
+(\texttt{\_normalise\_xes\_timestamp\_ms}).
+DH$^2$ sorts by $(\mathrm{user},\mathrm{timestamp},\mathrm{item})$ and
+sets $\Delta t=\max(t_i-t_{i-1},0)$ seconds between consecutive rows of
+the same learner, then $x=\log(1+\Delta t)$
+(\texttt{log\_time\_gaps}).
+A learner's first row and later KC-rows of the same attempt (identical
+start time) have $\Delta t{=}0$.
+That start-to-start gap includes time on the previous question plus idle;
+it is not a pure waiting time and is not the duration of the scored item.
+We treat the prediction time as \emph{attempt-onset
 correctness prediction}: the score is produced when the learner opens
 item $t{+}1$, whose identity is already the query, not when the system
-first recommends that item. We have not proven that the XES3G5M timestamp
-is open/start time rather than submit/completion time; query-side
-availability is therefore a deployment assumption, not a schema fact.
+first recommends that item.
+Query-side availability is therefore a deployment assumption on top of
+the start-time schema, not an open question about submit vs.\ start.
 LSTM-side $\Delta t$ uses only gaps between
 already-observed steps (\emph{history-only}). The query-side gap is the
-wait until the scored item; that item's identity is part of the
+wait until the scored item's start; that item's identity is part of the
 prediction request, so the gap is attempt context rather than a post-hoc
 peek at duration after $y_{t+1}$ is observed. We do not feed the scored
 step's own response into the query. We report a history-only $\Delta t$
@@ -482,7 +508,12 @@ Following \cite{daominh2026p0}, XES3G5M \cite{liu2023xes3g5m} is the
 primary predictive benchmark: 18{,}066 learners, 7{,}652 items, 865~KCs
 and 5{,}549{,}635 recorded attempts, which expand to 6{,}413{,}353
 KC-level rows under the standard multi-KC expansion
-(Section~\ref{sec:clean-protocol}). ASSISTments~2012 GKT AUC from P0 is
+(Section~\ref{sec:clean-protocol}).
+Each interaction carries the millisecond start time of answering
+\cite{liu2023xes3g5m}; P0 stores that field as unix seconds, and the
+Linear $\Delta t$ branch uses start-to-start gaps
+(Section~\ref{sec:encoding}).
+ASSISTments~2012 GKT AUC from P0 is
 not reused as a comparison column. FoundationalASSIST
 \cite{foundationalassist2026} is a secondary fold with synchronized
 hints (Section~\ref{sec:foundational-assist}), not interchangeable with
@@ -511,23 +542,38 @@ it was \emph{not} completed under this evaluator and is not a Table~\ref{tab:auc
 row.
 GIKT shares DH$^2$-KT's \emph{training envelope}
 (batch 16, epoch cap 30, patience 5)---matched limits, not measured
-FLOPs or wall-clock. AKT and simpleKT inherit
+FLOPs or wall-clock; we do not call AKT or \textit{simpleKT}
+envelope-matched. AKT, \textit{simpleKT}, DKT, and DGEKT inherit
 \textsc{pyKT}/P0 defaults with only $L$ raised to 400
 (\ref{app:hparams}; cf.\ \cite{pineau2021repro}).
+DGEKT uses P0's graph-model recipe (batch 16, 10 epochs, GKT adjacency
+from train-only $E_{\mathrm{pre}}{+}E_{\mathrm{sim}}$). All five seeds
+finished (128--202\,min; test-only SD $0.0001$). That run is
+\emph{contextual}, not a retuned reproduction of the TOIS~2024 paper.
+Under P0's older evaluator DGEKT already sat below DKT
+($0.841$ vs.\ $0.858$); the clean-protocol drops are parallel
+($-0.056$ vs.\ $-0.057$), so Table~\ref{tab:auc-xes3g5m} does not invert
+P0's ranking. P0 treats DGEKT as graph-inert. Status of every
+Table~\ref{tab:auc-xes3g5m} baseline is therefore contextual
+(inherited recipe or envelope-matched GIKT), not original-paper verified.
 The companion PDF is available to reviewers as
 supplementary material on request.
 
 \paragraph{Relation to P0.}
 Train-only graph construction, edge provenance, and the pairwise DAG
 audit in \cite{daominh2026p0} are reused and are not contradicted by
-this paper. Downstream AUC columns in P0 that score every KC-expanded
-row under an older evaluator are \emph{not} comparable to
-Table~\ref{tab:auc-xes3g5m} and must not be read as a ranking against
-QKC-T/Zero$+\Delta t$. The $\approx$8-point graph-only vs.\ GKT gap in
-\ref{app:graph-only} mixes encoder, budget, and protocol; it is not an
-isolated architecture cost. If a P0 claim depends on the older
-evaluator, that claim should be updated on the P0 manuscript's own
-track; this paper does not wait on P0 acceptance.
+this paper. Companion P0 is a separate manuscript prepared for
+\emph{Engineering Applications of Artificial Intelligence} (EAAI).
+The two papers may be under review at Elsevier at the same time; they
+share train-only graph construction, not the DH$^2$ evaluator or the
+attribution twins. Downstream AUC columns in P0 that score
+every KC-expanded row under an older evaluator are \emph{not}
+comparable to Table~\ref{tab:auc-xes3g5m} and must not be read as a
+ranking against QKC-T/Zero$+\Delta t$. The $\approx$8-point graph-only
+vs.\ GKT gap in \ref{app:graph-only} mixes encoder, budget, and
+protocol; it is not an isolated architecture cost. If a P0 claim
+depends on the older evaluator, that claim should be updated on the P0
+manuscript's own track; this paper does not wait on P0 acceptance.
 
 \subsection{Clean evaluation protocol}
 \label{sec:clean-protocol}
@@ -563,22 +609,30 @@ An occurrence join on (user, dense-KC, occurrence in the scored set)
 matches $1{,}093{,}718$ rows (\texttt{b6\_id\_join\_summary.json};
 \texttt{a4\_event\_identity.json}).
 That join is \emph{not} a stable event ID: $8$ joined keys disagree on
-the label, so the same occurrence counter can name two different KC-rows
-after the pipelines filter different rows. We keep those $8$ rows in the
-diagnostic and do not drop them to force a match.
+the label ($5$ learners, $6$ dense-KC pairs;
+\texttt{b6\_label\_mismatch\_rows.csv}).
+We keep those $8$ rows in the diagnostic and do not drop them to force a
+match.
 Native DH$^2$ $n{=}1{,}093{,}755$ minus one hashed KC absent from the
 train-fold dense map is the join-eligible $1{,}093{,}754$; then
 $36$ DH$^2$-only keys and $2$ pyKT-only keys leave $1{,}093{,}718$.
 Among the $36$, $7$ are occurrence-$1$ keys of a (user, dense-KC) pair
 absent from pyKT's scored bag ($12$ learners).
+The two pyKT-only keys are one first occurrence of a pair DH$^2$ never
+scored and one shifted later occurrence of a pair that also appears in
+the eight clashes.
+The pre-chunk key
+$\mathrm{user}{+}\mathrm{timestamp}{+}\mathrm{item}{+}\mathrm{KC}$
+matches the same $n{=}1{,}093{,}718$ with \emph{zero} label disagreement
+($37$ DH$^2$-only keys, including the unmapped hashed KC; $2$ pyKT-only).
+Same stable ID has the same label in both pipelines.
 pyKT's export drops item/KC ids missing from train-fold maps
 \emph{before} chunking; DH$^2$ native scoring uses checkpoint maps.
-The pre-chunk key is $\mathrm{user}{+}\mathrm{timestamp}{+}\mathrm{item}{+}\mathrm{KC}$;
-pyKT's exported timestamp column is a local index, not that field.
+pyKT's exported timestamp column is a local index, not the raw field.
 Headline five-seed gaps remain Zero$+\Delta t$ (native) minus the pyKT
 row (intersection): they are a \emph{contextual} location of the recipe,
-not an event-paired difference on a shared ID set, and they are not
-rebased onto $n{=}1{,}093{,}718$.
+not an event-paired difference on the common $1{,}093{,}718$, and they are
+not rebased onto that set.
 Learner-resampled CIs in
 Section~\ref{sec:time-result} draw the same $3614$ learners on both
 sides of one checkpoint pair; they are not event-aligned and they do not
@@ -688,10 +742,10 @@ $L{=}400$). Table~\ref{tab:auc-xes3g5m} lists fold~0 \emph{test-only} estimates;
 Table~\ref{tab:auc-p0-dt-folds} adds learner-fold test-only stability.
 On five training seeds, the credited-minimal control Zero$+\Delta t$
 reaches $0.8295{\pm}0.0001$ ($n{=}1{,}093{,}755$) versus
-training-budget-matched---not tuning-matched---GIKT $0.8258{\pm}0.0001$,
+training-envelope-matched---not tuning-matched---GIKT $0.8258{\pm}0.0001$,
 AKT $0.8223{\pm}0.0001$, and \textit{simpleKT} $0.8214{\pm}0.0007$
 ($n{=}1{,}093{,}720$; unrounded mean gaps $+0.0036$, $+0.0072$, and
-$+0.0081$; contextual, not event-paired).
+$+0.0081$; contextual, not event-paired, not a superiority claim).
 Q$\leftarrow$KC without time is $0.8268{\pm}0.0002$ on the same native
 test-only split.
 QKC-T is $0.8295{\pm}0.0001$ over the same five seeds (seed~42
@@ -699,7 +753,8 @@ $0.8296$ matches the calibration checkpoint); the archived
 A2 combined val+test mean $0.8296{\pm}0.0001$ ($n{=}1{,}640{,}242$) is
 not used as a Table~\ref{tab:auc-xes3g5m} cell.
 Retrained DKT and DGEKT are $0.8009{\pm}0.0002$ and
-$0.7850{\pm}0.0001$.
+$0.7850{\pm}0.0001$ (contextual inherited recipes;
+Section~\ref{sec:baselines-reuse}).
 Under the capacity-matched zero-incidence twin
 (Table~\ref{tab:qkc-capacity}), the incidence \emph{message} does not
 meet the gate on any seed ($0/5$;
@@ -728,7 +783,7 @@ $L{=}200$) and per-concept exponential forgetting (P4; XES $L{=}400$) are
 now five-seed and do not meet the rule on any seed ($0/5$; mean $\Delta\mathrm{val}$
 $+0.00025$ and $-0.00252$). ``Does not meet the gate'' means the form is
 not credited in that configuration, not that the knowledge type is valueless. The small FoundationalASSIST session-HE shift
-$0.720\rightarrow 0.722$ (concept projection; Table~\ref{tab:paired-ablation})
+$0.720\rightarrow 0.722$ (concept projection; Table~\ref{tab:foundational-assist})
 is therefore not a hypergraph-AUC claim: the isolated hint-item HE arm
 did not pass.
 \input{tables/table_negative_knowledge}
@@ -804,43 +859,13 @@ We report calibration as a diagnostic, not as a primary claim.
 \input{tables/table_calibration_xes3g5m}
 \input{figures/fig_reliability_xes3g5m}
 
-\subsection{Exploratory pilot: Critic-gated explanations}
+\subsection{Exploratory note}
 \label{sec:tier2}
 \label{sec:tier2-faithfulness-result}
-This subsection is an exploratory pilot after the Tier~1 results, not a
-contribution. Three agents read frozen DH$^2$-KT scores: a Diagnostician
-writes a rationale, a Critic flags output that contradicts the frozen
-$P(\mathrm{correct})$ (15-bin ECE $0.0056$ on QKC-T;
-Table~\ref{tab:calibration-xes3g5m}), and a Tutor writes session
-hyperedges that the frozen tracer does not consume. We ran $n{=}500$
-prompts (XES3G5M fold~0, seed 42, Qwen2.5-7B via Ollama) on the
-graph-only v2 checkpoint and again on QKC-T. Following
-\cite{ni2026ikteia}, we report Critic flag rate and ID-anchored
-KC-Jaccard. Independent generation (IG) omits $P(\mathrm{correct})$ from
-the Diagnostician prompt while the Critic still sees the true score, so
-the flag-rate gap is largely definitional and is not a content finding.
-On QKC-T, grounded/IG flags are $0.018$/$0.766$ with
-mean JC $0.161$/$0.152$; the JC gap is $\approx{+}0.010$
-(Table~\ref{tab:tier2}, Table~\ref{tab:kc-jaccard-ig}). Blinded Likert
-ratings on a seed~42 subsample of $n{=}100$ grounded tracer explanations
-(3 independent raters) give faithfulness $4.55{\pm}0.63$ and usefulness
-$4.01{\pm}0.74$ (ordinal Krippendorff $\alpha{=}0.52$/$0.56$;
-mean pairwise Spearman $\rho{=}0.43$/$0.34$;
-within$\pm$1 $95.0\%$/$94.7\%$; Table~\ref{tab:human-eval}). An earlier
-dual-rater $n{=}40$ pack on the v2 graph-only checkpoint is archived and
-not the primary human-eval row.
-\input{tables/table_tier2}
-\input{tables/table_kc_jaccard_ig}
-\input{tables/table_human_eval}
-
-\subsection{Paired diagnostic knobs}
-Table~\ref{tab:paired-ablation} pairs remaining diagnostic knobs with the
-pilot's faithfulness knobs. Removing the Critic sets the flag rate to $0$ by
-construction while leaving ID-anchored KC-Jaccard unchanged. Dropping $L_{\mathrm{aux}}$
-(\texttt{graph\_sensitivity\_weight}${}=0$) on the graph-only fold~0 track
-still yields clean AUC $0.754$ and $\Delta$AUC$=0.039$ (pass); that track
-is the appendix diagnostic, not Table~\ref{tab:auc-xes3g5m}.
-\input{tables/table_paired_ablation}
+A Critic-gated explanation pilot over frozen scores, including flag
+rates, ID-anchored KC-Jaccard, and a three-rater Likert pack, is in the
+Supplementary Material. It is not a contribution and is not used to
+credit any predictive message.
 
 \subsection{Ground-truth structural overlap (Junyi)}
 \label{sec:junyi-gt}
@@ -872,7 +897,7 @@ hyperedges (Hint-preferring selection; concept co-occurrence projection)
 raises AUC to 0.722 ($\Delta{+}0.002$) --- a small positive shift under the
 same local budget, not a matched GKT comparison. Table~\ref{tab:foundational-assist}
 summarizes the corpus and those AUCs. An IPW identification check of hint
-use, with weak positivity, is in \ref{app:ate}; it is not a
+use, with weak positivity, is in the Supplementary Material; it is not a
 contribution.
 \input{tables/table_foundational_assist}
 
@@ -886,7 +911,9 @@ Headline AUCs (Table~\ref{tab:auc-xes3g5m}) are clean $L{=}400$,
 test-only. QKC-T and Zero$+\Delta t$ are both five-seed test-only
 ($0.8295{\pm}0.0001$); three-fold QKC-T stability is in
 Table~\ref{tab:auc-p0-dt-folds}.
-Training-budget-matched GIKT/AKT remain fold~0. Other baselines come from reused
+Training-envelope-matched GIKT remains fold~0. AKT, \textit{simpleKT},
+DKT, and DGEKT inherit pyKT/P0 defaults at $L{=}400$ and are not
+envelope-matched. Other baselines come from reused
 P0 tables on the older budget. The GIKT edge is small (${+}0.0036$ from
 Zero$+\Delta t$) and is a matched \emph{training envelope}, not a matched
 tuning search (\ref{app:hparams}). Learner-level
@@ -908,8 +935,10 @@ bipartite membership matrix, not a new multi-way graph.
 
 \paragraph{Deployment availability of the query-side gap.}
 Attempt-onset scoring (this paper's protocol) produces $P(y_{t+1}{=}1)$
-when the learner opens item $t{+}1$, so the query-side wait has already
-elapsed. History-only / recommend-before-return uses only LSTM-side gaps
+when the learner opens item $t{+}1$, so the query-side start-to-start wait
+has already elapsed. That wait still folds in time spent on the previous
+question plus idle, because XES3G5M has no end timestamp
+\cite{liu2023xes3g5m}. History-only / recommend-before-return uses only LSTM-side gaps
 already in the log; that arm is the history-only row (five-seed mean
 $\Delta\mathrm{val}$, $2/5$ seeds pass; not credited;
 Table~\ref{tab:a7-query-dt}). Serving a next item before the
@@ -928,10 +957,13 @@ the pre-specified ablation, and what that means for a system builder.
 
 \paragraph{Question--KC incidence.}
 Does not survive as credited structural knowledge under the
-capacity-matched twin ($0/5$ seeds pass; Table~\ref{tab:qkc-capacity}). The
-QKC-T evaluation arm still includes the GIKT-class question pathway for
-architecture parity, but the train-only incidence message itself is not
-what the gate attributes.
+capacity-matched twin of Eq.~\eqref{eq:qkc} ($0/5$ seeds pass;
+Table~\ref{tab:qkc-capacity}). That null is about the shared-sum fusion
+on this backbone, not a claim that question--KC relations are
+universally useless under a richer gate, untied maps, or another
+encoder. The QKC-T evaluation arm still includes the GIKT-class
+question pathway for architecture parity, but the train-only incidence
+message itself is not what the gate attributes.
 
 \paragraph{Linear $\log(1{+}\Delta t)$.}
 Survives on this backbone when both LSTM-side and query-side gaps are
@@ -959,8 +991,8 @@ are $0/5$ (Table~\ref{tab:negative-knowledge}).
 Session+Hint on FoundationalASSIST ($0.720\rightarrow 0.722$) is a small
 local shift, not credited as multi-way graph novelty.
 
-The Critic pilot in Section~\ref{sec:tier2} is exploratory and is not
-part of this attribution map.
+The Critic pilot is exploratory and is not
+part of this attribution map (Supplementary Material).
 
 \subsection{Limitations}
 \label{sec:limitations}
@@ -971,7 +1003,11 @@ part of this attribution map.
   hint-item hypergraph arm does not meet the $+0.002$ gate (L in
   Table~\ref{tab:negative-knowledge}) and is not claimed as hypergraph
   novelty.
-  \item \ref{app:ate} reports an IPW hint check with weak
+  \item ``Does not meet the gate'' means the form is not credited in
+  that configuration. In particular, the Q$\leftarrow$KC incidence
+  null is for the shared $W$ fusion in Eq.~\eqref{eq:qkc}; richer
+  fusion, gating, or untied maps were not tested and are not ruled out.
+  \item The Supplementary Material reports an IPW hint check with weak
   positivity; it is not a contribution and must not be read as a
   recommendation against hints.
   \item Teacher grouping (M4) and per-concept exponential forgetting (P4)
@@ -1000,31 +1036,22 @@ part of this attribution map.
   \texttt{a3\_chunk\_boundary\_safety.json}): local index $0$ is never a
   scored target. We still do not fuse KC scores into a question-level
   all-in-one $p_a$. Native DH$^2$ $n{=}1{,}093{,}755$ versus pyKT
-  $n{=}1{,}093{,}720$ is not an event-paired set: the occurrence join
-  ($1{,}093{,}718$) is not a stable ID ($8$ label clashes, kept;
-  $36{+}2$ unmatched; one hashed KC closes $755$ vs $754$).
+  $n{=}1{,}093{,}720$ is not an event-paired Table~\ref{tab:auc-xes3g5m}
+  cell. The pre-chunk key agrees on $1{,}093{,}718$ rows with zero label
+  clash; the occurrence join of the same size has $8$ collisions (kept)
+  plus $36{+}2$ unmatched, and one hashed KC closes $755$ vs $754$.
   Headline gaps versus GIKT/AKT/\textit{simpleKT} stay contextual.
   \item We do not evaluate a planned-gap proxy for query-side $\Delta t$
   (the wait until a recommended item is actually opened). Deployment
   that scores before the learner returns must omit query-side $\Delta t$
   (Section~\ref{sec:threats}).
   \item The hyperedge leakage audit's pairwise-projection approximation
-  (Section~\ref{sec:leakage-ext}) weights all projected pairs equally;
-  the full-log control moves group-membership leak to $1.0$ but not
-  sampled $|\rho|$. A hyperedge-native statistic is future work.
-  \item Exploratory Critic pilot: one fold, one local 7B LLM. Blinded
-  Likert on QKC-T ($n{=}100$, 3 raters) is reported in
-  Table~\ref{tab:human-eval}; ordinal Krippendorff $\alpha$ is $0.52$
-  (faithfulness) / $0.56$ (usefulness). Mean pairwise Spearman is moderate
-  ($\rho{\approx}0.43$/$0.34$) while within$\pm$1 agreement is high
-  (${\approx}95\%$), consistent with compressed high scores. An earlier
-  dual-rater $n{=}40$ pack on the graph-only diagnostic checkpoint is archived
-  only. The grounded--IG flag gap is largely definitional because IG
-  withholds $P(\mathrm{correct})$ from the Diagnostician while the Critic
-  scores against that number. ID-anchored KC-Jaccard is not synonym-aware
-  (XES3G5M lacks an in-repo KC name vocabulary); the JC gap is
-  $\approx{+}0.010$. An LLM-scale sensitivity sweep remains optional
-  future work.
+  (Section~\ref{sec:leakage-ext}) weights all projected pairs equally, so
+  sampled $|\rho|$ is degenerate ($\sigma_w{=}0$), not a true near-zero.
+  The full-log control moves group-membership leak to $1.0$ but not TBMR
+  ($0.7341{\to}0.7357$). A hyperedge-native statistic is future work.
+  \item An exploratory Critic pilot (one fold, one local 7B LLM) is in
+  the Supplementary Material and is not a contribution.
   \item Reproduction environment: Windows workstation, single RTX~3090;
   unit tests pass in the released codebase.
 \end{itemize}
@@ -1044,8 +1071,8 @@ QKC-T is the observed-incidence evaluation arm;
 Zero$+\Delta t$ is the credited-minimal control. On XES3G5M
 (repeat-target-masked KC-expanded, $L{=}400$, test-only), both arms
 reach $0.8295{\pm}0.0001$ over five seeds. Table~\ref{tab:auc-xes3g5m}
-is a contextual benchmark: training-budget-matched GIKT is
-$0.8258{\pm}0.0001$. Three learner folds of QKC-T mean
+is a contextual benchmark: training-envelope-matched GIKT is
+$0.8258{\pm}0.0001$, not a tuning-matched superiority claim. Three learner folds of QKC-T mean
 $0.8295{\pm}0.0004$. History-only $\Delta t$ is $2/5$ seeds pass and is
 not credited. Future work: a question-level all-in-one evaluator;
 five-seed repeats of K/L/M1/M5; and hyperedge-native
@@ -1078,17 +1105,18 @@ institutions do not require research-ethics board review for this form
 of expert rating of model output.
 
 \section*{Data availability}
-Code and table-to-script artefacts matching this manuscript will be
-provided to reviewers on request and made public at submission
-(intended public URL \url{https://github.com/edu-risk-lab/DH2A-KT};
-that address is not yet a live repository).
+Code and table-to-script artefacts matching this manuscript are at
+\url{https://github.com/edu-risk-lab/DH2A-KT}
+(tag \texttt{kbs-submit-2026-09-09}).
 A Zenodo snapshot DOI will be minted at submission.
 A table-to-script map is in \texttt{docs/paper-artifacts.md}.
+Exploratory Critic and IPW analyses are in the Supplementary Material
+(\texttt{paper/supplement.tex}), not in the main claim map.
 P0's audited edges and reused baselines are vendored under
 \cite{daominh2026p0}'s release terms (pinned commit
 \texttt{5e3d6a0},
 Section~\ref{sec:baselines-reuse}); the companion PDF can be supplied as
-journal supplementary material while that manuscript is under review.
+journal supplementary material while that manuscript is unpublished.
 FoundationalASSIST~\cite{foundationalassist2026} must be obtained from
 Hugging Face under its Responsible Use Guidelines and cannot be
 redistributed by the authors.
@@ -1120,6 +1148,9 @@ confirms dependence on some graph input. Degree-preserving rewiring
 passes on folds~0--2 ($\Delta$AUC $0.0318$/$0.0341$/$0.0351$; shared clean
 $0.7485$/$0.7511$/$0.7521$). Relation-label permutation is near-null on every fold
 (Table~\ref{tab:manipulation}). We do not deploy this encoder.
+Dropping $L_{\mathrm{aux}}$
+(\texttt{graph\_sensitivity\_weight}${}=0$) on the graph-only fold~0
+track still yields clean AUC $0.754$ and $\Delta$AUC$=0.039$ (pass).
 \input{tables/table_auc_xes3g5m_v2}
 \input{tables/table_manipulation}
 \input{figures/fig_manipulation_sweep}
@@ -1144,29 +1175,6 @@ and is not a five-seed CI.
 \input{tables/table_bootstrap_qkct}
 \FloatBarrier
 
-\section{Observational hint identification check}
-\label{app:ate}
-\label{sec:causal}
-On FoundationalASSIST we report a standard inverse-propensity (IPW)
-average treatment effect of $\texttt{hint\_used}_t$ on
-$\texttt{correct}_{t+1}$, with logistic propensity on pre-$t$ summaries
-and clipping. Unconfoundedness is assumed, not proven. Same-step
-\texttt{discrete\_score} is not the outcome (it is mechanically tied to
-hint requests). No estimate is reported on XES3G5M (no hint logs). This
-check is not a contribution.
-
-Using train transitions, the IPW estimate of hint use on \emph{next-step}
-correctness is $-0.207$ (naive mean difference $-0.255$; trimmed IPW
-$-0.211$; bootstrap 95\% CI $[-0.230,\,-0.187]$ on 50k-row resamples;
-$n_{\mathrm{treated}}{=}36{,}151$). Propensity scores hit the clip floor
-($[0.05,\,0.219]$), indicating weak overlap. The negative sign reflects
-that weaker learners request more hints; it must \emph{not} be read as
-the effect of providing hints, and it is not a recommendation against
-hints. We did not compute Rosenbaum bounds or an E-value.
-\input{tables/table_hint_ate}
-\FloatBarrier
-\clearpage
-
 \section*{Declaration of generative AI and AI-assisted technologies
 in the manuscript preparation process}
 During the preparation of this work the authors used Cursor (Composer)
@@ -1176,7 +1184,7 @@ and edited the content as needed and take full responsibility for the
 content of the published article. The Tier~2 Diagnostician/Critic/Tutor
 agents (Qwen2.5-7B via Ollama) are experimental components of the
 reported system, not manuscript-writing tools, and are described in
-Section~\ref{sec:tier2}.
+the Supplementary Material.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}

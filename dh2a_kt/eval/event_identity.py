@@ -82,6 +82,52 @@ def classify_unmatched_occurrence_keys(keys: list[str]) -> dict[str, Any]:
     }
 
 
+def classify_occurrence_mismatch_keys(keys: list[str]) -> dict[str, Any]:
+    """Occurrence keys that joined but disagree on the label."""
+    parsed = [parse_occurrence_key(k) for k in keys]
+    pairs = {(u, k) for u, k, _ in parsed}
+    users = {u for u, _, _ in parsed}
+    return {
+        "n_keys": len(parsed),
+        "n_users": len(users),
+        "n_user_kc_pairs": len(pairs),
+        "pairs": [
+            {
+                "user_id": u,
+                "kc_dense": k,
+                "occurrences": sorted(o for uu, kk, o in parsed if uu == u and kk == k),
+            }
+            for u, k in sorted(pairs)
+        ],
+    }
+
+
+def account_stable_counts(
+    *,
+    n_dh2_stable: int,
+    n_pykt_stable: int,
+    n_only_dh2_stable: int,
+    n_only_pykt_stable: int,
+    n_common_stable: int,
+    n_label_mismatch: int,
+) -> dict[str, Any]:
+    ok = (
+        int(n_dh2_stable) - int(n_only_dh2_stable) == int(n_common_stable)
+        and int(n_pykt_stable) - int(n_only_pykt_stable) == int(n_common_stable)
+        and int(n_label_mismatch) == 0
+    )
+    return {
+        "n_dh2_stable": int(n_dh2_stable),
+        "n_pykt_stable": int(n_pykt_stable),
+        "n_only_dh2_stable": int(n_only_dh2_stable),
+        "n_only_pykt_stable": int(n_only_pykt_stable),
+        "n_common_stable": int(n_common_stable),
+        "n_label_mismatch_on_stable_join": int(n_label_mismatch),
+        "accounting_ok": bool(ok),
+        "same_stable_id_same_label": int(n_label_mismatch) == 0,
+    }
+
+
 def drop_unmapped_question_kc(
     df: pd.DataFrame,
     q_map: dict[int, int],

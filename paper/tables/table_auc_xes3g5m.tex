@@ -4,7 +4,8 @@
 DH$^2$ rows use native scoring ($n{=}1{,}093{,}755$).
 pyKT baselines use the library intersection ($n{=}1{,}093{,}720$).
 Gaps versus those rows are \emph{contextual}, not event-paired
-(Section~\ref{sec:clean-protocol}; the occurrence join is not a stable ID).
+(Section~\ref{sec:clean-protocol}; the occurrence join is not a stable ID.
+The pre-chunk key agrees on $1{,}093{,}718$ rows with zero label clash).
 Values are mean $\pm$ sample SD over five training seeds
 (42, 17, 1234, 0, 2024) of the \emph{same} test-only metric.
 QKC-T seed~42 is $0.829593$ and matches Table~\ref{tab:calibration-xes3g5m}.
@@ -18,6 +19,10 @@ Unrounded five-seed means agree to five decimals
 GIKT is matched to the DH$^2$ \emph{training envelope} (batch 16, cap 30
 epochs, patience 5), not to a hyperparameter search
 (\ref{app:hparams}).
+AKT/\textit{simpleKT}/DKT/DGEKT inherit pyKT/P0 defaults with $L{=}400$;
+they are contextual, not original-paper verified.
+DGEKT keeps P0's graph-model recipe (batch 16, 10 epochs); P0 already
+placed it below DKT and treated it as graph-inert.
 Five-seed mean gaps from unrounded test-only means
 (contextual, distinct $n$, not a shared event-ID set):
 QKC-T (or Zero$+\Delta t$) minus GIKT ${+}0.0036$, minus AKT ${+}0.0072$,
@@ -37,11 +42,11 @@ Model & Test-only AUC & $n$ scored & Seeds \\
 DH$^2$-KT QKC-T (eval.\ arm) & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 DH$^2$-KT Zero$+\Delta t$ (credited) & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 DH$^2$-KT Q$\leftarrow$KC & $0.8268{\pm}0.0002$ & 1{,}093{,}755 & 5 \\
-GIKT (training-budget-matched) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
-AKT ($L{=}400$) & $0.8223{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
-\textit{simpleKT} ($L{=}400$) & $0.8214{\pm}0.0007$ & 1{,}093{,}720 & 5 \\
-DKT ($L{=}400$) & $0.8009{\pm}0.0002$ & 1{,}093{,}720 & 5 \\
-DGEKT ($L{=}400$) & $0.7850{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
+GIKT (training-envelope-matched) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
+AKT ($L{=}400$; inherited) & $0.8223{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
+\textit{simpleKT} ($L{=}400$; inherited) & $0.8214{\pm}0.0007$ & 1{,}093{,}720 & 5 \\
+DKT ($L{=}400$; inherited) & $0.8009{\pm}0.0002$ & 1{,}093{,}720 & 5 \\
+DGEKT ($L{=}400$; inherited, contextual) & $0.7850{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
 \bottomrule
 \end{tabular}
 \end{table}

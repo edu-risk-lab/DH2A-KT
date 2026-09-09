@@ -4,9 +4,12 @@
 \textbf{Train-only} uses P0's audited $E_{\mathrm{pre}}^f$ and a
 train-only concept$\rightarrow$interaction map. \textbf{Full-log} is a
 deliberate positive control: $E_{\mathrm{pre}}$ pooled before the learner
-split with a full-log member map (positive control). Pairwise TBMR/$|\rho|$ use a
-random sample of $10^5$ projected pairs (seed 42) when the full projection
-exceeds $10^5$ pairs.}
+split with a full-log member map.
+TBMR uses a uniform random sample of $10^5$ projected pairs (seed~42)
+from $11{,}568{,}053$ (train-only) and $15{,}279{,}564$ (full-log) pairs.
+$|\rho|$ is \emph{not} a measured zero: every projected pair is assigned
+weight $1$, so Pearson is undefined ($\sigma_w{=}0$; P0 would print
+$0.0$). Cross-modal and intervention-timing classes are not instantiated.}
 \label{tab:leakage-measured}
 \centering
 \footnotesize
@@ -17,8 +20,8 @@ Metric & Train-only & Full-log (pos.\ control) \\
 Hyperedges & 446{,}305 & 588{,}369 \\
 $\mathrm{ECR}^{\mathrm{flag}}$ & 0.0 & 0.0 \\
 Group-membership leak rate & 0.0 & \textbf{1.0} \\
-TBMR (sampled) & 0.734 & 0.736 \\
-$|\rho|$ (sampled) & 0.0 & 0.0 \\
+TBMR (sampled $n{=}10^5$) & 0.7341 & 0.7357 \\
+$|\rho|$ (sampled) & degenerate ($\sigma_w{=}0$) & degenerate ($\sigma_w{=}0$) \\
 \bottomrule
 \end{tabularx}
 \end{table}

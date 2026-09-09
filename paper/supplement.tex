@@ -1,0 +1,73 @@
+\documentclass[review,12pt]{elsarticle}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\usepackage{xr}
+\externaldocument{main}
+
+\journal{Knowledge-Based Systems}
+
+\begin{document}
+\begin{frontmatter}
+\title{Supplementary Material for DH$^2$A-KT: Leakage-Audited
+Knowledge Attribution for Knowledge Tracing}
+\author{Tuan Dao Minh and co-authors}
+\end{frontmatter}
+
+These notes are exploratory. They are not research questions and not
+contributions of the main article. Compile this file after
+\texttt{main.tex} so cross-references resolve.
+
+\section{Exploratory Critic-gated explanations}
+\label{sec:tier2-supp}
+Three agents read frozen DH$^2$-KT scores: a Diagnostician writes a
+rationale, a Critic flags output that contradicts the frozen
+$P(\mathrm{correct})$, and a Tutor writes session hyperedges that the
+frozen tracer does not consume. We ran $n{=}500$ prompts (XES3G5M
+fold~0, seed 42, Qwen2.5-7B via Ollama) on the graph-only v2 checkpoint
+and again on QKC-T. Independent generation (IG) omits
+$P(\mathrm{correct})$ from the Diagnostician prompt while the Critic
+still sees the true score, so the flag-rate gap is largely definitional
+and is not a content finding.
+On QKC-T, grounded/IG flags are $0.018$/$0.766$ with mean JC
+$0.161$/$0.152$; the JC gap is $\approx{+}0.010$.
+Blinded Likert ratings on a seed~42 subsample of $n{=}100$ grounded
+tracer explanations (3 independent raters) give faithfulness
+$4.55{\pm}0.63$ and usefulness $4.01{\pm}0.74$ (ordinal Krippendorff
+$\alpha{=}0.52$/$0.56$; mean pairwise Spearman $\rho{=}0.43$/$0.34$;
+within$\pm$1 $95.0\%$/$94.7\%$). An earlier dual-rater $n{=}40$ pack on
+the v2 graph-only checkpoint is archived and is not the primary
+human-eval row.
+Removing the Critic sets the flag rate to $0$ by construction while
+leaving ID-anchored KC-Jaccard unchanged.
+\input{tables/table_tier2}
+\input{tables/table_kc_jaccard_ig}
+\input{tables/table_human_eval}
+\input{tables/table_paired_ablation}
+
+\section{Observational hint identification check}
+\label{sec:ate-supp}
+On FoundationalASSIST we report a standard inverse-propensity (IPW)
+average treatment effect of $\texttt{hint\_used}_t$ on
+$\texttt{correct}_{t+1}$, with logistic propensity on pre-$t$ summaries
+and clipping. Unconfoundedness is assumed, not proven. Same-step
+\texttt{discrete\_score} is not the outcome (it is mechanically tied to
+hint requests). No estimate is reported on XES3G5M (no hint logs).
+
+Using train transitions, the IPW estimate of hint use on
+\emph{next-step} correctness is $-0.207$ (naive mean difference
+$-0.255$; trimmed IPW $-0.211$; bootstrap 95\% CI
+$[-0.230,\,-0.187]$ on 50k-row resamples;
+$n_{\mathrm{treated}}{=}36{,}151$). Propensity scores hit the clip floor
+($[0.05,\,0.219]$), indicating weak overlap. The negative sign is
+\emph{consistent with} selection and confounding (weaker learners
+request more hints); it is not identified as the effect of providing
+hints, and it is not a recommendation against hints. We did not compute
+Rosenbaum bounds or an E-value.
+\input{tables/table_hint_ate}
+
+\end{document}

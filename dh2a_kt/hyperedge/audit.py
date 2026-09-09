@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 
 from dh2a_kt.hyperedge.construction import Hyperedge
@@ -26,6 +27,39 @@ logger = logging.getLogger(__name__)
 # when the projection exceeds this row cap — ECR_flag and group-membership
 # remain the M1 acceptance checks (see docs/execution-plan.md M1 gate).
 _PAIRWISE_DIAGNOSTIC_MAX_ROWS = 100_000
+DEGENERATE_CONSTANT_WEIGHT = "degenerate_constant_weight"
+
+
+def pairwise_rho_report(weights: np.ndarray) -> dict[str, object]:
+    """Pearson |rho| needs variance in edge weight.
+
+    The hyperedge projection assigns every pair ``weight=1``. P0's
+    ``compute_rho_edge_outcome`` then hits ``std(w)==0`` and returns 0.0.
+    That 0.0 is undefined Pearson, not a measured near-zero correlation.
+    """
+    w = np.asarray(weights, dtype=np.float64)
+    n = int(w.size)
+    if n < 2:
+        return {
+            "rho": None,
+            "rho_status": "too_few_pairs",
+            "weight_std": None,
+            "n_pairs": n,
+        }
+    w_std = float(np.std(w))
+    if w_std == 0.0:
+        return {
+            "rho": None,
+            "rho_status": DEGENERATE_CONSTANT_WEIGHT,
+            "weight_std": 0.0,
+            "n_pairs": n,
+        }
+    return {
+        "rho": None,
+        "rho_status": "defined",
+        "weight_std": w_std,
+        "n_pairs": n,
+    }
 
 
 @dataclass
@@ -191,8 +225,16 @@ def audit_hyperedges(
         tbmr = compute_tbvr(train_df, pairwise[["src_kc", "dst_kc"]])
         if test_df is not None:
             pairwise_weighted = pairwise.assign(weight=1.0)
-            empty_sim = pd.DataFrame(columns=["src_kc", "dst_kc", "weight"])
-            rho = compute_rho_edge_outcome(pairwise_weighted, empty_sim, test_df)
+            rho_meta = pairwise_rho_report(pairwise_weighted["weight"].to_numpy())
+            if rho_meta["rho_status"] == DEGENERATE_CONSTANT_WEIGHT:
+                rho = None
+                notes.append(
+                    "sampled |rho| is degenerate: all projected pairs have weight=1 "
+                    f"(n={rho_meta['n_pairs']}, sigma_w=0); P0 would print 0.0"
+                )
+            else:
+                empty_sim = pd.DataFrame(columns=["src_kc", "dst_kc", "weight"])
+                rho = compute_rho_edge_outcome(pairwise_weighted, empty_sim, test_df)
 
     group_leak = 0.0
     if held_out_interaction_ids is not None and member_to_interaction_id is not None:

@@ -44,7 +44,14 @@ def attach_saw_answer(canonical: pd.DataFrame, extended: pd.DataFrame) -> pd.Dat
 
 
 def log_time_gaps(timestamps: np.ndarray, user_ids: np.ndarray) -> np.ndarray:
-    """log1p seconds since the previous row of the same user; 0 at user starts."""
+    """log1p start-to-start seconds since the previous row of the same user.
+
+    XES3G5M parquet ``timestamp`` is unix seconds (raw millisecond start
+    time // 1000). The first row of a learner is 0. Consecutive KC-rows of
+    the same attempt share a start time, so their gap is 0. The gap between
+    distinct attempts includes time on the previous question plus idle; it
+    is not a submit-to-start wait and not the duration of the scored item.
+    """
     n = len(timestamps)
     dt = np.zeros(n, dtype=np.float32)
     if n < 2:

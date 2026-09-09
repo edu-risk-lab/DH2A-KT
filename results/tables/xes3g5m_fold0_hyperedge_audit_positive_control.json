@@ -7,18 +7,25 @@
   "n_edges_full_log": 1260,
   "sample_pairs": 100000,
   "seed": 42,
+  "rho_status": "degenerate_constant_weight",
+  "rho_status_note": "Projected pairs are assigned weight=1. P0 compute_rho_edge_outcome returns 0.0 when std(weight)==0; that is undefined Pearson, not a measured near-zero. Reclassified 09 Sep 2026 without rerunning the 1e5-pair sample.",
   "train_only": {
     "hyperedge_kind": "concept_prerequisite",
     "n_hyperedges": 446305,
     "ecr_flag": 0.0,
     "tbmr": 0.7340652696606873,
-    "rho": 0.0,
+    "rho": null,
+    "rho_status": "degenerate_constant_weight",
+    "weight_std": 0.0,
+    "n_pairs_sampled": 100000,
+    "n_pairs_population": 11568053,
     "group_membership_leak_rate": 0.0,
     "cross_modal_leak_rate": null,
     "intervention_timing_leak_rate": null,
     "notes": [
       "Pairwise projection not materialised (11568053 pairs > cap 100000); TBMR/|rho| skipped",
-      "TBMR/|rho| on random sample of 100,000 / 11,568,053 projected pairs (seed=42)"
+      "TBMR on random sample of 100,000 / 11,568,053 projected pairs (seed=42)",
+      "|rho| degenerate: all sampled pairs have weight=1 (sigma_w=0); P0 would print 0.0"
     ],
     "arm": "train_only"
   },
@@ -27,13 +34,18 @@
     "n_hyperedges": 588369,
     "ecr_flag": 0.0,
     "tbmr": 0.7356558785638102,
-    "rho": 0.0,
+    "rho": null,
+    "rho_status": "degenerate_constant_weight",
+    "weight_std": 0.0,
+    "n_pairs_sampled": 100000,
+    "n_pairs_population": 15279564,
     "group_membership_leak_rate": 1.0,
     "cross_modal_leak_rate": null,
     "intervention_timing_leak_rate": null,
     "notes": [
       "Pairwise projection not materialised (15279564 pairs > cap 100000); TBMR/|rho| skipped",
-      "TBMR/|rho| on random sample of 100,000 / 15,279,564 projected pairs (seed=42)"
+      "TBMR on random sample of 100,000 / 15,279,564 projected pairs (seed=42)",
+      "|rho| degenerate: all sampled pairs have weight=1 (sigma_w=0); P0 would print 0.0"
     ],
     "arm": "full_log_positive_control"
   }
