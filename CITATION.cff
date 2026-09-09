@@ -1,0 +1,80 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite this repository (and the KBS
+  manuscript once a DOI is assigned).
+type: software
+title: "DH2A-KT: Leakage-Audited Knowledge Attribution for Knowledge Tracing"
+abstract: >-
+  Companion code for DH2A-KT. The pipeline constructs train-only auxiliary
+  knowledge, audits hyperedge leakage, and credits only messages that
+  survive a matched-twin operating rule. It is not a new hypergraph
+  predictor. Pairwise train-only graph construction is reused from the
+  companion P0 protocol (edu-risk-lab/leakage-controlled-kt-audit, pin
+  5e3d6a0).
+authors:
+  - family-names: Dao Minh
+    given-names: Tuan
+    orcid: https://orcid.org/0009-0009-1641-6813
+    affiliation: Hung Yen University of Technology and Education
+  - family-names: Nguyen
+    given-names: Khanh-Trinh
+    orcid: https://orcid.org/0009-0004-3739-0484
+    affiliation: Hung Yen University of Technology and Education
+  - family-names: Nguyen Tien
+    given-names: Duong
+    orcid: https://orcid.org/0009-0007-1104-7129
+    affiliation: Hung Yen University of Technology and Education
+  - family-names: Ngo
+    given-names: Quoc Khanh
+    orcid: https://orcid.org/0009-0001-9250-6433
+    affiliation: Vietnam National University
+  - family-names: Nguyen
+    given-names: Van-Hau
+    orcid: https://orcid.org/0000-0002-3256-5626
+    affiliation: Hung Yen University of Technology and Education
+  - family-names: Le
+    given-names: Hoang Son
+    orcid: https://orcid.org/0000-0001-6356-0046
+    affiliation: Vietnam National University
+repository-code: https://github.com/edu-risk-lab/DH2A-KT
+url: https://github.com/edu-risk-lab/DH2A-KT
+license: MIT
+version: 0.1.0
+date-released: "2026-09-09"
+keywords:
+  - knowledge tracing
+  - knowledge attribution
+  - hypergraph
+  - data leakage
+  - reproducibility
+preferred-citation:
+  type: article
+  title: >-
+    DH2A-KT: Leakage-Audited Knowledge Attribution for Knowledge Tracing
+  authors:
+    - family-names: Dao Minh
+      given-names: Tuan
+      orcid: https://orcid.org/0009-0009-1641-6813
+    - family-names: Nguyen
+      given-names: Khanh-Trinh
+      orcid: https://orcid.org/0009-0004-3739-0484
+    - family-names: Nguyen Tien
+      given-names: Duong
+      orcid: https://orcid.org/0009-0007-1104-7129
+    - family-names: Ngo
+      given-names: Quoc Khanh
+      orcid: https://orcid.org/0009-0001-9250-6433
+    - family-names: Nguyen
+      given-names: Van-Hau
+      orcid: https://orcid.org/0000-0002-3256-5626
+    - family-names: Le
+      given-names: Hoang Son
+      orcid: https://orcid.org/0000-0001-6356-0046
+  year: 2026
+  journal: Knowledge-Based Systems
+  publisher:
+    name: Elsevier
+  notes: >-
+    Manuscript prepared for Knowledge-Based Systems. Update volume, pages,
+    and DOI upon publication. Canonical source: paper/main.tex. Snapshot
+    tag: kbs-submit-2026-09-09.

@@ -30,6 +30,26 @@ paper/*.fls
 paper/*.synctex.gz
 !paper/figures/*.pdf
 !paper/figures/*.png
+# Lab diaries, unpublished idea plans, leftover venue letters (keep on disk)
+NhatKy.md
+DanhGia_KetQuaThucNghiem*.md
+PROMPT_cursor*.md
+docs/Checklist_*
+docs/GhiChu_*
+docs/HuongDan_*
+docs/KeHoach_*
+docs/M9-results-summary.md
+docs/draft-paper-results.md
+docs/dynamic-*
+docs/execution-plan.md
+docs/gpu-remaining-tasks.md
+docs/greykt-*
+docs/idea-D-plan.md
+docs/kbs-author-gate.md
+docs/kbs-gpu-runbook.md
+docs/kbs-upgrade-plan.md
+docs/paper-revision-plan-tlt.md
+paper/cover_letter_tlt_short.md
 
 # Python
 __pycache__/
@@ -45,10 +65,8 @@ external/p0_leakage_audit/data/processed/*
 # Only the repo-root dataset folder (not package modules like dh2a_kt/data/)
 /data/
 
-# Stray artefacts from failed `git submodule add` / filesystem-probe attempts
-# in the authoring environment (mounted filesystem does not support unlink)
-# â€” harmless, kept instead of deleted because this environment cannot remove
-# files either. Safe to delete by hand on an unrestricted machine.
+# Stray artefacts from failed `git submodule add` / filesystem-probe attempts.
+# Harmless; safe to delete by hand.
 external/_failed_submodule_gitlink.txt
 external/_writetest2.txt
 external/p0_leakage_audit/.p0_vendored_commit.txt
@@ -61,9 +79,8 @@ logs/*
 *.log
 .pytest_cache/
 
-# Model checkpoints and generated result artefacts (large / non-reproducible
-# binaries â€” regenerate via scripts/03_train_tier1.py etc. on the GPU server,
-# do not commit weights to GitHub). Keep directory skeletons via .gitkeep.
+# Model checkpoints and generated result artefacts (large / regenerable).
+# Do not commit weights. Keep directory skeletons via .gitkeep.
 checkpoints/*
 !checkpoints/.gitkeep
 results/*
@@ -235,7 +252,6 @@ scripts/run_v4*.ps1
 !results/tables/v5q_priority.log
 !results/tables/v5q_ablation.log
 !results/tables/v5q_ablation_snapshot.log
-!NhatKy.md
 
 # pyKT work dirs and prediction dumps are large regenerable intermediates
 results/pykt_work_clean/

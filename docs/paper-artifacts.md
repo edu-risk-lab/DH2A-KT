@@ -46,7 +46,7 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 | Table KC-Jaccard / IG (supplement) | same | same JSON |
 | Table paired diagnostics (supplement) | same | same JSON |
 | Table human Likert n=100 (supplement) | pack in `results/tables/tier2_human_eval_tracer_n100/` | `paper/tables/table_human_eval.tex` |
-| P0 overlap / evaluator map (internal B5) | hand-maintained | `docs/p0_overlap_disclosure.md` |
+| P0 overlap / evaluator map | hand-maintained | `docs/p0_overlap_disclosure.md` |
 | Supplementary Material (Critic + IPW) | hand-maintained | `paper/supplement.tex` |
 | Table graph-only v2 AUC (app.) | `scripts/05_run_manipulation_check.py` | `paper/tables/table_auc_xes3g5m_v2.tex` |
 | Holm / paired credit tests | `scripts/33_b8_holm_credit_tests.py` | `results/tables/b8_holm_credit_tests.json` |

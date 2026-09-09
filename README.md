@@ -80,6 +80,11 @@ results/tables/   reported numbers (not checkpoints)
 external/p0_leakage_audit/   pinned P0 snapshot
 ```
 
+## Citation
+
+See [`CITATION.cff`](CITATION.cff). Preferred snapshot tag:
+`kbs-submit-2026-09-09` (create on `main` at submit).
+
 ## Licence
 
 MIT (`LICENSE`). Datasets remain under their providers' terms.

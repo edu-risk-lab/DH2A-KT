@@ -5,9 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dh2a-kt"
 version = "0.1.0"
-description = "Idea D: Dynamic Heterogeneous Hypergraph + Agentic Knowledge Tracing, built on the P0 leakage-controlled audit protocol"
+description = "Leakage-audited knowledge attribution for knowledge tracing (DH2A-KT)"
 requires-python = ">=3.10"
 readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Tuan Dao Minh" },
+  { name = "Khanh-Trinh Nguyen" },
+  { name = "Duong Nguyen Tien" },
+  { name = "Quoc Khanh Ngo" },
+  { name = "Van-Hau Nguyen" },
+  { name = "Le Hoang Son" },
+]
+urls = { Homepage = "https://github.com/edu-risk-lab/DH2A-KT" }
 
 [tool.setuptools]
 packages = ["dh2a_kt"]
