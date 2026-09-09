@@ -291,7 +291,11 @@ temp/_diag_pykt_smask/
 !results/tables/a6_reliability_zero_dt.json
 !results/tables/b6_id_join_summary.json
 !results/tables/b6_unmatched_dh2_rows.csv
+!results/tables/b6_unmatched_pykt_rows.csv
+!results/tables/b6_label_mismatch_rows.csv
+!results/tables/a4_event_identity.json
 !results/tables/a2_infoflow_trace.json
+!results/tables/a3_chunk_boundary_safety.json
 !results/tables/b9_same_ckpt_destruction.csv
 !results/tables/b9_same_ckpt_destruction.json
 !results/tables/gpu_hau_ver4_abc_2026-09-08.log

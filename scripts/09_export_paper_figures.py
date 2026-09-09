@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import csv
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -12,14 +13,26 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "paper" / "figures"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# Documented in docs/execution-plan.md §0.3 and M6 JSON.
-# Graph-inert (pairwise + exercise path): auc_drop ≈ 0.0003 (FAIL).
-# Graph-only v2 (chain + no exercise embed): auc_drop = 0.0380 (PASS).
+# Canonical fold-0 node-drop: results/tables/b9_same_ckpt_destruction.csv
+# (shared-clean evaluator). Do not hard-code a second ΔAUC.
+
+b9 = ROOT / "results" / "tables" / "b9_same_ckpt_destruction.csv"
+fold0_node_drop = None
+with b9.open(newline="", encoding="utf-8") as fh:
+    for row in csv.DictReader(fh):
+        if row["fold"] == "0" and row["operator"] == "node_drop":
+            fold0_node_drop = float(row["auc_drop_from_shared"])
+            break
+if fold0_node_drop is None:
+    raise SystemExit(f"missing fold-0 node_drop in {b9}")
+
+# Historical graph-inert path is not in B9; keep the archived 0.0003 and
+# label it historical so it cannot be read as the B9 evaluator.
 labels = [
-    "Pairwise +\nexercise path\n(graph-inert)",
-    "Chain +\ngraph-only\n(v2)",
+    "Pairwise +\nexercise path\n(historical inert)",
+    "Chain +\ngraph-only\n(B9 shared-clean)",
 ]
-auc_drops = [0.0003, 0.0380]
+auc_drops = [0.0003, fold0_node_drop]
 pass_flags = [False, True]
 
 mpl.rcParams.update({
@@ -36,7 +49,7 @@ bars = ax.bar(labels, auc_drops, color=colors, width=0.55, edgecolor="black", li
 ax.axhline(0.003, color="#c1121f", linestyle="--", linewidth=1.0,
            label=r"Illustrative floor ($\approx$10$\times$ inert noise)")
 ax.set_ylabel(r"Manipulation $\Delta$AUC ($p{=}0.9$ node-drop)")
-ax.set_ylim(0, 0.045)
+ax.set_ylim(0, max(0.045, fold0_node_drop + 0.012))
 ax.set_title("XES3G5M fold 0 — graph reliance gate")
 
 for bar, drop, ok in zip(bars, auc_drops, pass_flags):

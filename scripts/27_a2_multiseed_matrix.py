@@ -196,6 +196,8 @@ def run_dh2(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> int
     if out_csv.exists():
         res = pd.read_csv(out_csv)
         row = res[res["fold"] == 0].iloc[-1] if (res["fold"] == 0).any() else res.iloc[-1]
+        # dh2_kt_auc is combined val+test (n≈1.64e6). Do not label it
+        # test-only; script 34 renames the same field combined_eval_auc.
         auc = float(row.get("dh2_kt_auc", row.get("auc", float("nan"))))
         val_auc = float(row["val_auc"]) if pd.notna(row.get("val_auc")) else None
     question_graph = arm in ("p0_dt_on", "hg_qkc_on")
@@ -207,7 +209,7 @@ def run_dh2(arm: str, seed: int, device: str, dry_run: bool, force: bool) -> int
             "fold": 0,
             "auc": auc,
             "val_auc": val_auc,
-            "test_auc": auc,
+            "test_auc": auc,  # combined val+test; name kept for CSV compat
             "question_graph": question_graph,
             "minutes": round((time.time() - started) / 60.0, 1),
             "status": "ok",

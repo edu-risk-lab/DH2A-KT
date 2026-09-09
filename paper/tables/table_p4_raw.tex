@@ -1,0 +1,26 @@
+% P4 raw five-seed records: results/tables/p4_forget_5seed.csv
+% Twin = same-seed QKC-T Linear both (a7 dt_both val_auc).
+\begin{table}[t]
+\caption{Per-concept exponential forgetting (P4) versus Linear
+$\Delta t$ on the QKC-T backbone (XES3G5M fold~0, five paired seeds).
+Twin is same-seed \texttt{--time-gap-mode both} (QKC-T), not Zero$+\Delta t$.
+Mean $\Delta\mathrm{val}{=}{-}0.00252{\pm}0.00019$ ($0/5$ seeds pass).
+The printed five-seed mean twin $0.82862$ coincides at five decimals with
+Zero$+\Delta t$ seed~42 val in Table~\ref{tab:qkc-zero-time}; both values
+come from different files and are not a copied cell.}
+\label{tab:p4-raw}
+\centering
+\footnotesize
+\begin{tabular}{@{}rrrrl@{}}
+\toprule
+Seed & Twin val (QKC-T) & P4 val & $\Delta$val & Gate \\
+\midrule
+0 & 0.82860 & 0.82596 & $-0.00263$ & no \\
+17 & 0.82858 & 0.82587 & $-0.00270$ & no \\
+42 & 0.82878 & 0.82619 & $-0.00258$ & no \\
+1234 & 0.82841 & 0.82618 & $-0.00223$ & no \\
+2024 & 0.82875 & 0.82630 & $-0.00245$ & no \\
+mean & 0.82862 & 0.82610 & $-0.00252$ & $0/5$ \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,17 @@
+model,auc_mean,auc_sd,n_scored,n_seeds,metric,source
+QKC-T,0.829491516,0.000089,1093755,5,test-only native,a2_testonly_rescore.csv p0_dt_on
+Zero+Δt,0.829486371,0.000148,1093755,5,test-only native,qkc_capacity_matched_matrix.csv zero_time.test_only_auc
+Q←KC,0.826834035,0.000179,1093755,5,test-only native,a2_testonly_rescore.csv hg_qkc_on
+GIKT,0.825846029,0.000100,1093720,5,test-only pyKT,a2_multiseed_summary.csv gikt
+AKT,0.822250727,0.000119,1093720,5,test-only pyKT,a2_multiseed_summary.csv akt
+simpleKT,0.821414002,0.000658,1093720,5,test-only pyKT,a2_multiseed_summary.csv simplekt
+DKT,0.800890775,0.000184,1093720,5,test-only pyKT,xes3g5m_fold0_baselines_protocol.csv C_dkt_clean_L400
+DGEKT,0.784952576,0.000130,1093720,5,test-only pyKT,xes3g5m_fold0_baselines_protocol.csv C_dgekt_clean_L400
+QKC-T seed42,0.829592955,,1093755,1,test-only native,a2_testonly_rescore.csv p0_dt_on s42 (matches a6)
+QKC-T combined_archived,0.829619555,0.000100,1640242,5,combined val+test NOT table5,a2_multiseed_summary.csv p0_dt_on
+A7 lstm (4 seeds; 42 missing),0.828597881,0.000182,1093755,4,test-only native,a2_testonly_rescore.csv a7_dt_lstm
+A7 query (4 seeds; 42 missing),0.827871381,0.000150,1093755,4,test-only native,a2_testonly_rescore.csv a7_dt_query
+gap_QKCT_minus_GIKT,0.003646,,,—,unrounded test-only means,0.829491516-0.825846029
+gap_ZeroDt_minus_GIKT,0.003640,,,—,unrounded test-only means,0.829486371-0.825846029
+gap_QKCT_minus_AKT,0.007241,,,—,unrounded test-only means,0.829491516-0.822250727
+gap_QKCT_minus_simpleKT,0.008078,,,—,unrounded test-only means,0.829491516-0.821414002

@@ -1,33 +1,29 @@
-% A1 from results/tables/a1_timing_input_controls.csv
-% T-real val recovered from qkc_cm_zero_time_s*.csv (same checkpoints).
+% A1 val deltas from qkc_cm_zero_time_s*.csv (T-real) and
+% a1_timing_input_controls.csv (T-zero / T-misaligned). Gate on val.
 \begin{table}[t]
 \caption{Architecture-matched time-\emph{input} controls on the
-zero-incidence Linear-$\Delta t$ backbone (XES3G5M fold~0, clean
-$L{=}400$, five training seeds). All three arms keep the extra Linear
-maps. T-real reuses the five Zero$+\Delta t$ checkpoints (not retrained).
-T-zero trains with all gaps set to $0$; T-misaligned permutes non-start
-gaps within each learner. The operating rule is
-$\Delta\mathrm{val}\ge{+}0.002$ vs.\ T-real on every seed. Recovered
-T-real validation AUCs (Table~\ref{tab:qkc-zero-time}) give mean
-$\Delta\mathrm{val}{+}0.00183$ vs.\ T-zero and $+0.00144$ vs.\
-T-misaligned ($0/5$ either contrast). Test-only means: T-real
-$0.8295{\pm}0.0001$, T-zero $0.8275{\pm}0.0003$, T-misaligned
-$0.8280{\pm}0.0001$. Aligned $\Delta t$ is not isolated from the added
-branch under the pre-specified rule.}
+zero-incidence Linear-$\Delta t$ backbone (XES3G5M fold~0, five training
+seeds). All three arms keep the extra Linear maps. T-real reuses the five
+Zero$+\Delta t$ checkpoints (not retrained). T-zero trains with all gaps
+set to $0$; T-misaligned permutes non-start gaps within each learner.
+The operating rule is $\Delta\mathrm{val}\ge{+}0.002$ vs.\ T-real on
+every seed: $0/5$ vs.\ T-zero (mean $+0.00183$) and $0/5$ vs.\
+T-misaligned (mean $+0.00144$). Test-only means remain positive
+($+0.0020$ / $+0.0015$). We credit the timing \emph{package} under the
+pre-specified rule; we do not credit aligned gap input as a separate
+source.}
 \label{tab:a1-timing}
 \centering
 \footnotesize
 \begin{tabular}{@{}rrrrrrl@{}}
 \toprule
-Seed & T-real & T-zero & T-mis.\ & $\Delta$zero & $\Delta$mis.\ & Gate \\
+Seed & $\Delta$val 0 & $\Delta$val mis.\ & Gate & $\Delta$test 0 & $\Delta$test mis.\ \\
 \midrule
-0 & 0.82960 & 0.82759 & 0.82803 & $+0.00201$ & $+0.00157$ & no \\
-17 & 0.82953 & 0.82761 & 0.82797 & $+0.00193$ & $+0.00156$ & no \\
-42 & 0.82944 & 0.82774 & 0.82804 & $+0.00170$ & $+0.00140$ & no \\
-1234 & 0.82925 & 0.82705 & 0.82778 & $+0.00220$ & $+0.00147$ & no \\
-2024 & 0.82961 & 0.82768 & 0.82814 & $+0.00192$ & $+0.00147$ & no \\
+0 & $+0.00179$ & $+0.00148$ & no & $+0.00201$ & $+0.00157$ \\
+17 & $+0.00187$ & $+0.00124$ & no & $+0.00193$ & $+0.00156$ \\
+42 & $+0.00180$ & $+0.00159$ & no & $+0.00170$ & $+0.00140$ \\
+1234 & $+0.00175$ & $+0.00108$ & no & $+0.00220$ & $+0.00147$ \\
+2024 & $+0.00196$ & $+0.00179$ & no & $+0.00192$ & $+0.00147$ \\
 \bottomrule
-\end{tabular}\\[0.4em]
-{\footnotesize AUC columns are test-only ($n{=}1{,}093{,}755$). Gate uses
-recovered validation $\Delta$, not this column.}
+\end{tabular}
 \end{table}

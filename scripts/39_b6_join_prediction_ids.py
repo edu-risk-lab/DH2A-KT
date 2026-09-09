@@ -163,9 +163,18 @@ def main() -> int:
     both = merged[merged["_merge"] == "both"]
     only_dh2 = merged[merged["_merge"] == "left_only"]
     only_pykt = merged[merged["_merge"] == "right_only"]
-    label_mismatch = int((both["label_dh2"] != both["label_pykt"]).sum()) if len(both) else 0
+    label_mismatch_rows = (
+        both[both["label_dh2"] != both["label_pykt"]] if len(both) else both
+    )
+    label_mismatch = int(len(label_mismatch_rows))
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     only_dh2.to_csv(MANIFEST, index=False)
+    only_pykt.to_csv(
+        REPO_ROOT / "results" / "tables" / "b6_unmatched_pykt_rows.csv", index=False
+    )
+    label_mismatch_rows.to_csv(
+        REPO_ROOT / "results" / "tables" / "b6_label_mismatch_rows.csv", index=False
+    )
     payload = {
         "dh2_checkpoint": str(ckpt.relative_to(REPO_ROOT)),
         "pykt_npz": str(Path(npz_path)),
@@ -179,11 +188,14 @@ def main() -> int:
         "label_mismatch_on_join": label_mismatch,
         "join_key": "user|kc_dense|occurrence_in_scored_set",
         "expected_only_dh2": 35,
+        "do_not_drop_label_mismatches": True,
         "note": (
             "Join is occurrence-of-(user, dense-kc) in the scored set, not a native "
             "attempt_id. DH² hashed kc_id remapped via train-fold build_dense_maps. "
-            "Headline twins may stay on native n; baseline gaps should use n_joined "
-            "after this file exists."
+            "The n_dh2_unmapped_kc row is the 1,093,755 vs 1,093,754 gap. "
+            "Eight label mismatches stay in the join diagnostic; they are not "
+            "dropped. Headline model-vs-baseline gaps stay contextual on native "
+            "vs intersection n, not rebased onto n_joined."
         ),
     }
     OUT.write_text(json.dumps(payload, indent=2), encoding="utf-8")

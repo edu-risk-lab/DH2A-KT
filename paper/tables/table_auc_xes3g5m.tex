@@ -2,8 +2,9 @@
 \caption{Test-only AUC on XES3G5M fold~0 under the \emph{clean} protocol
 (mask-repeats, chunked windows, $L{=}400$).
 DH$^2$ rows use native scoring ($n{=}1{,}093{,}755$).
-pyKT baselines use the library intersection ($n{=}1{,}093{,}720$;
-occurrence join in Section~\ref{sec:clean-protocol}).
+pyKT baselines use the library intersection ($n{=}1{,}093{,}720$).
+Gaps versus those rows are \emph{contextual}, not event-paired
+(Section~\ref{sec:clean-protocol}; the occurrence join is not a stable ID).
 Values are mean $\pm$ sample SD over five training seeds
 (42, 17, 1234, 0, 2024) of the \emph{same} test-only metric.
 QKC-T seed~42 is $0.829593$ and matches Table~\ref{tab:calibration-xes3g5m}.
@@ -17,7 +18,8 @@ Unrounded five-seed means agree to five decimals
 GIKT is matched to the DH$^2$ \emph{training envelope} (batch 16, cap 30
 epochs, patience 5), not to a hyperparameter search
 (\ref{app:hparams}).
-Five-seed mean gaps from unrounded test-only means:
+Five-seed mean gaps from unrounded test-only means
+(contextual, distinct $n$, not a shared event-ID set):
 QKC-T (or Zero$+\Delta t$) minus GIKT ${+}0.0036$, minus AKT ${+}0.0072$,
 minus \textit{simpleKT} ${+}0.0081$
 (printed cells subtract to the same hundredths).

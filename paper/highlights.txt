@@ -1,5 +1,5 @@
 Leakage-audited KT: construct, audit, then credit matched twins.
 Q-KC incidence does not meet a capacity-matched gate (0/5 seeds).
-A Linear Delta-t branch meets the gate on observed and zero-incidence (5/5); aligned Delta-t vs T-zero/T-misaligned is 0/5.
+A Linear Delta-t package meets the gate on observed and zero-incidence (5/5); aligned-gap vs T-zero/T-misaligned is positive but below the rule (0/5).
 QKC-T is the GIKT-family evaluation arm; Zero+Delta-t is the credited-minimal control.
 Grouping and exponential forgetting are 0/5; other metadata remain 1-seed diagnostics.

@@ -12,6 +12,9 @@
   passbox/.style={draw, rounded corners=2pt, align=center,
               inner sep=6pt, text width=5.15cm, minimum height=1.22cm,
               fill=green!8},
+  warnbox/.style={draw, rounded corners=2pt, align=center,
+              inner sep=6pt, text width=5.15cm, minimum height=1.36cm,
+              fill=orange!12},
   failbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
               inner sep=6pt, text width=5.15cm, minimum height=1.72cm,
               fill=white},
@@ -24,25 +27,28 @@
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
 
-% Both outcomes hang off the gate (T-junction), not off earlier stages.
-\node[failbox, anchor=north east] (fail) at ([yshift=-1.32cm]gate.south east)
+\node[failbox, anchor=north east] (fail) at ([yshift=-2.85cm]gate.south east)
   {Not credited at 5 seeds: incidence\\message; grouping; exp.\ forgetting.\\1-seed: HypergraphConv, other metadata};
-\node[passbox, anchor=north east] (pass) at ([yshift=0cm, xshift=-0.32cm]fail.north west)
-  {Credited: Linear $\log(1{+}\Delta t)$\\(observed and zero incidence)};
+\node[warnbox, anchor=south east] (warn) at ([yshift=0.14cm]fail.north east)
+  {Aligned-gap contrast: positive vs T-zero /\\T-misaligned, below the $+0.002$ rule ($0/5$).\\Not separately credited};
+\node[passbox, anchor=north east] (pass) at ([xshift=-0.32cm]warn.north west)
+  {Package credited: Linear $\log(1{+}\Delta t)$\\branch ($5/5$; observed and zero incidence)};
 \coordinate (fork) at ([yshift=-0.40cm]gate.south);
 \draw[thick] (gate.south) -- (fork);
 \draw[->, thick] (fork) -| (pass.north east);
-\draw[->, thick] (fork) -- (fail.north);
+\draw[->, thick] (fork) -| (warn.north);
 \end{tikzpicture}%
 }
 \caption{DH$^2$A-KT is an attribution pipeline, not a single predictor.
 Train-only knowledge is constructed and audited, then compared against
-capacity-matched twins. Only Linear $\log(1{+}\Delta t)$ survives the
-credit gate on XES3G5M (five seeds); the question--KC incidence message
-does not. Teacher grouping and per-concept exponential forgetting also
-fail at five seeds ($0/5$). Remaining HypergraphConv/metadata forms in the
-dashed box are single-seed diagnostics, not five-seed credit tests. QKC-T is the observed-incidence
-evaluation arm; Zero$+\Delta t$ is the credited-minimal positive control.
+capacity-matched twins. The Linear $\log(1{+}\Delta t)$ \emph{package}
+meets the five-seed gate on XES3G5M; architecture-matched aligned-gap
+controls stay positive but below the $+0.002$ rule and are not separately
+credited. The question--KC incidence message does not meet the gate.
+Teacher grouping and per-concept exponential forgetting are $0/5$.
+Remaining HypergraphConv/metadata forms in the dashed box are
+single-seed diagnostics. QKC-T is the observed-incidence evaluation arm;
+Zero$+\Delta t$ is the credited-minimal positive control.
 The dashed graph-only encoder and the exploratory Critic survey are not
 part of this credited map (\ref{app:graph-only}, \ref{sec:tier2}).}
 \label{fig:architecture}

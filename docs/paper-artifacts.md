@@ -19,7 +19,8 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 | Table A1 T-real / T-zero / T-misaligned | `scripts/38_a1_timing_input_controls.py` | `results/tables/a1_timing_input_controls.csv`, `a1_timing_input_controls_summary.json` |
 | Table A7 history-only Δt | `scripts/31_a7_query_dt_ablation.py` | `results/tables/a7_query_dt_ablation.csv`, `paper/tables/table_a7_query_dt.tex` |
 | B6 DH²/pyKT occurrence join | `scripts/39_b6_join_prediction_ids.py` | `results/tables/b6_id_join_summary.json` |
-| A2 chunk/info-flow trace | `scripts/40_a2_infoflow_trace.py` | `results/tables/a2_infoflow_trace.json` |
+| A4 event identity (occurrence join is not a stable ID) | `scripts/44_a4_event_identity.py` | `results/tables/a4_event_identity.json`; tests `tests/test_a4_event_identity.py` |
+| A3 chunk-boundary safety | `scripts/43_a3_chunk_boundary_safety.py` | `results/tables/a3_chunk_boundary_safety.json`; tests `tests/test_a3_attempt_safe.py` |
 | B8 Zero+Δt ECE | `scripts/41_b8_zero_dt_calibration.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv`, `a6_reliability_zero_dt.json` |
 | B9 same-ckpt destruction | `scripts/42_b9_same_ckpt_destruction.py` | `results/tables/b9_same_ckpt_destruction.{csv,json}` |
 | Table AUC folds 1–2 (QKC-T only) | `scripts/03_train_tier1.py` | `paper/tables/table_auc_p0_dt_folds.tex` |
@@ -30,6 +31,8 @@ table: that exporter still writes the old graph-only $L{=}200$ format.
 | M4 teacher-group 5-seed | `scripts/03_train_tier1.py` (`--group-embed`) | `results/tables/m4_group_5seed.csv` |
 | Fig. reliability | `scripts/_plot_reliability_xes3g5m.py` | `paper/figures/fig_reliability_xes3g5m.pdf` |
 | Table negative knowledge (app.) | ablation drivers in `scripts/03_train_tier1.py` | `paper/tables/table_negative_knowledge.tex` |
+| Table P4 raw 5-seed | P4 forget runs | `results/tables/p4_forget_5seed.csv`, `paper/tables/table_p4_raw.tex` |
+| Fig. manipulation sweep | `scripts/09_export_paper_figures.py` | `results/tables/b9_same_ckpt_destruction.csv` |
 | Table leakage taxonomy / measured | hyperedge audit | `paper/tables/table_leakage_audit.tex` |
 | Table FoundationalASSIST | `scripts/03_train_tier1.py` | `results/tables/dh2_kt_foundational_assist.csv` |
 | Table Junyi GT overlap | P0 GT overlap | `paper/tables/table_junyi_gt.tex` |
@@ -54,5 +57,7 @@ M4 teacher-group **0/5 PASS**, mean Δval +0.00025.
 pyKT ECE (seed 42, n=1,093,720): GIKT 0.0073 / AKT 0.0047 / simpleKT 0.0100.
 A1 aligned-Δt isolation **0/5** (mean Δval +0.00183 vs T-zero, +0.00144 vs T-misaligned).
 B6 join n=1,093,718; n_only_dh2=36; n_only_pykt=2; 8 label mismatches.
+The 1,093,755 vs 1,093,754 gap is n_dh2_unmapped_kc=1. Occurrence join is not
+event identity; Table 5 / Appendix C vs pyKT remain contextual, not event-paired.
 B8 Zero+Δt ECE 0.0072 (n=1,093,755). B9 same-clean PASS (2.0e-9).
 A2: 208 chunk windows start on a global repeat. A7 seed-42 lstm/query now present.
