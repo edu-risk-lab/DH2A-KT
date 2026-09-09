@@ -11,5 +11,6 @@
   "label_mismatch_on_join": 8,
   "join_key": "user|kc_dense|occurrence_in_scored_set",
   "expected_only_dh2": 35,
-  "note": "Join is occurrence-of-(user, dense-kc) in the scored set, not a native attempt_id. DH\u00b2 hashed kc_id remapped via train-fold build_dense_maps. Headline twins may stay on native n; baseline gaps should use n_joined after this file exists."
+  "do_not_drop_label_mismatches": true,
+  "note": "Join is occurrence-of-(user, dense-kc) in the scored set, not a native attempt_id. DH\u00b2 hashed kc_id remapped via train-fold build_dense_maps. The n_dh2_unmapped_kc row is the 1,093,755 vs 1,093,754 gap. Eight label mismatches stay in the join diagnostic; they are not dropped. Headline model-vs-baseline gaps stay contextual on native vs intersection n, not rebased onto n_joined."
 }

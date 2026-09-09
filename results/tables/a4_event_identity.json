@@ -77,13 +77,28 @@
   "occurrence_join_is_stable_event_id": false,
   "reason_occurrence_is_not_identity": "Eight joined occurrence keys disagree on the label, so the same (user, dense-kc, occurrence-in-scored-set) can name two different KC-rows after the pipelines filter different rows. pyKT export drops item/KC ids absent from train-fold dense maps before chunking; DH2 native scoring uses checkpoint maps and keeps those rows. The one-row native gap (1,093,755 vs 1,093,754) is the hashed KC that does not map into the train-fold c_map.",
   "headline_model_vs_baseline": "contextual_not_event_paired",
-  "stable_key_join_run": false,
+  "stable_key_join_run": true,
   "assertions": {
     "accounting_ok": true,
     "one_row_gap_is_unmapped_kc": true,
     "do_not_drop_label_mismatches": true,
     "do_not_rebase_headline_n_onto_join": true
   },
-  "parquet_present": false,
-  "stable_key_join_note": "xes3g5m.parquet not on this machine; stable-key census is the function + tests. Re-run on GPU to count common pre-chunk keys."
+  "n_dh2_stable": 1093755,
+  "n_pykt_stable": 1093720,
+  "n_common_stable": 1093718,
+  "n_only_dh2_stable": 37,
+  "n_only_pykt_stable": 2,
+  "n_label_mismatch_on_stable_join": 0,
+  "same_stable_id_same_label": true,
+  "example_only_dh2": [
+    "1063993888282932119|1613809060|7526593774467167594|6949811205411410448",
+    "1063993888282932119|1613809982|6927765865188501273|4932081828363820241",
+    "3050240195338020146|1596685794|4581999888977264667|3823348261283868936",
+    "3050240195338020146|1596685794|8519947091546711182|703599217093634705",
+    "3050240195338020146|1612670288|182380538374101848|4526863928383273751",
+    "442777101019499837|1611575922|4906611248911600558|6827114036858291371",
+    "442777101019499837|1611577674|3778395780164522062|8628686323660025649",
+    "442777101019499837|1611724339|2942437326367175018|4560503297887269910"
+  ]
 }
