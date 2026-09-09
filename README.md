@@ -1,5 +1,7 @@
 # DH²A-KT
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22676635.svg)](https://doi.org/10.5281/zenodo.22676635)
+
 Leakage-audited **knowledge attribution** for knowledge tracing (KT).
 The manuscript for *Knowledge-Based Systems* lives in [`paper/`](paper/).
 This is not a new hypergraph predictor: the pipeline is construct → audit
@@ -82,8 +84,9 @@ external/p0_leakage_audit/   pinned P0 snapshot
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff). Preferred snapshot tag:
-`kbs-submit-2026-09-09` (create on `main` at submit).
+See [`CITATION.cff`](CITATION.cff). Snapshot tag
+`kbs-submit-2026-09-09`;
+DOI [10.5281/zenodo.22676635](https://doi.org/10.5281/zenodo.22676635).
 
 ## Licence
 

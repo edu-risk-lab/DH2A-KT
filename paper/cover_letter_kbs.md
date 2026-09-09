@@ -16,7 +16,7 @@ Two hooks:
 
 **Companion paper P0** (pairwise leakage protocol) is a separate manuscript prepared for *Engineering Applications of Artificial Intelligence* (EAAI, Elsevier). The two papers share train-only graph construction; they do not share the DH² evaluator or the attribution twins. We attach the P0 PDF as Supplementary Material S1. Code/artefacts for P0 are pinned at commit `5e3d6a0`. Downstream P0 AUCs scored on every KC-expanded row are not comparable to our Table 5. An overlap map is in `docs/p0_overlap_disclosure.md`. DH²A-KT does not wait on P0 acceptance.
 
-**Code.** https://github.com/edu-risk-lab/DH2A-KT (tag `kbs-submit-2026-09-09`). Table-to-script map: `docs/paper-artifacts.md`. XES3G5M is the public Liu et al. release. FoundationalASSIST is used under Hugging Face Responsible Use Guidelines and is not redistributed.
+**Code.** https://github.com/edu-risk-lab/DH2A-KT (tag `kbs-submit-2026-09-09`; DOI https://doi.org/10.5281/zenodo.22676635). Table-to-script map: `docs/paper-artifacts.md`. XES3G5M is the public Liu et al. release. FoundationalASSIST is used under Hugging Face Responsible Use Guidelines and is not redistributed.
 
 **Required Elsevier sections** (Highlights, CRediT, competing interest, Ethics, Data availability, generative AI) are included. This research received no specific grant. Corresponding author: Le Hoang Son (`sonlh@vnu.edu.vn`).
 

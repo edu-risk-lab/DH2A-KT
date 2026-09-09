@@ -38,8 +38,16 @@ authors:
     affiliation: Vietnam National University
 repository-code: https://github.com/edu-risk-lab/DH2A-KT
 url: https://github.com/edu-risk-lab/DH2A-KT
+doi: 10.5281/zenodo.22676635
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22676635
+    description: This version (tag kbs-submit-2026-09-09)
+  - type: doi
+    value: 10.5281/zenodo.22676634
+    description: All versions (concept DOI)
 license: MIT
-version: 0.1.0
+version: kbs-submit-2026-09-09
 date-released: "2026-09-09"
 keywords:
   - knowledge tracing
@@ -76,5 +84,6 @@ preferred-citation:
     name: Elsevier
   notes: >-
     Manuscript prepared for Knowledge-Based Systems. Update volume, pages,
-    and DOI upon publication. Canonical source: paper/main.tex. Snapshot
-    tag: kbs-submit-2026-09-09.
+    and DOI upon publication.     Canonical source: paper/main.tex. Snapshot tag
+    kbs-submit-2026-09-09; software DOI
+    10.5281/zenodo.22676635.

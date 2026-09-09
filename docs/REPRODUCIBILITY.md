@@ -84,9 +84,13 @@ Headline XES3G5M AUC: do **not** rebuild with
 
 ## 6. Clone and test
 
+Snapshot matching the manuscript: tag `kbs-submit-2026-09-09`,
+DOI [10.5281/zenodo.22676635](https://doi.org/10.5281/zenodo.22676635).
+
 ```bash
 git clone https://github.com/edu-risk-lab/DH2A-KT.git
 cd DH2A-KT
+git checkout kbs-submit-2026-09-09   # optional: exact snapshot
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
