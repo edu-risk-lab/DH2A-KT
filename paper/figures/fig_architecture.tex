@@ -1,50 +1,55 @@
 % Fig. 1 — DH$^2$A-KT attribution pipeline (TikZ)
 \begin{figure}[t]
 \centering
-\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  font=\footnotesize\sffamily,
+  font=\scriptsize\sffamily,
   >=Stealth,
-  every node/.style={outer sep=1.2pt},
+  every node/.style={outer sep=1pt},
   box/.style={draw, rounded corners=2pt, align=center,
-              inner sep=6pt, text width=2.9cm, minimum height=1.28cm,
+              inner sep=4pt, text width=2.72cm, minimum height=1.55cm,
               fill=white},
   passbox/.style={draw, rounded corners=2pt, align=center,
-              inner sep=6pt, text width=5.15cm, minimum height=1.22cm,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
               fill=green!8},
   warnbox/.style={draw, rounded corners=2pt, align=center,
-              inner sep=6pt, text width=5.15cm, minimum height=1.36cm,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
               fill=orange!12},
   failbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
-              inner sep=6pt, text width=5.15cm, minimum height=1.72cm,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
               fill=white},
 ]
-\node[box] (p0) {Train-only construction\\$E_{\mathrm{pre}}$ / Q--KC};
-\node[box, right=0.48cm of p0] (audit) {Hyperedge leakage\\audit};
-\node[box, right=0.48cm of audit] (twins) {Capacity-matched\\twins};
-\node[box, right=0.48cm of twins] (gate) {Pre-specified gate\\$\Delta\mathrm{val}\ge{+}0.002$};
+\node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
+\node[box, right=0.32cm of p0] (audit) {Hyperedge\\leakage audit};
+\node[box, right=0.32cm of audit] (twins) {Laddered ablation\\(cap.\ / arch.\ / pkg)};
+\node[box, right=0.32cm of twins] (gate) {Pre-specified gate\\$\Delta\mathrm{val}\ge{+}0.002$};
 \draw[->, thick] (p0.east) -- (audit.west);
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
 
-\node[failbox, anchor=north east] (fail) at ([yshift=-2.85cm]gate.south east)
-  {Not credited at 5 seeds: incidence\\message; grouping; exp.\ forgetting.\\1-seed: HypergraphConv, other metadata};
-\node[warnbox, anchor=south east] (warn) at ([yshift=0.14cm]fail.north east)
-  {Aligned-gap contrast: positive vs T-zero /\\T-misaligned, below the $+0.002$ rule ($0/5$).\\Not separately credited};
-\node[passbox, anchor=north east] (pass) at ([xshift=-0.32cm]warn.north west)
-  {Package credited: Linear $\log(1{+}\Delta t)$\\branch ($5/5$; observed and zero incidence)};
-\coordinate (fork) at ([yshift=-0.40cm]gate.south);
+\node[passbox, below=0.95cm of p0.south west, anchor=north west] (pass)
+  {Package credited:\\Linear $\log(1{+}\Delta t)$ branch\\($5/5$; observed and zero incidence)};
+\node[warnbox, right=0.28cm of pass] (warn)
+  {Aligned-gap contrast:\\positive vs T-zero / T-misaligned,\\below $+0.002$ ($0/5$). Not separately credited};
+\node[failbox, right=0.28cm of warn] (fail)
+  {Not credited at 5 seeds:\\incidence; grouping; exp.\ forgetting.\\1-seed: HypergraphConv, other metadata};
+
+\coordinate (fork) at ([yshift=-0.38cm]gate.south);
 \draw[thick] (gate.south) -- (fork);
-\draw[->, thick] (fork) -| (pass.north east);
+\draw[->, thick] (fork) -| (pass.north);
 \draw[->, thick] (fork) -| (warn.north);
-\end{tikzpicture}%
-}
+\draw[->, thick] (fork) -| (fail.north);
+\end{tikzpicture}
 \caption{DH$^2$A-KT is an attribution pipeline, not a single predictor.
-Train-only knowledge is constructed and audited, then compared against
-capacity-matched twins. The Linear $\log(1{+}\Delta t)$ \emph{package}
-meets the five-seed gate on XES3G5M; architecture-matched aligned-gap
-controls stay positive but below the $+0.002$ rule and are not separately
-credited. The question--KC incidence message does not meet the gate.
+Train-only knowledge is constructed and audited, then compared in a
+laddered ablation with capacity-matched, architecture-matched, and
+package-level controls (Table~\ref{tab:evidence-types}).
+The Linear $\log(1{+}\Delta t)$ \emph{package} meets the five-seed gate
+on XES3G5M as a package-level ablation (not capacity-matched);
+architecture-matched aligned-gap controls stay positive
+($+0.00183$ vs.\ T-zero; $+0.00144$ vs.\ T-misaligned) but below the
+$+0.002$ rule and are not separately credited.
+The question--KC incidence message does not meet the capacity-matched
+gate.
 Teacher grouping and per-concept exponential forgetting are $0/5$.
 Remaining HypergraphConv/metadata forms in the dashed box are
 single-seed diagnostics. QKC-T is the observed-incidence evaluation arm;

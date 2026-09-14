@@ -1,4 +1,4 @@
-﻿\begin{table}[t]
+\begin{table}[t]
 \caption{Architecture names used in this paper. Flags in parentheses are
 implementation aliases from training logs, not model names.}
 \label{tab:aliases}
@@ -7,8 +7,10 @@ implementation aliases from training logs, not model names.}
 \toprule
 Name in this paper & Architecture \\
 \midrule
-DH$^2$A-KT & Attribution pipeline: train-only construction, leakage audit,
-matched twins, credit gate, and knowledge map; not one predictor \\
+DH$^2$A-KT & Attribution pipeline: train-only construction, membership
+leakage audit, laddered ablation (capacity-matched, architecture-matched,
+and package-level controls), credit gate, and knowledge map; not one
+predictor \\
 QKC-T reference arm & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\

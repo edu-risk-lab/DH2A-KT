@@ -1,0 +1,24 @@
+\begin{table}[t]
+\caption{Per-seed validation $\Delta$ for the three Linear $\Delta t$
+injection sites on XES3G5M fold~0 (first line: fold~0).
+Twin is Q$\leftarrow$KC without time-gap. Source:
+\texttt{results/tables/a7\_query\_dt\_ablation.csv}.
+Gate is $\Delta\mathrm{val}\ge{+}0.002$.}
+\label{tab:a7-query-dt-seeds}
+\centering
+\footnotesize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Seed & \texttt{both} $\Delta$val & \texttt{lstm} $\Delta$val & \texttt{query} $\Delta$val \\
+\midrule
+0 & $+0.00306$ & $+0.00233$ & $+0.00131$ \\
+17 & $+0.00278$ & $+0.00199$ & $+0.00115$ \\
+42 & $+0.00280$ & $+0.00170$ & $+0.00069$ \\
+1234 & $+0.00236$ & $+0.00165$ & $+0.00083$ \\
+2024 & $+0.00268$ & $+0.00201$ & $+0.00096$ \\
+\midrule
+Mean & $+0.00274$ & $+0.00193$ & $+0.00099$ \\
+Gate & $5/5$ & $2/5$ & $0/5$ \\
+\bottomrule
+\end{tabular}
+\end{table}

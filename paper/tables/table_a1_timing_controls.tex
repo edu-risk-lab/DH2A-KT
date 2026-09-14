@@ -1,9 +1,9 @@
 % A1 val deltas from qkc_cm_zero_time_s*.csv (T-real) and
 % a1_timing_input_controls.csv (T-zero / T-misaligned). Gate on val.
 \begin{table}[t]
-\caption{Architecture-matched time-\emph{input} controls on the
-zero-incidence Linear-$\Delta t$ backbone (XES3G5M fold~0, five training
-seeds). All three arms keep the extra Linear maps. T-real reuses the five
+\caption{Fold~0 first: architecture-matched time-\emph{input} controls
+on the zero-incidence Linear-$\Delta t$ backbone (XES3G5M, five training
+seeds on this one learner fold). All three arms keep the extra Linear maps. T-real reuses the five
 Zero$+\Delta t$ checkpoints (not retrained). T-zero trains with all gaps
 set to $0$; T-misaligned permutes non-start gaps within each learner.
 The operating rule is $\Delta\mathrm{val}\ge{+}0.002$ vs.\ T-real on

@@ -1,15 +1,17 @@
 ﻿% Gate from results/tables/a7_query_dt_ablation.csv (five seeds).
 % Test-only AUC from results/tables/a2_testonly_rescore.csv.
 \begin{table}[t]
-\caption{Query-side vs.\ history-only Linear $\Delta t$ on XES3G5M
-fold~0 (clean $L{=}400$, five training seeds). Twin is Q$\leftarrow$KC
-without time-gap. Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$
+\caption{Fold~0 first: query-side vs.\ history-only Linear $\Delta t$
+on XES3G5M (repeat-target-masked $L{=}400$, five training seeds on this one learner
+fold). Twin is Q$\leftarrow$KC without time-gap (package-level; not
+capacity-matched). Pre-specified gate: $\Delta\mathrm{val}\ge{+}0.002$
 (validation only; this column is the credit test).
 The AUC column is the same \emph{test-only} metric as
 Table~\ref{tab:auc-xes3g5m} ($n{=}1{,}093{,}755$).
 \texttt{both} is QKC-T (five seeds).
 Only \texttt{both} meets the val gate on all five seeds.
-History-only is $2/5$ seeds pass and is not credited under the $5/5$ rule.}
+History-only is $2/5$ and is not credited.
+Per-seed $\Delta$val is in Table~\ref{tab:a7-query-dt-seeds}.}
 \label{tab:a7-query-dt}
 \centering
 \footnotesize

@@ -1,10 +1,10 @@
-﻿% Paired ablation: predictive knowledge (Tier 1, clean protocol) + faithfulness
-% knobs (Tier 2). Predictive AUCs: see notes in the AUC column.
+% Paired ablation: predictive knowledge (Tier 1) + faithfulness knobs
+% (Tier 2; exploratory). Predictive AUCs: notes in the AUC column.
 % Tier~2 flag/JC are the fold~0 Ollama $n{=}500$ run.
 \begin{table}[t]
 \caption{Paired ablation of DH$^2$A-KT knowledge and explanation knobs.
-Predictive rows use the clean $L{=}400$ protocol (fold~0) except
-HypergraphConv / FA session.
+Predictive rows use the repeat-target-masked $L{=}400$ protocol
+(fold~0) except HypergraphConv / FA session.
 QKC-T, Q$\leftarrow$KC, and Zero$+\Delta t$ $\pm$ cells are five-seed
 test-only (Table~\ref{tab:auc-xes3g5m}).
 The $0.8296$ Critic row is the seed-42 checkpoint used for the
@@ -14,22 +14,39 @@ Manipulation $\Delta$AUC is the graph-only diagnostic
 (\ref{app:graph-only}), not QKC-T.}
 \label{tab:paired-ablation}
 \centering
-\footnotesize
-\begin{tabular}{@{}llccl@{}}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabularx}{\linewidth}{@{}
+  >{\raggedright\arraybackslash}p{2.85cm}
+  >{\centering\arraybackslash}p{2.05cm}
+  >{\raggedright\arraybackslash}X
+  >{\centering\arraybackslash}p{1.55cm}
+  @{}}
 \toprule
-Setting & AUC & Gate / note & Flag & Mean JC \\
+Setting & AUC & Gate / note & Flag / JC \\
 \midrule
-QKC-T (eval.\ arm, 5-seed) & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00274$ & --- & --- \\
-Q$\leftarrow$KC (5-seed test-only) & $0.8268{\pm}0.0002$ & not an incidence credit & --- & --- \\
-Zero$+\Delta t$ (credited, 5-seed) & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00255$ & --- & --- \\
-HypergraphConv (val) & $0.8262$ & below gate $+0.00025$ & --- & --- \\
-Grounded + Critic (graph-only diagnostic) & $0.752{\pm}0.002$ & manip.\ fold~0 $\Delta$AUC $0.0323$ (B9) & $0.026$ & $0.152$ \\
-IG (graph-only diagnostic) & --- & --- & $0.768$ & $0.142$ \\
-Grounded + Critic (QKC-T) & $0.8296$ & same prompt, $n{=}500$ & $0.018$ & $0.161$ \\
-IG (QKC-T) & --- & --- & $0.766$ & $0.152$ \\
-w/o Critic & --- & --- & $0.000$ & $0.152$ \\
-FA: concept-only & $0.720$ & --- & --- & --- \\
-FA: + session HE & $0.722$ & L below gate $+0.00007$ & --- & --- \\
+QKC-T (eval.\ arm, 5-seed)
+  & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00274$ & --- \\
+Q$\leftarrow$KC (5-seed)
+  & $0.8268{\pm}0.0002$ & not an incidence credit & --- \\
+Zero$+\Delta t$ (credited)
+  & $0.8295{\pm}0.0001$ & val gate $5/5$ $+0.00255$ & --- \\
+HypergraphConv (val)
+  & $0.8262$ & below gate $+0.00025$ & --- \\
+Grounded+Critic (graph-only)
+  & $0.752{\pm}0.002$ & shared-clean $\Delta$AUC $0.0323$ & $0.026$/$0.152$ \\
+IG (graph-only)
+  & --- & --- & $0.768$/$0.142$ \\
+Grounded+Critic (QKC-T)
+  & $0.8296$ & same prompt, $n{=}500$ & $0.018$/$0.161$ \\
+IG (QKC-T)
+  & --- & --- & $0.766$/$0.152$ \\
+w/o Critic
+  & --- & --- & $0.000$/$0.152$ \\
+FA: concept-only
+  & $0.720$ & --- & --- \\
+FA: + session HE
+  & $0.722$ & L below gate $+0.00007$ & --- \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}

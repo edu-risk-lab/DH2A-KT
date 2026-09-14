@@ -2,14 +2,22 @@
 
 Map for the KBS draft (`paper/main.tex`). Checkpoints are gitignored; JSON
 under `results/tables/` is allowlisted when it is a reported number.
-Do **not** run `scripts/08_export_paper_tables.py` for the headline AUC
-table: that exporter still writes the old graph-only $L{=}200$ format.
+Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
+(that exporter writes the graph-only $L{=}200$ format).
+
+The 9 September 2026 tag `kbs-submit-2026-09-09` freezes evaluation code
+and numeric artefacts. This PDF's LaTeX is tag `kbs-submit-2026-09-14`.
 
 | Paper table / figure | Script | Result file |
 |---|---|---|
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
+| Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
+| Table threshold sensitivity | recount of printed Δval | `paper/tables/table_threshold_sensitivity.tex` |
+| Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
+| Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |
+| Citation verification log | Crossref/OpenAlex pass 10 Sep 2026 | `docs/citation_verification_log.md` |
 | Table aliases | hand-maintained | `paper/tables/table_aliases.tex` |
-| Table AUC XES3G5M (clean L=400, test-only rebuild) | `scripts/36_rescore_a2_testonly.py` + capacity-matched + pyKT CSVs | `results/tables/table5_testonly_rebuild.csv`, `a2_testonly_rescore.csv`, `qkc_capacity_matched_matrix.csv`, `a2_multiseed_summary.csv` |
+| Table AUC XES3G5M (repeat-target-masked L=400, test-only) | `scripts/36_rescore_a2_testonly.py` + capacity-matched + pyKT CSVs | `results/tables/table5_testonly_rebuild.csv`, `a2_testonly_rescore.csv`, `qkc_capacity_matched_matrix.csv`, `a2_multiseed_summary.csv` |
 | A2/A7 test-only rescore (server 08/09) | `scripts/36_rescore_a2_testonly.py` | `results/tables/a2_testonly_rescore.csv`, `a2_testonly_rescore_summary.json` |
 | A3 Δt-at-repeats diagnosis | `scripts/37_a3_dt_repeat_diag.py` | `results/tables/a3_dt_repeat_dist.json` |
 | Table protocol residual (A3) | stored rescores | `p0_dt_testonly_clean.csv`, `p0_dt_fold{1,2}_testonly_clean.csv`, `xes3g5m_fold0_p0parity_protocol.csv` |
@@ -60,8 +68,8 @@ M4 teacher-group **0/5 PASS**, mean Δval +0.00025.
 pyKT ECE (seed 42, n=1,093,720): GIKT 0.0073 / AKT 0.0047 / simpleKT 0.0100.
 A1 aligned-Δt isolation **0/5** (mean Δval +0.00183 vs T-zero, +0.00144 vs T-misaligned).
 B6 join n=1,093,718; n_only_dh2=36; n_only_pykt=2; 8 occurrence collisions.
-Stable key (user|timestamp|item|kc) on GPU: n_common=1,093,718; 0 label mismatch;
-n_only_dh2_stable=37; n_only_pykt_stable=2. Table 5 / Appendix C vs pyKT remain
-contextual, not event-paired.
+Stable key (user|timestamp|item|kc) on GPU: n_common=1,093,718; 0 label mismatch.
+Table 7 vs pyKT remains contextual (distinct *n*); per-row scores needed to
+rebase are not in the public snapshot.
 B8 Zero+Δt ECE 0.0072 (n=1,093,755). B9 same-clean PASS (2.0e-9).
 A2: 208 chunk windows start on a global repeat. A7 seed-42 lstm/query now present.

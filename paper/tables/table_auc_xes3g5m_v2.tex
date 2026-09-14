@@ -1,11 +1,11 @@
 \begin{table}[htbp]
 \caption{Diagnostic graph-only track (not QKC-T or Zero$+\Delta t$). Test AUC
 on XES3G5M under P0's matched GKT budget (batch 4, 10 epochs,
-max seq.\ len.\ 200; \emph{not} the clean $L{=}400$ protocol of
-Table~\ref{tab:auc-xes3g5m}). DH$^2$-KT v2 uses path-derived concept-group
+max seq.\ len.\ 200; \emph{not} the repeat-target-masked $L{=}400$ protocol of
+Table~\ref{tab:auc-xes3g5m}). Graph-only v2 uses path-derived concept-group
 chain hyperedges and graph-only interaction. Mean$\pm$SD over three
 learner folds. The P0 \textit{simpleKT} column ($\approx 0.8747$) uses
-that older leaky protocol and is not comparable to the clean
+that older leaky protocol and is not comparable to
 $0.8214{\pm}0.0007$ in Table~\ref{tab:auc-xes3g5m}.}
 \label{tab:auc-xes3g5m-v2}
 \centering
@@ -13,7 +13,7 @@ $0.8214{\pm}0.0007$ in Table~\ref{tab:auc-xes3g5m}.}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lccc@{}}
 \toprule
-Fold & DH$^2$-KT v2 & GKT (P0) & simpleKT (P0) \\
+Fold & Graph-only v2 & GKT (P0) & simpleKT (P0) \\
 \midrule
 0 & 0.7501 & 0.8346 & 0.8744 \\
 1 & 0.7518 & 0.8338 & 0.8747 \\

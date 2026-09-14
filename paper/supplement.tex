@@ -19,12 +19,11 @@ Knowledge Attribution for Knowledge Tracing}
 \end{frontmatter}
 
 These notes are exploratory. They are not research questions and not
-contributions of the main article. Compile this file after
-\texttt{main.tex} so cross-references resolve.
+contributions of the main article.
 
 \section{Exploratory Critic-gated explanations}
 \label{sec:tier2-supp}
-Three agents read frozen DH$^2$-KT scores: a Diagnostician writes a
+Three agents read frozen tracer scores: a Diagnostician writes a
 rationale, a Critic flags output that contradicts the frozen
 $P(\mathrm{correct})$, and a Tutor writes session hyperedges that the
 frozen tracer does not consume. We ran $n{=}500$ prompts (XES3G5M
@@ -39,8 +38,15 @@ Blinded Likert ratings on a seed~42 subsample of $n{=}100$ grounded
 tracer explanations (3 independent raters) give faithfulness
 $4.55{\pm}0.63$ and usefulness $4.01{\pm}0.74$ (ordinal Krippendorff
 $\alpha{=}0.52$/$0.56$; mean pairwise Spearman $\rho{=}0.43$/$0.34$;
-within$\pm$1 $95.0\%$/$94.7\%$). An earlier dual-rater $n{=}40$ pack on
-the v2 graph-only checkpoint is archived and is not the primary
+within$\pm$1 $95.0\%$/$94.7\%$).
+Those $\alpha$ values are moderate and below the $0.667$/$0.800$
+levels often suggested for tentative or firmer conclusions; we
+therefore treat the ratings as an exploratory pilot, not as a
+reliability warrant.
+The JC gap is $0.009$ (grounded $0.161$ minus IG $0.152$), not an
+approximate ${+}0.010$.
+An earlier dual-rater $n{=}40$ pack on
+the graph-only diagnostic checkpoint is archived and is not the primary
 human-eval row.
 Removing the Critic sets the flag rate to $0$ by construction while
 leaving ID-anchored KC-Jaccard unchanged.
@@ -60,9 +66,12 @@ hint requests). No estimate is reported on XES3G5M (no hint logs).
 
 Using train transitions, the IPW estimate of hint use on
 \emph{next-step} correctness is $-0.207$ (naive mean difference
-$-0.255$; trimmed IPW $-0.211$; bootstrap 95\% CI
-$[-0.230,\,-0.187]$ on 50k-row resamples;
-$n_{\mathrm{treated}}{=}36{,}151$). Propensity scores hit the clip floor
+$-0.255$; trimmed IPW $-0.211$;
+$n_{\mathrm{treated}}{=}36{,}151$).
+We do not report a row-resampled confidence interval: rows nest in
+learners, and the archived 50k-row bootstrap is an $m$-of-$n$ draw
+that would understate cluster variance. A learner-clustered interval
+is future work. Propensity scores hit the clip floor
 ($[0.05,\,0.219]$), indicating weak overlap. The negative sign is
 \emph{consistent with} selection and confounding (weaker learners
 request more hints); it is not identified as the effect of providing

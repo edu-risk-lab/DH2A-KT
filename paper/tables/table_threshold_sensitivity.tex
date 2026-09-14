@@ -1,0 +1,29 @@
+\begin{table}[t]
+\caption{Seed-pass counts ($k/5$) if the operating threshold is varied.
+Every cell is a recount of printed per-seed $\Delta$val on XES3G5M
+fold~0 (Tables~\ref{tab:qkc-zero-time},~\ref{tab:a1-timing},
+~\ref{tab:qkc-capacity}). No retraining.
+The published qualitative map---package credited; aligned gap not
+credited separately; incidence not credited---holds for any threshold
+in $(+0.00175,+0.00242]$. At or below $+0.00175$ the aligned-gap
+contrast against T-zero would also pass $5/5$; above $+0.00242$ the
+timing package itself would not. The $+0.002$ rule remains an operating
+convention locked for this ladder, not a public registry.
+Applying the same absolute threshold on ASSISTments~2012, Junyi, and
+FoundationalASSIST is an unverified assumption: seed-SD was measured on
+XES3G5M fold~0.}
+\label{tab:threshold-sensitivity}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Threshold & Package (zero-inc.) & vs.\ T-zero & vs.\ T-misaligned & Incidence \\
+\midrule
+$+0.0010$ & $5/5$ & $5/5$ & $5/5$ & $0/5$ \\
+$+0.0015$ & $5/5$ & $5/5$ & $3/5$ & $0/5$ \\
+$+0.0020$ & $5/5$ & $0/5$ & $0/5$ & $0/5$ \\
+$+0.0025$ & $2/5$ & $0/5$ & $0/5$ & $0/5$ \\
+$+0.0030$ & $0/5$ & $0/5$ & $0/5$ & $0/5$ \\
+\bottomrule
+\end{tabular}
+\end{table}

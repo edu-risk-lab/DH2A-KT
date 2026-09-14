@@ -3,9 +3,8 @@
 P0 (*Leakage-Controlled Concept Graph Construction…*) is a **separate**
 manuscript, currently prepared for *Engineering Applications of
 Artificial Intelligence* (EAAI, Elsevier). DH²A-KT (this repo, KBS) is
-an attribution paper on a later evaluator. Both may be under review at
-Elsevier at the same time; they are companions, not duplicate
-submissions.
+an attribution paper on a later evaluator. They are companions, not
+duplicate submissions.
 
 Pinned code: commit `5e3d6a0` in `external/p0_leakage_audit`
 ([`leakage-controlled-kt-audit`](https://github.com/edu-risk-lab/leakage-controlled-kt-audit)).

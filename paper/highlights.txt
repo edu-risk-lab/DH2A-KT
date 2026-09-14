@@ -1,5 +1,5 @@
-Leakage-audited KT: construct, audit, then credit matched twins.
-Q-KC incidence does not meet a capacity-matched gate on this shared-sum fusion (0/5 seeds).
-A Linear Delta-t package meets the gate on observed and zero-incidence (5/5); aligned-gap vs T-zero/T-misaligned is positive but below the rule (0/5).
-QKC-T is the GIKT-family evaluation arm; Zero+Delta-t is the credited-minimal control.
-Grouping and exponential forgetting are 0/5; other metadata remain 1-seed diagnostics.
+Leakage-audited KT: construct, audit membership leak, then credit.
+Q-KC incidence fails a capacity-matched gate on this fusion (0/5).
+A Linear Delta-t package meets the gate; aligned-gap input does not (0/5).
+Zero+Delta-t is the credited-minimal control (XES3G5M 0.8295 test-only).
+Teacher grouping and exponential forgetting are 0/5; other metadata 1-seed.

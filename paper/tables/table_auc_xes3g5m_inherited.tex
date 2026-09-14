@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Inherited LSTM / dynamic-graph baselines on XES3G5M fold~0
+under the same repeat-target-masked KC-expanded protocol ($L{=}400$),
+moved out of Table~\ref{tab:auc-xes3g5m}.
+Values are five-seed test-only mean $\pm$ sample SD on the pyKT
+intersection ($n{=}1{,}093{,}720$). They are contextual location
+rows, not tuning-matched or event-paired claims
+(Section~\ref{sec:baselines-reuse}).}
+\label{tab:auc-inherited}
+\centering
+\footnotesize
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Model & Test-only AUC & Seeds \\
+\midrule
+DKT ($L{=}400$; inherited) & $0.8009{\pm}0.0002$ & 5 \\
+DGEKT ($L{=}400$; inherited, contextual) & $0.7850{\pm}0.0001$ & 5 \\
+\bottomrule
+\end{tabular}
+\end{table}
