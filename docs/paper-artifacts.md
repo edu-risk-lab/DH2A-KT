@@ -7,7 +7,8 @@ Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 
 The 9 September 2026 tag `kbs-submit-2026-09-09` freezes evaluation code
 and numeric artefacts (DOI https://doi.org/10.5281/zenodo.22676635).
-This PDF is a later editorial revision of that freeze.
+This PDF's LaTeX is tag `kbs-submit-2026-09-15`
+(DOI https://doi.org/10.5281/zenodo.22772808).
 
 | Paper table / figure | Script | Result file |
 |---|---|---|
