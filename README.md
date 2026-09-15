@@ -5,7 +5,7 @@
 Leakage-audited **knowledge attribution** for knowledge tracing (KT).
 The manuscript for *Knowledge-Based Systems* lives in [`paper/`](paper/).
 This is not a new hypergraph predictor: the pipeline is construct → audit
-→ matched-twin ablation → credit only messages that meet a pre-specified
+→ matched-twin ablation → credit only messages that meet an operating
 gate.
 
 Companion protocol paper (pairwise train-only graphs, P0):

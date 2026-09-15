@@ -3,7 +3,7 @@
 XES3G5M (repeat-target-masked protocol; five training seeds on this one learner fold). Both arms keep \texttt{--question-graph} (same
 \texttt{question\_embed}, GCN linear, and input projection); only the
 train-only incidence matrix is replaced by zeros in the twin
-(\texttt{--question-incidence-control zero}). Pre-specified gate:
+(\texttt{--question-incidence-control zero}). Operating gate:
 $\Delta\mathrm{val}\ge{+}0.002$. Checkpoint state shapes match on every
 seed; observed nonzero links $=8848$, zero arm $=0$. Mean
 $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$; mean

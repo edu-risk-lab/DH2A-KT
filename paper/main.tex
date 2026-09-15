@@ -60,15 +60,17 @@ structural and temporal messages survive a laddered ablation with
 capacity-matched, architecture-matched, and package-level controls.
 DH$^2$A-KT constructs train-only auxiliary knowledge, audits hyperedge
 membership leakage, and credits a message only when validation AUC rises
-by at least $+0.002$ versus its designated control on all five paired
-seeds. Adding a linear $\log(1{+}\Delta t)$ branch meets that rule as a
+by at least $+0.002$ versus its designated control on XES3G5M learner
+fold~0 across five paired training seeds. Adding a linear
+$\log(1{+}\Delta t)$ branch meets that rule as a
 package-level ablation on both the observed question--KC incidence
 backbone and a capacity-matched zero-incidence twin ($5/5$). This
 package contrast is not capacity-matched: the timed arm adds linear
 maps. Architecture-matched controls that keep those maps but zero or
 misalign the gap stay positive but below the rule ($0/5$; mean
 $\Delta\mathrm{val}{+}0.00183$ vs.\ T-zero, $+0.00144$ vs.\
-T-misaligned). We therefore credit the timing \emph{package} under our
+T-misaligned). We therefore credit the timing \emph{package} as
+attempt-context timing and boundary information under our
 convention, but do not isolate aligned gap input as a separately
 credited source. Capacity-matched zeroing of the question--KC incidence
 message does not meet the rule ($0/5$). On XES3G5M, under a
@@ -172,8 +174,9 @@ check remain available as a forced-reliance diagnostic
   lift. Applying the same membership diagnostic to published hyperedge
   formulas is future work.
   \item \textbf{C2 (which knowledge predicts).} An operating rule
-  ($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a designated control on five
-  paired seeds; an internal convention, not a public registry) plus a
+  ($\Delta\mathrm{val}\ge{+}0.002$ vs.\ a designated control on
+  XES3G5M learner fold~0 across five paired training seeds; an internal
+  convention, not a public registry) plus a
   repeat-target-masked KC-expanded protocol. Adding a Linear
   $\log(1{+}\Delta t)$ \emph{branch} meets the rule as a
   \emph{package-level} ablation on the QKC-T backbone ($5/5$ seeds
@@ -183,7 +186,8 @@ check remain available as a forced-reliance diagnostic
   as gap input. Architecture-matched T-zero / T-misaligned on the same
   maps remain positive but below the val rule ($0/5$; mean
   $\Delta\mathrm{val}{+}0.00183$ / $+0.00144$;
-  Table~\ref{tab:a1-timing}). We credit the timing package, not aligned
+  Table~\ref{tab:a1-timing}). We credit the timing package as
+  attempt-context timing and boundary information, not aligned
   gap input as a separate source. Capacity-matched zeroing of the
   train-only incidence \emph{message} does not meet the rule ($0/5$;
   Table~\ref{tab:qkc-capacity}). History-only LSTM $\Delta t$ is $2/5$
@@ -205,8 +209,10 @@ fixed backbone. Architectural choices of that backbone (Rasch item
 parameters, item embeddings, chunked windows, optimiser budget) are
 outside the ladder. The credited messages contribute
 ${+}0.0027$ within the backbone, whereas the distance from QKC-T to DKT
-is ${+}0.0286$; the remainder is backbone and protocol and is not
-attributed here (Section~\ref{sec:auc-tradeoff}).
+is ${+}0.0286$. The ladder does not decompose the $+0.0286$
+cross-model gap to DKT; that gap additionally reflects differences in
+backbone architecture, representations, optimisation, and protocol
+(Section~\ref{sec:auc-tradeoff}).
 \input{tables/table_claims}
 
 % =============================================================================
@@ -499,6 +505,10 @@ the same learner, then $x=\log(1+\Delta t)$
 (\texttt{log\_time\_gaps}).
 A learner's first row and later KC-rows of the same attempt (identical
 start time) have $\Delta t{=}0$.
+Because those zeros also mark attempt boundaries, the Linear-$\Delta t$
+channel can encode elapsed time \emph{and} boundary structure; we
+credit the package as attempt-context timing and boundary information,
+not as a pure elapsed-time effect (Section~\ref{sec:limitations}).
 That start-to-start gap includes time on the previous question plus idle;
 it is not a pure waiting time and is not the duration of the scored item.
 We treat the prediction time as \emph{attempt-onset
@@ -592,7 +602,10 @@ finished (128--202\,min; test-only SD $0.0001$). That run is
 Under P0's older evaluator DGEKT already sat below DKT
 ($0.841$ vs.\ $0.858$); the repeat-target-masked-protocol drops are parallel
 ($-0.056$ vs.\ $-0.057$), so Table~\ref{tab:auc-xes3g5m} does not invert
-P0's ranking. P0 treats DGEKT as graph-inert. Status of every
+P0's ranking. Under the inherited P0 recipe used here, the DGEKT graph
+pathway had previously been diagnosed as graph-inert; these numbers
+should not be interpreted as a reproduction of the performance reported
+in \cite{dgekt2024}. Status of every
 Table~\ref{tab:auc-xes3g5m} baseline is therefore contextual
 (inherited recipe or envelope-matched GIKT), not original-paper verified.
 The companion PDF is attached as related unpublished material.
@@ -600,7 +613,8 @@ The companion PDF is attached as related unpublished material.
 \paragraph{Relation to P0}
 Train-only graph construction, edge provenance, and the pairwise DAG
 audit in \cite{daominh2026p0} are reused and are not contradicted by
-this paper. Companion P0 is a separate manuscript under review.
+this paper. Companion P0 is a separate manuscript prepared for
+\emph{Engineering Applications of Artificial Intelligence} (EAAI).
 The two papers share train-only graph construction, not the DH$^2$
 evaluator or the attribution twins. Downstream AUC columns in P0 that
 score every KC-expanded row under an older evaluator are \emph{not}
@@ -611,7 +625,7 @@ protocol; it is not an isolated architecture cost. If a P0 claim
 depends on the older evaluator, that claim should be updated on the P0
 manuscript's own track; this paper does not wait on P0 acceptance.
 
-\subsection{Clean evaluation protocol}
+\subsection{Repeat-target-masked KC-expanded evaluation protocol}
 \label{sec:clean-protocol}
 Headline AUCs use a \emph{repeat-target-masked KC-expanded} protocol
 aligned with \textsc{pyKT}'s repeat-format warning
@@ -686,9 +700,11 @@ For Q$\leftarrow$KC incidence the designated control is a
 capacity-matched zero-incidence twin (Table~\ref{tab:qkc-capacity}):
 mean $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$ over five seeds
 ($0/5$ seeds pass; 95\% CI $[{-}0.00052,{+}0.00032]$).
-Under this shared-sum fusion the incidence message contributes at most
-${+}0.0003$ validation AUC with 95\% confidence. We report that as a
-bounded null rather than only as a failed threshold.
+On XES3G5M learner fold~0, across five paired training seeds and under
+the shared-sum fusion of Eq.~\eqref{eq:qkc}, the 95\% CI bounds the
+mean incidence contribution above by approximately $+0.0003$
+validation AUC. We report that as a bounded null rather than only as a
+failed threshold.
 A historical hard-off comparison that
 removed the whole question pathway is capacity-mismatched and is not a
 credit test. Adding Linear $\Delta t$ vs.\ Q$\leftarrow$KC has mean
@@ -773,14 +789,19 @@ GIKT. Concept-stack \texttt{HypergraphConv} is off on these arms.
 \input{tables/table_attribution_summary}
 \input{tables/table_auc_p0_dt_folds}
 
-Table~\ref{tab:negative-knowledge} lists pre-specified diagnostics
+Table~\ref{tab:negative-knowledge} lists operating-gate diagnostics
 ($\Delta\mathrm{val}$ gate ${+}0.002$, not loosened). HypergraphConv on
 multi-KC item hyperedges (K), hint-item session hyperedges on
 FoundationalASSIST (L), a full Q-matrix (M1), and a Junyi expert DAG on a
 5k-user subsample (M5) remain single-seed. Teacher grouping (M4; ASSIST2012
 $L{=}200$) and per-concept exponential forgetting (P4; XES $L{=}400$) are
-now five-seed and do not meet the rule on any seed ($0/5$; mean $\Delta\mathrm{val}$
-$+0.00025$ and $-0.00252$). ``Does not meet the gate'' means the form is
+now five-seed and do not meet the rule on any seed ($0/5$).
+On ASSISTments~2012, across five paired training seeds, teacher
+grouping is a bounded null (mean $\Delta\mathrm{val}{+}0.00025$;
+95\% CI $[{-}0.00063,{+}0.00112]$).
+Per-concept exponential forgetting on XES3G5M fold~0 is
+mean $\Delta\mathrm{val}{-}0.00252$.
+``Does not meet the gate'' means the form is
 not credited in that configuration, not that the knowledge type is valueless. The small FoundationalASSIST session-HE shift
 $0.720\rightarrow 0.722$ (concept projection; Table~\ref{tab:foundational-assist})
 is therefore not a hypergraph-AUC claim: the isolated hint-item HE arm
@@ -808,11 +829,19 @@ within-learner temporal correlation. The two means differ by about
 $27\%$; we report both and do not prefer one as the unique aligned-gap
 estimate. Beside those architecture-matched figures, the package-level
 zero-incidence contrast is ${+}0.00255$
-(Table~\ref{tab:qkc-zero-time}). We do not convert any of these
+(Table~\ref{tab:qkc-zero-time}).
+On that same zero-incidence backbone the three-point ladder of mean
+$\Delta$val is $+0.00071$ (T-zero vs.\ no-time;
+95\% CI $[{+}0.00053,{+}0.00090]$), $+0.00183$ (T-real vs.\ T-zero),
+and $+0.00255$ (T-real vs.\ no-time). Those are absolute figures from
+separately trained arms, not a causal share; we do not convert them
+into percentages of one another.
+We do not convert any of these
 $\Delta$s into a percentage of another contrast: they come from
 separately trained models.
 Adding the time branch improves the
-ablations. We credit that package under the pre-specified rule; we do
+ablations. We credit that package under the operating rule as
+attempt-context timing and boundary information; we do
 not isolate aligned gap input as a separately credited source.
 The same timing branch also passes when the
 backbone has \emph{zero} Q--KC incidence ($5/5$ seeds pass; mean
@@ -837,7 +866,7 @@ $+0.00280$; combining time with prior-step \texttt{saw\_answer} is additive
 Per-concept $\exp(-\mathrm{softplus}(\theta_c)\cdot
 \mathrm{gap})$ does not meet the gate versus Linear on any seed (P4; mean
 $\Delta\mathrm{val}{-}0.00252$). We treat Linear $\Delta t$ as
-attempt-context knowledge on this backbone, not as a hypergraph effect,
+attempt-context timing and boundary information on this backbone, not as a hypergraph effect,
 and we do not generalise that to every forgetting form. Query-side $\Delta t$ uses the
 gap to the item whose identity is already the next-step query; it is not
 the duration of a step whose correctness has been observed. Against AKT
@@ -926,14 +955,19 @@ envelope-matched. Other baselines come from reused
 P0 tables on the older budget. The GIKT edge is small (${+}0.0036$ from
 Zero$+\Delta t$) and is a matched \emph{training envelope}, not a matched
 tuning search (\ref{app:hparams}).
-The tracer architecture was selected from a pre-specified ablation
-ladder evaluated on validation (incidence on/off, three $\Delta t$
+The tracer architecture was selected from a validation ablation
+ladder (incidence on/off, three $\Delta t$
 injection sites, and the Table~\ref{tab:negative-knowledge}
 diagnostics), whereas each baseline used a single inherited
 hyperparameter vector. This search asymmetry favours the DH$^2$ arms,
 not the baselines, and is a second reason the comparison is contextual.
 The five-seed credit map is established on learner fold~0; repeating
-paired $\Delta$ on other learner folds is future work. Learner-level
+paired $\Delta$ on other learner folds is future work.
+Because zero gaps also mark later KC-expanded rows of the same attempt
+(and learner-start rows), the Linear-$\Delta t$ channel can encode both
+elapsed-time information and attempt-boundary structure
+(Section~\ref{sec:limitations}).
+Learner-level
 bootstrap CIs on one checkpoint are a secondary diagnostic of learner
 sampling, not training-seed CIs, not event-aligned, and they do not use the
 $1{,}093{,}718$-row occurrence join. HypergraphConv and
@@ -970,13 +1004,15 @@ LSTM-only arm and must not claim the both-mode $5/5$ credit
 \label{sec:auc-tradeoff}
 The results answer an attribution question, not ``hypergraph NNs beat
 GIKT.'' Each paragraph below asks whether one knowledge type survived
-the pre-specified ablation, and what that means for a system builder.
+the validation ablation, and what that means for a system builder.
 Our ladder attributes knowledge messages on a fixed backbone; it does
 not attribute the backbone's own architectural choices. The credited
 messages contribute ${+}0.0027$ within that backbone, whereas the
-distance to DKT is ${+}0.0286$; the remainder is backbone and protocol
-and is outside the scope of this attribution. We do not convert those
-two distances into a percentage of one another.
+distance to DKT is ${+}0.0286$. The ladder does not decompose the
+$+0.0286$ cross-model gap to DKT; that gap additionally reflects
+differences in backbone architecture, representations, optimisation,
+and protocol. We do not convert those two distances into a percentage
+of one another.
 
 \paragraph{Question--KC incidence.}
 Does not survive as credited structural knowledge under the
@@ -1020,9 +1056,22 @@ part of this attribution map (Supplementary Material).
 \subsection{Limitations}
 \label{sec:limitations}
 \begin{itemize}
+  \item Because zero gaps also mark later KC-expanded rows of the same
+  attempt (and learner-start rows), the Linear-$\Delta t$ channel can
+  encode both elapsed-time information and attempt-boundary structure.
+  We therefore interpret the credited package as attempt-context timing
+  and boundary information rather than a pure effect of elapsed time.
+  On the fold-0 test export every repeat row has raw $\Delta t{=}0$
+  ($183{,}741$ rows; $14.4\%$ of unchunked P0-protocol targets, not of
+  the $n{=}1{,}093{,}755$ scored set). Learner-start rows are
+  $\Delta t{=}0$ by construction but are not next-step targets. A
+  three-way split of true zero-second gaps between distinct attempts
+  needs the processed parquet, which is not in the public snapshot. A
+  no-time arm plus a $1[\Delta t{=}0]$ indicator is reserved for
+  rebuttal and was not run for this submission.
   \item Discussion-thread and teacher-intervention hyperedges remain
   data-blocked; session+Hint hyperedges on FoundationalASSIST shift AUC
-  $0.720\rightarrow 0.722$ under concept projection, but the pre-specified
+  $0.720\rightarrow 0.722$ under concept projection, but the operating-gate
   hint-item hypergraph arm does not meet the $+0.002$ gate (L in
   Table~\ref{tab:negative-knowledge}) and is not claimed as hypergraph
   novelty.
@@ -1069,8 +1118,12 @@ part of this attribution map (Supplementary Material).
 We presented DH$^2$A-KT as leakage-audited knowledge attribution: which
 structural and temporal knowledge survives a laddered ablation with
 capacity-matched, architecture-matched, and package-level controls.
+The credit ladder was estimated on XES3G5M learner fold~0 using five
+paired training seeds; absolute QKC-T AUC was additionally stable
+across three learner folds.
 The timing package passes the operating rule in package-level
-ablations. Architecture-matched controls retain a consistently
+ablations as attempt-context timing and boundary information.
+Architecture-matched controls retain a consistently
 positive aligned-gap contrast, but its mean improvement
 ($+0.00183$ vs.\ T-zero; $+0.00144$ vs.\ T-misaligned) remains below
 the separate $+0.002$ credit threshold. Capacity-matched zeroing of
@@ -1078,17 +1131,21 @@ the question--KC incidence message does not meet the rule.
 QKC-T is the observed-incidence evaluation arm;
 Zero$+\Delta t$ is the credited-minimal control. On XES3G5M
 (repeat-target-masked KC-expanded, $L{=}400$, test-only), both arms
-reach $0.8295{\pm}0.0001$ over five seeds.
+reach $0.8295{\pm}0.0001$ over five training seeds on fold~0.
 Table~\ref{tab:auc-xes3g5m} is a contextual benchmark, not a
 tuning-matched superiority claim. Three learner folds of QKC-T mean
-$0.8295{\pm}0.0004$. History-only $\Delta t$ is $2/5$ seeds pass and is
+$0.8295{\pm}0.0004$; that figure is absolute AUC, not a cross-fold
+credit test. History-only $\Delta t$ is $2/5$ seeds pass and is
 not credited.
 Future work, in order: (i)~run DyGKT \cite{dygkt2024} under this
 evaluator; (ii)~ablate backbone choices that sit outside the present
 message ladder; (iii)~a question-level all-in-one evaluator;
 (iv)~five-seed repeats of K/L/M1/M5; (v)~hyperedge-native leakage
 statistics and the membership diagnostic on published hyperedge
-formulas.
+formulas; (vi)~stratify results by KC density using P0's existing
+group definition (prediction files already stored);
+(vii)~a diagnostic permutation of KC order within multi-KC attempts
+(not a replacement protocol).
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
@@ -1122,9 +1179,10 @@ Evaluation code and numeric table artefacts frozen on
 \url{https://github.com/edu-risk-lab/DH2A-KT}
 (tag \texttt{kbs-submit-2026-09-09};
 DOI \url{https://doi.org/10.5281/zenodo.22676635}).
-The \LaTeX{} sources of \emph{this} PDF are tagged
-\texttt{kbs-submit-2026-09-14} on the same repository.
-A new Zenodo version will be minted when that tag is pushed.
+The wording of this PDF is a later editorial revision of that freeze;
+the numeric evaluation artefacts are unchanged.
+We do not print a second DOI until a Zenodo version of this PDF's
+\LaTeX{} exists and can be opened from a logged-out browser.
 A table-to-script map is in \texttt{docs/paper-artifacts.md}.
 Exploratory Critic and IPW analyses are in the Supplementary Material,
 not in the main claim map.
@@ -1152,7 +1210,7 @@ Hugging Face dataset's Responsible Use Guidelines for this study.
 The evaluation arm in Table~\ref{tab:auc-xes3g5m} is QKC-T;
 Zero$+\Delta t$ is the credited-minimal control.
 A graph-only diagnostic encoder (chain
-hyperedges, no question LSTM path; log label v2) exists so a destruction
+hyperedges, no question LSTM path; Table~\ref{tab:aliases}) exists so a destruction
 check is interpretable: mean test AUC $0.7516{\pm}0.0015$ vs.\ reused GKT
 $0.8336{\pm}0.0010$ under P0's GKT budget ($L{=}200$;
 Table~\ref{tab:auc-xes3g5m-v2}). Frozen-weight node-drop $p{=}0.9$
@@ -1178,8 +1236,8 @@ Table~\ref{tab:hparams} records, for each model in
 Table~\ref{tab:auc-xes3g5m}, which knobs were searched, which value was
 used, and how many distinct configurations were tried
 \cite{pineau2021repro}. We do not claim a matched \emph{tuning} budget.
-The tracer architecture was selected from a pre-specified ablation
-ladder evaluated on validation---incidence on/off, three $\Delta t$
+The tracer architecture was selected from a validation ablation
+ladder---incidence on/off, three $\Delta t$
 injection sites, and the Table~\ref{tab:negative-knowledge}
 diagnostics---whereas each baseline used a single inherited
 hyperparameter vector. That asymmetry favours the DH$^2$ arms in

@@ -24,7 +24,10 @@ $\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}; T-real) \\
 T-zero / T-misaligned & Same Zero$+\Delta t$ maps with
 \texttt{--time-gap-control zero} or \texttt{misaligned} \\
 Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
-question LSTM path (\texttt{v2}) \\
+question LSTM path (\texttt{v2}; diagnostic encoder only) \\
+Q$\leftarrow$KC, no $\Delta t$, window last & Archived no-time checkpoint
+under \texttt{window-mode last} (\texttt{v4q\_clean}); not the
+Table~\ref{tab:auc-xes3g5m} Q$\leftarrow$KC run \\
 \bottomrule
 \end{tabular}
 \end{table}

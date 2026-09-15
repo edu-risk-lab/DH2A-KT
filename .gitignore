@@ -331,6 +331,8 @@ temp/_diag_pykt_smask/
 !results/tables/rescore_testonly_2026-09-08.log
 !results/tables/a3_dt_repeat_dist.json
 !results/tables/a3_dt_repeat_diag.log
+!results/tables/threshold_sensitivity_recount.json
+!results/tables/a2_zero_gap_three_way.json
 !results/tables/a1_timing_input_controls.csv
 !results/tables/a1_timing_input_controls_summary.json
 !results/tables/a1_timing_logs/

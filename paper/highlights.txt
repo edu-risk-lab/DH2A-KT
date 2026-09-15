@@ -1,5 +1,5 @@
 Leakage-audited KT: construct, audit membership leak, then credit.
 Q-KC incidence fails a capacity-matched gate on this fusion (0/5).
-A Linear Delta-t package meets the gate; aligned-gap input does not (0/5).
+A Linear Delta-t package meets the gate on XES3G5M fold 0 as attempt-context timing and boundary information; aligned-gap input does not (0/5).
 Zero+Delta-t is the credited-minimal control (XES3G5M 0.8295 test-only).
 Teacher grouping and exponential forgetting are 0/5; other metadata 1-seed.

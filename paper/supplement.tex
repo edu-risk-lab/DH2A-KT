@@ -27,13 +27,14 @@ Three agents read frozen tracer scores: a Diagnostician writes a
 rationale, a Critic flags output that contradicts the frozen
 $P(\mathrm{correct})$, and a Tutor writes session hyperedges that the
 frozen tracer does not consume. We ran $n{=}500$ prompts (XES3G5M
-fold~0, seed 42, Qwen2.5-7B via Ollama) on the graph-only v2 checkpoint
-and again on QKC-T. Independent generation (IG) omits
+fold~0, seed 42, Qwen2.5-7B via Ollama) on the graph-only diagnostic
+checkpoint and again on QKC-T. Independent generation (IG) omits
 $P(\mathrm{correct})$ from the Diagnostician prompt while the Critic
 still sees the true score, so the flag-rate gap is largely definitional
 and is not a content finding.
 On QKC-T, grounded/IG flags are $0.018$/$0.766$ with mean JC
-$0.161$/$0.152$; the JC gap is $\approx{+}0.010$.
+$0.161$/$0.152$; the JC gap is $0.009$ (grounded $0.161$ minus IG
+$0.152$).
 Blinded Likert ratings on a seed~42 subsample of $n{=}100$ grounded
 tracer explanations (3 independent raters) give faithfulness
 $4.55{\pm}0.63$ and usefulness $4.01{\pm}0.74$ (ordinal Krippendorff
@@ -43,14 +44,17 @@ Those $\alpha$ values are moderate and below the $0.667$/$0.800$
 levels often suggested for tentative or firmer conclusions; we
 therefore treat the ratings as an exploratory pilot, not as a
 reliability warrant.
-The JC gap is $0.009$ (grounded $0.161$ minus IG $0.152$), not an
-approximate ${+}0.010$.
 An earlier dual-rater $n{=}40$ pack on
 the graph-only diagnostic checkpoint is archived and is not the primary
 human-eval row.
 Removing the Critic sets the flag rate to $0$ by construction while
 leaving ID-anchored KC-Jaccard unchanged.
 \input{tables/table_tier2}
+The large flag-rate change after output-format calibration
+($0.124\rightarrow 0.000$ on the same graph-only checkpoint;
+Table~\ref{tab:tier2}) indicates prompt and format sensitivity; Critic
+flags should therefore not be interpreted as a validated contradiction
+detector.
 \input{tables/table_kc_jaccard_ig}
 \input{tables/table_human_eval}
 \input{tables/table_paired_ablation}

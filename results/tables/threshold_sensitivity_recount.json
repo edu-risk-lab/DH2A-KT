@@ -1,0 +1,120 @@
+{
+  "seeds": [
+    0,
+    17,
+    42,
+    1234,
+    2024
+  ],
+  "source_files": [
+    "results\\tables\\qkc_capacity_matched_matrix.csv",
+    "results\\tables\\a1_timing_input_controls.csv",
+    "results\\tables\\a7_query_dt_ablation.csv"
+  ],
+  "unrounded_deltas": {
+    "package_zero_incidence": {
+      "0": 0.002424532262463419,
+      "17": 0.0024545051475142188,
+      "42": 0.002434835440393579,
+      "1234": 0.0027000687806615353,
+      "2024": 0.0027209305462827515
+    },
+    "package_observed_incidence": {
+      "0": 0.003062654491593,
+      "17": 0.0027821630407509,
+      "42": 0.0027968050290879,
+      "1234": 0.0023564039552208,
+      "2024": 0.002678363757417
+    },
+    "aligned_vs_t_zero": {
+      "0": 0.00179216858096376,
+      "17": 0.0018671607068441176,
+      "42": 0.0018048759584330387,
+      "1234": 0.001746511651633531,
+      "2024": 0.0019575425769169374
+    },
+    "aligned_vs_t_misaligned": {
+      "0": 0.0014839703745486155,
+      "17": 0.0012411371306765284,
+      "42": 0.0015873076550190213,
+      "1234": 0.001082149820677225,
+      "2024": 0.0017888485884325345
+    },
+    "incidence": {
+      "0": -0.0005622772954489985,
+      "17": -0.00010027612489682536,
+      "42": -0.00020690228145847644,
+      "1234": 0.00038098411607134786,
+      "2024": -2.7215872306474154e-05
+    }
+  },
+  "t_zero_vs_no_time": {
+    "name": "extra-map without aligned gap (T-zero minus no-time)",
+    "per_seed": {
+      "0": 0.0006323636814996592,
+      "17": 0.0005873444406701012,
+      "42": 0.0006299594819605403,
+      "1234": 0.0009535571290280043,
+      "2024": 0.0007633879693658141
+    },
+    "mean": 0.0007133225405048238,
+    "ci95": [
+      0.000527494110627811,
+      0.0008991509703818366
+    ],
+    "sd": 0.0001496608020735388,
+    "note": "Descriptive three-point ladder point, not a causal share and not a capacity effect. Do not convert to a percentage."
+  },
+  "cells_k_of_5": {
+    "package_zero_incidence": {
+      "0.0010": 5,
+      "0.0015": 5,
+      "0.0020": 5,
+      "0.0025": 2,
+      "0.0030": 0
+    },
+    "package_observed_incidence": {
+      "0.0010": 5,
+      "0.0015": 5,
+      "0.0020": 5,
+      "0.0025": 4,
+      "0.0030": 1
+    },
+    "aligned_vs_t_zero": {
+      "0.0010": 5,
+      "0.0015": 5,
+      "0.0020": 0,
+      "0.0025": 0,
+      "0.0030": 0
+    },
+    "aligned_vs_t_misaligned": {
+      "0.0010": 5,
+      "0.0015": 2,
+      "0.0020": 0,
+      "0.0025": 0,
+      "0.0030": 0
+    },
+    "incidence": {
+      "0.0010": 0,
+      "0.0015": 0,
+      "0.0020": 0,
+      "0.0025": 0,
+      "0.0030": 0
+    }
+  },
+  "mins": {
+    "package_zero_incidence": 0.002424532262463419,
+    "package_observed_incidence": 0.0023564039552208,
+    "aligned_vs_t_zero": 0.001746511651633531,
+    "aligned_vs_t_misaligned": 0.001082149820677225,
+    "incidence": -0.0005622772954489985
+  },
+  "window": {
+    "aligned_tzero_min": 0.001746511651633531,
+    "package_obs_min": 0.0023564039552208,
+    "package_zero_min": 0.002424532262463419,
+    "qualitative_map_open": 0.001746511651633531,
+    "qualitative_map_closed_upper": 0.0023564039552208,
+    "note": "Both package columns are 5/5, aligned-gap columns are not 5/5, and incidence is 0/5, for any threshold in (aligned_tzero_min, min(package mins)]."
+  }
+}

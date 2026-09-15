@@ -6,13 +6,14 @@ Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 (that exporter writes the graph-only $L{=}200$ format).
 
 The 9 September 2026 tag `kbs-submit-2026-09-09` freezes evaluation code
-and numeric artefacts. This PDF's LaTeX is tag `kbs-submit-2026-09-14`.
+and numeric artefacts (DOI https://doi.org/10.5281/zenodo.22676635).
+This PDF is a later editorial revision of that freeze.
 
 | Paper table / figure | Script | Result file |
 |---|---|---|
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
-| Table threshold sensitivity | recount of printed Δval | `paper/tables/table_threshold_sensitivity.tex` |
+| Table threshold sensitivity | `scripts/45_recount_threshold_sensitivity.py` | `results/tables/threshold_sensitivity_recount.json`, `paper/tables/table_threshold_sensitivity.tex` |
 | Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
 | Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |
 | Citation verification log | Crossref/OpenAlex pass 10 Sep 2026 | `docs/citation_verification_log.md` |
@@ -20,6 +21,7 @@ and numeric artefacts. This PDF's LaTeX is tag `kbs-submit-2026-09-14`.
 | Table AUC XES3G5M (repeat-target-masked L=400, test-only) | `scripts/36_rescore_a2_testonly.py` + capacity-matched + pyKT CSVs | `results/tables/table5_testonly_rebuild.csv`, `a2_testonly_rescore.csv`, `qkc_capacity_matched_matrix.csv`, `a2_multiseed_summary.csv` |
 | A2/A7 test-only rescore (server 08/09) | `scripts/36_rescore_a2_testonly.py` | `results/tables/a2_testonly_rescore.csv`, `a2_testonly_rescore_summary.json` |
 | A3 Δt-at-repeats diagnosis | `scripts/37_a3_dt_repeat_diag.py` | `results/tables/a3_dt_repeat_dist.json` |
+| A2 three-way zero-gap split | `scripts/46_zero_gap_three_way.py` | `results/tables/a2_zero_gap_three_way.json` (skipped if parquet absent) |
 | Table protocol residual (A3) | stored rescores | `p0_dt_testonly_clean.csv`, `p0_dt_fold{1,2}_testonly_clean.csv`, `xes3g5m_fold0_p0parity_protocol.csv` |
 | Table attribution summary | `scripts/33_b8_holm_credit_tests.py`, `scripts/34_qkc_capacity_matched.py` | `results/tables/b8_holm_credit_tests.json`, `qkc_capacity_matched_summary.json` |
 | Table QKC capacity-matched (app.) | `scripts/34_qkc_capacity_matched.py` | `results/tables/qkc_capacity_matched_{matrix.csv,summary.json}` |
