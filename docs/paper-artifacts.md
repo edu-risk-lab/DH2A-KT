@@ -7,8 +7,9 @@ Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 
 The 9 September 2026 tag `kbs-submit-2026-09-09` freezes evaluation code
 and numeric artefacts (DOI https://doi.org/10.5281/zenodo.22676635).
-This PDF's LaTeX is tag `kbs-submit-2026-09-15`
-(DOI https://doi.org/10.5281/zenodo.22772808).
+An earlier manuscript freeze is tag `kbs-submit-2026-09-15`
+(DOI https://doi.org/10.5281/zenodo.22772808); the current PDF supersedes
+that freeze.
 
 | Paper table / figure | Script | Result file |
 |---|---|---|
@@ -58,6 +59,8 @@ This PDF's LaTeX is tag `kbs-submit-2026-09-15`
 | Table paired diagnostics (supplement) | same | same JSON |
 | Table human Likert n=100 (supplement) | pack in `results/tables/tier2_human_eval_tracer_n100/` | `paper/tables/table_human_eval.tex` |
 | P0 overlap / evaluator map | hand-maintained | `docs/p0_overlap_disclosure.md` |
+| Related unpublished P0 (S1, named) | `paper/S1_P0_for_KBS/build_s1.py` | `paper/S1_P0_related_unpublished.pdf`; notes `paper/S1_P0_README.md` |
+| KBS Editorial Manager pack | `paper/build_kbs_package.py` | `QuyDinhTruocKhiSubmit/submission_KBS/` |
 | Supplementary Material (Critic + IPW) | hand-maintained | `paper/supplement.tex` |
 | Table graph-only v2 AUC (app.) | `scripts/05_run_manipulation_check.py` | `paper/tables/table_auc_xes3g5m_v2.tex` |
 | Holm / paired credit tests | `scripts/33_b8_holm_credit_tests.py` | `results/tables/b8_holm_credit_tests.json` |

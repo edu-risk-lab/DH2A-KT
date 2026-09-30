@@ -1,10 +1,11 @@
 % DH^{2} from results/tables/a6_calibration_xes3g5m_fold0.csv (n=1,093,755).
 % pyKT from results/tables/a6_calibration_pykt_xes3g5m_fold0.csv (n=1,093,720).
-\begin{table}[t]
+\begin{table}[ht]
 \caption{Calibration on XES3G5M fold~0 test predictions under the
 repeat-target-masked protocol (mask-repeats, chunked, $L{=}400$). ECE uses 15 equal-width bins;
-lower is better. DH$^2$ checkpoints: seed~42 (QKC-T AUC $0.8296$ here matches
-Table~\ref{tab:auc-xes3g5m}; Zero$+\Delta t$ $0.8294$ is the same seed-42
+lower is better. DH$^2$ checkpoints: seed~42 (QKC-T AUC $0.8296$ is the fold~0
+checkpoint in Table~\ref{tab:auc-p0-dt-folds}, not the five-seed mean
+$0.8295{\pm}0.0001$ in Table~\ref{tab:auc-xes3g5m}; Zero$+\Delta t$ $0.8294$ is the same seed-42
 checkpoint as Table~\ref{tab:qkc-zero-time}; the pathway-off twin $0.8202$ is
 calibration-only and is not a Table~\ref{tab:auc-xes3g5m} row),
 scored on native $n{=}1{,}093{,}755$ positions. pyKT GIKT/AKT/\textit{simpleKT}
@@ -25,7 +26,7 @@ Figure~\ref{fig:reliability-xes3g5m}.}
 \toprule
 Model & AUC & Brier & NLL & ECE \\
 \midrule
-Q$\leftarrow$KC $+\Delta t$ & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
+QKC-T & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
 Zero$+\Delta t$ & 0.8294 & 0.1208 & 0.3831 & 0.0072 \\
 Q$\leftarrow$KC on & 0.8270 & 0.1216 & 0.3857 & 0.0103 \\
 Q$\leftarrow$KC off (twin) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\

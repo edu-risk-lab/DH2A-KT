@@ -230,6 +230,13 @@ def main() -> int:
         "config skill_csv. Sequences stay single-kc.",
     )
     parser.add_argument(
+        "--time-gap-pad",
+        action="store_true",
+        help="Allocate Linear(1, hidden) and add a zero multiple so the "
+        "no-time arm matches the timed arm's parameter count. Mutually "
+        "exclusive with --time-gap. Does not credit the gap input.",
+    )
+    parser.add_argument(
         "--time-gap",
         action="store_true",
         help="v4: dedicated Linear on log1p seconds since the previous step of "
@@ -390,6 +397,9 @@ def main() -> int:
         args.hint_hypergraph or train_cfg.get("hint_hypergraph", False)
     )
     time_gap = bool(args.time_gap or train_cfg.get("time_gap", False))
+    time_gap_pad = bool(args.time_gap_pad or train_cfg.get("time_gap_pad", False))
+    if time_gap and time_gap_pad:
+        raise SystemExit("--time-gap and --time-gap-pad are mutually exclusive")
     time_gap_mode = str(
         args.time_gap_mode or train_cfg.get("time_gap_mode", "both") or "both"
     )
@@ -661,6 +671,7 @@ def main() -> int:
             hint_hypergraph=hint_hypergraph,
             hint_hyperedges=hint_hyperedges,
             time_gap=time_gap,
+            time_gap_pad=time_gap_pad,
             time_gap_mode=time_gap_mode,
             time_gap_control=time_gap_control,
             time_gap_seed=time_gap_seed,

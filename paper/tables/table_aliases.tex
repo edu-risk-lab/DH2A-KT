@@ -3,15 +3,17 @@
 implementation aliases from training logs, not model names.}
 \label{tab:aliases}
 \centering
-\begin{tabular}{@{}p{3.6cm}p{8.6cm}@{}}
+\footnotesize
+\begingroup
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular}{@{}p{4.35cm}p{8.0cm}@{}}
 \toprule
 Name in this paper & Architecture \\
 \midrule
 DH$^2$A-KT & Attribution pipeline: train-only construction, membership
-leakage audit, laddered ablation (capacity-matched, architecture-matched,
-and package-level controls), credit gate, and knowledge map; not one
+audit, laddered ablation, credit gate, and knowledge map; not one
 predictor \\
-QKC-T reference arm & LSTM with train-only Q$\leftarrow$KC
+QKC-T (eval.\ arm) & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\
 Q$\leftarrow$KC only & Same LSTM without the $\Delta t$ branch \\
@@ -19,15 +21,16 @@ Pathway-off twin & Same LSTM with the question pathway removed
 (historical hard-off; capacity-mismatched) \\
 Capacity-matched zero twin & Same question pathway with incidence matrix
 zeroed (\texttt{--question-incidence-control zero}) \\
-Zero-incidence$+\Delta t$ (minimal positive control) & Capacity-matched zero twin plus Linear
+Zero$+\Delta t$ (credited-minimal) & Capacity-matched zero twin plus Linear
 $\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}; T-real) \\
 T-zero / T-misaligned & Same Zero$+\Delta t$ maps with
 \texttt{--time-gap-control zero} or \texttt{misaligned} \\
 Graph-only diagnostic & HypergraphConv encoder on chain hyperedges, no
 question LSTM path (\texttt{v2}; diagnostic encoder only) \\
-Q$\leftarrow$KC, no $\Delta t$, window last & Archived no-time checkpoint
+Q$\leftarrow$KC, no $\Delta t$, last & Archived no-time checkpoint
 under \texttt{window-mode last} (\texttt{v4q\_clean}); not the
 Table~\ref{tab:auc-xes3g5m} Q$\leftarrow$KC run \\
 \bottomrule
 \end{tabular}
+\endgroup
 \end{table}

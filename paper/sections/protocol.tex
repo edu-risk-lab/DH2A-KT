@@ -1,0 +1,110 @@
+% Protocol section. Included from main.tex before the tracer.
+\section{Credit protocol}
+\label{sec:protocol}
+
+DH$^2$A-KT decides whether a knowledge message may be credited for a
+change in next-step AUC. The name denotes this protocol. It is not a
+second predictor. The tracer in Section~\ref{sec:encoding} is one
+backbone on which the protocol is run. Fig.~\ref{fig:architecture}
+is the decision map for the reference run.
+
+\subsection{Three rungs and three outcomes}
+\label{sec:protocol-rungs}
+A contrast sits on one rung
+(Table~\ref{tab:evidence-types}).
+
+\begin{itemize}
+  \item \textbf{(i) Capacity-matched message.} The on and off arms use
+  the same maps. Only the message content changes. On this paper the
+  question--KC incidence twin is this rung.
+  \item \textbf{(ii) Architecture-matched input.} The maps stay. The
+  input is zeroed or misaligned. T-zero and T-misaligned are this rung
+  for the gap.
+  \item \textbf{(iii) Package.} The component is added, including any
+  new maps. Record $\Delta$params. A pass on this rung does not credit
+  the input alone. The linear $\log(1{+}\Delta t)$ branch is this rung:
+  one $\mathrm{Linear}(1,128)$ with bias, 256 parameters, absent from
+  the no-time arm. A no-time arm that keeps those 256 parameters
+  unused (param-padded, flag \texttt{--time-gap-pad}) adds the same
+  $\mathrm{Linear}(1,128)$ and a zero multiple of its output, so the
+  representation matches the no-time arm. That arm was not scored for
+  this submission. Until it is, rung (iii) remains the weakest evidence
+  and is reported with $\Delta$params.
+\end{itemize}
+
+For five paired training seeds, let $\Delta_s$ be validation AUC of the
+on arm minus validation AUC of the designated control. With threshold
+$\tau$:
+
+\begin{itemize}
+  \item \textbf{Credited.} Every $\Delta_s\ge\tau$.
+  \item \textbf{Consistent-positive, not credited.} Every $\Delta_s>0$
+  and at least one $\Delta_s<\tau$. The gain is reported. It is not
+  given a separate credit line.
+  \item \textbf{Unsupported.} Any other pattern, including a negative
+  mean.
+\end{itemize}
+
+The middle outcome is part of the protocol. It is the status of aligned
+gap input on the reference run
+($0/5$; mean $\Delta\mathrm{val}\,{+}0.00183$ versus T-zero and
+${+}0.00144$ versus T-misaligned).
+
+\subsection{Threshold}
+\label{sec:protocol-threshold}
+On the reference corpus, XES3G5M learner fold~0, $\tau{=}{+}0.002$.
+Table~\ref{tab:threshold-sensitivity} recounts the same unrounded
+per-seed deltas at neighbouring cuts. The qualitative map
+(package credited, aligned gap not separately credited, incidence not
+credited) holds for every cut in $(+0.00175,+0.00236]$. The value
+$+0.002$ is the default inside that band. It is anchored to the
+five-seed test-AUC dispersion of the credited arm, printed as
+$\pm0.0001$, so $20\times0.0001{=}0.002$. It is an operating rule, not
+a hypothesis test of $\mu_\Delta{=}0$, and not a registered public
+standard.
+
+On a new corpus or a new backbone, report both cuts. The absolute cut
+remains $+0.002$. The relative cut is
+$\tau_{\mathrm{rel}}{=}\max(0.002,\,20\cdot\mathrm{SD}_{\mathrm{seed}})$,
+where $\mathrm{SD}_{\mathrm{seed}}$ is the sample standard deviation of
+the control arm's validation AUC across the same five seeds. The factor
+20 reproduces $\tau{=}0.002$ when that dispersion equals the reference
+value $0.0001$. If the two cuts disagree, publish both maps and do not
+silently keep the cut that credits more messages.
+
+\subsection{Registering a message}
+\label{sec:protocol-register}
+Algorithm~\ref{alg:register} is the interface. A new message is not
+integrated by editing the tracer alone. It enters the ladder only with
+a declared rung, a designated control, five paired seeds, and one of
+the three outcomes. Worked commands are in
+\texttt{docs/REGISTER\_MESSAGE.md}.
+
+\noindent\textbf{Algorithm~\ref{alg:register}.} Register a message on the credit ladder.
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$
+\STATE Choose rung (i), (ii), or (iii) and the designated control
+\STATE If rung (iii), record $\Delta$params of the added maps
+\FOR{each seed $s\in S$}
+  \STATE Train the on arm and the control with seed $s$; both see the same fold
+  \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{val}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{val}}(\mathrm{control})$
+\ENDFOR
+\STATE $\tau\gets 0.002$ on the reference corpus; also compute $\tau_{\mathrm{rel}}$ (Section~\ref{sec:protocol-threshold})
+\IF{every $\Delta_s\ge\tau$}
+  \STATE outcome $\gets$ Credited
+\ELSIF{every $\Delta_s>0$}
+  \STATE outcome $\gets$ Consistent-positive, not credited
+\ELSE
+  \STATE outcome $\gets$ Unsupported
+\ENDIF
+\STATE A package credit does not credit the input in isolation
+\end{algorithmic}
+\label{alg:register}
+
+Table~\ref{tab:module-hypothesis} states the hypothesis each current
+module tests. Table~\ref{tab:credit-decisions} is the reference
+decision list. Single-seed rows in
+Table~\ref{tab:negative-knowledge} are diagnostics. They are not
+five-seed outcomes.
+\input{tables/table_module_hypothesis}
+\input{tables/table_credit_decisions}

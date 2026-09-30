@@ -1,28 +1,23 @@
 \begin{table}[t]
-\caption{Leakage-audited knowledge attribution summary on fold~0
-(five paired \emph{training} seeds, not five data folds).
-The upper block is the credit map. The lower block is single-seed
-diagnostics and is \emph{not} a five-seed credit test.
-Intervals are 95\% CIs for the mean $\Delta$val across the five
-training seeds on this one fold
-($\mathrm{mean}\pm t_{0.975,4}\,s/\sqrt{5}$); they are not
-across-fold intervals.
-``Observed'' and ``zero'' refer only to the Q$\leftarrow$KC incidence
-message; both retain the same question embedding and projection pathway.
-The operating rule is $\Delta\mathrm{val}\ge{+}0.002$ versus the
-stated control on every seed ($5/5$).
-Package-level timing rows add maps as well as gap input;
-architecture-matched aligned-input rows keep those maps
+\caption{Five-seed credit map on XES3G5M fold~0 (training seeds, not data
+folds). Intervals are 95\% CIs for mean $\Delta$val
+($\mathrm{mean}\pm t_{0.975,4}\,s/\sqrt{5}$). ``Observed''/``zero'' refer
+only to the Q$\leftarrow$KC incidence message. Rule:
+$\Delta\mathrm{val}\ge{+}0.002$ vs.\ the stated control on every seed.
+Package-level rows add maps; architecture-matched rows keep them
 (Table~\ref{tab:a1-timing}).}
 \label{tab:attribution-summary}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabularx}{\textwidth}{@{}Xlrl@{}}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{3.05cm}
+  >{\raggedright\arraybackslash}p{3.45cm}
+  >{\raggedright\arraybackslash}p{3.55cm}
+  >{\raggedright\arraybackslash}p{2.55cm}@{}}
 \toprule
 Knowledge message & Control type & Mean $\Delta$val [95\% CI] & Credit \\
 \midrule
-\multicolumn{4}{@{}l}{\emph{Five-seed credit tests (XES3G5M fold~0 unless noted)}} \\
 Q$\leftarrow$KC incidence & Capacity-matched zero &
 $-0.00010$ $[{-}0.00052,{+}0.00032]$ & 0/5; bounded null \\
 Linear $\Delta t$ (both) & Package vs.\ no-time, observed &
@@ -41,12 +36,23 @@ Teacher grouping & Off-group twin (ASSIST2012) &
 $+0.00025$ $[{-}0.00063,{+}0.00112]$ & 0/5; bounded null \\
 Per-concept exponential gap & Linear $\Delta t$ &
 $-0.00252$ $[{-}0.00276,{-}0.00228]$ & 0/5; below Linear \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{Single-seed diagnostics (not five-seed credit tests).}
+\label{tab:attribution-diagnostics}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{3.6cm}p{3.8cm}rl@{}}
+\toprule
+Knowledge message & Control type & Mean $\Delta$val & Credit \\
 \midrule
-\multicolumn{4}{@{}l}{\emph{Single-seed diagnostics (not five-seed credit)}} \\
 HypergraphConv & No concept convolution & $+0.00025$ & below gate \\
 Hint-item session HE & No hint-item HE & $+0.00007$ & below gate \\
 Full Q-matrix incidence & Matched control & $-0.00010$ & below gate \\
 Expert prerequisite DAG & Matched control (Junyi 5k) & $+0.00056$ & below gate \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}

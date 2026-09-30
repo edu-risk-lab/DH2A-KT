@@ -1,24 +1,10 @@
-\begin{table}[t]
-\caption{Repeat-mask residual already measured on stored checkpoints
-(no new training).
-``P0-protocol'' scores every exported KC-row; ``clean'' masks repeat-row
-targets (\texttt{--mask-repeats}).
-The $+$0.0101 residual on QKC-T fold~0 is the drop from scoring all
-expanded rows to scoring the masked remainder---the pyKT repeat-format
-effect \cite{liu2022pykt}---not an attempt-level collapse and not a
-history-side de-duplication.
-The same recipe on folds~1--2 yields $+$0.0094 and $+$0.0091.
-A Q$\leftarrow$KC checkpoint without the $\Delta t$ branch under a
-different window rule (\texttt{last}, $L$ budget of that run) is near
-null ($-$0.0007); that row does \emph{not} isolate the time branch from
-the window rule. An older chunked no-time residual
-(Q$\leftarrow$KC, no $\Delta t$, $\approx{-}0.0003$;
-Table~\ref{tab:aliases}) is not the
-Table~\ref{tab:auc-xes3g5m} Q$\leftarrow$KC run.
-On the fold-0 test export every repeat row has raw $\Delta t{=}0$
-($183{,}741$ rows; $14.4\%$ of P0-protocol targets).
-We have not yet run attempt-level collapse; headline AUCs remain
-repeat-target-masked KC-expanded, not question-level.}
+\begin{table}[H]
+\caption{Repeat-mask residual on stored checkpoints (no new training).
+P0-protocol scores every exported KC-row; clean masks repeat-row
+targets. The QKC-T drop is the pyKT repeat-format effect
+\cite{liu2022pykt}, not an attempt-level collapse. The no-$\Delta t$
+row uses \texttt{window-mode last} and does not isolate the time
+branch.}
 \label{tab:protocol-residual}
 \centering
 \footnotesize

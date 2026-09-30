@@ -1,6 +1,7 @@
 # Companion P0 — what is reused, what is not comparable
 
-P0 (*Leakage-Controlled Concept Graph Construction…*) is a **separate**
+P0 (*Bounding graph-mediated leakage in knowledge tracing: a train-only
+audit protocol with a predictive exposure measure*) is a **separate**
 manuscript, currently prepared for *Engineering Applications of
 Artificial Intelligence* (EAAI, Elsevier). DH²A-KT (this repo, KBS) is
 an attribution paper on a later evaluator. They are companions, not
@@ -21,5 +22,9 @@ Do not edit that tree for DH²A-KT wording.
 | Graph-only vs GKT $\approx$8-point gap | Encoder + $L{=}200$ + protocol | Mixed | Appendix diagnostic only |
 | Vendored baseline CSVs (BKT, GKT, SKT) | P0 published tables | Those rows are not in Table 5 | Provenance only |
 
-The KBS cover letter and Data availability attach the P0 PDF as
-supplementary material. DH²A-KT does not wait on P0 acceptance.
+Attach at KBS submit: `paper/S1_P0_related_unpublished.pdf`
+(1-page reviewer notice + named main + EAAI supplement).
+Do **not** upload the double-anonymized `main_EAAI.pdf`.
+Rebuild: `python paper/S1_P0_for_KBS/build_s1.py`.
+Editorial Manager notes: `paper/S1_P0_README.md`.
+DH²A-KT does not wait on P0 acceptance.

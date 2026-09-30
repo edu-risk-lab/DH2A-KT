@@ -148,6 +148,12 @@ class DH2KTConfig:
     """
     time_gap: bool = False
     """v4 only: dedicated Linear on log1p inter-step seconds (not in concept_embed)."""
+    time_gap_pad: bool = False
+    """v4 only: allocate the same Linear(1, hidden) and add a zero multiple.
+
+    The parameter count matches the timed arm. The representation does not
+    change. Do not set this together with ``time_gap``.
+    """
     time_gap_mode: str = "both"
     """Where ``time_gap`` / ``time_split`` inject: ``both``, ``lstm``, or ``query``."""
     time_gap_control: str = "real"
@@ -552,7 +558,9 @@ if _TORCH_AVAILABLE:
                         "hint_edge_index",
                         torch.empty((2, 0), dtype=torch.long),
                     )
-                if config.time_gap:
+                if config.time_gap or config.time_gap_pad:
+                    if config.time_gap and config.time_gap_pad:
+                        raise ValueError("time_gap and time_gap_pad are mutually exclusive")
                     self.time_gap_proj = nn.Linear(1, hidden)
                 if config.time_split:
                     self.duration_proj = nn.Linear(1, hidden)
@@ -783,6 +791,13 @@ if _TORCH_AVAILABLE:
         def _add_shared_time_gap(
             self, x: torch.Tensor, gaps: torch.Tensor | None, *, where: str
         ) -> torch.Tensor:
+            if getattr(self.config, "time_gap_pad", False) and not self.config.time_gap:
+                if where != "lstm":
+                    return x
+                zeros = torch.zeros(
+                    *x.shape[:-1], 1, device=x.device, dtype=x.dtype
+                )
+                return x + self.time_gap_proj(zeros) * 0.0
             if not self.config.time_gap or gaps is None:
                 return x
             if not self._time_injects_at(where):

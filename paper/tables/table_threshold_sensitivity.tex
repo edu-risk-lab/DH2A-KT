@@ -1,25 +1,10 @@
-\begin{table}[t]
+\begin{table}[H]
 \caption{Seed-pass counts ($k/5$) if the operating threshold is varied.
-Every cell is a recount of \emph{unrounded} per-seed $\Delta$val on
-XES3G5M fold~0 (Tables~\ref{tab:qkc-zero-time},~\ref{tab:a1-timing},
-~\ref{tab:qkc-capacity},~\ref{tab:a7-query-dt-seeds};
-\texttt{results/tables/threshold\_sensitivity\_recount.json}).
-No retraining.
-The published qualitative map---both package columns credited;
-aligned gap not credited separately; incidence not credited---holds
-for any threshold in $(+0.00175,+0.00236]$ (five-decimal print of the
-unrounded T-zero minimum $+0.0017465$ and the observed-package
-minimum $+0.002356$).
-The first tabulated cut at which the T-zero aligned column leaves
-$5/5$ is $+0.0020$; above $+0.00236$ the observed-incidence timing
-package itself would not.
-The previous upper end $+0.00242$ described the zero-incidence package
-column alone (unrounded min $+0.00242$).
-The $+0.002$ rule remains an operating
-convention locked for this ladder, not a public registry.
-Applying the same absolute threshold on ASSISTments~2012, Junyi, and
-FoundationalASSIST is an unverified assumption: seed-SD was measured on
-XES3G5M fold~0.}
+Every cell recounts \emph{unrounded} per-seed $\Delta$val on XES3G5M
+fold~0 (no retraining). The qualitative map holds for any cut in
+$(+0.00175,+0.00236]$; the first tabulated cut at which T-zero leaves
+$5/5$ is $+0.0020$. Source:
+\protect\path{results/tables/threshold_sensitivity_recount.json}.}
 \label{tab:threshold-sensitivity}
 \centering
 \footnotesize

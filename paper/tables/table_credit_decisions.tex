@@ -1,0 +1,38 @@
+\begin{table}[t]
+\caption{Credit decisions on XES3G5M learner fold~0, five paired training
+seeds. $\tau{=}{+}0.002$ validation AUC versus the designated control.
+Credited requires $5/5$ seeds at or above $\tau$. Consistent-positive,
+not credited requires every seed strictly positive and at least one seed
+below $\tau$. Unsupported is every remaining case. The package rows add
+one $\mathrm{Linear}(1,128)$ (256 parameters, bias included) and are not
+capacity-matched.}
+\label{tab:credit-decisions}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm}
+>{\raggedright\arraybackslash}p{2.5cm}
+>{\raggedright\arraybackslash}X
+r@{}}
+\toprule
+Message & Rung & Outcome & Mean $\Delta$val \\
+\midrule
+Linear $\log(1{+}\Delta t)$ package, observed incidence &
+Package & Credited ($5/5$) & $+0.00274$ \\
+Same package, zero incidence &
+Package & Credited ($5/5$) & $+0.00255$ \\
+Aligned gap vs.\ T-zero &
+Architecture & Consistent-positive, not credited ($0/5$) & $+0.00183$ \\
+Aligned gap vs.\ T-misaligned &
+Architecture & Consistent-positive, not credited ($0/5$) & $+0.00144$ \\
+History-only $\Delta t$ &
+Package & Unsupported ($2/5$) & $+0.00193$ \\
+Q$\leftarrow$KC incidence message &
+Capacity & Unsupported ($0/5$) & $-0.00010$ \\
+Teacher grouping (ASSIST2012) &
+Package & Unsupported ($0/5$) & $+0.00025$ \\
+Per-concept exp.\ forgetting &
+Package & Unsupported ($0/5$) & $-0.00252$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
