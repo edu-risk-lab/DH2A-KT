@@ -27,9 +27,11 @@ A contrast sits on one rung
   the no-time arm. A no-time arm that keeps those 256 parameters
   unused (param-padded, flag \texttt{--time-gap-pad}) adds the same
   $\mathrm{Linear}(1,128)$ and a zero multiple of its output, so the
-  representation matches the no-time arm. That arm was not scored for
-  this submission. Until it is, rung (iii) remains the weakest evidence
-  and is reported with $\Delta$params.
+  representation matches the no-time arm. That arm was trained on
+  XES3G5M under the YAML default budget, not paired with the reference
+  timed arm (Section~\ref{sec:assist-ladder}). Until that pair exists,
+  rung (iii) remains the weakest evidence and is reported with
+  $\Delta$params.
 \end{itemize}
 
 For five paired training seeds, let $\Delta_s$ be validation AUC of the

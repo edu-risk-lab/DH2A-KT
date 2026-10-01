@@ -82,7 +82,8 @@ $\log(1{+}\Delta t)$ package is credited ($5/5$; the branch adds 256
 parameters) and the question--KC incidence message is not ($0/5$);
 aligned gap input stays positive and below the cut ($0/5$). The
 credited-minimal control reaches test-only AUC $0.8295{\pm}0.0001$.
-The map is for this backbone and fold.
+On ASSISTments~2012 fold~0 the same rule credits no message, so the
+map depends on the corpus.
 \end{abstract}
 
 \begin{keyword}
@@ -133,7 +134,9 @@ Fig.~\ref{fig:architecture} is the decision map.
 The ladder attributes messages on a fixed backbone. It does not
 decompose the gap from QKC-T to DKT ($+0.0286$), which also reflects
 architecture, optimisation, and protocol. The credited package
-contributes about $+0.0027$ inside the backbone.
+contributes about $+0.0027$ inside the backbone on XES3G5M. The same
+package is not credited on ASSISTments~2012
+(Section~\ref{sec:assist-ladder}).
 \input{tables/table_claims}
 
 % =============================================================================
@@ -826,6 +829,47 @@ $[+0.0068,+0.0077]$ vs.\ AKT, and $[+0.0088,+0.0098]$ vs.\
 \textit{simpleKT} (Table~\ref{tab:bootstrap-qkct}; see Table~\ref{tab:claims}
 for what this does not infer).
 
+\subsection{ASSISTments 2012 does not reproduce the credit map}
+\label{sec:assist-ladder}
+The same five seeds and the same three rungs were run on ASSISTments~2012
+learner fold~0. The recipe is the corpus config, not the XES reference
+recipe: batch~32, 10~epochs, learning rate $10^{-3}$, $L{=}400$,
+repeat-target masking, and the best epoch by validation AUC. Each arm
+scores $n{=}805{,}911$ test rows. The observed-incidence arm links
+$51{,}321$ of $53{,}086$ items (mean degree $0.97$); the zero-incidence
+twin keeps the question pathway and drops those links.
+
+Table~\ref{tab:credit-assist} is the decision list. Every contrast is
+positive on all five seeds. None is credited. Under $\tau{=}{+}0.002$
+the time package on observed incidence passes on $4/5$ seeds (mean
+$\Delta\mathrm{val}{+}0.00212$); the seed-$0$ delta is $+0.00170$. The
+zero-incidence package passes on $3/5$ (mean $+0.00209$). Aligned gap
+versus T-zero passes on $2/5$ (mean $+0.00192$); versus T-misaligned it
+passes on $4/5$ (mean $+0.00238$). Question--KC incidence is positive on
+$5/5$ and below the cut on every seed (mean $+0.00123$), so its outcome
+is consistent-positive, not the XES unsupported null.
+
+The control-arm seed standard deviation is larger than on XES3G5M. For
+the zero-incidence no-time arm it is $0.000686$, so
+$\tau_{\mathrm{rel}}{=}\max(0.002,\,20\cdot 0.000686){=}0.0137$. No
+contrast reaches that cut. The absolute and relative maps therefore
+agree with each other, and both disagree with the XES map: the linear
+package that is credited on XES3G5M is not credited here. We do not
+replace the reference map. We narrow the claim. The credit decision
+depends on the corpus.
+
+The param-padded no-time arm was run on XES3G5M fold~0, five seeds,
+zero incidence, under the YAML default budget (batch~4, 10~epochs),
+not under the reference recipe of batch~16, 30~epochs, and patience~5.
+Mean validation AUC is $0.8265{\pm}0.0002$ and test-only AUC is
+$0.8276{\pm}0.0002$ ($n{=}1{,}640{,}242$). The timed twin was not
+retrained on that budget, so these runs do not decide whether the
+published package credit is a capacity effect. The arm still adds
+256 parameters by construction and does not enter
+Table~\ref{tab:credit-decisions}.
+
+\input{tables/table_credit_assist}
+
 \subsection{Calibration}
 \label{sec:calibration}
 Table~\ref{tab:calibration-xes3g5m} reports 15-bin ECE, Brier score, and NLL
@@ -968,6 +1012,9 @@ and below $+0.002$, which is the protocol outcome
 and is unsupported. The credited arm therefore needs attempt-onset
 gaps, and those gaps also mark KC-expansion boundaries, so the credit
 is attempt-context timing and boundary information.
+That credit does not transfer. On ASSISTments~2012 the same package is
+positive on every seed and is not credited under either cut
+(Section~\ref{sec:assist-ladder}).
 
 HypergraphConv, teacher grouping, and per-concept exponential
 forgetting do not clear the gate in the configurations we ran
@@ -1026,13 +1073,13 @@ part of this attribution map (Supplementary Material).
 \subsection{Limitations}
 \label{sec:limitations}
 \begin{itemize}
-  \item Transfer ladders are specified and not scored in this
-  submission: ASSISTments~2012 fold~0, the time package on a second
-  backbone, two additional pyKT context rows, the param-padded no-time
-  arm, and a fixed Junyi subsample of about 50{,}000 users. The driver
-  is \texttt{scripts/50\_credit\_ladder\_plan.py}. The reference map
-  above is XES3G5M fold~0 on the LSTM backbone only. If a later ladder
-  disagrees, the claim narrows to ``the map depends on the corpus.''
+  \item ASSISTments~2012 fold~0 is scored
+  (Section~\ref{sec:assist-ladder}). Still not scored: the time package
+  on a second backbone, two pyKT models from 2023--2025 as context
+  rows, and a fixed Junyi subsample of about 50{,}000 users. The
+  param-padded arm is scored only under the YAML default budget, not
+  as a paired contrast with the reference timed arm. The driver is
+  \texttt{scripts/50\_credit\_ladder\_plan.py}.
   \item Because zero gaps also mark later KC-expanded rows of the same
   attempt (and learner-start rows), the Linear-$\Delta t$ channel can
   encode both elapsed-time information and attempt-boundary structure.

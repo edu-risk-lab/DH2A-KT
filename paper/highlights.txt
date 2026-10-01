@@ -1,5 +1,6 @@
 Credit protocol for leakage-audited signals in knowledge tracing.
 Three outcomes: credited, consistent-positive not credited, unsupported.
 Time package credited 5/5; question-KC incidence unsupported 0/5 on XES3G5M fold 0.
+On ASSISTments 2012 fold 0 the same rule credits no message.
 Aligned gap stays positive and below +0.002, so it is not credited separately.
 Package rung adds 256 parameters and is the weakest evidence type.

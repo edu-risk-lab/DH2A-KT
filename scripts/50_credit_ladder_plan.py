@@ -11,7 +11,9 @@ Groups, in the order the plan cuts from the end:
   backbone          XES3G5M fold 0, v4 LSTM, 3 arms x 5 seeds
   assist            ASSISTments 2012 fold 0, 5 arms x 5 seeds
   recent-baselines  two pyKT names x 3 seeds (context rows only)
-  package-capacity  param-padded no-time x 5 seeds (--time-gap-pad)
+  package-capacity  param-padded no-time x 5 seeds, YAML default budget
+  package-refbudget param-padded no-time x 5 seeds, reference recipe
+                    batch 16, 30 epochs, patience 5 (run this next)
   junyi-partial     Junyi fold 0, 3 arms x 5 seeds, --max-users 50000
 
 ``--time-gap-pad`` allocates Linear(1, hidden) and adds a zero multiple,
@@ -29,8 +31,8 @@ replaced by DyGKT.
 
 Usage:
   python scripts/50_credit_ladder_plan.py
-  python scripts/50_credit_ladder_plan.py --group assist --launch
-  python scripts/50_credit_ladder_plan.py --group assist --launch-all
+  python scripts/50_credit_ladder_plan.py --group package-refbudget --launch
+  python scripts/50_credit_ladder_plan.py --group package-refbudget --launch-all
 """
 
 from __future__ import annotations
@@ -196,6 +198,28 @@ def _jobs() -> list[dict]:
                     "--question-incidence-control",
                     "zero",
                     "--time-gap-pad",
+                ],
+            ),
+        )
+
+    # Pair with the published XES ladder (batch 16, 30 epochs, patience 5).
+    # The package-capacity group used the YAML default (batch 4, 10 epochs)
+    # and is not this contrast. New group name so those .ok stamps do not skip it.
+    ref_budget = ["--batch-size", "16", "--epochs", "30", "--early-stop-patience", "5"]
+    for seed in SEEDS_5:
+        add(
+            "package-refbudget",
+            "no-time-param-padded",
+            seed,
+            _dh2(
+                "configs/xes3g5m.yaml",
+                seed,
+                [
+                    "--question-graph",
+                    "--question-incidence-control",
+                    "zero",
+                    "--time-gap-pad",
+                    *ref_budget,
                 ],
             ),
         )
