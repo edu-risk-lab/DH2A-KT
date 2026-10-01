@@ -289,6 +289,10 @@ temp/_diag_pykt_smask/
 !results/tables/m4_*.log
 !results/tables/m5_*.log
 !results/tables/dh2_kt_p*_vs_p0.csv
+!results/tables/dh2_kt_ladder_*_vs_p0.csv
+!results/tables/credit_ladder_status.json
+!logs/credit_ladder/
+!logs/credit_ladder/**
 !results/tables/p_stage.log
 !results/tables/p0_dt_slice.*
 !results/tables/p0_dt_testonly_clean.csv

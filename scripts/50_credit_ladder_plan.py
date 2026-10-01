@@ -74,6 +74,10 @@ def _jobs() -> list[dict]:
     jobs: list[dict] = []
 
     def add(group: str, arm: str, seed: int, cmd: list[str] | None, block: str | None = None) -> None:
+        if cmd is not None:
+            # Keep each arm×seed off the shared v4q checkpoint and CSV.
+            tag = f"ladder_{group}_{arm}_s{seed}"
+            cmd = [*cmd, "--tag", tag]
         jobs.append(
             {
                 "group": group,
