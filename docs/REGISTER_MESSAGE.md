@@ -23,9 +23,9 @@ On XES3G5M fold 0, `τ = +0.002`. That default sits in the stability band `(+0.0
 On any other corpus or backbone, report both:
 
 - absolute `τ = +0.002`;
-- `τ_rel = max(0.002, 20 * SD_seed)`, where `SD_seed` is the sample standard deviation of the **control** arm's validation AUC across the five seeds.
+- `τ_rel = max(0.002, 10 * SD_seed)`, where `SD_seed` is the sample standard deviation of the **control** arm's validation AUC across the five seeds.
 
-The factor 20 reproduces `0.002` when `SD_seed = 0.0001`, the printed five-seed dispersion of the reference credited arm. If the two cuts disagree, publish both maps.
+`K = 10` is the largest integer that keeps both XES3G5M packages credited (bound 10.47). It was fixed after the XES runs. If the two cuts disagree, publish both maps. `python scripts/51_transfer_credit_tables.py` recomputes every outcome and stops if `K` no longer preserves the XES map.
 
 ## Reference command shape
 

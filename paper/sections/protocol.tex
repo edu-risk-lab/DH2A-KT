@@ -27,11 +27,11 @@ A contrast sits on one rung
   the no-time arm. A no-time arm that keeps those 256 parameters
   unused (param-padded, flag \texttt{--time-gap-pad}) adds the same
   $\mathrm{Linear}(1,128)$ and a zero multiple of its output, so the
-  representation matches the no-time arm. That arm was trained on
-  XES3G5M under the YAML default budget, not paired with the reference
-  timed arm (Section~\ref{sec:assist-ladder}). Until that pair exists,
-  rung (iii) remains the weakest evidence and is reported with
-  $\Delta$params.
+  representation matches the no-time arm. Those 256 weights receive no
+  gradient, so the padded arm matches the parameter count, not the
+  usable capacity. Rung (ii) is the control that keeps a working map.
+  Rung (iii) remains the weakest evidence and is reported with
+  $\Delta$params (Section~\ref{sec:transfer-ladder}).
 \end{itemize}
 
 For five paired training seeds, let $\Delta_s$ be validation AUC of the
@@ -59,30 +59,32 @@ Table~\ref{tab:threshold-sensitivity} recounts the same unrounded
 per-seed deltas at neighbouring cuts. The qualitative map
 (package credited, aligned gap not separately credited, incidence not
 credited) holds for every cut in $(+0.00175,+0.00236]$. The value
-$+0.002$ is the default inside that band. It is anchored to the
-five-seed test-AUC dispersion of the credited arm, printed as
-$\pm0.0001$, so $20\times0.0001{=}0.002$. It is an operating rule, not
+$+0.002$ is the default inside that band. It is an operating rule, not
 a hypothesis test of $\mu_\Delta{=}0$, and not a registered public
 standard.
 
-On a new corpus or a new backbone, report both cuts. The absolute cut
-remains $+0.002$. The relative cut is
-$\tau_{\mathrm{rel}}{=}\max(0.002,\,20\cdot\mathrm{SD}_{\mathrm{seed}})$,
+An absolute cut does not scale with seed noise, so every map is also
+reported under a relative cut,
+$\tau_{\mathrm{rel}}{=}\max(0.002,\,K\cdot\mathrm{SD}_{\mathrm{seed}})$,
 where $\mathrm{SD}_{\mathrm{seed}}$ is the sample standard deviation of
-the control arm's validation AUC across the same five seeds. The factor
-20 reproduces $\tau{=}0.002$ when that dispersion equals the reference
-value $0.0001$. If the two cuts disagree, publish both maps and do not
-silently keep the cut that credits more messages.
+the control arm's validation AUC across the same five seeds. On
+XES3G5M the two package controls have $\mathrm{SD}_{\mathrm{seed}}$
+$0.000225$ (observed incidence) and $0.000210$ (zero incidence). Both
+packages stay credited for $K\le 10.47$. We fix $K{=}10$, the largest
+integer that keeps the XES map. That choice was made after the XES runs
+and before the transfer runs were scored; it is not pre-registered. If
+the two cuts disagree, both maps are published and neither is dropped
+because it credits fewer messages.
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
-Algorithm~\ref{alg:register} is the interface. A new message is not
+Algorithm~1 is the interface. A new message is not
 integrated by editing the tracer alone. It enters the ladder only with
 a declared rung, a designated control, five paired seeds, and one of
 the three outcomes. Worked commands are in
 \texttt{docs/REGISTER\_MESSAGE.md}.
 
-\noindent\textbf{Algorithm~\ref{alg:register}.} Register a message on the credit ladder.
+\noindent\textbf{Algorithm~1.} Register a message on the credit ladder.\par
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$
 \STATE Choose rung (i), (ii), or (iii) and the designated control

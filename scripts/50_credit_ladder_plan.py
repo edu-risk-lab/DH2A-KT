@@ -18,10 +18,9 @@ Groups, in the order the plan cuts from the end:
 
 ``--time-gap-pad`` allocates Linear(1, hidden) and adds a zero multiple,
 so the parameter count matches the timed arm and the representation does
-not. That arm is listed as runnable. It was not scored on the machine
-that prepared this revision (GeForce MX250, 2GB). The manuscript
-therefore still reports Delta-params = 256 and does not claim a
-capacity-matched package result.
+not. The padded weights get no gradient: the control matches parameter
+count, not usable capacity. Outcomes are scored by
+scripts/51_transfer_credit_tables.py.
 
 The vendored evaluator (external/p0_leakage_audit/src/pykt_engine.py)
 only forwards dkt, akt, gkt, simplekt, gikt, sakt, skt, dygkt, dgekt.

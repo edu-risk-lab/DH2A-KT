@@ -69,21 +69,20 @@ country={Vietnam}}
 
 \begin{abstract}
 Graph-augmented knowledge tracing often reports one AUC as if every
-graph or time component had earned it. A real signal has to be separated
-from leakage and from the parameters a new branch adds. DH$^2$A-KT is a
-protocol that builds train-only auxiliary knowledge, audits hyperedge
-membership leakage, and assigns each message one of three outcomes on a
-three-rung ladder: capacity-matched, architecture-matched, or
-package-level. A message is credited only when all five paired seeds on
-XES3G5M learner fold~0 gain at least $+0.002$ validation AUC against
-its designated control; a gain that is positive on every seed and still
-below that cut is reported and not credited. On that fold the linear
-$\log(1{+}\Delta t)$ package is credited ($5/5$; the branch adds 256
-parameters) and the question--KC incidence message is not ($0/5$);
-aligned gap input stays positive and below the cut ($0/5$). The
-credited-minimal control reaches test-only AUC $0.8295{\pm}0.0001$.
-On ASSISTments~2012 fold~0 the same rule credits no message, so the
-map depends on the corpus.
+graph or time component had earned it. DH$^2$A-KT is a protocol that
+builds train-only auxiliary knowledge, audits hyperedge membership
+leakage, and assigns each message one of three outcomes (credited;
+consistent-positive, not credited; unsupported) against a
+capacity-matched, architecture-matched, or package-level control, with
+five paired seeds and both an absolute cut of $+0.002$ validation AUC
+and a cut scaled to seed noise. On XES3G5M learner fold~0 the linear
+$\log(1{+}\Delta t)$ package is credited ($5/5$, also against a
+parameter-matched control), the question--KC incidence message is
+unsupported, and aligned gap input stays positive and below the cut.
+The map does not transfer unchanged: on ASSISTments~2012 no message is
+credited, and on a 50{,}000-learner Junyi subsample aligned gap input is
+credited under both cuts. Credit is therefore a property of corpus,
+backbone, and cut, and the protocol reports it as such.
 \end{abstract}
 
 \begin{keyword}
@@ -119,13 +118,15 @@ Fig.~\ref{fig:architecture} is the decision map.
   \item \textbf{C1 (protocol).} Three rungs, three outcomes, a default
   threshold $+0.002$ inside the stability band
   $(+0.00175,+0.00236]$, a relative cut for a new corpus, and
-  Algorithm~\ref{alg:register} for registering a message
+  Algorithm~1 (Section~\ref{sec:protocol}) for registering a message
   (Section~\ref{sec:protocol}).
   \item \textbf{C2 (reference map).} On XES3G5M learner fold~0 and five
   paired seeds, the linear $\log(1{+}\Delta t)$ package is credited
   ($5/5$) and the question--KC incidence message is unsupported
   ($0/5$). Aligned gap input is consistent-positive and not credited
-  ($0/5$). Table~\ref{tab:credit-decisions}.
+  ($0/5$). Table~\ref{tab:credit-decisions}. Transfer runs on
+  ASSISTments~2012 and a Junyi subsample give different maps
+  (Table~\ref{tab:credit-transfer}).
   \item \textbf{C3 (membership diagnostic).} Path-derived concept-group
   hyperedges and a membership-leak check. The full-log positive control
   moves the leak rate from $0$ to $1$. Pairwise TBMR and $|\rho|$ do
@@ -136,7 +137,7 @@ decompose the gap from QKC-T to DKT ($+0.0286$), which also reflects
 architecture, optimisation, and protocol. The credited package
 contributes about $+0.0027$ inside the backbone on XES3G5M. The same
 package is not credited on ASSISTments~2012
-(Section~\ref{sec:assist-ladder}).
+(Section~\ref{sec:transfer-ladder}).
 \input{tables/table_claims}
 
 % =============================================================================
@@ -309,7 +310,7 @@ part of the QKC-T / Zero$+\Delta t$ evaluation arms.
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
-\noindent\textbf{Algorithm 1.} Path-derived concept-group hyperedges from
+\noindent\textbf{Algorithm 2.} Path-derived concept-group hyperedges from
 audited $E_{\mathrm{pre}}^f$ (member set is unordered; path direction is
 not encoded). Chain length bounds $[3,8]$ match
 \texttt{hyperedge.concept\_prerequisite} in \texttt{configs/xes3g5m.yaml}.
@@ -623,15 +624,16 @@ $\tau{=}{+}0.002$ on this reference fold, and three outcomes. The
 numbers below are the reference run of that rule. A paired $t$-test on
 $\Delta$ answers whether the mean differs from zero; it does not prove
 $\mu_\Delta>+0.002$. On a new corpus the protocol also reports
-$\tau_{\mathrm{rel}}{=}\max(0.002,\,20\cdot\mathrm{SD}_{\mathrm{seed}})$
+$\tau_{\mathrm{rel}}{=}\max(0.002,\,10\cdot\mathrm{SD}_{\mathrm{seed}})$
 (Section~\ref{sec:protocol-threshold}).
 The five seeds are training seeds on learner fold~0, not five data
 folds. Comparing $+0.002$ to training-seed SD after the runs describes
 signal relative to noise; it is not evidence that the threshold was
-registered in advance. The same absolute cut on ASSISTments~2012,
-Junyi, and FoundationalASSIST is not assumed to transfer: those corpora
-are reported under both cuts when the ladder is run
-(Table~\ref{tab:threshold-sensitivity}).
+registered in advance. The same absolute cut is not assumed to
+transfer: ASSISTments~2012 and the Junyi subsample are reported under
+both cuts (Table~\ref{tab:credit-transfer}), and FoundationalASSIST rows
+remain single-seed diagnostics. Table~\ref{tab:threshold-sensitivity}
+covers XES3G5M only.
 
 \input{tables/table_evidence_types}
 
@@ -829,46 +831,64 @@ $[+0.0068,+0.0077]$ vs.\ AKT, and $[+0.0088,+0.0098]$ vs.\
 \textit{simpleKT} (Table~\ref{tab:bootstrap-qkct}; see Table~\ref{tab:claims}
 for what this does not infer).
 
-\subsection{ASSISTments 2012 does not reproduce the credit map}
-\label{sec:assist-ladder}
-The same five seeds and the same three rungs were run on ASSISTments~2012
-learner fold~0. The recipe is the corpus config, not the XES reference
-recipe: batch~32, 10~epochs, learning rate $10^{-3}$, $L{=}400$,
-repeat-target masking, and the best epoch by validation AUC. Each arm
-scores $n{=}805{,}911$ test rows. The observed-incidence arm links
-$51{,}321$ of $53{,}086$ items (mean degree $0.97$); the zero-incidence
-twin keeps the question pathway and drops those links.
+\subsection{Transfer: the credit map depends on the corpus}
+\label{sec:transfer-ladder}
+The same five seeds and the same rungs were run on two more corpora and
+against one more XES3G5M control (Table~\ref{tab:credit-transfer}).
+Each contrast is paired by seed and scored under both cuts of
+Section~\ref{sec:protocol-threshold}. Every contrast in the table is
+positive on all five seeds. The corpora differ in which of those gains
+clear the cut.
 
-Table~\ref{tab:credit-assist} is the decision list. Every contrast is
-positive on all five seeds. None is credited. Under $\tau{=}{+}0.002$
-the time package on observed incidence passes on $4/5$ seeds (mean
-$\Delta\mathrm{val}{+}0.00212$); the seed-$0$ delta is $+0.00170$. The
-zero-incidence package passes on $3/5$ (mean $+0.00209$). Aligned gap
-versus T-zero passes on $2/5$ (mean $+0.00192$); versus T-misaligned it
-passes on $4/5$ (mean $+0.00238$). Question--KC incidence is positive on
-$5/5$ and below the cut on every seed (mean $+0.00123$), so its outcome
-is consistent-positive, not the XES unsupported null.
+\paragraph{Parameter-matched package on XES3G5M.}
+The no-time arm was retrained with the 256 time-branch parameters
+allocated and its output multiplied by zero, under the reference recipe
+(batch~16, 30~epochs, patience~5, zero incidence). The timed arm beats
+it on every seed at $+0.002$ (mean $\Delta\mathrm{val}{+}0.00266$; lowest
+seed $+0.00235$). Under the relative cut the padded control is noisier
+($\mathrm{SD}_{\mathrm{seed}}{=}0.00025$, $\tau_{\mathrm{rel}}{=}0.0025$)
+and one seed falls short ($4/5$). The padded and unpadded no-time arms
+differ by a mean of $+0.00011$ in validation AUC with mixed signs, so
+the extra parameter count does not by itself move AUC. The padded
+weights receive no gradient, so this answers the parameter-count
+objection and nothing more. The aligned-input contrasts on rung~(ii)
+remain the evidence about the gap itself, and on XES3G5M they stay
+below the cut.
 
-The control-arm seed standard deviation is larger than on XES3G5M. For
-the zero-incidence no-time arm it is $0.000686$, so
-$\tau_{\mathrm{rel}}{=}\max(0.002,\,20\cdot 0.000686){=}0.0137$. No
-contrast reaches that cut. The absolute and relative maps therefore
-agree with each other, and both disagree with the XES map: the linear
-package that is credited on XES3G5M is not credited here. We do not
-replace the reference map. We narrow the claim. The credit decision
-depends on the corpus.
+\paragraph{ASSISTments 2012.}
+Learner fold~0, corpus config (batch~32, 10~epochs, $L{=}400$,
+repeat-target masking). The observed-incidence arm links $51{,}321$ of
+$53{,}086$ items (mean degree $0.97$). No message is credited under
+either cut. The time package passes on $4/5$ seeds with observed
+incidence (mean $+0.00212$) and $3/5$ with zero incidence (mean
+$+0.00209$). Aligned gap passes on $2/5$ versus T-zero and $4/5$ versus
+T-misaligned. Question--KC incidence is positive on every seed and below
+the cut on every seed (mean $+0.00123$), so its outcome is
+consistent-positive rather than the unsupported null of XES3G5M. Control
+seed SDs are two to three times the XES values, which puts the relative
+cuts between $0.0020$ and $0.0069$.
 
-The param-padded no-time arm was run on XES3G5M fold~0, five seeds,
-zero incidence, under the YAML default budget (batch~4, 10~epochs),
-not under the reference recipe of batch~16, 30~epochs, and patience~5.
-Mean validation AUC is $0.8265{\pm}0.0002$ and test-only AUC is
-$0.8276{\pm}0.0002$ ($n{=}1{,}640{,}242$). The timed twin was not
-retrained on that budget, so these runs do not decide whether the
-published package credit is a capacity effect. The arm still adds
-256 parameters by construction and does not enter
-Table~\ref{tab:credit-decisions}.
+\paragraph{Junyi, partial replication.}
+The first $50{,}000$ training and $50{,}000$ evaluation learners of
+fold~0, three arms (no time, time package, T-zero), corpus config.
+Items map one-to-one to KCs here, so no incidence contrast is run. Under
+$+0.002$ both the package (mean $+0.00412$) and aligned gap versus
+T-zero (mean $+0.00395$) are credited. Under the relative cut the
+aligned gap stays credited ($\tau_{\mathrm{rel}}{=}0.0022$), while the
+package misses on one seed ($+0.00347$ against $\tau_{\mathrm{rel}}{=}0.00350$)
+and becomes consistent-positive. Junyi is therefore the only corpus on
+which the aligned gap input itself is credited. This is a subsample, not
+the full corpus of about 25~million interactions.
 
-\input{tables/table_credit_assist}
+\paragraph{What changes in the claim.}
+The XES3G5M map is not replaced. It is narrowed: the package credit is
+a property of that corpus and backbone. On ASSISTments~2012 the same
+gains are positive and too small; on the Junyi subsample the aligned
+gap is credited and the package depends on the cut. The two cuts
+disagree on two rows (the padded XES control and the Junyi package),
+and both maps are printed.
+
+\input{tables/table_credit_transfer}
 
 \subsection{Calibration}
 \label{sec:calibration}
@@ -1011,10 +1031,19 @@ and below $+0.002$, which is the protocol outcome
 ``consistent-positive, not credited.'' History-only injection is $2/5$
 and is unsupported. The credited arm therefore needs attempt-onset
 gaps, and those gaps also mark KC-expansion boundaries, so the credit
-is attempt-context timing and boundary information.
-That credit does not transfer. On ASSISTments~2012 the same package is
-positive on every seed and is not credited under either cut
-(Section~\ref{sec:assist-ladder}).
+is attempt-context timing and boundary information. A no-time control
+that carries the same 256 parameters, unused, does not close the gap
+($5/5$ at $+0.002$).
+
+That credit does not transfer unchanged
+(Section~\ref{sec:transfer-ladder}). On ASSISTments~2012 the package is
+positive on every seed and is not credited under either cut. On the
+Junyi subsample the aligned gap clears both cuts against T-zero. One
+reading is that gap informativeness depends on how a corpus logs
+attempts and how much seed noise its control carries; the ladder
+reports that dependence and does not explain it. A single XES3G5M
+credit map should not be read as a property of the time message in
+general.
 
 HypergraphConv, teacher grouping, and per-concept exponential
 forgetting do not clear the gate in the configurations we ran
@@ -1073,13 +1102,17 @@ part of this attribution map (Supplementary Material).
 \subsection{Limitations}
 \label{sec:limitations}
 \begin{itemize}
-  \item ASSISTments~2012 fold~0 is scored
-  (Section~\ref{sec:assist-ladder}). Still not scored: the time package
-  on a second backbone, two pyKT models from 2023--2025 as context
-  rows, and a fixed Junyi subsample of about 50{,}000 users. The
-  param-padded arm is scored only under the YAML default budget, not
-  as a paired contrast with the reference timed arm. The driver is
-  \texttt{scripts/50\_credit\_ladder\_plan.py}.
+  \item Every ladder uses one LSTM backbone. The time package was not
+  run on simpleKT or AKT: the vendored pyKT path passes no gap tensor
+  and exports placeholder timestamps. Two pyKT models from 2023--2025
+  (sparseKT, stableKT) were not added as context rows, because the
+  vendored evaluator has no forward for them; we did not substitute
+  another model. The transfer corpora use their own configs (batch~32,
+  10~epochs), not the XES recipe, and Junyi is a 50{,}000-learner
+  subsample of one fold. $K{=}10$ in the relative cut was fixed after
+  the XES runs. Run lists and blocked jobs are in
+  \texttt{scripts/50\_credit\_ladder\_plan.py}; outcomes are recomputed by
+  \texttt{scripts/51\_transfer\_credit\_tables.py}.
   \item Because zero gaps also mark later KC-expanded rows of the same
   attempt (and learner-start rows), the Linear-$\Delta t$ channel can
   encode both elapsed-time information and attempt-boundary structure.
@@ -1212,6 +1245,9 @@ An earlier manuscript freeze is tag \texttt{kbs-submit-2026-09-15}
 (DOI \url{https://doi.org/10.5281/zenodo.22772808}); this PDF supersedes
 that freeze.
 A table-to-script map is in \texttt{docs/paper-artifacts.md}.
+Transfer-ladder comparison files, run logs, and the transfer outcome
+file listed there were added to the same repository after both freezes;
+that later state has no DOI yet.
 Exploratory Critic and IPW analyses are in the Supplementary Material,
 not in the main claim map.
 P0's audited edges and reused baselines are vendored under

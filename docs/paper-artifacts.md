@@ -16,6 +16,7 @@ that freeze.
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
 | Table threshold sensitivity | `scripts/45_recount_threshold_sensitivity.py` | `results/tables/threshold_sensitivity_recount.json`, `paper/tables/table_threshold_sensitivity.tex` |
+| Table credit transfer (ASSIST, Junyi subsample, padded control) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex` |
 | Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
 | Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |
 | Citation verification log | Crossref/OpenAlex pass 10 Sep 2026 | `docs/citation_verification_log.md` |
