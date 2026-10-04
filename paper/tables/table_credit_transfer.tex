@@ -6,14 +6,12 @@ $\tau_{\mathrm{rel}}{=}\max(0.002,\,10\cdot\mathrm{SD}_{\mathrm{seed}})$,
 with $\mathrm{SD}_{\mathrm{seed}}$ the sample SD of the control arm's
 validation AUC. $K{=}10$ is the largest integer that keeps both XES3G5M
 packages credited (bound 10.5). Cons.-pos.\ is consistent-positive,
-not credited; Unsupp.\ is unsupported. The param-padded arm adds the
-same 256 parameters as the timed arm and multiplies their output by
-zero. XES3G5M rows use batch~16, 30~epochs, patience~5; ASSIST2012
-and Junyi use their corpus configs, batch~32 and 10~epochs. Junyi uses
-the first 50{,}000 train and 50{,}000 evaluation learners, a partial
-replication; its items map one-to-one to KCs, so no incidence
-contrast is run there. Source:
-\protect\path{results/tables/credit_ladder_transfer.json}.}
+not credited; Unsupp.\ is unsupported.
+XES3G5M rows use the reference recipe: no concept or session hypergraph,
+batch~16, 30~epochs, patience~5. ASSIST2012 and Junyi (50k) use their
+corpus configs: concept-prerequisite hypergraph on, batch~32, 10~epochs.
+Junyi (50k) uses the first 50{,}000 train and 50{,}000 evaluation learners. Junyi items map one-to-one to KCs, so no incidence contrast is run there.
+Source: \protect\path{results/tables/credit_ladder_transfer.json}.}
 \label{tab:credit-transfer}
 \centering
 \scriptsize
@@ -26,7 +24,6 @@ XES3G5M & Package, observed incidence & $+0.00274$ & $0.0023$ & Credited $5/5$ &
  & Package, zero incidence & $+0.00255$ & $0.0021$ & Credited $5/5$ & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+0.00183$ & $0.0020$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
  & Aligned gap vs.\ T-misaligned & $+0.00144$ & $0.0020$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Package vs.\ param-padded no-time & $+0.00266$ & $0.0025$ & Credited $5/5$ & Cons.-pos. $4/5$ \\
 \addlinespace
 ASSIST2012 & Q$\leftarrow$KC incidence & $+0.00123$ & $0.0069$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
  & Package, observed incidence & $+0.00212$ & $0.0057$ & Cons.-pos. $4/5$ & Cons.-pos. $0/5$ \\

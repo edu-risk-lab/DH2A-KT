@@ -91,6 +91,14 @@ class DH2KTConfig:
     """v4/v5: add Rasch-style question difficulty on top of the concept vector."""
     n_lstm_layers: int = 1
     """v4/v5: depth of the LSTM backbone."""
+    sequence_encoder: str = "lstm"
+    """v4 only: ``lstm`` or ``attention`` (causal Transformer encoder with
+    sinusoidal positions, simpleKT-style). Inputs, time injection, query and
+    readout are shared, so only the history encoder changes."""
+    n_attn_layers: int = 2
+    """v4 ``attention`` encoder: number of layers."""
+    n_attn_heads: int = 4
+    """v4 ``attention`` encoder: heads per layer; must divide ``hidden_dim``."""
     memory_dim: int = 16
     """v5 only: width of the per-concept mastery memory.
 
@@ -505,13 +513,39 @@ if _TORCH_AVAILABLE:
                 self.interaction_embed = nn.Embedding(2 * config.n_concepts, hidden)
                 self.concept_in_proj = nn.Linear(hidden, hidden)
                 self.input_norm = nn.LayerNorm(hidden)
-                self.lstm = nn.LSTM(
-                    hidden,
-                    hidden,
-                    num_layers=config.n_lstm_layers,
-                    batch_first=True,
-                    dropout=config.dropout if config.n_lstm_layers > 1 else 0.0,
-                )
+                encoder = getattr(config, "sequence_encoder", "lstm") or "lstm"
+                if encoder == "lstm":
+                    self.lstm = nn.LSTM(
+                        hidden,
+                        hidden,
+                        num_layers=config.n_lstm_layers,
+                        batch_first=True,
+                        dropout=config.dropout if config.n_lstm_layers > 1 else 0.0,
+                    )
+                elif encoder == "attention":
+                    if hidden % config.n_attn_heads != 0:
+                        raise ValueError(
+                            f"hidden_dim {hidden} not divisible by n_attn_heads "
+                            f"{config.n_attn_heads}"
+                        )
+                    layer = nn.TransformerEncoderLayer(
+                        hidden,
+                        config.n_attn_heads,
+                        dim_feedforward=2 * hidden,
+                        dropout=config.dropout,
+                        batch_first=True,
+                        norm_first=True,
+                    )
+                    self.attn_encoder = nn.TransformerEncoder(
+                        layer,
+                        num_layers=config.n_attn_layers,
+                        norm=nn.LayerNorm(hidden),
+                        enable_nested_tensor=False,
+                    )
+                else:
+                    raise ValueError(
+                        f"sequence_encoder must be lstm/attention, got {encoder!r}"
+                    )
                 self.query_proj = nn.Linear(hidden, hidden)
                 self.concept_bias = nn.Embedding(config.n_concepts, 1)
                 nn.init.zeros_(self.concept_bias.weight)
@@ -842,6 +876,29 @@ if _TORCH_AVAILABLE:
             decay = torch.exp(-theta * gaps.unsqueeze(-1).to(dtype=vectors.dtype))
             return vectors * decay
 
+        def _run_sequence_encoder(self, x: torch.Tensor) -> torch.Tensor:
+            """History states ``(B, T, H)``; position ``t`` sees steps ``<= t`` only."""
+            if (getattr(self.config, "sequence_encoder", "lstm") or "lstm") == "lstm":
+                x = F.dropout(x, p=self.config.dropout, training=self.training)
+                hidden, _ = self.lstm(x)
+                return hidden
+            t_len, width = x.shape[1], x.shape[2]
+            position = torch.arange(t_len, device=x.device, dtype=x.dtype).unsqueeze(1)
+            freq = torch.exp(
+                torch.arange(0, width, 2, device=x.device, dtype=x.dtype)
+                * (-math.log(10000.0) / width)
+            )
+            pos = torch.zeros(t_len, width, device=x.device, dtype=x.dtype)
+            pos[:, 0::2] = torch.sin(position * freq)
+            pos[:, 1::2] = torch.cos(position * freq[: width // 2])
+            x = F.dropout(x + pos, p=self.config.dropout, training=self.training)
+            # Sequences are right-padded, so a causal mask alone keeps pads out
+            # of every real position.
+            causal = torch.full(
+                (t_len, t_len), float("-inf"), device=x.device, dtype=x.dtype
+            ).triu(1)
+            return self.attn_encoder(x, mask=causal)
+
         def _encode_sequence_v4(
             self, batch: DH2KTBatch
         ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -886,8 +943,7 @@ if _TORCH_AVAILABLE:
                     self.group_embed_table(batch.group_ids.long().clamp(0, n_groups - 1))
                 )
             x = self.input_norm(x)
-            x = F.dropout(x, p=self.config.dropout, training=self.training)
-            hidden, _ = self.lstm(x)
+            hidden = self._run_sequence_encoder(x)
             hidden = F.dropout(hidden, p=self.config.dropout, training=self.training)
 
             # Position t is scored against the concept asked at t+1; the final

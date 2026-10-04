@@ -1,4 +1,7 @@
-"""Credit outcomes for the transfer ladders and the reference-budget padded arm.
+"""Credit outcomes for the transfer ladders, the second encoder, and the padded arm.
+
+Rows whose five seed CSVs are not all present are listed as pending and
+left out of the table.
 
 Reads the per-seed comparison CSVs that ``scripts/50_credit_ladder_plan.py``
 jobs write, pairs on/control arms by seed, and applies both cuts:
@@ -52,7 +55,13 @@ CONTRASTS = [
     ("XES3G5M", "Aligned gap vs.\\ T-misaligned", "Architecture",
      _frozen("qkc_cm_zero_time"), _frozen("a1_t_misaligned")),
     ("XES3G5M", "Package vs.\\ param-padded no-time", "Package (param.\\ matched)",
-     _frozen("qkc_cm_zero_time"), _ladder("package-refbudget_no-time-param-padded")),
+     _frozen("qkc_cm_zero_time"), _ladder("package-matched_no-time-param-padded")),
+    ("XES3G5M, attention", "Package, zero incidence", "Package (backbone)",
+     _ladder("backbone-attn_time-package"), _ladder("backbone-attn_no-time")),
+    ("XES3G5M, attention", "Aligned gap vs.\\ T-zero", "Architecture",
+     _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-zero")),
+    ("XES3G5M, attention", "Aligned gap vs.\\ T-misaligned", "Architecture",
+     _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-misaligned")),
     ("ASSIST2012", "Q$\\leftarrow$KC incidence", "Capacity",
      _ladder("assist_incidence-on"), _ladder("assist_incidence-off")),
     ("ASSIST2012", "Package, observed incidence", "Package",
@@ -67,7 +76,17 @@ CONTRASTS = [
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_no-time")),
     ("Junyi (50k)", "Aligned gap vs.\\ T-zero", "Architecture",
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_t-zero")),
+    ("Junyi (all)", "Package, zero incidence", "Package",
+     _ladder("junyi-full_time-package"), _ladder("junyi-full_no-time")),
+    ("Junyi (all)", "Aligned gap vs.\\ T-zero", "Architecture",
+     _ladder("junyi-full_time-package"), _ladder("junyi-full_t-zero")),
 ]
+
+
+def _available(pattern: str | None) -> bool:
+    if pattern is None:
+        return True
+    return all((TABLES / pattern.format(seed=s)).exists() for s in SEEDS)
 
 
 def _read(pattern: str) -> dict[int, dict]:
@@ -113,7 +132,11 @@ def _a7_both() -> tuple[dict[int, float], dict[int, dict]]:
 
 def main() -> int:
     rows = []
+    pending = []
     for corpus, label, rung, on_pat, ctrl_pat in CONTRASTS:
+        if not (_available(on_pat) and _available(ctrl_pat)):
+            pending.append(f"{corpus}: {label}")
+            continue
         if on_pat is None:
             on_val, ctrl = _a7_both()
         else:
@@ -146,12 +169,50 @@ def main() -> int:
 
     xes = [r for r in rows if r["corpus"] == "XES3G5M" and r["rung"] == "Package"]
     max_k = min(r["min_delta_val"] / r["sd_control_val"] for r in xes)
-    payload = {"K": K, "tau_abs": TAU, "max_K_preserving_xes_packages": max_k, "rows": rows}
+    payload = {
+        "K": K,
+        "tau_abs": TAU,
+        "max_K_preserving_xes_packages": max_k,
+        "rows": rows,
+        "pending": pending,
+    }
     if K > math.floor(max_k):
         raise SystemExit(f"K={K} no longer preserves the XES packages (max {max_k:.2f})")
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     short = {"Credited": "Credited", "Consistent-positive, not credited": "Cons.-pos.", "Unsupported": "Unsupp."}
+    present = {r["corpus"] for r in rows}
+    ref_groups = ["XES3G5M rows"]
+    if "XES3G5M, attention" in present:
+        ref_groups.append("the attention-encoder rows")
+    if "Junyi (all)" in present:
+        ref_groups.append("Junyi (all)")
+    recipe = (
+        ", ".join(ref_groups[:-1]) + " and " + ref_groups[-1]
+        if len(ref_groups) > 1
+        else ref_groups[0]
+    )
+    notes = [
+        f"{recipe} use the reference recipe: no concept or session hypergraph,",
+        "batch~16, 30~epochs, patience~5. ASSIST2012 and Junyi (50k) use their",
+        "corpus configs: concept-prerequisite hypergraph on, batch~32, 10~epochs.",
+    ]
+    if any(r["rung"] == "Package (param.\\ matched)" for r in rows):
+        notes.append(
+            "The param-padded arm adds the same 256 parameters as the timed arm"
+            " and multiplies their output by zero."
+        )
+    if "XES3G5M, attention" in present:
+        notes.append(
+            "Attention rows replace the LSTM with a two-layer causal Transformer"
+            " encoder; inputs, time branch and readout are unchanged."
+        )
+    if "Junyi (50k)" in present:
+        notes.append(
+            "Junyi (50k) uses the first 50{,}000 train and 50{,}000 evaluation"
+            " learners. Junyi items map one-to-one to KCs, so no incidence"
+            " contrast is run there."
+        )
     lines = [
         "\\begin{table}[t]",
         "\\caption{Credit outcomes under both cuts. Five paired training seeds",
@@ -161,14 +222,9 @@ def main() -> int:
         "with $\\mathrm{SD}_{\\mathrm{seed}}$ the sample SD of the control arm's",
         f"validation AUC. $K{{=}}{K}$ is the largest integer that keeps both XES3G5M",
         f"packages credited (bound {max_k:.1f}). Cons.-pos.\\ is consistent-positive,",
-        "not credited; Unsupp.\\ is unsupported. The param-padded arm adds the",
-        "same 256 parameters as the timed arm and multiplies their output by",
-        "zero. XES3G5M rows use batch~16, 30~epochs, patience~5; ASSIST2012",
-        "and Junyi use their corpus configs, batch~32 and 10~epochs. Junyi uses",
-        "the first 50{,}000 train and 50{,}000 evaluation learners, a partial",
-        "replication; its items map one-to-one to KCs, so no incidence",
-        "contrast is run there. Source:",
-        "\\protect\\path{results/tables/credit_ladder_transfer.json}.}",
+        "not credited; Unsupp.\\ is unsupported.",
+        *notes,
+        "Source: \\protect\\path{results/tables/credit_ladder_transfer.json}.}",
         "\\label{tab:credit-transfer}",
         "\\centering",
         "\\scriptsize",
@@ -199,6 +255,8 @@ def main() -> int:
             f"tau_rel={r['tau_rel']:.6f} abs={r['pass_abs']}/5 {r['outcome_abs']} | "
             f"rel={r['pass_rel']}/5 {r['outcome_rel']}"
         )
+    for p in pending:
+        print(f"PENDING {p}")
     print(f"wrote {OUT_JSON}")
     print(f"wrote {OUT_TEX}")
     return 0

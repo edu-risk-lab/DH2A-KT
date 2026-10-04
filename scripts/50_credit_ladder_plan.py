@@ -8,13 +8,18 @@ cannot be written into the paper tables.
 
 Groups, in the order the plan cuts from the end:
 
-  backbone          XES3G5M fold 0, v4 LSTM, 3 arms x 5 seeds
-  assist            ASSISTments 2012 fold 0, 5 arms x 5 seeds
+  backbone-attn     XES3G5M fold 0, v4 with a causal attention encoder in
+                    place of the LSTM, 4 arms x 5 seeds, frozen XES recipe
+  assist            ASSISTments 2012 fold 0, 6 arms x 5 seeds, YAML recipe
   recent-baselines  two pyKT names x 3 seeds (context rows only)
-  package-capacity  param-padded no-time x 5 seeds, YAML default budget
-  package-refbudget param-padded no-time x 5 seeds, reference recipe
-                    batch 16, 30 epochs, patience 5 (run this next)
-  junyi-partial     Junyi fold 0, 3 arms x 5 seeds, --max-users 50000
+  package-capacity  param-padded no-time x 5 seeds, YAML recipe
+  package-refbudget param-padded no-time x 5 seeds, reference budget but
+                    YAML graph flags (does not pair with the frozen ladder)
+  package-matched   param-padded no-time x 5 seeds, frozen XES recipe
+  junyi-partial     Junyi fold 0, 3 arms x 5 seeds, --max-users 50000, YAML recipe
+  junyi-full        Junyi fold 0, 3 arms x 5 seeds, all learners, frozen XES recipe
+
+"Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
 ``--time-gap-pad`` allocates Linear(1, hidden) and adds a zero multiple,
 so the parameter count matches the timed arm and the representation does
@@ -30,8 +35,9 @@ replaced by DyGKT.
 
 Usage:
   python scripts/50_credit_ladder_plan.py
-  python scripts/50_credit_ladder_plan.py --group package-refbudget --launch
-  python scripts/50_credit_ladder_plan.py --group package-refbudget --launch-all
+  python scripts/50_credit_ladder_plan.py --group package-matched --launch-all
+  python scripts/50_credit_ladder_plan.py --group backbone-attn --launch-all
+  python scripts/50_credit_ladder_plan.py --group junyi-full --launch-all
 """
 
 from __future__ import annotations
@@ -63,6 +69,26 @@ COMMON = [
     "400",
 ]
 
+# Recipe of the frozen XES ladder (scripts 34 and 38). Without these flags the
+# YAML turns on the concept and session hypergraphs, graph dropout and the
+# auxiliary loss, and the arm no longer pairs with qkc_cm_* / a1_*.
+REF_RECIPE = [
+    "--no-graph",
+    "--no-session",
+    "--batch-size",
+    "16",
+    "--epochs",
+    "30",
+    "--val-frac",
+    "0.1",
+    "--early-stop-patience",
+    "5",
+    "--graph-dropout",
+    "0",
+    "--graph-sensitivity-weight",
+    "0",
+]
+
 
 def _dh2(config: str, seed: int, extra: list[str], max_users: int | None = None) -> list[str]:
     cmd = [sys.executable, "scripts/03_train_tier1.py", config, *COMMON, "--seed", str(seed), *extra]
@@ -89,19 +115,22 @@ def _jobs() -> list[dict]:
             }
         )
 
-    # Second backbone: simpleKT (fallback AKT) on XES3G5M fold 0.
-    # The time package is a v4 Linear on log1p gaps. The vendored pyKT
-    # clean export writes placeholder timestamps (range(length)), and
-    # simpleKT/AKT forwards do not take a gap tensor. Incidence is not
-    # plugged into those models. Do not rerun the frozen v4 XES ladder
-    # and call it a second backbone.
-    backbone_block = (
-        "simpleKT/AKT in pykt_engine have no gap input; "
-        "pykt_clean timestamps are placeholders; incidence not plugged in"
-    )
-    for arm in ("no-time", "time-package", "t-zero"):
-        for seed in SEEDS_5:
-            add("backbone", arm, seed, None, block=backbone_block)
+    # Second backbone: the vendored simpleKT/AKT forwards take no gap tensor and
+    # the pyKT clean export has placeholder timestamps, so the swap is done
+    # inside v4: a causal Transformer replaces the LSTM, everything else fixed.
+    # Reference budget so the arms pair with the frozen XES LSTM ladder.
+    attn = ["--sequence-encoder", "attention", *REF_RECIPE]
+    zero_q = ["--question-graph", "--question-incidence-control", "zero"]
+    timed = [*zero_q, "--time-gap", "--time-gap-mode", "both"]
+    backbone_arms = {
+        "no-time": zero_q,
+        "time-package": timed,
+        "t-zero": [*timed, "--time-gap-control", "zero"],
+        "t-misaligned": [*timed, "--time-gap-control", "misaligned"],
+    }
+    for seed in SEEDS_5:
+        for arm, extra in backbone_arms.items():
+            add("backbone-attn", arm, seed, _dh2("configs/xes3g5m.yaml", seed, [*extra, *attn]))
 
     assist = "configs/assist2012.yaml"
     for seed in SEEDS_5:
@@ -201,9 +230,9 @@ def _jobs() -> list[dict]:
             ),
         )
 
-    # Pair with the published XES ladder (batch 16, 30 epochs, patience 5).
-    # The package-capacity group used the YAML default (batch 4, 10 epochs)
-    # and is not this contrast. New group name so those .ok stamps do not skip it.
+    # Budget only: this group kept the YAML graph, session hyperedges,
+    # graph dropout 0.15 and the auxiliary loss, so it is not the frozen
+    # recipe. Kept for provenance; package-matched is the paired control.
     ref_budget = ["--batch-size", "16", "--epochs", "30", "--early-stop-patience", "5"]
     for seed in SEEDS_5:
         add(
@@ -262,6 +291,24 @@ def _jobs() -> list[dict]:
                 max_users=50000,
             ),
         )
+
+    for seed in SEEDS_5:
+        add(
+            "package-matched",
+            "no-time-param-padded",
+            seed,
+            _dh2("configs/xes3g5m.yaml", seed, [*zero_q, "--time-gap-pad", *REF_RECIPE]),
+        )
+
+    # All learners, frozen XES recipe, so corpus is the only change from XES.
+    junyi_arms = {
+        "no-time": zero_q,
+        "time-package": timed,
+        "t-zero": [*timed, "--time-gap-control", "zero"],
+    }
+    for seed in SEEDS_5:
+        for arm, extra in junyi_arms.items():
+            add("junyi-full", arm, seed, _dh2(junyi, seed, [*extra, *REF_RECIPE]))
     return jobs
 
 

@@ -172,6 +172,15 @@ def main() -> int:
     parser.add_argument("--dropout", type=float, default=None)
     parser.add_argument("--lstm-layers", type=int, default=None, help="v4 LSTM depth")
     parser.add_argument(
+        "--sequence-encoder",
+        choices=("lstm", "attention"),
+        default=None,
+        help="v4 history encoder. 'attention' is a causal Transformer "
+        "(simpleKT-style); inputs, time injection and readout are unchanged.",
+    )
+    parser.add_argument("--attn-layers", type=int, default=None, help="v4 attention depth (default 2)")
+    parser.add_argument("--attn-heads", type=int, default=None, help="v4 attention heads (default 4)")
+    parser.add_argument(
         "--max-seq-len",
         type=int,
         default=None,
@@ -377,6 +386,11 @@ def main() -> int:
     diffusion_alpha = float(train_cfg.get("diffusion_alpha", 0.5))
     dropout = float(args.dropout if args.dropout is not None else train_cfg.get("dropout", 0.2))
     n_lstm_layers = int(args.lstm_layers or train_cfg.get("n_lstm_layers", 1))
+    sequence_encoder = str(
+        args.sequence_encoder or train_cfg.get("sequence_encoder", "lstm") or "lstm"
+    )
+    n_attn_layers = int(args.attn_layers or train_cfg.get("n_attn_layers", 2))
+    n_attn_heads = int(args.attn_heads or train_cfg.get("n_attn_heads", 4))
     use_questions = bool(args.use_questions or train_cfg.get("use_questions", False))
     recap_attention = bool(args.recap_attention or train_cfg.get("recap_attention", False))
     question_kc_agg = bool(args.question_kc_agg or train_cfg.get("question_kc_agg", False))
@@ -472,6 +486,8 @@ def main() -> int:
           f"hyperedge_source={args.hyperedge_source or 'from config'} no_graph={args.no_graph} "
           f"use_questions={use_questions} window_mode={window_mode} val_frac={val_frac} "
           f"mask_repeats={args.mask_repeats} seed={args.seed} "
+          f"sequence_encoder={sequence_encoder} n_attn_layers={n_attn_layers} "
+          f"n_attn_heads={n_attn_heads} time_gap_pad={time_gap_pad} "
           f"recap_attention={recap_attention} question_kc_agg={question_kc_agg} "
           f"question_graph={question_graph} "
           f"question_incidence_control={question_incidence_control} "
@@ -649,6 +665,9 @@ def main() -> int:
             max_users=args.max_users,
             use_questions=use_questions,
             n_lstm_layers=n_lstm_layers,
+            sequence_encoder=sequence_encoder,
+            n_attn_layers=n_attn_layers,
+            n_attn_heads=n_attn_heads,
             window_mode=window_mode,
             val_frac=val_frac,
             early_stop_patience=early_stop_patience,

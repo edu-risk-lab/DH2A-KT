@@ -128,37 +128,6 @@
       "n_scored": 1640242
     },
     {
-      "corpus": "XES3G5M",
-      "contrast": "Package vs.\\ param-padded no-time",
-      "rung": "Package (param.\\ matched)",
-      "seeds": [
-        0,
-        17,
-        42,
-        1234,
-        2024
-      ],
-      "delta_val": [
-        0.0027849491637712553,
-        0.0026873064635539734,
-        0.0023502725954378523,
-        0.00262680711755936,
-        0.002848155263921237
-      ],
-      "mean_delta_val": 0.0026594981208487357,
-      "min_delta_val": 0.0023502725954378523,
-      "sd_control_val": 0.00025051145444341,
-      "tau_abs": 0.002,
-      "tau_rel": 0.0025051145444341004,
-      "pass_abs": 5,
-      "pass_rel": 4,
-      "outcome_abs": "Credited",
-      "outcome_rel": "Consistent-positive, not credited",
-      "control_batch": 16,
-      "control_epochs": 30,
-      "n_scored": 1640242
-    },
-    {
       "corpus": "ASSIST2012",
       "contrast": "Q$\\leftarrow$KC incidence",
       "rung": "Capacity",
@@ -375,5 +344,13 @@
       "control_epochs": 10,
       "n_scored": 5122539
     }
+  ],
+  "pending": [
+    "XES3G5M: Package vs.\\ param-padded no-time",
+    "XES3G5M, attention: Package, zero incidence",
+    "XES3G5M, attention: Aligned gap vs.\\ T-zero",
+    "XES3G5M, attention: Aligned gap vs.\\ T-misaligned",
+    "Junyi (all): Package, zero incidence",
+    "Junyi (all): Aligned gap vs.\\ T-zero"
   ]
 }
