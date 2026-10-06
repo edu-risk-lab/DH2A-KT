@@ -11,6 +11,7 @@ Groups, in the order the plan cuts from the end:
   backbone-attn     XES3G5M fold 0, v4 with a causal attention encoder in
                     place of the LSTM, 4 arms x 5 seeds, frozen XES recipe
   assist            ASSISTments 2012 fold 0, 6 arms x 5 seeds, YAML recipe
+  assist-ref        same 6 arms x 5 seeds, frozen XES recipe
   recent-baselines  two pyKT names x 3 seeds (context rows only)
   package-capacity  param-padded no-time x 5 seeds, YAML recipe
   package-refbudget param-padded no-time x 5 seeds, reference budget but
@@ -35,6 +36,7 @@ replaced by DyGKT.
 
 Usage:
   python scripts/50_credit_ladder_plan.py
+  python scripts/50_credit_ladder_plan.py --group assist-ref --launch-all
   python scripts/50_credit_ladder_plan.py --group package-matched --launch-all
   python scripts/50_credit_ladder_plan.py --group backbone-attn --launch-all
   python scripts/50_credit_ladder_plan.py --group junyi-full --launch-all
@@ -199,6 +201,23 @@ def _jobs() -> list[dict]:
                 ],
             ),
         )
+
+    # Same six arms as "assist", frozen XES recipe, so corpus is the only
+    # change from the XES ladder.
+    assist_ref_arms = {
+        "incidence-off": zero_q,
+        "incidence-on": ["--question-graph", "--question-incidence-control", "observed"],
+        "time-on-observed": [
+            "--question-graph", "--question-incidence-control", "observed",
+            "--time-gap", "--time-gap-mode", "both",
+        ],
+        "time-on-zero": timed,
+        "t-zero": [*timed, "--time-gap-control", "zero"],
+        "t-misaligned": [*timed, "--time-gap-control", "misaligned"],
+    }
+    for seed in SEEDS_5:
+        for arm, extra in assist_ref_arms.items():
+            add("assist-ref", arm, seed, _dh2(assist, seed, [*extra, *REF_RECIPE]))
 
     for model in ("sparsekt", "stablekt"):
         for seed in SEEDS_3:

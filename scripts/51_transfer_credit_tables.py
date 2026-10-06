@@ -56,11 +56,11 @@ CONTRASTS = [
      _frozen("qkc_cm_zero_time"), _frozen("a1_t_misaligned")),
     ("XES3G5M", "Package vs.\\ param-padded no-time", "Package (param.\\ matched)",
      _frozen("qkc_cm_zero_time"), _ladder("package-matched_no-time-param-padded")),
-    ("XES3G5M, attention", "Package, zero incidence", "Package (backbone)",
+    ("XES3G5M attn.", "Package, zero incidence", "Package (backbone)",
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_no-time")),
-    ("XES3G5M, attention", "Aligned gap vs.\\ T-zero", "Architecture",
+    ("XES3G5M attn.", "Aligned gap vs.\\ T-zero", "Architecture",
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-zero")),
-    ("XES3G5M, attention", "Aligned gap vs.\\ T-misaligned", "Architecture",
+    ("XES3G5M attn.", "Aligned gap vs.\\ T-misaligned", "Architecture",
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-misaligned")),
     ("ASSIST2012", "Q$\\leftarrow$KC incidence", "Capacity",
      _ladder("assist_incidence-on"), _ladder("assist_incidence-off")),
@@ -72,6 +72,16 @@ CONTRASTS = [
      _ladder("assist_time-on-zero"), _ladder("assist_t-zero")),
     ("ASSIST2012", "Aligned gap vs.\\ T-misaligned", "Architecture",
      _ladder("assist_time-on-zero"), _ladder("assist_t-misaligned")),
+    ("ASSIST2012 ref.", "Q$\\leftarrow$KC incidence", "Capacity",
+     _ladder("assist-ref_incidence-on"), _ladder("assist-ref_incidence-off")),
+    ("ASSIST2012 ref.", "Package, observed incidence", "Package",
+     _ladder("assist-ref_time-on-observed"), _ladder("assist-ref_incidence-on")),
+    ("ASSIST2012 ref.", "Package, zero incidence", "Package",
+     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_incidence-off")),
+    ("ASSIST2012 ref.", "Aligned gap vs.\\ T-zero", "Architecture",
+     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-zero")),
+    ("ASSIST2012 ref.", "Aligned gap vs.\\ T-misaligned", "Architecture",
+     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-misaligned")),
     ("Junyi (50k)", "Package, zero incidence", "Package",
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_no-time")),
     ("Junyi (50k)", "Aligned gap vs.\\ T-zero", "Architecture",
@@ -183,8 +193,10 @@ def main() -> int:
     short = {"Credited": "Credited", "Consistent-positive, not credited": "Cons.-pos.", "Unsupported": "Unsupp."}
     present = {r["corpus"] for r in rows}
     ref_groups = ["XES3G5M rows"]
-    if "XES3G5M, attention" in present:
-        ref_groups.append("the attention-encoder rows")
+    if "XES3G5M attn." in present:
+        ref_groups.append("XES3G5M attn.")
+    if "ASSIST2012 ref." in present:
+        ref_groups.append("ASSIST2012 ref.")
     if "Junyi (all)" in present:
         ref_groups.append("Junyi (all)")
     recipe = (
@@ -202,9 +214,9 @@ def main() -> int:
             "The param-padded arm adds the same 256 parameters as the timed arm"
             " and multiplies their output by zero."
         )
-    if "XES3G5M, attention" in present:
+    if "XES3G5M attn." in present:
         notes.append(
-            "Attention rows replace the LSTM with a two-layer causal Transformer"
+            "XES3G5M attn.\\ rows replace the LSTM with a two-layer causal Transformer"
             " encoder; inputs, time branch and readout are unchanged."
         )
     if "Junyi (50k)" in present:
@@ -229,6 +241,7 @@ def main() -> int:
         "\\centering",
         "\\scriptsize",
         "\\setlength{\\tabcolsep}{2.5pt}",
+        "\\resizebox{\\textwidth}{!}{%",
         "\\begin{tabular}{@{}llrrcc@{}}",
         "\\toprule",
         "Corpus & Contrast & Mean $\\Delta$val & $\\tau_{\\mathrm{rel}}$ & Outcome at $+0.002$ & Outcome at $\\tau_{\\mathrm{rel}}$ \\\\",
@@ -244,7 +257,7 @@ def main() -> int:
             f"{corpus} & {r['contrast']} & ${r['mean_delta_val']:+.5f}$ & ${r['tau_rel']:.4f}$ & "
             f"{short[r['outcome_abs']]} ${r['pass_abs']}/5$ & {short[r['outcome_rel']]} ${r['pass_rel']}/5$ \\\\"
         )
-    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
+    lines += ["\\bottomrule", "\\end{tabular}}", "\\end{table}", ""]
     OUT_TEX.write_text("\n".join(lines), encoding="utf-8")
 
     print(f"K={K} max_K={max_k:.3f}")
