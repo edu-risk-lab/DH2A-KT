@@ -1,4 +1,4 @@
-% Fig. 1 — DH$^2$A-KT attribution pipeline (TikZ)
+% Fig. 1 -- credit protocol pipeline (TikZ)
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
@@ -19,19 +19,19 @@
               fill=white},
 ]
 \node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
-\node[box, right=0.32cm of p0] (audit) {Hyperedge\\leakage audit};
-\node[box, right=0.32cm of audit] (twins) {Laddered ablation\\(cap.\ / arch.\ / pkg)};
-\node[box, right=0.32cm of twins] (gate) {Operating rule\\$\Delta\mathrm{val}\ge{+}0.002$};
+\node[box, right=0.32cm of p0] (audit) {Hyperedge\\membership audit};
+\node[box, right=0.32cm of audit] (twins) {Rung and control\\(cap.\ / arch.\ / pkg)};
+\node[box, right=0.32cm of twins] (gate) {Seed and interval\\rules at $+0.002$};
 \draw[->, thick] (p0.east) -- (audit.west);
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
 
 \node[passbox, below=0.95cm of p0.south west, anchor=north west] (pass)
-  {Package credited:\\Linear $\log(1{+}\Delta t)$ branch\\($5/5$; observed and zero incidence)};
+  {Credited:\\time package, XES3G5M + LSTM;\\time package and aligned gap,\\Junyi + LSTM};
 \node[warnbox, right=0.28cm of pass] (warn)
-  {Aligned-gap contrast:\\positive vs T-zero / T-misaligned,\\below $+0.002$ ($0/5$). Not separately credited};
+  {Consistent-positive, not credited:\\aligned gap, XES3G5M + LSTM;\\all time contrasts on the attention\\encoder and on ASSISTments 2012};
 \node[failbox, right=0.28cm of warn] (fail)
-  {Not credited at 5 seeds:\\incidence; grouping; exp.\ forgetting.\\1-seed: HypergraphConv, other metadata};
+  {Unsupported:\\Q--KC incidence (XES3G5M);\\teacher grouping; exp.\ forgetting};
 
 \coordinate (fork) at ([yshift=-0.38cm]gate.south);
 \draw[thick] (gate.south) -- (fork);
@@ -39,24 +39,11 @@
 \draw[->, thick] (fork) -| (warn.north);
 \draw[->, thick] (fork) -| (fail.north);
 \end{tikzpicture}
-\caption{DH$^2$A-KT is an attribution pipeline, not a single predictor.
-Train-only knowledge is constructed and audited, then compared in a
-laddered ablation with capacity-matched, architecture-matched, and
-package-level controls (Table~\ref{tab:evidence-types}).
-The Linear $\log(1{+}\Delta t)$ \emph{package} meets the five-seed
-operating rule on XES3G5M learner fold~0 as a package-level ablation
-(not capacity-matched) and is credited as attempt-context timing and
-boundary information;
-architecture-matched aligned-gap controls stay positive
-($+0.00183$ vs.\ T-zero; $+0.00144$ vs.\ T-misaligned) but below the
-$+0.002$ rule and are not separately credited.
-The question--KC incidence message does not meet the capacity-matched
-gate.
-Teacher grouping and per-concept exponential forgetting are $0/5$.
-Remaining HypergraphConv/metadata forms in the dashed box are
-single-seed diagnostics. QKC-T is the observed-incidence evaluation arm;
-Zero$+\Delta t$ is the credited-minimal positive control.
-The dashed graph-only encoder and the exploratory Critic survey are not
-part of this credited map (\ref{app:graph-only}; Supplementary Material).}
+\caption{The credit protocol. Auxiliary knowledge is built from training
+learners only and audited for membership leakage. Each message is then
+placed on a rung with a designated control, run on five paired seeds,
+and assigned one of three outcomes. The boxes give the outcomes of this
+paper (Table~\ref{tab:credit-transfer}); the same time message is
+credited or not depending on corpus, encoder, and rung.}
 \label{fig:architecture}
 \end{figure}

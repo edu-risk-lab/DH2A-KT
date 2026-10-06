@@ -1,10 +1,9 @@
 \begin{table}[t]
-\caption{What this paper claims, and what it does not infer.
-Evidence types on the credit ladder: (i)~capacity-matched message;
-(ii)~architecture-matched input; (iii)~package-level component
-(Table~\ref{tab:evidence-types}). The two architecture-matched
-$\Delta$val figures are two control definitions, not a confidence
-interval.}
+\caption{What this paper claims, and what it does not infer. Rungs:
+(i)~capacity-matched message; (ii)~architecture-matched input;
+(iii)~package (Table~\ref{tab:evidence-types}). Seed rule: every paired
+seed at or above $+0.002$; interval rule: lower 95\% bound of the mean
+paired difference at or above $+0.002$.}
 \label{tab:claims}
 \centering
 \scriptsize
@@ -12,30 +11,26 @@ interval.}
 \toprule
 Claim & Evidence & Not inferred \\
 \midrule
-Linear $\Delta t$ \emph{package} is credited as attempt-context
-timing and boundary information on the LSTM tracer &
-Package-level $5/5$ vs.\ no-time twins, observed and zero incidence;
-$5/5$ vs.\ a parameter-padded twin at $+0.002$, $0/5$ at
-$\tau_{\mathrm{rel}}$ & Aligned gap input is separately credited; the
-package is credited on another encoder \\
-Aligned gap vs.\ T-zero / T-misaligned is positive but below the rule &
-Architecture-matched val $\Delta$ $+0.00183$ and $+0.00144$ separately,
-$0/5$ (not a CI band) & Aligned time has no value; or no matched
-control exists \\
-Q--KC incidence message is not credited on this fusion &
-Capacity-matched $0/5$; 95\% CI
-$[{-}0.00052,{+}0.00032]$ & Question--KC relations are universally
-useless \\
-The credit map depends on corpus and encoder &
-Attention encoder: no time message credited; ASSISTments~2012: no
-message credited under either recipe; Junyi, XES recipe: package and aligned gap credited
-under both cuts (Table~\ref{tab:credit-transfer}) & The XES map, or any
-one map, holds for every corpus or backbone \\
-Hyperedge membership diagnostic responds to contamination &
-Full-log leak $0{\to}1$ & The whole audit taxonomy is validated
-(TBMR; degenerate $|\rho|$) \\
-Table~\ref{tab:auc-xes3g5m} baselines locate the recipe &
-Training-envelope GIKT; inherited AKT/\textit{simpleKT} defaults &
+Credit for the same time message depends on corpus and encoder &
+Credited on XES3G5M with the LSTM tracer (package only) and on Junyi
+(package and aligned gap); consistent-positive on the attention encoder
+and on ASSISTments~2012 under both recipes; same outcome under both
+rules in every setting (Table~\ref{tab:credit-transfer}) & Any single
+map, including the XES3G5M one, holds for another corpus or backbone \\
+On XES3G5M the credit rests on the package rung only &
+Package $5/5$ against no-time and parameter-padded twins; aligned gap
+against T-zero and T-misaligned positive on every seed, $0/5$ &
+Aligned gap input is credited on XES3G5M; the package credit is an
+input effect \\
+The question--KC incidence message is not credited on this fusion &
+Capacity-matched $0/5$; 95\% interval $[{-}0.00052,{+}0.00032]$ &
+Question--KC relations are useless under a richer fusion \\
+Of the inherited pairwise leakage diagnostics, only group membership
+works on hyperedge projections & Membership leak $0{\to}1$ under the
+full-log control; TBMR does not separate the arms; $|\rho|$ is degenerate
+& The audit taxonomy is validated as a whole \\
+Contextual baselines locate the recipe &
+Training-envelope GIKT; inherited AKT and \textit{simpleKT} defaults &
 Tuning-matched or event-paired superiority \\
 \bottomrule
 \end{tabularx}

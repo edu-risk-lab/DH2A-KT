@@ -1,6 +1,6 @@
 # Paper artefacts → scripts and result files
 
-Map for the KBS draft (`paper/main.tex`). Checkpoints are gitignored; JSON
+Map for the Expert Systems draft (`paper/main.tex`, `paper/appendix.tex`). Checkpoints are gitignored; JSON
 under `results/tables/` is allowlisted when it is a reported number.
 Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 (that exporter writes the graph-only $L{=}200$ format).
@@ -16,7 +16,11 @@ that freeze.
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
 | Table threshold sensitivity | `scripts/45_recount_threshold_sensitivity.py` | `results/tables/threshold_sensitivity_recount.json`, `paper/tables/table_threshold_sensitivity.tex` |
-| Table credit transfer (ASSIST, Junyi subsample, padded control) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex` |
+| Table credit map (all settings; seed rule and interval rule) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex` |
+| XES T-boundary / T-shuffled controls (pending GPU) | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows added to `credit_ladder_transfer.json` when runs exist |
+| XES folds 1–2 package and aligned gap (pending GPU) | `scripts/50_credit_ladder_plan.py --group xes-fold1` / `xes-fold2` | same |
+| Gap descriptives (pending server run) | `scripts/52_gap_descriptives.py` | `results/tables/gap_descriptives.json`, `paper/tables/table_gap_descriptives.tex` |
+| Partial membership positive control (pending server run) | `scripts/53_partial_membership_control.py` | `results/tables/{dataset}_fold{f}_partial_membership_control.json` |
 | Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
 | Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |
 | Citation verification log | Crossref/OpenAlex pass 10 Sep 2026 | `docs/citation_verification_log.md` |
@@ -38,7 +42,7 @@ that freeze.
 | B8 Zero+Δt ECE | `scripts/41_b8_zero_dt_calibration.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv`, `a6_reliability_zero_dt.json` |
 | B9 same-ckpt destruction | `scripts/42_b9_same_ckpt_destruction.py` | `results/tables/b9_same_ckpt_destruction.{csv,json}` |
 | Table AUC folds 1–2 (QKC-T only) | `scripts/03_train_tier1.py` | `paper/tables/table_auc_p0_dt_folds.tex` |
-| Table calibration (DH²) | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
+| Table calibration (tracer) | `scripts/30_a6_calibration_metrics.py` | `results/tables/a6_calibration_xes3g5m_fold0.csv` |
 | Table calibration (pyKT) | `scripts/35_pykt_calibration_from_npz.py` | `results/tables/a6_calibration_pykt_xes3g5m_fold0.csv` |
 | Table bootstrap (app.) | `scripts/25_bootstrap_protocol_ci.py` | `results/tables/b10_bootstrap_qkct_vs_{gikt,akt,simplekt}.csv`, `paper/tables/table_bootstrap_qkct.tex` |
 | P4 concept-forget 5-seed | `scripts/03_train_tier1.py` (`--concept-forget`) | `results/tables/p4_forget_5seed.csv` |

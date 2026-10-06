@@ -1,28 +1,24 @@
 ﻿% Gate from results/tables/a7_query_dt_ablation.csv (five seeds).
 % Test-only AUC from results/tables/a2_testonly_rescore.csv.
 \begin{table}[ht]
-\caption{Fold~0 first: query-side vs.\ history-only Linear $\Delta t$
-on XES3G5M (repeat-target-masked $L{=}400$, five training seeds on this one learner
-fold). Twin is Q$\leftarrow$KC without time-gap (package-level; not
-capacity-matched). Operating gate: $\Delta\mathrm{val}\ge{+}0.002$
-(validation only; the $k/5$ column is the credit test).
-The AUC column is the same \emph{test-only} metric as
-Table~\ref{tab:auc-xes3g5m} ($n{=}1{,}093{,}755$).
-\texttt{both} is QKC-T (five seeds).
-Only \texttt{both} meets the val gate on all five seeds.
-History-only is $2/5$ and is not credited.
-Per-seed $\Delta$val is in Table~\ref{tab:a7-query-dt-seeds}.}
+\caption{Injection site of the time package on XES3G5M fold~0 (five
+paired seeds). The control is the observed-incidence tracer without the
+time branch (package rung). $k/5$ counts seeds at or above $+0.002$
+validation AUC; every seed is positive in every row. The AUC column is
+the test-only metric of Table~\ref{tab:auc-xes3g5m}. Only LSTM$+$query
+injection is credited; the other two are consistent-positive, not
+credited. Per-seed values: Table~\ref{tab:a7-query-dt-seeds}.}
 \label{tab:a7-query-dt}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3.8pt}
 \begin{tabular}{@{}llccc@{}}
 \toprule
-Mode & Injection site & Test-only AUC & $k/5$ & Mean $\Delta$val \\
+Injection site & Gaps used & Test-only AUC & $k/5$ & Mean $\Delta$val \\
 \midrule
-\texttt{both} & LSTM + query & $0.8295{\pm}0.0001$ & $5/5$ & $+0.00274$ \\
-\texttt{lstm} (history-only) & LSTM only (observed gaps) & $0.8286{\pm}0.0002$ & $2/5$ & $+0.00193$ \\
-\texttt{query} & next-step query only & $0.8278{\pm}0.0002$ & $0/5$ & $+0.00099$ \\
+LSTM $+$ query & history and next-step wait & $0.8295{\pm}0.0001$ & $5/5$ & $+0.00274$ \\
+LSTM only (history-only) & observed gaps only & $0.8286{\pm}0.0002$ & $2/5$ & $+0.00193$ \\
+Query only & next-step wait only & $0.8278{\pm}0.0002$ & $0/5$ & $+0.00099$ \\
 \bottomrule
 \end{tabular}
 \end{table}

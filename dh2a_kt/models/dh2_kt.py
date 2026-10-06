@@ -165,7 +165,8 @@ class DH2KTConfig:
     time_gap_mode: str = "both"
     """Where ``time_gap`` / ``time_split`` inject: ``both``, ``lstm``, or ``query``."""
     time_gap_control: str = "real"
-    """Gap *input* while the Linear branch stays on: ``real``, ``zero``, ``misaligned``."""
+    """Gap *input* while the Linear branch stays on: ``real``, ``zero``, ``misaligned``,
+    ``boundary``, ``shuffled``."""
     time_gap_seed: int = 0
     """RNG seed for ``misaligned`` within-user permutation."""
     time_split: bool = False

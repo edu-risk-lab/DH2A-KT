@@ -33,6 +33,27 @@ Finding recorded in §2.4: within that scoped search we did not find a protocol 
 | graphrag2025 | 2026 | 10.1609/aaai.v40i17.38479 | GraphRAG-Induced… | 0 | AAAI 2026 record in Crossref |
 | agentcat2026 | 2026 | 10.48550/arXiv.2606.21832 | AgentCAT… via OpenAlex | 200 | arXiv fetch timed out in the automated pass; title confirmed via OpenAlex |
 
+## Added for the Expert Systems revision (October 2026)
+
+Each entry below was resolved from its DOI (doi.org content negotiation, Crossref, or the Zenodo record API). Claims made in the paper are limited to what the abstract or record states.
+
+| Key | Year | DOI | Source checked | Notes |
+|---|---|---|---|---|
+| badran2025labelleak | 2025 | 10.5220/0013275200003932 | doi.org BibTeX | CSEDU 2025 |
+| kim2026pktreliability | 2026 | 10.48550/arXiv.2605.04727 | arXiv record | Preprint |
+| gervet2020deepkt | 2020 | 10.5281/zenodo.4143614 | doi.org + Zenodo API | JEDM 12(3):31–54; Semantic Scholar rate-limited (429) |
+| schmucker2022assessing | 2022 | 10.5281/zenodo.6450190 | Zenodo API | JEDM 14(1):1–45 |
+| shen2021lpkt | 2021 | 10.1145/3447548.3467237 | doi.org BibTeX | KDD 2021 |
+| kapoor2023leakage | 2023 | 10.1016/j.patter.2023.100804 | doi.org BibTeX | Patterns 4(9):100804 |
+| bouthillier2021variance | 2021 | 10.48550/arXiv.2103.03098 | arXiv record | MLSys 2021 |
+| ferraridacrema2019progress | 2019 | 10.1145/3298689.3347058 | doi.org BibTeX | RecSys 2019 |
+| shehzad2025gnnsbrs | 2025 | 10.1145/3705328.3748156 | doi.org BibTeX | RecSys 2025 |
+| lai2021rktm | 2021 | 10.1111/exsy.12782 | doi.org BibTeX | Expert Systems 38(8):e12782 |
+
+Not cited: Naranjo & Stoffova 2025 (10.1007/978-981-96-6034-6_32). The DOI resolves, but the full text could not be read, so no claim about it is made.
+
+`daominh2026p0` note changed to "Manuscript under review" (no venue named in the bibliography).
+
 ## Explicitly left unchanged
 
 - `corbett1995bkt` — 1995, DOI 10.1007/BF01099821, Crossref match.

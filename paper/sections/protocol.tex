@@ -2,113 +2,124 @@
 \section{Credit protocol}
 \label{sec:protocol}
 
-DH$^2$A-KT decides whether a knowledge message may be credited for a
-change in next-step AUC. The name denotes this protocol. It is not a
-second predictor. The tracer in Section~\ref{sec:encoding} is one
-backbone on which the protocol is run. Fig.~\ref{fig:architecture}
-is the decision map for the reference run.
+The protocol decides whether a knowledge message may be credited for a
+change in next-step AUC on a given corpus and backbone. It does not
+define a predictor. The tracer of Section~\ref{sec:encoding} is the
+backbone on which it is run here, and Fig.~\ref{fig:architecture}
+summarises the pipeline.
 
-\subsection{Three rungs and three outcomes}
+\subsection{Three rungs}
 \label{sec:protocol-rungs}
-A contrast sits on one rung
+Each contrast is placed on one rung before it is run
 (Table~\ref{tab:evidence-types}).
 
 \begin{itemize}
-  \item \textbf{(i) Capacity-matched message.} The on and off arms use
-  the same maps. Only the message content changes. On this paper the
-  question--KC incidence twin is this rung.
-  \item \textbf{(ii) Architecture-matched input.} The maps stay. The
-  input is zeroed or misaligned. T-zero and T-misaligned are this rung
-  for the gap.
-  \item \textbf{(iii) Package.} The component is added, including any
-  new maps. Record $\Delta$params. A pass on this rung does not credit
-  the input alone. The linear $\log(1{+}\Delta t)$ branch is this rung:
-  one $\mathrm{Linear}(1,128)$ with bias, 256 parameters, absent from
-  the no-time arm. A no-time arm that keeps those 256 parameters
-  unused (param-padded, flag \texttt{--time-gap-pad}) adds the same
-  $\mathrm{Linear}(1,128)$ and a zero multiple of its output, so the
-  representation matches the no-time arm. Those 256 weights receive no
-  gradient, so the padded arm matches the parameter count, not the
-  usable capacity. Rung (ii) is the control that keeps a working map.
-  Rung (iii) remains the weakest evidence and is reported with
-  $\Delta$params.
+  \item \textbf{(i) Capacity-matched message.} The on and off arms share
+  every map; only the message content changes. The question--KC
+  incidence twin, which replaces the train-only incidence matrix by
+  zeros, is this rung.
+  \item \textbf{(ii) Architecture-matched input.} The maps stay and the
+  input is replaced. For the gap this means T-zero (every gap set to
+  $0$) and T-misaligned (gaps permuted within each learner). This is the
+  strongest available control for an input, because the control arm
+  keeps a map that receives gradient.
+  \item \textbf{(iii) Package.} The component is added together with
+  its maps, and the number of added parameters is recorded. A pass here
+  credits the package, not its input. The linear
+  $\log(1{+}\Delta t)$ branch is this rung: one
+  $\mathrm{Linear}(1,128)$ with bias (256 parameters) absent from the
+  no-time arm.
 \end{itemize}
 
-For five paired training seeds, let $\Delta_s$ be validation AUC of the
-on arm minus validation AUC of the designated control. With threshold
-$\tau$:
+\begin{table}[t]
+\caption{Rungs of the credit ladder and the designated control of each.}
+\label{tab:evidence-types}
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.2cm}
+>{\raggedright\arraybackslash}p{5.0cm}
+>{\raggedright\arraybackslash}X@{}}
+\toprule
+Rung & Designated control & What it isolates \\
+\midrule
+(i)~Capacity-matched message & Observed vs.\ zero Q$\leftarrow$KC
+incidence, same maps & Incidence content on a fixed fusion \\
+(ii)~Architecture-matched input & Real vs.\ zeroed or permuted gaps,
+same maps & The aligned gap input, not extra parameters \\
+(iii)~Package & Time branch vs.\ no time branch (256 added
+parameters) & The timing package as a whole \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Outcomes and decision rules}
+\label{sec:protocol-threshold}
+For a fixed set $S$ of paired training seeds, let $\Delta_s$ be the
+validation AUC of the on arm minus that of the designated control under
+seed $s$. Two rules decide credit at a threshold $\tau$.
 
 \begin{itemize}
-  \item \textbf{Credited.} Every $\Delta_s\ge\tau$.
-  \item \textbf{Consistent-positive, not credited.} Every $\Delta_s>0$
-  and at least one $\Delta_s<\tau$. The gain is reported. It is not
-  given a separate credit line.
-  \item \textbf{Unsupported.} Any other pattern, including a negative
-  mean.
+  \item \textbf{Seed rule.} Every $\Delta_s\ge\tau$.
+  \item \textbf{Interval rule.} The lower end of the two-sided 95\%
+  interval of the mean paired difference reaches the threshold,
+  $\bar\Delta-t_{0.975,|S|-1}\,s_\Delta/\sqrt{|S|}\ge\tau$, where
+  $s_\Delta$ is the sample standard deviation of the paired
+  $\Delta_s$.
 \end{itemize}
 
-The middle outcome is part of the protocol. It is the status of aligned
-gap input on the reference run
-($0/5$; mean $\Delta\mathrm{val}\,{+}0.00183$ versus T-zero and
-${+}0.00144$ versus T-misaligned).
+Under either rule a message is \textbf{Credited} if the rule holds,
+\textbf{Consistent-positive, not credited} if it fails while every
+$\Delta_s>0$, and \textbf{Unsupported} otherwise, including a negative
+mean. The middle outcome is part of the protocol: a gain that is
+positive on every seed is reported without a separate credit line.
 
-\subsection{Threshold}
-\label{sec:protocol-threshold}
-On the reference corpus, XES3G5M learner fold~0, $\tau{=}{+}0.002$.
-Table~\ref{tab:threshold-sensitivity} recounts the same unrounded
-per-seed deltas at neighbouring cuts. The qualitative map
-(package credited, aligned gap not separately credited, incidence not
-credited) holds for every cut in $(+0.00175,+0.00236]$. The value
-$+0.002$ is the default inside that band. It is an operating rule, not
-a hypothesis test of $\mu_\Delta{=}0$, and not a registered public
-standard.
+The seed rule is a minimum over seeds, so it becomes stricter as $|S|$
+grows; $|S|{=}5$ is therefore part of its definition, and maps are
+comparable only at the same $|S|$. The interval rule scales with the
+noise of the paired contrast itself, which is the relevant noise for a
+seed-paired design \cite{bouthillier2021variance}, and it has no
+constant fitted to any corpus. It was fixed after all runs had been
+scored. When the two rules disagree, both outcomes are reported.
 
-An absolute cut does not scale with seed noise, so every map is also
-reported under a relative cut,
-$\tau_{\mathrm{rel}}{=}\max(0.002,\,K\cdot\mathrm{SD}_{\mathrm{seed}})$,
-where $\mathrm{SD}_{\mathrm{seed}}$ is the sample standard deviation of
-the control arm's validation AUC across the same five seeds. On
-XES3G5M the two package controls have $\mathrm{SD}_{\mathrm{seed}}$
-$0.000225$ (observed incidence) and $0.000210$ (zero incidence). Both
-packages stay credited for $K\le 10.47$. We fix $K{=}10$, the largest
-integer that keeps the XES map. That choice was made after the XES runs
-and before the transfer runs were scored; it is not pre-registered. If
-the two cuts disagree, both maps are published and neither is dropped
-because it credits fewer messages.
+We use $\tau{=}{+}0.002$ throughout. On XES3G5M learner fold~0 this is
+about nine times the seed standard deviation of the two package control
+arms ($0.00021$ and $0.00023$), and about half the gap between the
+timed tracer and the closest contextual baseline in
+Table~\ref{tab:auc-xes3g5m} ($+0.0037$). Recounting
+the unrounded per-seed differences (Table~\ref{tab:threshold-sensitivity})
+shows that the reference map holds for any seed-rule threshold in
+$(+0.00175,+0.00236]$. The value is an operating rule, not a hypothesis
+test of $\mu_\Delta{=}0$, and not a registered public standard.
+
+\input{tables/table_threshold_sensitivity}
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
-Algorithm~1 is the interface. A new message is not
-integrated by editing the tracer alone. It enters the ladder only with
-a declared rung, a designated control, five paired seeds, and one of
-the three outcomes. Worked commands are in
-\texttt{docs/REGISTER\_MESSAGE.md}.
+Algorithm~\ref{alg:register} is the interface. A new message enters
+the ladder only with a declared rung, a designated control, five
+paired seeds, and an outcome under both rules. A worked example is in
+the repository file \path{docs/REGISTER_MESSAGE.md}.
 
-\noindent\textbf{Algorithm~1.} Register a message on the credit ladder.\par
+\begin{algorithm}[t]
+\caption{Register a message on the credit ladder.}
+\label{alg:register}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$
+\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$; $\tau{=}{+}0.002$
 \STATE Choose rung (i), (ii), or (iii) and the designated control
-\STATE If rung (iii), record $\Delta$params of the added maps
+\STATE If rung (iii), record the number of added parameters
 \FOR{each seed $s\in S$}
-  \STATE Train the on arm and the control with seed $s$; both see the same fold
+  \STATE Train the on arm and the control with seed $s$ on the same fold
   \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{val}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{val}}(\mathrm{control})$
 \ENDFOR
-\STATE $\tau\gets 0.002$ on the reference corpus; also compute $\tau_{\mathrm{rel}}$ (Section~\ref{sec:protocol-threshold})
-\IF{every $\Delta_s\ge\tau$}
-  \STATE outcome $\gets$ Credited
-\ELSIF{every $\Delta_s>0$}
-  \STATE outcome $\gets$ Consistent-positive, not credited
-\ELSE
-  \STATE outcome $\gets$ Unsupported
-\ENDIF
-\STATE A package credit does not credit the input in isolation
+\FOR{each rule $R\in\{$seed, interval$\}$}
+  \IF{$R$ holds at $\tau$}
+    \STATE outcome$_R\gets$ Credited
+  \ELSIF{every $\Delta_s>0$}
+    \STATE outcome$_R\gets$ Consistent-positive, not credited
+  \ELSE
+    \STATE outcome$_R\gets$ Unsupported
+  \ENDIF
+\ENDFOR
+\STATE Report both outcomes with corpus, backbone, and rung; a package credit does not credit the input alone
 \end{algorithmic}
-\label{alg:register}
-
-Table~\ref{tab:module-hypothesis} states the hypothesis each current
-module tests. Table~\ref{tab:credit-decisions} is the reference
-decision list. Single-seed rows in
-Table~\ref{tab:negative-knowledge} are diagnostics. They are not
-five-seed outcomes.
-\input{tables/table_module_hypothesis}
-\input{tables/table_credit_decisions}
+\end{algorithm}

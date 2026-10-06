@@ -1,6 +1,6 @@
 \begin{table}[t]
-\caption{Credit decisions on XES3G5M learner fold~0 (ASSIST2012 where
-marked), LSTM tracer, five paired training seeds. $\tau{=}{+}0.002$ validation AUC versus the designated control.
+\caption{Reference decision list: XES3G5M learner fold~0, LSTM tracer,
+five paired training seeds; the teacher-grouping row is on ASSIST2012. $\tau{=}{+}0.002$ validation AUC versus the designated control.
 Credited requires $5/5$ seeds at or above $\tau$. Consistent-positive,
 not credited requires every seed strictly positive and at least one seed
 below $\tau$. Unsupported is every remaining case. The package rows add
@@ -27,7 +27,9 @@ Architecture & Consistent-positive, not credited ($0/5$) & $+0.00183$ \\
 Aligned gap vs.\ T-misaligned &
 Architecture & Consistent-positive, not credited ($0/5$) & $+0.00144$ \\
 History-only $\Delta t$ &
-Package & Unsupported ($2/5$) & $+0.00193$ \\
+Package & Consistent-positive, not credited ($2/5$) & $+0.00193$ \\
+Query-only $\Delta t$ &
+Package & Consistent-positive, not credited ($0/5$) & $+0.00099$ \\
 Q$\leftarrow$KC incidence message &
 Capacity & Unsupported ($0/5$) & $-0.00010$ \\
 Teacher grouping (ASSIST2012) &

@@ -1,32 +1,27 @@
 \begin{table}[t]
-\caption{Negative results under an operating validation gate
-($\Delta\mathrm{val}\ge{+}0.002$ vs.\ its designated package-level or
-capacity-matched control). ``Below gate'' means the form is
-not credited in the configuration we ran, not that the knowledge type is
-valueless. All runs keep a separate Linear/embedding branch (no absorption
-into \texttt{concept\_embed}). Hypergraph convolution and hint-item
-hyperedges are among these diagnostics; they are not AUC novelty.
-M4 and P4 are five-seed means (seeds 42, 17, 1234, 0, 2024; $0/5$ seeds pass);
-P4's twin is same-seed Linear $\Delta t$ / QKC-T
-(Table~\ref{tab:p4-raw}), not Zero$+\Delta t$.
-K, L, M1, and M5 remain single-seed and are not five-seed credit tests.
-M5 is a 5{,}000-user Junyi subsample with path-derived \emph{unordered}
-concept groups (Algorithm~1), not a directed-DAG test on the full corpus.
-Five-seed rows that miss the rule are marked $0/5$.}
+\caption{Messages that do not reach the $+0.002$ seed rule against their
+designated control. ``Below the rule'' means the form is not credited in
+the configuration run here, not that the knowledge type is valueless.
+Teacher grouping and exponential forgetting use five paired seeds; the
+other four rows are single-seed diagnostics, not five-seed credit tests.
+The exponential-forgetting control is the same-seed linear time package
+on the observed-incidence tracer (Table~\ref{tab:p4-raw}). The Junyi DAG
+row uses a separate 5{,}000-learner subsample with unordered
+concept groups. FA is FoundationalASSIST.}
 \label{tab:negative-knowledge}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xrrrrl@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xlrrrl@{}}
 \toprule
-ID & Knowledge (corpus) & Twin val & ON val & $\Delta$val & Gate \\
+Knowledge (corpus) & Seeds & Control val & On val & $\Delta$val & Outcome \\
 \midrule
-K & HypergraphConv, multi-KC HE (XES) & 0.82598 & 0.82623 & $+0.00025$ & below gate \\
-L & Hint-item session HE (FA) & 0.80861 & 0.80868 & $+0.00007$ & below gate \\
-M1 & Full Q-matrix incidence (FA) & 0.80834 & 0.80824 & $-0.00010$ & below gate \\
-M4 & Teacher grouping (ASSIST2012, 5-seed) & 0.76475 & 0.76499 & $+0.00025$ & $0/5$ \\
-M5 & Expert prereq.\ DAG (Junyi 5k) & 0.7640 & 0.76456 & $+0.00056$ & below gate \\
-P4 & Per-concept exp.\ forgetting (XES, 5-seed) & 0.82862 & 0.82610 & $-0.00252$ & $0/5$ \\
+Hypergraph convolution on multi-KC hyperedges (XES3G5M) & 1 & 0.82598 & 0.82623 & $+0.00025$ & below rule \\
+Hint-item session hyperedges (FA) & 1 & 0.80861 & 0.80868 & $+0.00007$ & below rule \\
+Full Q-matrix incidence (FA) & 1 & 0.80834 & 0.80824 & $-0.00010$ & below rule \\
+Expert prerequisite DAG (Junyi, 5{,}000 learners) & 1 & 0.7640 & 0.76456 & $+0.00056$ & below rule \\
+Teacher grouping (ASSIST2012) & 5 & 0.76475 & 0.76499 & $+0.00025$ & $0/5$ \\
+Per-concept exponential forgetting (XES3G5M) & 5 & 0.82862 & 0.82610 & $-0.00252$ & $0/5$ \\
 \bottomrule
 \end{tabularx}
 \end{table}

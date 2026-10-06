@@ -1,23 +1,21 @@
 \begin{table}[t]
-\caption{Test-only AUC on XES3G5M fold~0 (repeat-target-masked, $L{=}400$).
-DH$^2$ arms use native $n{=}1{,}093{,}755$; pyKT rows use the library
-intersection $n{=}1{,}093{,}720$. Gaps are a contextual location of the
-recipe (distinct $n$), not an event-paired difference on the stable
-pre-chunk key ($n{=}1{,}093{,}718$; Section~\ref{sec:clean-protocol}).
-Mean $\pm$ sample SD over five training seeds
-(42, 17, 1234, 0, 2024). Zero$+\Delta t$ is the credited-minimal
-control; QKC-T is the observed-incidence evaluation arm.
-GIKT shares the training envelope, not a hyperparameter search
-(\ref{app:hparams}). Inherited DKT/DGEKT:
-Table~\ref{tab:auc-inherited}.}
+\caption{Contextual test-only AUC on XES3G5M fold~0 (repeat-target-masked,
+$L{=}400$). Tracer arms are scored on $n{=}1{,}093{,}755$ positions;
+pyKT rows on the library intersection $n{=}1{,}093{,}720$. Gaps locate
+the recipe and are not event-paired differences
+(Section~\ref{sec:clean-protocol}). Mean $\pm$ sample SD over five
+training seeds. QKC-T has observed incidence and the time package;
+Zero$+\Delta t$ has zeroed incidence and the time package. GIKT shares
+the training envelope, not a hyperparameter search (\ref{app:hparams}).
+Inherited DKT and DGEKT: Table~\ref{tab:auc-inherited}.}
 \label{tab:auc-xes3g5m}
 \centering
 \begin{tabular}{@{}lccc@{}}
 \toprule
 Model & Test-only AUC & $n$ scored & Seeds \\
 \midrule
-QKC-T (eval.\ arm) & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
-Zero$+\Delta t$ (credited) & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
+QKC-T & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
+Zero$+\Delta t$ & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 Q$\leftarrow$KC only & $0.8268{\pm}0.0002$ & 1{,}093{,}755 & 5 \\
 GIKT (training-envelope-matched) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
 AKT ($L{=}400$; inherited) & $0.8223{\pm}0.0001$ & 1{,}093{,}720 & 5 \\

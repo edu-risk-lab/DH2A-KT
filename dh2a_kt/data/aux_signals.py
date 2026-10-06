@@ -74,19 +74,27 @@ def apply_time_gap_control(
     ``real`` leaves aligned ``log(1+Δt)``. ``zero`` sets every gap to 0
     (raw feature zero; ``f(0)=b`` still injects bias). ``misaligned``
     permutes non-start gaps within each user so the marginal gap
-    distribution is unchanged but alignment is broken.
+    distribution is unchanged but alignment is broken. ``boundary`` keeps
+    only ``1[Δt=0]``, the attempt-boundary and learner-start marker.
+    ``shuffled`` permutes all gaps across users and rows, so the input has
+    the corpus marginal and carries neither timing nor boundary structure.
     """
-    if control not in ("real", "zero", "misaligned"):
+    if control not in ("real", "zero", "misaligned", "boundary", "shuffled"):
         raise ValueError(
-            f"time_gap_control must be real/zero/misaligned, got {control!r}"
+            "time_gap_control must be real/zero/misaligned/boundary/shuffled, "
+            f"got {control!r}"
         )
     out = np.asarray(gaps, dtype=np.float32)
     if control == "real":
         return out.copy()
     if control == "zero":
         return np.zeros_like(out)
-    users = np.asarray(user_ids)
+    if control == "boundary":
+        return (out == 0).astype(np.float32)
     rng = np.random.default_rng(int(seed))
+    if control == "shuffled":
+        return rng.permutation(out)
+    users = np.asarray(user_ids)
     shuffled = out.copy()
     for uid in np.unique(users):
         idx = np.flatnonzero(users == uid)

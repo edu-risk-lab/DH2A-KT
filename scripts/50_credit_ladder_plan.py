@@ -19,6 +19,10 @@ Groups, in the order the plan cuts from the end:
   package-matched   param-padded no-time x 5 seeds, frozen XES recipe
   junyi-partial     Junyi fold 0, 3 arms x 5 seeds, --max-users 50000, YAML recipe
   junyi-full        Junyi fold 0, 3 arms x 5 seeds, all learners, frozen XES recipe
+  xes-gap-controls  XES3G5M fold 0, gap input 1[dt=0] or shuffled across
+                    rows, 2 arms x 5 seeds, frozen XES recipe
+  xes-fold1/2       XES3G5M folds 1 and 2, 3 arms x 5 seeds each, frozen
+                    XES recipe
 
 "Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
@@ -40,6 +44,8 @@ Usage:
   python scripts/50_credit_ladder_plan.py --group package-matched --launch-all
   python scripts/50_credit_ladder_plan.py --group backbone-attn --launch-all
   python scripts/50_credit_ladder_plan.py --group junyi-full --launch-all
+  python scripts/50_credit_ladder_plan.py --group xes-gap-controls --launch-all
+  python scripts/50_credit_ladder_plan.py --group xes-fold1 --launch-all
 """
 
 from __future__ import annotations
@@ -57,8 +63,6 @@ SEEDS_3 = (42, 17, 1234)
 STATUS = REPO / "results" / "tables" / "credit_ladder_status.json"
 
 COMMON = [
-    "--fold",
-    "0",
     "--device",
     "cuda",
     "--architecture",
@@ -92,8 +96,24 @@ REF_RECIPE = [
 ]
 
 
-def _dh2(config: str, seed: int, extra: list[str], max_users: int | None = None) -> list[str]:
-    cmd = [sys.executable, "scripts/03_train_tier1.py", config, *COMMON, "--seed", str(seed), *extra]
+def _dh2(
+    config: str,
+    seed: int,
+    extra: list[str],
+    max_users: int | None = None,
+    fold: int = 0,
+) -> list[str]:
+    cmd = [
+        sys.executable,
+        "scripts/03_train_tier1.py",
+        config,
+        "--fold",
+        str(fold),
+        *COMMON,
+        "--seed",
+        str(seed),
+        *extra,
+    ]
     if max_users is not None:
         cmd.extend(["--max-users", str(max_users)])
     return cmd
@@ -328,6 +348,40 @@ def _jobs() -> list[dict]:
     for seed in SEEDS_5:
         for arm, extra in junyi_arms.items():
             add("junyi-full", arm, seed, _dh2(junyi, seed, [*extra, *REF_RECIPE]))
+
+    # Two more architecture-matched gap inputs on XES3G5M fold 0. They pair
+    # with the frozen qkc_cm_zero_time / a1_t_zero arms. "boundary" feeds
+    # only 1[dt=0], so time-package vs boundary isolates elapsed time from
+    # attempt-boundary structure. "shuffled" permutes gaps across all rows:
+    # same marginal, a map that receives gradient, no timing information.
+    for seed in SEEDS_5:
+        for arm, control in (("t-boundary", "boundary"), ("t-shuffled", "shuffled")):
+            add(
+                "xes-gap-controls",
+                arm,
+                seed,
+                _dh2(
+                    "configs/xes3g5m.yaml",
+                    seed,
+                    [*timed, "--time-gap-control", control, *REF_RECIPE],
+                ),
+            )
+
+    # Learner folds 1 and 2 for the XES3G5M LSTM package and aligned gap.
+    xes_fold_arms = {
+        "no-time": zero_q,
+        "time-package": timed,
+        "t-zero": [*timed, "--time-gap-control", "zero"],
+    }
+    for fold in (1, 2):
+        for seed in SEEDS_5:
+            for arm, extra in xes_fold_arms.items():
+                add(
+                    f"xes-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2("configs/xes3g5m.yaml", seed, [*extra, *REF_RECIPE], fold=fold),
+                )
     return jobs
 
 

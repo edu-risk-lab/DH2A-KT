@@ -1,15 +1,16 @@
 ﻿% Auto-derived from xes3g5m_fold0_hyperedge_audit*.json (full-log positive control)
 \begin{table}[t]
 \caption{Path-derived concept-group hyperedge audit on XES3G5M fold~0.
-\textbf{Train-only} uses P0's audited $E_{\mathrm{pre}}^f$ and a
+\textbf{Train-only} uses the audited pairwise $E_{\mathrm{pre}}^f$ and a
 train-only concept$\rightarrow$interaction map. \textbf{Full-log} is a
 deliberate positive control: $E_{\mathrm{pre}}$ pooled before the learner
 split with a full-log member map.
 TBMR uses a uniform random sample of $10^5$ projected pairs (seed~42)
 from $11{,}568{,}053$ (train-only) and $15{,}279{,}564$ (full-log) pairs.
 $|\rho|$ is \emph{not} a measured zero: every projected pair is assigned
-weight $1$, so Pearson is undefined ($\sigma_w{=}0$; P0 would print
-$0.0$). Cross-modal and intervention-timing classes are not instantiated.}
+weight $1$, so Pearson is undefined ($\sigma_w{=}0$; the pairwise routine
+would print $0.0$). Cross-modal and intervention-timing classes are not
+instantiated.}
 \label{tab:leakage-measured}
 \centering
 \footnotesize

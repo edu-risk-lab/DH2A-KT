@@ -1,55 +1,49 @@
-\begin{table}[t]
-\caption{Credit outcomes under both cuts. Five paired training seeds
-$\{0,17,42,1234,2024\}$, learner fold~0, validation AUC. Absolute cut
-$\tau{=}{+}0.002$; relative cut
-$\tau_{\mathrm{rel}}{=}\max(0.002,\,10\cdot\mathrm{SD}_{\mathrm{seed}})$,
-with $\mathrm{SD}_{\mathrm{seed}}$ the sample SD of the control arm's
-validation AUC. $K{=}10$ is the largest integer that keeps both XES3G5M
-packages credited (bound 10.5). Cons.-pos.\ is consistent-positive,
-not credited; Unsupp.\ is unsupported.
-XES3G5M rows, XES3G5M attn., ASSIST2012 ref. and Junyi (all) use the reference recipe: no concept or session hypergraph,
-batch~16, 30~epochs, patience~5. ASSIST2012 and Junyi (50k) use their
-corpus configs: concept-prerequisite hypergraph on, batch~32, 10~epochs.
-The param-padded arm adds the same 256 parameters as the timed arm and multiplies their output by zero.
-XES3G5M attn.\ rows replace the LSTM with a two-layer causal Transformer encoder; inputs, time branch and readout are unchanged.
-Junyi (50k) uses the first 50{,}000 train and 50{,}000 evaluation learners. Junyi items map one-to-one to KCs, so no incidence contrast is run there.
-Source: \protect\path{results/tables/credit_ladder_transfer.json}.}
+\begin{table}[tbp]
+\caption{Credit map across settings. Five paired training seeds,
+learner fold~0 unless marked, validation AUC. Seed rule: every
+$\Delta_s\ge{+}0.002$ (passing seeds shown). Interval rule: the lower
+95\% bound of the mean paired $\Delta$ ($t_{0.975,4}$) is at least
+$+0.002$. Cons.-pos.: consistent-positive, not credited; Unsupp.:
+unsupported. ``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the
+reference recipe; the other ASSIST2012 and Junyi rows use corpus
+configurations (Section~\ref{sec:credit-gate}).}
 \label{tab:credit-transfer}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}llrrcc@{}}
+\begin{tabular}{@{}llrrll@{}}
 \toprule
-Corpus & Contrast & Mean $\Delta$val & $\tau_{\mathrm{rel}}$ & Outcome at $+0.002$ & Outcome at $\tau_{\mathrm{rel}}$ \\
+Setting & Contrast & Mean $\Delta$ & Lower 95\% & Seed rule & Interval rule \\
 \midrule
-XES3G5M & Package, observed incidence & $+0.00274$ & $0.0023$ & Credited $5/5$ & Credited $5/5$ \\
- & Package, zero incidence & $+0.00255$ & $0.0021$ & Credited $5/5$ & Credited $5/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00183$ & $0.0020$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-misaligned & $+0.00144$ & $0.0020$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Package vs.\ param-padded no-time & $+0.00265$ & $0.0035$ & Credited $5/5$ & Cons.-pos. $0/5$ \\
+XES3G5M & Q$\leftarrow$KC incidence & $-0.00010$ & $-0.00052$ & Unsupp. $0/5$ & Unsupp. \\
+ & Package, observed incidence & $+0.00274$ & $+0.00242$ & Credited $5/5$ & Credited \\
+ & Package, zero incidence & $+0.00255$ & $+0.00236$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00183$ & $+0.00173$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00144$ & $+0.00109$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Package vs.\ param-padded no-time & $+0.00265$ & $+0.00227$ & Credited $5/5$ & Credited \\
 \addlinespace
-XES3G5M attn. & Package, zero incidence & $+0.00178$ & $0.0065$ & Cons.-pos. $2/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00135$ & $0.0048$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-misaligned & $+0.00111$ & $0.0027$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
+XES3G5M attn. & Package, zero incidence & $+0.00178$ & $+0.00104$ & Cons.-pos. $2/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-zero & $+0.00135$ & $+0.00081$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00111$ & $+0.00084$ & Cons.-pos. $0/5$ & Cons.-pos. \\
 \addlinespace
-ASSIST2012 & Q$\leftarrow$KC incidence & $+0.00123$ & $0.0069$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Package, observed incidence & $+0.00212$ & $0.0057$ & Cons.-pos. $4/5$ & Cons.-pos. $0/5$ \\
- & Package, zero incidence & $+0.00209$ & $0.0069$ & Cons.-pos. $3/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00191$ & $0.0020$ & Cons.-pos. $2/5$ & Cons.-pos. $2/5$ \\
- & Aligned gap vs.\ T-misaligned & $+0.00238$ & $0.0034$ & Cons.-pos. $4/5$ & Cons.-pos. $0/5$ \\
+ASSIST2012 & Q$\leftarrow$KC incidence & $+0.00123$ & $+0.00065$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Package, observed incidence & $+0.00212$ & $+0.00160$ & Cons.-pos. $4/5$ & Cons.-pos. \\
+ & Package, zero incidence & $+0.00209$ & $+0.00121$ & Cons.-pos. $3/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-zero & $+0.00191$ & $+0.00175$ & Cons.-pos. $2/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00238$ & $+0.00197$ & Cons.-pos. $4/5$ & Cons.-pos. \\
 \addlinespace
-ASSIST2012 ref. & Q$\leftarrow$KC incidence & $+0.00127$ & $0.0095$ & Cons.-pos. $0/5$ & Cons.-pos. $0/5$ \\
- & Package, observed incidence & $+0.00235$ & $0.0097$ & Cons.-pos. $2/5$ & Cons.-pos. $0/5$ \\
- & Package, zero incidence & $+0.00209$ & $0.0095$ & Cons.-pos. $3/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00183$ & $0.0039$ & Cons.-pos. $1/5$ & Cons.-pos. $0/5$ \\
- & Aligned gap vs.\ T-misaligned & $+0.00216$ & $0.0067$ & Cons.-pos. $3/5$ & Cons.-pos. $0/5$ \\
+ASSIST2012 ref. & Q$\leftarrow$KC incidence & $+0.00127$ & $+0.00076$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Package, observed incidence & $+0.00235$ & $+0.00076$ & Cons.-pos. $2/5$ & Cons.-pos. \\
+ & Package, zero incidence & $+0.00209$ & $+0.00115$ & Cons.-pos. $3/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-zero & $+0.00183$ & $+0.00161$ & Cons.-pos. $1/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00216$ & $+0.00166$ & Cons.-pos. $3/5$ & Cons.-pos. \\
 \addlinespace
-Junyi (50k) & Package, zero incidence & $+0.00412$ & $0.0035$ & Credited $5/5$ & Cons.-pos. $4/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00395$ & $0.0022$ & Credited $5/5$ & Credited $5/5$ \\
+Junyi (50k) & Package, zero incidence & $+0.00412$ & $+0.00365$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00395$ & $+0.00337$ & Credited $5/5$ & Credited \\
 \addlinespace
-Junyi (all) & Package, zero incidence & $+0.00336$ & $0.0020$ & Credited $5/5$ & Credited $5/5$ \\
- & Aligned gap vs.\ T-zero & $+0.00334$ & $0.0020$ & Credited $5/5$ & Credited $5/5$ \\
+Junyi (all) & Package, zero incidence & $+0.00336$ & $+0.00315$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00334$ & $+0.00303$ & Credited $5/5$ & Credited \\
 \bottomrule
 \end{tabular}}
 \end{table}

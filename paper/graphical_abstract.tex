@@ -6,7 +6,7 @@
 \pagestyle{empty}
 \begin{document}
 \centering
-{\large\bfseries DH$^2$A-KT: construct, audit membership leak, then credit}\\[6pt]
+{\large\bfseries Credit protocol: construct, audit membership leak, then credit}\\[6pt]
 \begin{tikzpicture}[
   font=\scriptsize\sffamily,
   >=Stealth,
@@ -27,7 +27,7 @@
 \node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
 \node[box, right=0.32cm of p0] (audit) {Hyperedge\\leakage audit};
 \node[box, right=0.32cm of audit] (twins) {Laddered ablation\\(cap.\ / arch.\ / pkg)};
-\node[box, right=0.32cm of twins] (gate) {Credit rule: $5/5$\\seeds $\Delta\mathrm{val}\ge\tau$\\($+0.002$ and $\tau_{\mathrm{rel}}$)};
+\node[box, right=0.32cm of twins] (gate) {Credit rules, $\tau{=}{+}0.002$:\\all 5 seeds $\Delta\mathrm{val}\ge\tau$;\\lower 95\% bound $\ge\tau$};
 \draw[->, thick] (p0.east) -- (audit.west);
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
@@ -48,7 +48,7 @@
 \node[draw, rounded corners=2pt, align=left, inner sep=4pt,
       text width=13.25cm, fill=blue!5,
       below=0.35cm of pass.south west, anchor=north west] (transfer)
-  {\textbf{Transfer, same rule and both cuts.}
+  {\textbf{Transfer, same control levels and both rules.}
    Attention encoder in place of the LSTM: no time message credited.
    ASSISTments~2012, corpus config and XES recipe: no message credited.
    Junyi, all learners: package and aligned gap credited.

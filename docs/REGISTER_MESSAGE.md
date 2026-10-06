@@ -1,4 +1,4 @@
-# Register a message on the DH²A-KT credit ladder
+# Register a message on the credit ladder
 
 The protocol is Section 4 of `paper/main.tex` (`sec:protocol`) and Algorithm Register. A new message is not added by editing the tracer alone.
 
@@ -11,21 +11,21 @@ The protocol is Section 4 of `paper/main.tex` (`sec:protocol`) and Algorithm Reg
    - `(iii)` package: the branch is added, including new parameters. Record `Δparams`. A package pass does not credit the input alone.
 3. **Designated control.** One twin per contrast. Do not compare against a different architecture.
 4. **Corpus, learner fold, five training seeds.** The reference seeds are `42, 17, 1234, 0, 2024` on XES3G5M fold 0. Use the same five seeds on a transfer corpus.
-5. **Outcome**, from the five paired validation deltas `Δ_s`:
-   - **Credited** if every `Δ_s ≥ τ`.
-   - **Consistent-positive, not credited** if every `Δ_s > 0` and at least one `Δ_s < τ`.
+5. **Outcome**, from the five paired validation deltas `Δ_s`, under each rule below:
+   - **Credited** if the rule passes.
+   - **Consistent-positive, not credited** if the rule fails and every `Δ_s > 0`.
    - **Unsupported** otherwise.
 
-## Threshold
+## Decision rules
 
-On XES3G5M fold 0, `τ = +0.002`. That default sits in the stability band `(+0.00175, +0.00236]` (`paper/tables/table_threshold_sensitivity.tex`).
+`τ = +0.002` validation AUC on every corpus and backbone. On XES3G5M fold 0 that value sits in the stability band `(+0.00175, +0.00236]` (`paper/tables/table_threshold_sensitivity.tex`).
 
-On any other corpus or backbone, report both:
+Report both rules:
 
-- absolute `τ = +0.002`;
-- `τ_rel = max(0.002, 10 * SD_seed)`, where `SD_seed` is the sample standard deviation of the **control** arm's validation AUC across the five seeds.
+- **Seed rule:** every one of the five `Δ_s ≥ τ`. This is a minimum over seeds, so the five-seed set is part of the rule.
+- **Interval rule:** `mean(Δ) − t_{0.975,4} · SD(Δ) / √5 ≥ τ`, with `t_{0.975,4} = 2.7764` and `SD(Δ)` the sample standard deviation of the five paired deltas.
 
-`K = 10` is the largest integer that keeps both XES3G5M packages credited (bound 10.47). It was fixed after the XES runs. If the two cuts disagree, publish both maps. `python scripts/51_transfer_credit_tables.py` recomputes every outcome and stops if `K` no longer preserves the XES map.
+No constant is fitted to any corpus. The interval rule was fixed after the reference runs were scored; it is reported as a check on the seed rule, not as a looser alternative. If the two rules disagree, publish both outcomes. `python scripts/51_transfer_credit_tables.py` recomputes both outcomes and the lower bound for every row.
 
 ## Reference command shape
 
@@ -37,7 +37,7 @@ python scripts/03_train_tier1.py configs/xes3g5m.yaml --fold 0 --device cuda \
   --mask-repeats --window-mode chunked --seq-len 400 --seed 42
 ```
 
-Drop `--time-gap` for the no-time control. Add `--time-gap-pad` instead when the no-time arm must carry the same `Linear(1, hidden)` (256 parameters at hidden 128) without changing the representation. Keep `--time-gap` and set `--time-gap-control zero` or `misaligned` for rung (ii). `--time-gap` and `--time-gap-pad` cannot be combined. Repeat for seeds `42 17 1234 0 2024`.
+Drop `--time-gap` for the no-time control. Add `--time-gap-pad` instead when the no-time arm must carry the same `Linear(1, hidden)` (256 parameters at hidden 128) without changing the representation. Keep `--time-gap` and set `--time-gap-control zero`, `misaligned`, `boundary` (only `1[Δt=0]`), or `shuffled` (gaps permuted across all rows and learners) for rung (ii). `--time-gap` and `--time-gap-pad` cannot be combined. Repeat for seeds `42 17 1234 0 2024`.
 
 The batch driver for the transfer ladders is `scripts/50_credit_ladder_plan.py`. It prints the run list and, with `--launch`, starts the next job only when CUDA is available. It does not invent AUC numbers.
 

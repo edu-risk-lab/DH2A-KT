@@ -3,7 +3,7 @@
 \begin{table}[ht]
 \caption{Calibration on XES3G5M fold~0 test predictions under the
 repeat-target-masked protocol (mask-repeats, chunked, $L{=}400$). ECE uses 15 equal-width bins;
-lower is better. DH$^2$ checkpoints: seed~42 (QKC-T AUC $0.8296$ is the fold~0
+lower is better. Tracer checkpoints: seed~42 (QKC-T AUC $0.8296$ is the fold~0
 checkpoint in Table~\ref{tab:auc-p0-dt-folds}, not the five-seed mean
 $0.8295{\pm}0.0001$ in Table~\ref{tab:auc-xes3g5m}; Zero$+\Delta t$ $0.8294$ is the same seed-42
 checkpoint as Table~\ref{tab:qkc-zero-time}; the pathway-off twin $0.8202$ is
@@ -15,9 +15,9 @@ $1{,}093{,}718$ rows with $8$ label collisions (kept). The pre-chunk
 $\mathrm{user}{+}\mathrm{timestamp}{+}\mathrm{item}{+}\mathrm{KC}$ key
 matches the same $n$ with zero label disagreement
 (\texttt{a4\_event\_identity.json}). Calibration is not event-paired
-across DH$^2$ and pyKT. We report
+across the tracer and pyKT. We report
 calibration as a diagnostic and do not apply temperature scaling.
-Reliability curves (DH$^2$ arms, including Zero$+\Delta t$) appear in
+Reliability curves (tracer arms, including Zero$+\Delta t$) appear in
 Figure~\ref{fig:reliability-xes3g5m}.}
 \label{tab:calibration-xes3g5m}
 \centering

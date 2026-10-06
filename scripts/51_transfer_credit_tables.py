@@ -4,15 +4,16 @@ Rows whose five seed CSVs are not all present are listed as pending and
 left out of the table.
 
 Reads the per-seed comparison CSVs that ``scripts/50_credit_ladder_plan.py``
-jobs write, pairs on/control arms by seed, and applies both cuts:
+jobs write, pairs on/control arms by seed, and applies two rules:
 
-  absolute  tau = +0.002
-  relative  tau_rel = max(0.002, K * SD_seed)
+  seed-wise  every paired delta_s >= tau, tau = +0.002
+  interval   mean(delta) - t_{0.975,4} * SD(delta) / sqrt(5) >= tau
 
-SD_seed is the sample SD of the control arm's validation AUC over the five
-seeds. K = 10 is the largest integer that keeps the XES3G5M fold-0 map
-(both packages credited, aligned gap not credited); the XES rows are
-recomputed here from the frozen CSVs so that check is reproducible.
+SD(delta) is the sample SD of the paired per-seed deltas, so the interval
+rule scales with the noise of the contrast itself and has no free
+constant. It replaces an earlier max(0.002, K * SD_control) cut whose K
+had been chosen to keep the XES3G5M map. The XES rows are recomputed here
+from the frozen CSVs.
 
 Writes results/tables/credit_ladder_transfer.json and
 paper/tables/table_credit_transfer.tex. Does not retrain anything.
@@ -32,7 +33,8 @@ REPO = Path(__file__).resolve().parents[1]
 TABLES = REPO / "results" / "tables"
 SEEDS = (0, 17, 42, 1234, 2024)
 TAU = 0.002
-K = 10
+# Two-sided 95% Student t quantile, df = len(SEEDS) - 1 = 4.
+T_975 = 2.7764451051977987
 OUT_JSON = TABLES / "credit_ladder_transfer.json"
 OUT_TEX = REPO / "paper" / "tables" / "table_credit_transfer.tex"
 
@@ -47,6 +49,8 @@ def _frozen(prefix: str) -> str:
 
 # (corpus, label, rung, on pattern, control pattern)
 CONTRASTS = [
+    ("XES3G5M", "Q$\\leftarrow$KC incidence", "Capacity",
+     _frozen("qkc_cm_observed"), _frozen("qkc_cm_zero")),
     ("XES3G5M", "Package, observed incidence", "Package", None, None),
     ("XES3G5M", "Package, zero incidence", "Package",
      _frozen("qkc_cm_zero_time"), _frozen("qkc_cm_zero")),
@@ -56,6 +60,20 @@ CONTRASTS = [
      _frozen("qkc_cm_zero_time"), _frozen("a1_t_misaligned")),
     ("XES3G5M", "Package vs.\\ param-padded no-time", "Package (param.\\ matched)",
      _frozen("qkc_cm_zero_time"), _ladder("package-matched_no-time-param-padded")),
+    ("XES3G5M", "Aligned gap vs.\\ T-shuffled", "Architecture",
+     _frozen("qkc_cm_zero_time"), _ladder("xes-gap-controls_t-shuffled")),
+    ("XES3G5M", "Aligned gap vs.\\ T-boundary", "Architecture",
+     _frozen("qkc_cm_zero_time"), _ladder("xes-gap-controls_t-boundary")),
+    ("XES3G5M", "T-boundary vs.\\ T-zero", "Architecture",
+     _ladder("xes-gap-controls_t-boundary"), _frozen("a1_t_zero")),
+    ("XES3G5M fold 1", "Package, zero incidence", "Package",
+     _ladder("xes-fold1_time-package"), _ladder("xes-fold1_no-time")),
+    ("XES3G5M fold 1", "Aligned gap vs.\\ T-zero", "Architecture",
+     _ladder("xes-fold1_time-package"), _ladder("xes-fold1_t-zero")),
+    ("XES3G5M fold 2", "Package, zero incidence", "Package",
+     _ladder("xes-fold2_time-package"), _ladder("xes-fold2_no-time")),
+    ("XES3G5M fold 2", "Aligned gap vs.\\ T-zero", "Architecture",
+     _ladder("xes-fold2_time-package"), _ladder("xes-fold2_t-zero")),
     ("XES3G5M attn.", "Package, zero incidence", "Package (backbone)",
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_no-time")),
     ("XES3G5M attn.", "Aligned gap vs.\\ T-zero", "Architecture",
@@ -116,8 +134,8 @@ def _read(pattern: str) -> dict[int, dict]:
     return out
 
 
-def _outcome(deltas: list[float], tau: float) -> str:
-    if all(d >= tau for d in deltas):
+def _outcome(credited: bool, deltas: list[float]) -> str:
+    if credited:
         return "Credited"
     if all(d > 0 for d in deltas):
         return "Consistent-positive, not credited"
@@ -154,7 +172,9 @@ def main() -> int:
             on_val = {s: v["val_auc"] for s, v in _read(on_pat).items()}
         deltas = [on_val[s] - ctrl[s]["val_auc"] for s in SEEDS]
         sd_ctrl = statistics.stdev(ctrl[s]["val_auc"] for s in SEEDS)
-        tau_rel = max(TAU, K * sd_ctrl)
+        mean = statistics.mean(deltas)
+        sd_delta = statistics.stdev(deltas)
+        lcb = mean - T_975 * sd_delta / math.sqrt(len(SEEDS))
         rows.append(
             {
                 "corpus": corpus,
@@ -162,89 +182,49 @@ def main() -> int:
                 "rung": rung,
                 "seeds": list(SEEDS),
                 "delta_val": deltas,
-                "mean_delta_val": statistics.mean(deltas),
+                "mean_delta_val": mean,
                 "min_delta_val": min(deltas),
                 "sd_control_val": sd_ctrl,
+                "sd_delta_val": sd_delta,
+                "lcb95_delta_val": lcb,
                 "tau_abs": TAU,
-                "tau_rel": tau_rel,
                 "pass_abs": sum(d >= TAU for d in deltas),
-                "pass_rel": sum(d >= tau_rel for d in deltas),
-                "outcome_abs": _outcome(deltas, TAU),
-                "outcome_rel": _outcome(deltas, tau_rel),
+                "outcome_abs": _outcome(all(d >= TAU for d in deltas), deltas),
+                "outcome_ci": _outcome(lcb >= TAU, deltas),
                 "control_batch": ctrl[SEEDS[0]]["batch"],
                 "control_epochs": ctrl[SEEDS[0]]["epochs"],
                 "n_scored": ctrl[SEEDS[0]]["n"],
             }
         )
 
-    xes = [r for r in rows if r["corpus"] == "XES3G5M" and r["rung"] == "Package"]
-    max_k = min(r["min_delta_val"] / r["sd_control_val"] for r in xes)
     payload = {
-        "K": K,
         "tau_abs": TAU,
-        "max_K_preserving_xes_packages": max_k,
+        "t_975_df4": T_975,
+        "interval_rule": "mean - t_975 * SD(delta) / sqrt(5) >= tau",
         "rows": rows,
         "pending": pending,
     }
-    if K > math.floor(max_k):
-        raise SystemExit(f"K={K} no longer preserves the XES packages (max {max_k:.2f})")
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     short = {"Credited": "Credited", "Consistent-positive, not credited": "Cons.-pos.", "Unsupported": "Unsupp."}
-    present = {r["corpus"] for r in rows}
-    ref_groups = ["XES3G5M rows"]
-    if "XES3G5M attn." in present:
-        ref_groups.append("XES3G5M attn.")
-    if "ASSIST2012 ref." in present:
-        ref_groups.append("ASSIST2012 ref.")
-    if "Junyi (all)" in present:
-        ref_groups.append("Junyi (all)")
-    recipe = (
-        ", ".join(ref_groups[:-1]) + " and " + ref_groups[-1]
-        if len(ref_groups) > 1
-        else ref_groups[0]
-    )
-    notes = [
-        f"{recipe} use the reference recipe: no concept or session hypergraph,",
-        "batch~16, 30~epochs, patience~5. ASSIST2012 and Junyi (50k) use their",
-        "corpus configs: concept-prerequisite hypergraph on, batch~32, 10~epochs.",
-    ]
-    if any(r["rung"] == "Package (param.\\ matched)" for r in rows):
-        notes.append(
-            "The param-padded arm adds the same 256 parameters as the timed arm"
-            " and multiplies their output by zero."
-        )
-    if "XES3G5M attn." in present:
-        notes.append(
-            "XES3G5M attn.\\ rows replace the LSTM with a two-layer causal Transformer"
-            " encoder; inputs, time branch and readout are unchanged."
-        )
-    if "Junyi (50k)" in present:
-        notes.append(
-            "Junyi (50k) uses the first 50{,}000 train and 50{,}000 evaluation"
-            " learners. Junyi items map one-to-one to KCs, so no incidence"
-            " contrast is run there."
-        )
     lines = [
-        "\\begin{table}[t]",
-        "\\caption{Credit outcomes under both cuts. Five paired training seeds",
-        "$\\{0,17,42,1234,2024\\}$, learner fold~0, validation AUC. Absolute cut",
-        "$\\tau{=}{+}0.002$; relative cut",
-        f"$\\tau_{{\\mathrm{{rel}}}}{{=}}\\max(0.002,\\,{K}\\cdot\\mathrm{{SD}}_{{\\mathrm{{seed}}}})$,",
-        "with $\\mathrm{SD}_{\\mathrm{seed}}$ the sample SD of the control arm's",
-        f"validation AUC. $K{{=}}{K}$ is the largest integer that keeps both XES3G5M",
-        f"packages credited (bound {max_k:.1f}). Cons.-pos.\\ is consistent-positive,",
-        "not credited; Unsupp.\\ is unsupported.",
-        *notes,
-        "Source: \\protect\\path{results/tables/credit_ladder_transfer.json}.}",
+        "\\begin{table}[tbp]",
+        "\\caption{Credit map across settings. Five paired training seeds,",
+        "learner fold~0 unless marked, validation AUC. Seed rule: every",
+        "$\\Delta_s\\ge{+}0.002$ (passing seeds shown). Interval rule: the lower",
+        "95\\% bound of the mean paired $\\Delta$ ($t_{0.975,4}$) is at least",
+        "$+0.002$. Cons.-pos.: consistent-positive, not credited; Unsupp.:",
+        "unsupported. ``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the",
+        "reference recipe; the other ASSIST2012 and Junyi rows use corpus",
+        "configurations (Section~\\ref{sec:credit-gate}).}",
         "\\label{tab:credit-transfer}",
         "\\centering",
         "\\scriptsize",
         "\\setlength{\\tabcolsep}{2.5pt}",
         "\\resizebox{\\textwidth}{!}{%",
-        "\\begin{tabular}{@{}llrrcc@{}}",
+        "\\begin{tabular}{@{}llrrll@{}}",
         "\\toprule",
-        "Corpus & Contrast & Mean $\\Delta$val & $\\tau_{\\mathrm{rel}}$ & Outcome at $+0.002$ & Outcome at $\\tau_{\\mathrm{rel}}$ \\\\",
+        "Setting & Contrast & Mean $\\Delta$ & Lower 95\\% & Seed rule & Interval rule \\\\",
         "\\midrule",
     ]
     last = None
@@ -254,19 +234,18 @@ def main() -> int:
             lines.append("\\addlinespace")
         last = r["corpus"]
         lines.append(
-            f"{corpus} & {r['contrast']} & ${r['mean_delta_val']:+.5f}$ & ${r['tau_rel']:.4f}$ & "
-            f"{short[r['outcome_abs']]} ${r['pass_abs']}/5$ & {short[r['outcome_rel']]} ${r['pass_rel']}/5$ \\\\"
+            f"{corpus} & {r['contrast']} & ${r['mean_delta_val']:+.5f}$ & ${r['lcb95_delta_val']:+.5f}$ & "
+            f"{short[r['outcome_abs']]} ${r['pass_abs']}/5$ & {short[r['outcome_ci']]} \\\\"
         )
     lines += ["\\bottomrule", "\\end{tabular}}", "\\end{table}", ""]
     OUT_TEX.write_text("\n".join(lines), encoding="utf-8")
 
-    print(f"K={K} max_K={max_k:.3f}")
     for r in rows:
         print(
-            f"{r['corpus']:12} {r['contrast']:40} mean={r['mean_delta_val']:+.6f} "
-            f"min={r['min_delta_val']:+.6f} sd_ctrl={r['sd_control_val']:.6f} "
-            f"tau_rel={r['tau_rel']:.6f} abs={r['pass_abs']}/5 {r['outcome_abs']} | "
-            f"rel={r['pass_rel']}/5 {r['outcome_rel']}"
+            f"{r['corpus']:15} {r['contrast']:40} mean={r['mean_delta_val']:+.6f} "
+            f"min={r['min_delta_val']:+.6f} sd_delta={r['sd_delta_val']:.6f} "
+            f"lcb95={r['lcb95_delta_val']:+.6f} seed={r['pass_abs']}/5 {r['outcome_abs']} | "
+            f"interval {r['outcome_ci']}"
         )
     for p in pending:
         print(f"PENDING {p}")

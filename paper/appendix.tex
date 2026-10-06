@@ -11,6 +11,7 @@
 \usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{algorithm}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,positioning,backgrounds}
 \usepackage{xr-hyper}
@@ -34,61 +35,140 @@
 \setcounter{topnumber}{3}
 \setcounter{bottomnumber}{2}
 \setcounter{totalnumber}{6}
+\setlength{\emergencystretch}{3em}
 
 \begin{document}
 
 \begin{center}
-{\large\bfseries Appendices to ``A Credit Protocol for Leakage-Audited Signals
-in Knowledge Tracing''}
+{\large\bfseries Appendices to ``Validating Auxiliary Knowledge in
+Knowledge Tracing: A Credit Protocol Shows That Credit Depends on Corpus
+and Encoder''}
 \end{center}
 
 \FloatBarrier
 \appendix
-\section{Graph-only encoder as a forced-reliance diagnostic}
-\label{app:graph-only}
-\label{sec:manipulation-result}
-The evaluation arm in Table~\ref{tab:auc-xes3g5m} is QKC-T;
-Zero$+\Delta t$ is the credited-minimal control.
-A graph-only diagnostic encoder (chain
-hyperedges, no question LSTM path; Table~\ref{tab:aliases}) exists so a destruction
-check is interpretable: mean test AUC $0.7516{\pm}0.0015$ vs.\ reused GKT
-$0.8336{\pm}0.0010$ under P0's GKT budget ($L{=}200$;
-Table~\ref{tab:auc-xes3g5m-v2}).
 
-\input{tables/table_auc_xes3g5m_v2}
+\section{Names, aliases, and the reference decision list}
+\label{app:names}
+Table~\ref{tab:aliases} maps the arm names of the paper to
+implementation aliases in the training logs.
+Table~\ref{tab:module-hypothesis} states the hypothesis each module
+tests, and Table~\ref{tab:credit-decisions} is the reference decision
+list on XES3G5M under the seed rule.
 
-Frozen-weight node-drop $p{=}0.9$ passes on all three folds
-($\Delta$AUC $0.0323$, $0.0606$, and $0.0574$ on a shared clean AUC
-per fold).
-P0 GKT also drops after retraining on a destroyed pairwise graph
-($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
-confirms dependence on some graph input. Degree-preserving rewiring
-passes on folds~0--2 ($\Delta$AUC $0.0318$, $0.0341$, $0.0351$; shared clean
-$0.7485$/$0.7511$/$0.7521$). Relation-label permutation is near-null on every fold
-(Table~\ref{tab:manipulation}). We do not deploy this encoder.
-Dropping $L_{\mathrm{aux}}$
-(\texttt{graph\_sensitivity\_weight}${}=0$) on the graph-only fold~0
-track still yields clean AUC $0.754$ and $\Delta$AUC$=0.039$ (pass).
-
-\input{tables/table_manipulation}
-\input{figures/fig_manipulation_sweep}
+\input{tables/table_aliases}
+\input{tables/table_module_hypothesis}
+\input{tables/table_credit_decisions}
 \FloatBarrier
 
-\section{Hyperparameters for Table~\ref{tab:auc-xes3g5m}}
-\label{app:hparams}
-Table~\ref{tab:hparams} records, for each model in
-Table~\ref{tab:auc-xes3g5m}, which knobs were searched, which value was
-used, and how many distinct configurations were tried
-\cite{pineau2021repro}. We do not claim a matched \emph{tuning} budget.
-The tracer architecture was selected from a validation ablation
-ladder---incidence on/off, three $\Delta t$
-injection sites, and the Table~\ref{tab:negative-knowledge}
-diagnostics---whereas each baseline used a single inherited
-hyperparameter vector. That asymmetry favours the DH$^2$ arms in
-configuration search, not the baselines.
+\section{Per-seed records of the XES3G5M reference run}
+\label{app:reference-run}
+Tables~\ref{tab:qkc-capacity}--\ref{tab:p4-raw} give the per-seed
+validation and test differences behind the XES3G5M rows of the credit
+map, and Table~\ref{tab:attribution-summary} collects their 95\%
+intervals. Table~\ref{tab:auc-p0-dt-folds} reports the three-fold
+stability of the absolute test AUC of QKC-T.
 
-\input{tables/table_hparams}
-\input{tables/table_auc_xes3g5m_inherited}
+Two-sided paired $t$-tests on the validation differences, with
+Holm--Bonferroni correction over a family of $m{=}3$, are in
+Table~\ref{tab:credit-stats}. The two package contrasts remain
+significant against $H_0{:}\,\mu_\Delta=0$ and the incidence contrast
+does not. The family was chosen after the incidence and timing twins
+existed and is not presented as fixed before any exploratory run. The
+credit rules of the paper do not use these $p$-values.
+
+\input{tables/table_qkc_capacity_matched}
+\input{tables/table_qkc_zero_time}
+\input{tables/table_a1_timing_controls}
+\input{tables/table_a7_query_dt_seeds}
+\input{tables/table_p4_raw}
+\input{tables/table_attribution_summary}
+\input{tables/table_credit_stats}
+\input{tables/table_auc_p0_dt_folds}
+\FloatBarrier
+
+\section{Path-derived hyperedges and the leakage taxonomy}
+\label{app:hyperedge-construction}
+\label{sec:tier1-graph}
+Path-derived concept-group hyperedges are bounded-length simple directed
+paths on audited, acyclic $E_{\mathrm{pre}}^f$
+(Algorithm~\ref{alg:concept-hyperedge}). Each hyperedge collects the
+concepts visited along a path as an unordered member set, so path
+direction is not retained. These groups are used for the audit and for
+optional hypergraph-convolution diagnostic arms
+\cite{bai2021hypergraphconv}; they are not inputs of the credited arms.
+Chain length bounds $[3,8]$ match \texttt{configs/xes3g5m.yaml}.
+
+\begin{algorithm}[H]
+\caption{Path-derived concept-group hyperedges from audited
+$E_{\mathrm{pre}}^f$.}
+\label{alg:concept-hyperedge}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} $E_{\mathrm{pre}}^f$; bounds $[\ell_{\min},\ell_{\max}]=[3,8]$
+\STATE \textbf{Output:} path-derived concept-group set $\mathcal{E}^{\mathrm{path}}_f$
+\STATE Build directed graph $G$ from $E_{\mathrm{pre}}^f$
+\FOR{each root $r$ with in-degree 0 in $G$}
+  \FOR{each simple path $p$ from $r$ with $\ell_{\min}\le |p|\le\ell_{\max}$}
+    \STATE emit unordered members $\{(\text{concept},c):c\in p\}$
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+Table~\ref{tab:leakage-taxonomy} lists the three hyperedge-level
+leakage classes that a pairwise projection does not express.
+Discussion-thread and teacher-intervention hyperedges are data-blocked
+on the public corpora; session and hint hyperedges are built on
+FoundationalASSIST only (\ref{app:foundational-assist}).
+
+\begin{table}[t]
+\caption{Hyperedge-level leakage taxonomy (extends the pairwise taxonomy
+of \cite{daominh2026p0}).}
+\label{tab:leakage-taxonomy}
+\centering
+\small
+\begin{tabularx}{\textwidth}{@{}
+  >{\raggedright\arraybackslash}p{3.35cm}
+  >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}X
+  @{}}
+\toprule
+Class & Source & Diagnostic \\
+\midrule
+Group-membership & A hyperedge with $\ge 1$ member drawn from a held-out
+interaction while other members are train-only & Group-membership leak
+rate (XES3G5M fold~0: $0$; Table~\ref{tab:leakage-measured}) \\
+Cross-modal & A forum or video embedding pooled over content timestamped
+after the prediction cutoff & Not instantiated (no forum or video logs
+on the corpora used) \\
+Intervention-timing & A teacher or hint hyperedge whose content was
+chosen using knowledge of the student's later correctness & Not
+instantiated for teachers; hint members on FoundationalASSIST use
+train-only session construction (group-membership leak $0$) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\FloatBarrier
+
+\section{Evaluation protocol details}
+\label{app:protocol-detail}
+Because the logits at position $t$ predict row $t{+}1$, local index $0$
+of a window is never a scored target, and the repeat flag is sliced
+from the full-log array rather than recomputed inside the window. A
+fold-0 census finds $208$ windows of length $400$ that start on a
+globally repeated KC-row; all $208$ also split an attempt across the
+boundary, and all are classified as safe because the first row is not a
+target. Later KCs of the same attempt remain masked, not pooled.
+
+Tracer arms are scored on $n{=}1{,}093{,}755$ native positions and pyKT
+baselines on the library intersection $n{=}1{,}093{,}720$. An occurrence
+join on (learner, dense KC, occurrence index) matches $1{,}093{,}718$
+rows but is not a stable event identifier: eight joined keys disagree on
+the label. The pre-chunk key (learner, timestamp, item, KC) matches the
+same $n$ with no label disagreement. Rebasing every arm onto that key
+needs stored per-row scores, which are not in the public snapshot, so
+baseline gaps remain contextual locations rather than event-paired
+differences.
 
 \section{Protocol residual and KC expansion}
 \label{app:protocol-residual}
@@ -98,29 +178,128 @@ every exported KC-row and scoring the masked remainder
 
 \input{tables/table_protocol_residual}
 
-A no-$\Delta t$ Q$\leftarrow$KC residual of $-0.0007$ used
-\texttt{window-mode last} and a different $L$ budget: it does not
-isolate the time branch from the window rule.
-On the fold-0 test export every repeat row has raw
-$\log(1{+}\Delta t){=}0$ ($183{,}741$ rows; $14.4\%$ of unchunked
-P0-protocol targets, not of the $n{=}1{,}093{,}755$ scored set).
-Because $f(0)=b$, that is a zero feature, not a proven zero hidden
+A no-$\Delta t$ Q$\leftarrow$KC residual of $-0.0007$ used a last-window
+rule and a different $L$ budget, so it does not isolate the time branch
+from the window rule. On the fold-0 test export every repeat row has
+raw $\log(1{+}\Delta t){=}0$ ($183{,}741$ rows; $14.4\%$ of unchunked
+targets under the older protocol, not of the $n{=}1{,}093{,}755$ scored
+set). Because $f(0)=b$, that is a zero feature, not a proven zero hidden
 state. The $6{,}413{,}353$ KC-expanded rows versus $5{,}549{,}635$
-recorded attempts in \cite{liu2023xes3g5m} is the same expansion pyKT
-warns about. The retrain uses the shared masking rules; it is not a
-claim that we discovered KC-level row repeats.
+recorded attempts in \cite{liu2023xes3g5m} is the expansion pyKT warns
+about.
+\FloatBarrier
 
 \section{Learner-resampled bootstrap on one checkpoint pair}
 \label{app:bootstrap}
 Table~\ref{tab:bootstrap-qkct} records a learner-resampled diagnostic
-used in Section~\ref{sec:time-result}. It
-resamples 3614 learners that appear on both sides of each contrast; it
-does not use the $1{,}093{,}718$-row occurrence join, is not event-aligned,
-and is not a five-seed CI.
+used in Section~\ref{sec:time-result}. It resamples 3614 learners that
+appear on both sides of each contrast; it does not use the
+$1{,}093{,}718$-row occurrence join, is not event-aligned, and is not a
+five-seed interval.
 
 \input{tables/table_bootstrap_qkct}
 \FloatBarrier
 
+\section{Hyperparameters for the contextual baselines}
+\label{app:hparams}
+Table~\ref{tab:hparams} records, for each model in
+Table~\ref{tab:auc-xes3g5m}, which settings were searched, which value
+was used, and how many configurations were tried
+\cite{pineau2021repro}. We do not claim a matched tuning budget. The
+tracer was selected from a validation ablation ladder (incidence on or
+off, three injection sites, and the diagnostics of
+Table~\ref{tab:negative-knowledge}), whereas each baseline used one
+inherited hyperparameter vector; that asymmetry favours the tracer.
+
+\input{tables/table_hparams}
+\input{tables/table_auc_xes3g5m_inherited}
+\FloatBarrier
+
+\section{Calibration}
+\label{app:calibration}
+\label{sec:calibration}
+Table~\ref{tab:calibration-xes3g5m} reports 15-bin expected calibration
+error (ECE), Brier score, and negative log-likelihood on fold~0 test
+predictions under the same protocol. Among tracer arms QKC-T is best
+calibrated (ECE $0.0056$); Zero$+\Delta t$ is $0.0072$ on the same
+native $n$, and the incidence-only arm is slightly miscalibrated high
+(ECE $0.0103$). On the pyKT intersection AKT has the lowest ECE
+($0.0047$), GIKT $0.0073$, and \textit{simpleKT} $0.0100$. No reported
+ECE exceeds $0.05$.
+
+\input{tables/table_calibration_xes3g5m}
+\input{figures/fig_reliability_xes3g5m}
+\FloatBarrier
+
+\section{Graph-only encoder as a forced-reliance diagnostic}
+\label{app:graph-only}
+\label{sec:manipulation-result}
+A graph-only diagnostic encoder (chain hyperedges, no question LSTM
+path; Table~\ref{tab:aliases}) exists so that a destruction check is
+interpretable: mean test AUC $0.7516{\pm}0.0015$ against reused GKT
+$0.8336{\pm}0.0010$ under the pairwise audit's GKT budget ($L{=}200$;
+Table~\ref{tab:auc-xes3g5m-v2}). That gap mixes encoder, budget, and
+protocol and is not an isolated architecture cost.
+
+\input{tables/table_auc_xes3g5m_v2}
+
+Frozen-weight node-drop $p{=}0.9$ passes on all three folds
+($\Delta$AUC $0.0323$, $0.0606$, and $0.0574$ on a shared clean AUC
+per fold). GKT also drops after retraining on a destroyed pairwise graph
+($0.0877{\pm}0.0009$); the protocol differs (freeze versus retrain).
+Node-drop confirms dependence on some graph input. Degree-preserving
+rewiring passes on folds~0--2 ($\Delta$AUC $0.0318$, $0.0341$, $0.0351$;
+shared clean $0.7485$/$0.7511$/$0.7521$), so this encoder is sensitive
+to co-occurrence structure. Relation-label permutation is near-null on
+every fold (Table~\ref{tab:manipulation}). Dropping the auxiliary
+graph-sensitivity loss on the fold~0 track still yields clean AUC
+$0.754$ and $\Delta$AUC $0.039$. The credited arms do not take this
+check: concept-level convolution is off there, and question--KC
+incidence is a bipartite membership matrix rather than a multi-way
+graph. We do not deploy this encoder.
+
+\input{tables/table_manipulation}
+\input{figures/fig_manipulation_sweep}
+\FloatBarrier
+
+\section{Secondary corpora}
+\subsection{Descriptive structural overlap on Junyi}
+\label{app:junyi-gt}
+\label{sec:junyi-gt}
+Table~\ref{tab:junyi-gt} compares hyperedge-chain overlap and the
+pairwise $E_{\mathrm{pre}}$ against the Junyi expert DAG at
+$K{=}|$expert$|$. Edge F1 is $0.165$ (hyperedge chain) against $0.183$
+($E_{\mathrm{pre}}$) on fold~0; folds~1--2 are analogous. Collapsing
+directed paths into multi-node hyperedges and projecting back to pairs
+can dilute expert-edge recall. This is a descriptive overlap measure,
+not validation of construction fidelity and not evidence that chain
+hyperedges improve prediction. A degree-preserving random-graph null is
+future work.
+
+\input{tables/table_junyi_gt}
+
+\subsection{FoundationalASSIST}
+\label{app:foundational-assist}
+\label{sec:foundational-assist}
+FoundationalASSIST \cite{foundationalassist2026} provides about
+1.74~million skill-linked interactions with synchronised hint counts
+(hint-use rate $5.2\%$). Under the same learner split (fold~0) we infer
+train-only $E_{\mathrm{pre}}$ (280 edges after cycle pruning), build
+5{,}840 path-derived concept groups, and construct 308{,}670 session
+hyperedges on training learners ($11.6\%$ with a hint member;
+$\mathrm{ECR}^{\mathrm{flag}}{=}0$, group-membership leak $0$). The
+tracer reaches fold~0 AUC $0.720$ with concept groups alone
+($n{=}298{,}500$ predictions); adding up to 20{,}000 multi-concept
+session hyperedges raises it to $0.722$. That shift is not a
+hypergraph-AUC claim: the isolated hint-item hyperedge arm stays below
+the rule (Table~\ref{tab:negative-knowledge}). On this corpus query-only
+$\Delta t$ keeps most of the gain of the package ($+0.01471$ against no
+time), LSTM-only gives $+0.00280$, and adding the previous step's
+answer-viewing flag to the package adds a further $+0.00297$. These are
+single-seed diagnostics.
+
+\input{tables/table_foundational_assist}
+\FloatBarrier
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}

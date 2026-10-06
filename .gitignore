@@ -292,6 +292,8 @@ temp/_diag_pykt_smask/
 !results/tables/dh2_kt_ladder_*_vs_p0.csv
 !results/tables/credit_ladder_status.json
 !results/tables/credit_ladder_transfer.json
+!results/tables/gap_descriptives.json
+!results/tables/*_partial_membership_control.json
 !logs/credit_ladder/
 !logs/credit_ladder/**
 !results/tables/p_stage.log

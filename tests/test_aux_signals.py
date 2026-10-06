@@ -70,6 +70,20 @@ def test_time_gap_control_zero_and_misaligned_keep_starts():
     assert sorted(other[1:3].tolist()) == sorted(gaps[1:3].tolist())
 
 
+def test_time_gap_control_boundary_and_shuffled():
+    from dh2a_kt.data.aux_signals import apply_time_gap_control
+
+    ts = np.array([0, 0, 100, 5, 15, 15], dtype=np.int64)
+    users = np.array([1, 1, 1, 2, 2, 2], dtype=np.int64)
+    gaps = log_time_gaps(ts, users)
+    boundary = apply_time_gap_control(gaps, users, "boundary")
+    assert boundary.tolist() == [1.0, 1.0, 0.0, 1.0, 0.0, 1.0]
+    shuffled = apply_time_gap_control(gaps, users, "shuffled", seed=3)
+    assert sorted(shuffled.tolist()) == sorted(gaps.tolist())
+    again = apply_time_gap_control(gaps, users, "shuffled", seed=3)
+    assert np.array_equal(shuffled, again)
+
+
 def test_log_duration_idle_subtracts_previous_duration():
     ts = np.array([0, 10, 20], dtype=np.int64)
     users = np.array([1, 1, 1], dtype=np.int64)

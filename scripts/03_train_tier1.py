@@ -260,11 +260,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--time-gap-control",
-        choices=("real", "zero", "misaligned"),
+        choices=("real", "zero", "misaligned", "boundary", "shuffled"),
         default=None,
         help="Gap input while the Linear branch stays on. real = aligned "
         "log1p Δt; zero = all zeros; misaligned = per-user permutation "
-        "(seed = --seed). Requires --time-gap.",
+        "(seed = --seed); boundary = 1[Δt=0] only; shuffled = permutation "
+        "across all rows and users. Requires --time-gap.",
     )
     parser.add_argument(
         "--time-split",
