@@ -1,5 +1,5 @@
 Credit protocol for leakage-audited signals in knowledge tracing.
 Three outcomes: credited, consistent-positive not credited, unsupported.
-XES3G5M: the time package is credited 5/5; question-KC incidence is not.
-ASSISTments 2012 credits no message; a Junyi subsample credits aligned gap input.
-Every map is reported under an absolute and a seed-noise-scaled cut.
+XES3G5M, LSTM tracer: the time package is credited 5/5; incidence is not.
+An attention encoder and ASSISTments 2012 credit no time message.
+On Junyi the aligned gap input is credited; maps are reported per setting.

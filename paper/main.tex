@@ -77,13 +77,15 @@ capacity-matched, architecture-matched, or package-level control, with
 five paired seeds and both an absolute cut of $+0.002$ validation AUC
 and a cut scaled to seed noise. On XES3G5M learner fold~0 the linear
 $\log(1{+}\Delta t)$ package is credited ($5/5$), the question--KC
-incidence message is
-unsupported, and aligned gap input stays positive and below the cut.
-The map does not transfer unchanged: on ASSISTments~2012 no message is
-credited, and on a 50{,}000-learner Junyi subsample aligned gap input is
-credited under both cuts. Those corpora used their own training
-configs, so credit is reported per corpus, recipe, and cut rather than
-as one map.
+incidence message is unsupported, and aligned gap input stays positive
+and below the cut. Against a parameter-padded control the package is
+credited only at the absolute cut. The map does not transfer unchanged.
+With a causal attention encoder in place of the LSTM, no time message
+is credited. On ASSISTments~2012 no message is credited under either
+the corpus config or the XES3G5M recipe. On Junyi, under
+the same recipe as XES3G5M, both the package and aligned gap input are
+credited under both cuts. Credit is therefore reported per corpus,
+backbone, and cut rather than as one map.
 \end{abstract}
 
 \begin{keyword}
@@ -125,8 +127,8 @@ Fig.~\ref{fig:architecture} is the decision map.
   paired seeds, the linear $\log(1{+}\Delta t)$ package is credited
   ($5/5$) and the question--KC incidence message is unsupported
   ($0/5$). Aligned gap input is consistent-positive and not credited
-  ($0/5$). Table~\ref{tab:credit-decisions}. Transfer runs on
-  ASSISTments~2012 and a Junyi subsample give different maps
+  ($0/5$). Table~\ref{tab:credit-decisions}. A second encoder,
+  ASSISTments~2012, and Junyi give different maps
   (Table~\ref{tab:credit-transfer}).
   \item \textbf{C3 (membership diagnostic).} Path-derived concept-group
   hyperedges and a membership-leak check. The full-log positive control
@@ -136,9 +138,9 @@ Fig.~\ref{fig:architecture} is the decision map.
 The ladder attributes messages on a fixed backbone. It does not
 decompose the gap from QKC-T to DKT ($+0.0286$), which also reflects
 architecture, optimisation, and protocol. The credited package
-contributes about $+0.0027$ inside the backbone on XES3G5M. The same
-package is not credited on ASSISTments~2012
-(Section~\ref{sec:transfer-ladder}).
+contributes about $+0.0027$ inside the LSTM backbone on XES3G5M. The
+same package is not credited on an attention encoder or on
+ASSISTments~2012 (Section~\ref{sec:transfer-ladder}).
 \input{tables/table_claims}
 
 % =============================================================================
@@ -631,8 +633,8 @@ The five seeds are training seeds on learner fold~0, not five data
 folds. Comparing $+0.002$ to training-seed SD after the runs describes
 signal relative to noise; it is not evidence that the threshold was
 registered in advance. The same absolute cut is not assumed to
-transfer: ASSISTments~2012 and the Junyi subsample are reported under
-both cuts (Table~\ref{tab:credit-transfer}), and FoundationalASSIST rows
+transfer: the attention encoder, ASSISTments~2012, and Junyi are
+reported under both cuts (Table~\ref{tab:credit-transfer}), and FoundationalASSIST rows
 remain single-seed diagnostics. Table~\ref{tab:threshold-sensitivity}
 covers XES3G5M only.
 
@@ -832,29 +834,47 @@ $[+0.0068,+0.0077]$ vs.\ AKT, and $[+0.0088,+0.0098]$ vs.\
 \textit{simpleKT} (Table~\ref{tab:bootstrap-qkct}; see Table~\ref{tab:claims}
 for what this does not infer).
 
-\subsection{Transfer: the credit map depends on the corpus}
+\subsection{Transfer: the credit map depends on corpus and backbone}
 \label{sec:transfer-ladder}
-The same five seeds and the same rungs were run on two more corpora
+The same five seeds and the same rungs were run against one more
+XES3G5M control, on a second history encoder, and on two more corpora
 (Table~\ref{tab:credit-transfer}). Each contrast is paired by seed and
 scored under both cuts of Section~\ref{sec:protocol-threshold}. Every
-contrast in the table is positive on all five seeds. The corpora differ
+contrast in the table is positive on all five seeds. The settings differ
 in which of those gains clear the cut.
 
-Every arm within a corpus shares one recipe, but the recipes differ
-across corpora. The XES3G5M ladder trains without the concept and
-session hypergraphs (batch~16, 30~epochs, patience~5). The ASSISTments
-and Junyi arms keep the corpus config: the concept-prerequisite
-hypergraph on, no session hyperedges, batch~32, 10~epochs. A difference
-between corpora is therefore a difference in corpus and recipe
-together.
+Every arm within a setting shares one recipe. The reference recipe is
+the XES3G5M one: no concept or session hypergraph, batch~16,
+30~epochs, patience~5. The parameter-padded control, the attention
+encoder, the full Junyi ladder, and a second ASSISTments ladder use it.
+A first ASSISTments ladder and the Junyi subsample keep the corpus
+config (concept-prerequisite hypergraph on, batch~32, 10~epochs), so
+for those rows corpus and recipe change together.
 
-A param-padded no-time arm (rung~(iii) in
-Section~\ref{sec:protocol-rungs}) was also trained on XES3G5M, but with
-the corpus graph flags (both hypergraphs, graph dropout~$0.15$,
-auxiliary loss) rather than the reference recipe. It is not paired with
-the timed arm and is not scored here; a rerun under the reference recipe
-is queued in \texttt{scripts/50\_credit\_ladder\_plan.py}
-(\texttt{package-matched}).
+\paragraph{Parameter-padded package control on XES3G5M.}
+The no-time arm was retrained under the reference recipe with the 256
+time-branch parameters allocated and their output multiplied by zero
+(rung~(iii), Section~\ref{sec:protocol-rungs}). The timed arm beats it
+on every seed at $+0.002$ (mean $\Delta\mathrm{val}{+}0.00265$; lowest
+seed $+0.00228$). The padded control has a larger seed SD than the
+unpadded one ($0.00035$ against $0.00021$), so its relative cut is
+$0.0035$ and no seed clears it: credited at $+0.002$, consistent-positive
+under $\tau_{\mathrm{rel}}$. Padded and unpadded no-time arms differ by a
+mean of $-0.00010$ with mixed signs. The padded weights receive no
+gradient, so this addresses the parameter count and nothing more.
+
+\paragraph{Second history encoder on XES3G5M.}
+The simpleKT and AKT forwards in the vendored pyKT evaluator take no gap
+tensor, so the second backbone is built inside the tracer: a two-layer
+causal Transformer encoder (four heads, sinusoidal positions)
+replaces the LSTM, and the inputs, the time branch, the query, and the
+readout are unchanged. Its no-time arm reaches a mean validation AUC of
+$0.8241$, against $0.8260$ for the LSTM. The time package is positive on
+every seed (mean $+0.00178$) and passes $+0.002$ on two of five; the
+aligned-gap contrasts pass on none. No time message is credited on this
+encoder under either cut. Its control seed SDs are two to three times
+the LSTM values. The XES3G5M package credit therefore belongs to the
+LSTM tracer, not to the gap input in general.
 
 \paragraph{ASSISTments 2012.}
 Learner fold~0, corpus config (concept-prerequisite hypergraph, batch~32,
@@ -869,25 +889,43 @@ consistent-positive rather than the unsupported null of XES3G5M. Control
 seed SDs are two to three times the XES values, which puts the relative
 cuts between $0.0020$ and $0.0069$.
 
-\paragraph{Junyi, partial replication.}
-The first $50{,}000$ training and $50{,}000$ evaluation learners of
-fold~0, three arms (no time, time package, T-zero), corpus config as
-for ASSISTments.
-Items map one-to-one to KCs here, so no incidence contrast is run. Under
-$+0.002$ both the package (mean $+0.00412$) and aligned gap versus
-T-zero (mean $+0.00395$) are credited. Under the relative cut the
-aligned gap stays credited ($\tau_{\mathrm{rel}}{=}0.0022$), while the
-package misses on one seed ($+0.00347$ against $\tau_{\mathrm{rel}}{=}0.00350$)
-and becomes consistent-positive. Junyi is therefore the only corpus on
-which the aligned gap input itself is credited. This is a subsample, not
-the full corpus of about 25~million interactions.
+The same six arms were rerun under the reference recipe, so that only
+the corpus differs from XES3G5M. The map is unchanged: every contrast
+is positive on every seed and no message is credited under either cut.
+The package passes $+0.002$ on two of five seeds with observed incidence
+(mean $+0.00235$) and three of five with zero incidence (mean
+$+0.00209$); aligned gap passes on one of five versus T-zero and three
+of five versus T-misaligned; incidence passes on none (mean $+0.00127$).
+Early stopping restores epochs~4--7 of~30 and control seed SDs rise to
+$0.0004$--$0.0010$, so the relative cuts are larger still. The
+ASSISTments null is therefore not an artefact of the corpus config.
+
+\paragraph{Junyi.}
+Fold~0, three arms (no time, time package, T-zero). Items map one-to-one
+to KCs here, so no incidence contrast is run. On all learners under the
+reference recipe (about 25~million interactions), both the package (mean
+$+0.00336$; lowest seed $+0.00307$) and aligned gap versus T-zero (mean
+$+0.00334$; lowest $+0.00308$) are credited under both cuts. Control
+seed SDs are $0.00015$ and $0.00012$, so $\tau_{\mathrm{rel}}$ falls to
+the $+0.002$ floor. Three of the five timed runs restored a checkpoint
+from epoch~25 or later of 30, so a longer budget could change the size
+of the gain. An earlier subsample (first $50{,}000$
+training and evaluation learners, corpus config) gave the same sign
+with larger gains and noisier controls; there the package missed the
+relative cut on one seed.
+
+Junyi is the only setting on which the aligned gap input itself is
+credited. Since the full Junyi ladder shares the XES3G5M recipe, that
+difference comes from the corpus, not the recipe.
 
 \paragraph{What changes in the claim.}
-The XES3G5M map is not replaced. It is narrowed: the package credit is
-a property of that corpus and backbone. On ASSISTments~2012 the same
-gains are positive and too small; on the Junyi subsample the aligned
-gap is credited and the package depends on the cut. The two cuts
-disagree on the Junyi package, and both maps are printed.
+The XES3G5M map is not replaced. It is narrowed. The package credit
+holds for the LSTM tracer on XES3G5M against no-time twins, survives a
+parameter-padded control only at the absolute cut, and does not appear
+on the attention encoder. On ASSISTments~2012 the same gains are
+positive and too small under both recipes. On Junyi the aligned gap is credited under both
+cuts. The two cuts disagree on the padded control and on the Junyi
+subsample package, and both maps are printed.
 
 \input{tables/table_credit_transfer}
 
@@ -1032,18 +1070,21 @@ and below $+0.002$, which is the protocol outcome
 ``consistent-positive, not credited.'' History-only injection is $2/5$
 and is unsupported. The credited arm therefore needs attempt-onset
 gaps, and those gaps also mark KC-expansion boundaries, so the credit
-is attempt-context timing and boundary information. Whether a no-time
-control that carries the same 256 parameters, unused, closes the gap is
-not yet answered under the reference recipe
-(Section~\ref{sec:transfer-ladder}).
+is attempt-context timing and boundary information. A no-time control
+that carries the same 256 parameters, unused, does not close the gap at
+$+0.002$ ($5/5$), but its seed noise is larger and none of the five
+seeds clears the relative cut.
 
 That credit does not transfer unchanged
-(Section~\ref{sec:transfer-ladder}). On ASSISTments~2012 the package is
-positive on every seed and is not credited under either cut. On the
-Junyi subsample the aligned gap clears both cuts against T-zero. One
+(Section~\ref{sec:transfer-ladder}). With a causal attention encoder in
+place of the LSTM, the package is positive on every seed and passes
+$+0.002$ on two of five. On ASSISTments~2012 it is positive on every
+seed and is not credited under either cut or either recipe. On Junyi, under the XES3G5M
+recipe, both the package and the aligned gap clear both cuts. One
 reading is that gap informativeness depends on how a corpus logs
-attempts and how much seed noise its control carries; the ladder
-reports that dependence and does not explain it. A single XES3G5M
+attempts, and that a recurrent state uses an additive gap input more
+readily than attention does; the ladder reports these dependences and
+does not explain them. A single XES3G5M
 credit map should not be read as a property of the time message in
 general.
 
@@ -1104,17 +1145,16 @@ part of this attribution map (Supplementary Material).
 \subsection{Limitations}
 \label{sec:limitations}
 \begin{itemize}
-  \item Every ladder uses one LSTM backbone. The time package was not
-  run on simpleKT or AKT: the vendored pyKT path passes no gap tensor
-  and exports placeholder timestamps. Two pyKT models from 2023--2025
-  (sparseKT, stableKT) were not added as context rows, because the
-  vendored evaluator has no forward for them; we did not substitute
-  another model. The transfer corpora use their own configs
-  (concept-prerequisite hypergraph on, batch~32, 10~epochs), not the XES
-  recipe, so corpus and recipe change together; Junyi is a
-  50{,}000-learner subsample of one fold. The parameter-padded package
-  control has not yet been run under the reference recipe. $K{=}10$ in the relative cut was fixed after
-  the XES runs. Run lists and blocked jobs are in
+  \item The second backbone is an encoder swap inside the tracer, not
+  simpleKT or AKT as published: the vendored pyKT path passes no gap
+  tensor and exports placeholder timestamps. It was run on XES3G5M only.
+  Two pyKT models from 2023--2025 (sparseKT, stableKT) were not added as
+  context rows, because the vendored evaluator has no forward for them;
+  we did not substitute another model. The Junyi subsample uses the
+  corpus config, so for it corpus and recipe change together; the full
+  Junyi ladder and the second ASSISTments ladder do not. Every setting
+  uses one learner fold. $K{=}10$ in the
+  relative cut was fixed after the XES runs. Run lists and blocked jobs are in
   \texttt{scripts/50\_credit\_ladder\_plan.py}; outcomes are recomputed by
   \texttt{scripts/51\_transfer\_credit\_tables.py}.
   \item Because zero gaps also mark later KC-expanded rows of the same
