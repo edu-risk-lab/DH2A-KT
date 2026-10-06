@@ -89,7 +89,7 @@ message across two encoders and three corpora, the same message
 receives different verdicts. On XES3G5M with a recurrent tracer the
 time package is credited, but only at the package level: with its map
 held fixed, the aligned gap input is positive on every seed and not
-credited. With a causal attention encoder, and on ASSISTments~2012
+credited, on each of three learner folds. With a causal attention encoder, and on ASSISTments~2012
 under two training recipes, no time message is credited. On Junyi both
 the package and the aligned gap input are credited. Question--concept
 incidence is not credited on XES3G5M. The two rules agree in every
@@ -372,11 +372,22 @@ Table~\ref{tab:leakage-measured} shows the result on XES3G5M fold~0.
 The membership leak rate moves from $0$ to $1$. TBMR moves from $0.7341$
 to $0.7357$ and does not separate the arms. $|\rho|$ is degenerate
 rather than zero, because the projection gives every pair weight $1$.
-Of the inherited diagnostics, only membership works at this layer. The
-full-log control is close to a construction check, since a full-log
-member map touches held-out learners by design; the result we rely on
-is the negative one, that the pairwise statistics do not transfer to
-hyperedge projections.
+Of the inherited diagnostics, only membership works at this layer.
+
+The full-log control is close to a construction check, since a full-log
+member map touches held-out learners by design. A graded control keeps
+the $446{,}305$ train-only hyperedges fixed and adds a random fraction
+$p$ of the $5{,}420$ held-out learners to the member map (seed~42). One
+held-out learner ($p{=}10^{-4}$) raises the membership leak rate from
+$0$ to $0.964$, although held-out interactions are only $0.007\%$ of the
+support of the hyperedges; five learners raise it to $0.99999$, and
+$54$ learners ($p{=}0.01$) to $1$. The held-out support share grows
+with $p$ ($0.0004$, $0.0044$, $0.041$, and $0.30$ at $p{=}0.001$,
+$0.01$, $0.1$, and $1$). The membership rate therefore detects
+contamination down to a single learner but saturates at once, so it is
+a detector and not a measure of how much held-out data entered; the
+support share gives the amount. Source:
+\path{results/tables/xes3g5m_fold0_partial_membership_control.json}.
 
 \input{tables/table_leakage_audit}
 
@@ -399,6 +410,21 @@ descriptive overlap check (\ref{app:junyi-gt}). FoundationalASSIST
 \cite{foundationalassist2026} supplies synchronised hints for
 single-seed diagnostics (\ref{app:foundational-assist}).
 
+Table~\ref{tab:gap-descriptives} describes the gap on each corpus. Two
+properties of the processed corpora bear on the time message. In the
+ASSISTments~2012 export of the pairwise audit, start times are stored
+at a resolution of $1{,}000$\,s, so $82.7\%$ of gaps between distinct
+items are zero and rows inside one $1{,}000$\,s window are ordered by
+item identifier; every ASSISTments arm and control shares this
+ordering. Junyi records completion times in microseconds, and the
+tracer received $\log(1{+}\Delta t)$ in those units. For gaps of one
+second or more this differs from the value in seconds by an offset
+between $13.1$ and $\ln 10^{6}\approx 13.8$, close to a constant that
+the bias of the linear map can absorb; zero gaps, $0.004\%$ of Junyi
+rows, are the exception.
+
+\input{tables/table_gap_descriptives}
+
 \subsection{Recipes and seeds}
 \label{sec:credit-gate}
 Every arm within a setting shares one recipe. The reference recipe has
@@ -410,7 +436,8 @@ $50{,}000$ training and evaluation learners) keep their corpus
 configurations (concept-prerequisite hypergraph on, batch~32,
 10~epochs), so for those rows corpus and recipe change together. Every
 setting uses learner fold~0 and the five training seeds of
-Section~\ref{sec:prelim}. Credit is decided on validation AUC; test-only
+Section~\ref{sec:prelim}; on XES3G5M with the LSTM, the package and
+the aligned-gap contrast are repeated on learner folds~1 and~2. Credit is decided on validation AUC; test-only
 AUC is reported for context.
 
 \subsection{Evaluation protocol}
@@ -475,6 +502,29 @@ differ by a mean of $-0.00010$ with mixed signs. The padded weights
 receive no gradient, so this control checks the parameter count only;
 rung~(ii) remains the control that keeps a working map.
 
+Two further rung-(ii) controls keep the map and change only its input.
+T-shuffled permutes the gaps across all rows and learners, so it keeps
+the marginal gap distribution and removes both alignment and each
+learner's pace. The aligned gap beats it by $+0.00147$ (lower bound
+$+0.0011$), almost the same as against T-misaligned ($+0.00144$),
+which permutes within a learner; per-learner pace adds little, in line
+with a lag-1 gap correlation of $0.08$
+(Table~\ref{tab:gap-descriptives}). T-boundary feeds only the
+indicator $1[\Delta t{=}0]$, which marks learner starts and later
+KC-rows of one attempt. It gains $+0.00111$ over T-zero (lower bound
+$+0.0009$), and the aligned gap gains a further $+0.00072$ over it
+(lower bound $+0.0005$). Both are positive on every seed and
+consistent-positive, not credited. Of the $+0.00183$ by which the
+aligned gap beats T-zero, the indicator alone reproduces about
+$60\%$; as for the package ladder, these are differences between
+separately trained arms, not a causal split.
+
+On learner folds~1 and~2 the reference outcomes repeat. The package is
+credited (means $+0.00316$ and $+0.00272$; lower bounds $+0.0030$ and
+$+0.0025$), and the aligned gap against T-zero is consistent-positive
+(means $+0.00172$ on both folds; lower bounds $+0.0016$ and $+0.0014$;
+$0/5$ and $1/5$ seeds at the threshold).
+
 \paragraph{XES3G5M, attention encoder}
 The no-time arm reaches a mean validation AUC of $0.8241$, against
 $0.8260$ for the LSTM. The time package is positive on every seed (mean
@@ -499,7 +549,10 @@ $+0.00235$) and three of five with zero incidence (mean $+0.00209$),
 aligned gap on one and three of five, incidence on none (mean
 $+0.00127$). Early stopping restores epochs~4--7 of~30 there, and
 control seed standard deviations are $0.0004$--$0.0010$. The
-ASSISTments null is not an artefact of the corpus configuration.
+ASSISTments outcome is not an artefact of the corpus configuration. It
+does concern the gap at the $1{,}000$\,s resolution of the processed
+corpus (Section~\ref{sec:reuse}), at which most within-session gaps
+are zero; a second-resolution export may give a different outcome.
 
 \paragraph{Junyi}
 On all learners under the reference recipe, the package (mean
@@ -603,11 +656,17 @@ under the XES3G5M recipe, consistent-positive on ASSISTments~2012 under
 two recipes, and consistent-positive on XES3G5M once the recurrent
 encoder is replaced by attention. This agrees with the observation that
 the leading KT model family depends on the dataset and on how much
-temporal information matters \cite{gervet2020deepkt}. Two readings fit
-the data: that gap informativeness depends on how a corpus logs
-attempts, and that a recurrent state uses an additive gap input more
-readily than attention does. The ladder records these dependences; it
-does not identify their cause.
+temporal information matters \cite{gervet2020deepkt}. The gap
+descriptives in Table~\ref{tab:gap-descriptives} are consistent with
+the corpus reading. Scored alone, $\log(1{+}\Delta t)$ separates
+correct from incorrect responses far more on Junyi (AUC $0.335$, that
+is $0.665$ with the sign reversed) than on XES3G5M ($0.468$) or
+ASSISTments~2012 ($0.492$), and Junyi is the corpus on which the
+aligned gap is credited. On ASSISTments~2012 the coarse timestamps
+leave most gaps at zero. Neither descriptive explains the attention
+result, since that comparison holds the corpus fixed; a recurrent state
+may use an additive gap input more readily than attention does. The
+ladder records these dependences; it does not identify their cause.
 
 Third, structure messages fail locally. Question--KC incidence is a
 bounded null under the shared-sum fusion on XES3G5M and is
@@ -633,17 +692,23 @@ credited on another here.
 \label{sec:threats}
 \label{sec:limitations}
 \begin{itemize}
-  \item \textbf{One learner fold per setting.} Every map uses learner
-  fold~0; three-fold stability is shown only for the absolute test AUC
-  of QKC-T. The interval rule was fixed after the runs were scored, and
-  its threshold, like the seed-rule threshold, is an operating choice.
+  \item \textbf{Learner folds.} The XES3G5M package and aligned-gap
+  contrasts are repeated on three learner folds; the other settings use
+  fold~0 only. The interval rule was fixed after the runs were scored,
+  and its threshold, like the seed-rule threshold, is an operating
+  choice.
   \item \textbf{Time versus boundary.} Zero gaps also mark later
   KC-rows of one attempt and learner starts, so the credited package
   is attempt-context timing and boundary information, not a pure
-  elapsed-time effect. On the fold-0 test export every repeat row has
-  $\Delta t{=}0$ ($183{,}741$ rows). The XES3G5M schema has no end time,
-  and a tracer that scores before the learner opens the next item must
-  drop the query-side gap.
+  elapsed-time effect. The indicator $1[\Delta t{=}0]$ alone reproduces
+  about $60\%$ of the aligned-gap gain over T-zero on XES3G5M. The
+  XES3G5M schema has no end time, and a tracer that scores before the
+  learner opens the next item must drop the query-side gap.
+  \item \textbf{Timestamp handling.} The ASSISTments~2012 export has
+  $1{,}000$\,s timestamp resolution, and the Junyi gap entered the
+  tracer in microseconds (Section~\ref{sec:reuse}). The ASSISTments
+  outcome is for that resolution; the Junyi unit changes the input by a
+  near-constant offset.
   \item \textbf{Second encoder.} The attention encoder is a swap inside
   the tracer under the LSTM recipe, not simpleKT or AKT as published,
   and was run on XES3G5M only. Its larger seed variance may reflect less
@@ -674,11 +739,12 @@ not the aligned gap input, credits neither on an attention encoder or on
 ASSISTments~2012, and credits both on Junyi. Question--concept incidence
 is not credited on XES3G5M. A single credit map would have misstated
 what the time message contributes in at least one of these settings.
-Future work, in order: repeat the reference contrasts on further learner
-folds; separate elapsed time from attempt boundaries with an
-indicator-only gap input and an input that keeps the gap distribution
-without its timing; run DyGKT and recent pyKT models under this
-evaluator; and develop hyperedge-native leakage statistics.
+On XES3G5M these outcomes repeat on three learner folds, and an
+indicator-only input reproduces about $60\%$ of the aligned-gap gain. Future work, in order: rerun ASSISTments~2012 from a
+second-resolution export; repeat the transfer settings on further
+learner folds; run DyGKT and recent pyKT models under this evaluator;
+and develop a hyperedge-native leakage statistic that measures the
+amount of contamination rather than detecting it.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,

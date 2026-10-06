@@ -16,10 +16,12 @@ Credited on XES3G5M with the LSTM tracer (package only) and on Junyi
 (package and aligned gap); consistent-positive on the attention encoder
 and on ASSISTments~2012 under both recipes; same outcome under both
 rules in every setting (Table~\ref{tab:credit-transfer}) & Any single
-map, including the XES3G5M one, holds for another corpus or backbone \\
+map, including the XES3G5M one, holds for another corpus or backbone;
+the ASSISTments~2012 outcome holds at finer timestamp resolution \\
 On XES3G5M the credit rests on the package rung only &
-Package $5/5$ against no-time and parameter-padded twins; aligned gap
-against T-zero and T-misaligned positive on every seed, $0/5$ &
+Package $5/5$ against no-time and parameter-padded twins, on three
+learner folds; aligned gap against T-zero, T-misaligned, T-shuffled,
+and T-boundary positive on every seed, at most $1/5$ &
 Aligned gap input is credited on XES3G5M; the package credit is an
 input effect \\
 The question--KC incidence message is not credited on this fusion &
@@ -27,8 +29,10 @@ Capacity-matched $0/5$; 95\% interval $[{-}0.00052,{+}0.00032]$ &
 Question--KC relations are useless under a richer fusion \\
 Of the inherited pairwise leakage diagnostics, only group membership
 works on hyperedge projections & Membership leak $0{\to}1$ under the
-full-log control; TBMR does not separate the arms; $|\rho|$ is degenerate
-& The audit taxonomy is validated as a whole \\
+full-log control and $0{\to}0.964$ with one held-out learner added; TBMR
+does not separate the arms; $|\rho|$ is degenerate
+& The audit taxonomy is validated as a whole; the membership rate
+measures the amount of leakage \\
 Contextual baselines locate the recipe &
 Training-envelope GIKT; inherited AKT and \textit{simpleKT} defaults &
 Tuning-matched or event-paired superiority \\

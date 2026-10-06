@@ -41,6 +41,10 @@ DEFAULT_CONFIGS = ("configs/xes3g5m.yaml", "configs/assist2012.yaml", "configs/j
 LABELS = {"xes3g5m": "XES3G5M", "assist2012": "ASSIST2012", "junyi": "Junyi"}
 OUT_JSON = REPO / "results" / "tables" / "gap_descriptives.json"
 OUT_TEX = REPO / "paper" / "tables" / "table_gap_descriptives.tex"
+# Junyi time_done is unix microseconds; the magnitude rule in
+# infer_timestamp_seconds_scale reads it as seconds. The tracer inputs keep that
+# rule (frozen runs); only these descriptives are converted.
+SECONDS_PER_UNIT = {"junyi": 1.0e-6}
 
 
 def _auc(score: np.ndarray, label: np.ndarray) -> float:
@@ -59,7 +63,8 @@ def describe(config: Path, fold: int) -> dict:
     items = df["item_id"].to_numpy()
     ts = df["timestamp"].to_numpy(dtype=np.int64)
     y = df["correct"].to_numpy()
-    scale = infer_timestamp_seconds_scale(ts)
+    tracer_scale = infer_timestamp_seconds_scale(ts)
+    scale = SECONDS_PER_UNIT.get(dh2_cfg["dataset"], tracer_scale)
 
     same_user = np.zeros(len(df), dtype=bool)
     same_user[1:] = users[1:] == users[:-1]
@@ -94,10 +99,15 @@ def describe(config: Path, fold: int) -> dict:
         "auc_log_gap_correct": _auc(log_gap[scored], y[scored]),
         "lag1_corr_log_gap": lag_corr,
         "timestamp_scale_to_seconds": scale,
+        "tracer_scale_to_seconds": tracer_scale,
+        "timestamp_resolution_s": float(pos_gap.min()),
+        "median_stored_timestamp": float(np.median(ts)),
     }
 
 
 def _fmt_s(seconds: float) -> str:
+    if seconds < 10:
+        return f"{seconds:.1f}\\,s"
     if seconds < 120:
         return f"{seconds:.0f}\\,s"
     if seconds < 7200:
@@ -111,22 +121,25 @@ def write_table(rows: list[dict]) -> None:
     lines = [
         "\\begin{table}[t]",
         "\\caption{Start-to-start gaps on the training split of learner fold~0.",
+        "Resolution is the smallest positive gap in the processed corpus.",
         "Zero-gap shares are over non-first rows; ``repeat'' rows are later",
         "KC-rows of one attempt. Gap AUC scores correctness by $\\log(1{+}\\Delta t)$",
-        "alone on non-repeat rows (0.5 is uninformative). Lag-1 $r$ is the",
-        "within-learner correlation of consecutive $\\log(1{+}\\Delta t)$.",
-        "Source: \\protect\\path{results/tables/gap_descriptives.json}.}",
+        "alone on non-repeat rows (0.5 is uninformative; below 0.5, longer gaps",
+        "go with errors). Lag-1 $r$ is the within-learner correlation of",
+        "consecutive $\\log(1{+}\\Delta t)$.}",
         "\\label{tab:gap-descriptives}",
         "\\centering",
-        "\\small",
-        "\\begin{tabular}{@{}lrrrrrr@{}}",
+        "\\footnotesize",
+        "\\setlength{\\tabcolsep}{3pt}",
+        "\\begin{tabular}{@{}lrrrrrrr@{}}",
         "\\toprule",
-        "Corpus & $\\Delta t{=}0$ & of which repeat & Median gap & 90th pct. & Gap AUC & Lag-1 $r$ \\\\",
+        "Corpus & Resolution & $\\Delta t{=}0$ & Repeat & Median & 90th pct. & Gap AUC & Lag-1 $r$ \\\\",
         "\\midrule",
     ]
     for r in rows:
         lines.append(
-            f"{LABELS.get(r['dataset'], r['dataset'])} & {100 * r['share_zero_gap']:.1f}\\% & "
+            f"{LABELS.get(r['dataset'], r['dataset'])} & {_fmt_s(r['timestamp_resolution_s'])} & "
+            f"{100 * r['share_zero_gap']:.1f}\\% & "
             f"{100 * r['share_zero_repeat']:.1f}\\% & {_fmt_s(r['positive_gap_median_s'])} & "
             f"{_fmt_s(r['positive_gap_p90_s'])} & {r['auc_log_gap_correct']:.3f} & "
             f"{r['lag1_corr_log_gap']:.2f} \\\\"

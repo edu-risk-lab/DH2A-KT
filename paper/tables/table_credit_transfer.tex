@@ -4,13 +4,16 @@ learner fold~0 unless marked, validation AUC. Seed rule: every
 $\Delta_s\ge{+}0.002$ (passing seeds shown). Interval rule: the lower
 95\% bound of the mean paired $\Delta$ ($t_{0.975,4}$) is at least
 $+0.002$. Cons.-pos.: consistent-positive, not credited; Unsupp.:
-unsupported. ``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the
+unsupported. T-shuffled permutes gaps across all rows and learners;
+T-boundary feeds only $1[\Delta t{=}0]$.
+``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the
 reference recipe; the other ASSIST2012 and Junyi rows use corpus
 configurations (Section~\ref{sec:credit-gate}).}
 \label{tab:credit-transfer}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{0.88}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llrrll@{}}
 \toprule
@@ -22,6 +25,15 @@ XES3G5M & Q$\leftarrow$KC incidence & $-0.00010$ & $-0.00052$ & Unsupp. $0/5$ & 
  & Aligned gap vs.\ T-zero & $+0.00183$ & $+0.00173$ & Cons.-pos. $0/5$ & Cons.-pos. \\
  & Aligned gap vs.\ T-misaligned & $+0.00144$ & $+0.00109$ & Cons.-pos. $0/5$ & Cons.-pos. \\
  & Package vs.\ param-padded no-time & $+0.00265$ & $+0.00227$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-shuffled & $+0.00147$ & $+0.00110$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-boundary & $+0.00072$ & $+0.00045$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & T-boundary vs.\ T-zero & $+0.00111$ & $+0.00094$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+\addlinespace
+XES3G5M fold 1 & Package, zero incidence & $+0.00316$ & $+0.00296$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00172$ & $+0.00158$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+\addlinespace
+XES3G5M fold 2 & Package, zero incidence & $+0.00272$ & $+0.00247$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00172$ & $+0.00138$ & Cons.-pos. $1/5$ & Cons.-pos. \\
 \addlinespace
 XES3G5M attn. & Package, zero incidence & $+0.00178$ & $+0.00104$ & Cons.-pos. $2/5$ & Cons.-pos. \\
  & Aligned gap vs.\ T-zero & $+0.00135$ & $+0.00081$ & Cons.-pos. $0/5$ & Cons.-pos. \\

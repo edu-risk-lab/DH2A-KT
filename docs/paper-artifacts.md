@@ -17,10 +17,10 @@ that freeze.
 | Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
 | Table threshold sensitivity | `scripts/45_recount_threshold_sensitivity.py` | `results/tables/threshold_sensitivity_recount.json`, `paper/tables/table_threshold_sensitivity.tex` |
 | Table credit map (all settings; seed rule and interval rule) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex` |
-| XES T-boundary / T-shuffled controls (pending GPU) | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows added to `credit_ladder_transfer.json` when runs exist |
-| XES folds 1–2 package and aligned gap (pending GPU) | `scripts/50_credit_ladder_plan.py --group xes-fold1` / `xes-fold2` | same |
-| Gap descriptives (pending server run) | `scripts/52_gap_descriptives.py` | `results/tables/gap_descriptives.json`, `paper/tables/table_gap_descriptives.tex` |
-| Partial membership positive control (pending server run) | `scripts/53_partial_membership_control.py` | `results/tables/{dataset}_fold{f}_partial_membership_control.json` |
+| XES T-boundary / T-shuffled controls | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows in `credit_ladder_transfer.json` |
+| XES folds 1–2 package and aligned gap | `scripts/50_credit_ladder_plan.py --group xes-fold1` / `xes-fold2` | same |
+| Gap descriptives (Junyi in microseconds; ASSIST2012 stored at 1,000 s) | `scripts/52_gap_descriptives.py` | `results/tables/gap_descriptives.json`, `paper/tables/table_gap_descriptives.tex` |
+| Partial membership positive control | `scripts/53_partial_membership_control.py` | `results/tables/xes3g5m_fold0_partial_membership_control.json` |
 | Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
 | Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |
 | Citation verification log | Crossref/OpenAlex pass 10 Sep 2026 | `docs/citation_verification_log.md` |

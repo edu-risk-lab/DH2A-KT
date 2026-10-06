@@ -190,6 +190,223 @@
       "n_scored": 1640242
     },
     {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-shuffled",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0015277861050244645,
+        0.0013710973574880825,
+        0.0014495379330921043,
+        0.0010843358707730566,
+        0.0018967615947459437
+      ],
+      "mean_delta_val": 0.0014659037722247303,
+      "min_delta_val": 0.0010843358707730566,
+      "sd_control_val": 0.0001506044239677881,
+      "sd_delta_val": 0.00029339310094326734,
+      "lcb95_delta_val": 0.0011016081214621117,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1640242
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-boundary",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0005626069750749307,
+        0.000715087229277489,
+        0.0007240760144950897,
+        0.000530157731271852,
+        0.0010688951783727196
+      ],
+      "mean_delta_val": 0.0007201646256984162,
+      "min_delta_val": 0.000530157731271852,
+      "sd_control_val": 0.00012742134721095772,
+      "sd_delta_val": 0.00021364755468111432,
+      "lcb95_delta_val": 0.00045488614874660596,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1640242
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "T-boundary vs.\\ T-zero",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0012295616058888292,
+        0.0011520734775666286,
+        0.001080799943937949,
+        0.0012163539203616791,
+        0.0008886473985442178
+      ],
+      "mean_delta_val": 0.0011134872692598607,
+      "min_delta_val": 0.0008886473985442178,
+      "sd_control_val": 0.0001552888879358633,
+      "sd_delta_val": 0.00013889305571588084,
+      "lcb95_delta_val": 0.0009410287623769416,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1640242
+    },
+    {
+      "corpus": "XES3G5M fold 1",
+      "contrast": "Package, zero incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0031047835306983185,
+        0.003094632621294169,
+        0.0030449699826009535,
+        0.003453500608781024,
+        0.0031253437969159803
+      ],
+      "mean_delta_val": 0.003164646108058089,
+      "min_delta_val": 0.0030449699826009535,
+      "sd_control_val": 0.0001340184725881674,
+      "sd_delta_val": 0.0001641564693748279,
+      "lcb95_delta_val": 0.002960818929963126,
+      "tau_abs": 0.002,
+      "pass_abs": 5,
+      "outcome_abs": "Credited",
+      "outcome_ci": "Credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1639666
+    },
+    {
+      "corpus": "XES3G5M fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0016457289805181796,
+        0.001596496018006155,
+        0.00174836424082081,
+        0.0017196822032988779,
+        0.0019020458802894158
+      ],
+      "mean_delta_val": 0.0017224634645866877,
+      "min_delta_val": 0.001596496018006155,
+      "sd_control_val": 0.00011386782052337982,
+      "sd_delta_val": 0.00011692348812021056,
+      "lcb95_delta_val": 0.0015772837788434165,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1639666
+    },
+    {
+      "corpus": "XES3G5M fold 2",
+      "contrast": "Package, zero incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0025964940040483775,
+        0.002604192169558317,
+        0.0025582817532546764,
+        0.003047083399784656,
+        0.0028048248194268988
+      ],
+      "mean_delta_val": 0.002722175229214585,
+      "min_delta_val": 0.0025582817532546764,
+      "sd_control_val": 0.00039833765148020324,
+      "sd_delta_val": 0.00020553169965531362,
+      "lcb95_delta_val": 0.0024669739172629526,
+      "tau_abs": 0.002,
+      "pass_abs": 5,
+      "outcome_abs": "Credited",
+      "outcome_ci": "Credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1636300
+    },
+    {
+      "corpus": "XES3G5M fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.00206794020155443,
+        0.0015522239091303458,
+        0.0014316555918807428,
+        0.0015936090384662815,
+        0.0019348426901222293
+      ],
+      "mean_delta_val": 0.0017160542862308058,
+      "min_delta_val": 0.0014316555918807428,
+      "sd_control_val": 0.00023100516494964417,
+      "sd_delta_val": 0.0002712968446137537,
+      "lcb95_delta_val": 0.0013791947614476266,
+      "tau_abs": 0.002,
+      "pass_abs": 1,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 1636300
+    },
+    {
       "corpus": "XES3G5M attn.",
       "contrast": "Package, zero incidence",
       "rung": "Package (backbone)",
@@ -717,13 +934,5 @@
       "n_scored": 7651421
     }
   ],
-  "pending": [
-    "XES3G5M: Aligned gap vs.\\ T-shuffled",
-    "XES3G5M: Aligned gap vs.\\ T-boundary",
-    "XES3G5M: T-boundary vs.\\ T-zero",
-    "XES3G5M fold 1: Package, zero incidence",
-    "XES3G5M fold 1: Aligned gap vs.\\ T-zero",
-    "XES3G5M fold 2: Package, zero incidence",
-    "XES3G5M fold 2: Aligned gap vs.\\ T-zero"
-  ]
+  "pending": []
 }
