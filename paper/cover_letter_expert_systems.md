@@ -1,6 +1,8 @@
 # Cover letter — Expert Systems (Wiley)
 
-**Manuscript:** DH²A-KT: A Credit Protocol for Leakage-Audited Signals in Knowledge Tracing
+**Manuscript:** A Credit Protocol for Leakage-Audited Signals in Knowledge Tracing
+
+**Running title:** Credit protocol for knowledge tracing
 
 **Article type:** Research article
 
@@ -10,7 +12,7 @@
 
 Dear Editors,
 
-We submit a methodology paper on which leakage-audited signals in knowledge tracing deserve credit for a change in AUC. DH²A-KT is the name of the protocol, not a new predictor. The protocol builds train-only auxiliary knowledge, audits hyperedge membership leakage, and assigns each message one of three outcomes on a three-rung ladder: capacity-matched, architecture-matched, or package-level. A message is credited only when every one of five paired training seeds gains at least +0.002 validation AUC against its designated control. A gain that is positive on every seed and still below that cut is reported and is not credited.
+We submit a methodology paper on which leakage-audited signals in knowledge tracing deserve credit for a change in AUC. DH²A-KT is the name of the protocol, not a new predictor. The protocol builds train-only auxiliary knowledge, audits hyperedge membership leakage, and assigns each message one of three outcomes on a three-rung ladder: capacity-matched, architecture-matched, or package-level. A message is credited only when every one of five paired training seeds gains at least +0.002 validation AUC against its designated control. A gain that is positive on every seed and still below that cut is reported and is not credited. The appendices are supplied as a separate file, as the author guidelines request.
 
 On XES3G5M learner fold 0 the linear log(1+Δt) package meets the rule (5/5) and is credited as attempt-context timing and boundary information. That contrast adds a linear map (256 parameters at hidden size 128) and is the weakest rung. Against a no-time control that carries the same 256 parameters unused, the package passes on every seed at +0.002 and on none at the noise-scaled cut. Architecture-matched controls that keep the map and zero or misalign the gap stay positive and below the cut (0/5; mean Δval +0.00183 versus T-zero, +0.00144 versus T-misaligned). Capacity-matched removal of the question–KC incidence message does not meet the rule (0/5; mean Δval −0.00010).
 

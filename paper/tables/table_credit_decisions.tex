@@ -1,11 +1,12 @@
 \begin{table}[t]
-\caption{Credit decisions on XES3G5M learner fold~0, five paired training
-seeds. $\tau{=}{+}0.002$ validation AUC versus the designated control.
+\caption{Credit decisions on XES3G5M learner fold~0 (ASSIST2012 where
+marked), LSTM tracer, five paired training seeds. $\tau{=}{+}0.002$ validation AUC versus the designated control.
 Credited requires $5/5$ seeds at or above $\tau$. Consistent-positive,
 not credited requires every seed strictly positive and at least one seed
 below $\tau$. Unsupported is every remaining case. The package rows add
 one $\mathrm{Linear}(1,128)$ (256 parameters, bias included) and are not
-capacity-matched.}
+capacity-matched. Transfer to other settings is in
+Table~\ref{tab:credit-transfer}.}
 \label{tab:credit-decisions}
 \centering
 \footnotesize

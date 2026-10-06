@@ -1,0 +1,57 @@
+% Graphical abstract (TikZ; no generative-AI artwork).
+\documentclass[11pt]{article}
+\usepackage[margin=12mm,paperwidth=18cm,paperheight=9.6cm]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\pagestyle{empty}
+\begin{document}
+\centering
+{\large\bfseries DH$^2$A-KT: construct, audit membership leak, then credit}\\[6pt]
+\begin{tikzpicture}[
+  font=\scriptsize\sffamily,
+  >=Stealth,
+  every node/.style={outer sep=1pt},
+  box/.style={draw, rounded corners=2pt, align=center,
+              inner sep=4pt, text width=2.72cm, minimum height=1.55cm,
+              fill=white},
+  passbox/.style={draw, rounded corners=2pt, align=center,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
+              fill=green!8},
+  warnbox/.style={draw, rounded corners=2pt, align=center,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
+              fill=orange!12},
+  failbox/.style={draw, densely dashed, rounded corners=2pt, align=center,
+              inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
+              fill=white},
+]
+\node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
+\node[box, right=0.32cm of p0] (audit) {Hyperedge\\leakage audit};
+\node[box, right=0.32cm of audit] (twins) {Laddered ablation\\(cap.\ / arch.\ / pkg)};
+\node[box, right=0.32cm of twins] (gate) {Credit rule: $5/5$\\seeds $\Delta\mathrm{val}\ge\tau$\\($+0.002$ and $\tau_{\mathrm{rel}}$)};
+\draw[->, thick] (p0.east) -- (audit.west);
+\draw[->, thick] (audit.east) -- (twins.west);
+\draw[->, thick] (twins.east) -- (gate.west);
+
+\node[passbox, below=0.95cm of p0.south west, anchor=north west] (pass)
+  {XES3G5M, LSTM. Package credited:\\Linear $\log(1{+}\Delta t)$ branch\\($5/5$; observed and zero incidence)};
+\node[warnbox, right=0.28cm of pass] (warn)
+  {Aligned-gap contrast:\\positive vs T-zero / T-misaligned,\\below $+0.002$ ($0/5$). Not separately credited};
+\node[failbox, right=0.28cm of warn] (fail)
+  {Not credited at 5 seeds:\\incidence; grouping; exp.\ forgetting.\\1-seed: HypergraphConv, other metadata};
+
+\coordinate (fork) at ([yshift=-0.38cm]gate.south);
+\draw[thick] (gate.south) -- (fork);
+\draw[->, thick] (fork) -| (pass.north);
+\draw[->, thick] (fork) -| (warn.north);
+\draw[->, thick] (fork) -| (fail.north);
+
+\node[draw, rounded corners=2pt, align=left, inner sep=4pt,
+      text width=13.25cm, fill=blue!5,
+      below=0.35cm of pass.south west, anchor=north west] (transfer)
+  {\textbf{Transfer, same rule and both cuts.}
+   Attention encoder in place of the LSTM: no time message credited.
+   ASSISTments~2012, corpus config and XES recipe: no message credited.
+   Junyi, all learners: package and aligned gap credited.
+   Credit is reported per corpus, backbone, and cut.};
+\end{tikzpicture}
+\end{document}

@@ -13,7 +13,9 @@
 \usepackage{float}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,positioning,backgrounds}
+\usepackage{xr-hyper}
 \usepackage[hidelinks]{hyperref}
+\externaldocument{appendix}
 \usepackage{xurl}
 \usepackage{placeins}
 % Elsevier-like float spacing (review 12pt, one column). Avoid [!t],
@@ -39,8 +41,9 @@
 
 \begin{frontmatter}
 
-\title{DH$^2$A-KT: A Credit Protocol for Leakage-Audited Signals
-in Knowledge Tracing}
+\title{A Credit Protocol for Leakage-Audited Signals in Knowledge
+Tracing\tnoteref{rt}}
+\tnotetext[rt]{Running title: Credit protocol for knowledge tracing.}
 
 \author[utehy]{Tuan Dao Minh}
 \ead{tuanymc@utehy.edu.vn}
@@ -68,20 +71,21 @@ city={Hanoi},
 country={Vietnam}}
 
 \begin{abstract}
-Graph-augmented knowledge tracing often reports one AUC as if every
-graph or time component had earned it. DH$^2$A-KT is a protocol that
-builds train-only auxiliary knowledge, audits hyperedge membership
-leakage, and assigns each message one of three outcomes (credited;
-consistent-positive, not credited; unsupported) against a
-capacity-matched, architecture-matched, or package-level control, with
-five paired seeds and both an absolute cut of $+0.002$ validation AUC
-and a cut scaled to seed noise. On XES3G5M learner fold~0 the linear
-$\log(1{+}\Delta t)$ package is credited ($5/5$), the question--KC
+Graph-augmented knowledge tracing often reports one area under the
+ROC curve (AUC) as if every graph or time component had earned it. We
+state a credit protocol that builds train-only auxiliary knowledge,
+audits hyperedge membership leakage, and assigns each message one of
+three outcomes (credited; consistent-positive, not credited;
+unsupported) against a capacity-matched, architecture-matched, or
+package-level control, with five paired seeds and both an absolute cut
+of $+0.002$ validation AUC and a cut scaled to seed noise. On XES3G5M
+learner fold~0 with a recurrent tracer, the linear time-gap package
+$\log(1{+}\Delta t)$ is credited ($5/5$), the question--concept
 incidence message is unsupported, and aligned gap input stays positive
 and below the cut. Against a parameter-padded control the package is
 credited only at the absolute cut. The map does not transfer unchanged.
-With a causal attention encoder in place of the LSTM, no time message
-is credited. On ASSISTments~2012 no message is credited under either
+With a causal attention encoder in place of the recurrent one, no time
+message is credited. On ASSISTments~2012 no message is credited under either
 the corpus config or the XES3G5M recipe. On Junyi, under
 the same recipe as XES3G5M, both the package and aligned gap input are
 credited under both cuts. Credit is therefore reported per corpus,
@@ -90,7 +94,7 @@ backbone, and cut rather than as one map.
 
 \begin{keyword}
 Knowledge tracing \sep knowledge attribution \sep data leakage
-\sep educational data mining
+\sep ablation protocol \sep hypergraph \sep educational data mining
 \end{keyword}
 
 \end{frontmatter}
@@ -143,8 +147,20 @@ same package is not credited on an attention encoder or on
 ASSISTments~2012 (Section~\ref{sec:transfer-ladder}).
 \input{tables/table_claims}
 
+This paper is structured as follows. Section~\ref{sec:related} reviews
+related work and Section~\ref{sec:prelim} restates the reused
+train-only construction. Section~\ref{sec:protocol} states the credit
+protocol. Section~\ref{sec:tracer} describes the tracer and the
+hyperedge audit, and Section~\ref{sec:setup} the data, baselines,
+evaluation protocol, and credit gate. Section~\ref{sec:results} reports
+the credit map on XES3G5M and its transfer to a second encoder and two
+more corpora. Section~\ref{sec:discussion} discusses threats,
+interpretation, and limitations, and Section~\ref{sec:conclusion}
+concludes. Appendices are supplied as a separate file.
+
 % =============================================================================
 \section{Related Work}
+\label{sec:related}
 % =============================================================================
 
 \subsection{Graph- and hypergraph-based knowledge tracing}
@@ -287,6 +303,7 @@ timestamps and zeros the incidence message.
 
 % =============================================================================
 \section{Tier 1: DH$^2$A-KT tracer}
+\label{sec:tracer}
 % =============================================================================
 
 \input{figures/fig_architecture}
@@ -480,6 +497,7 @@ $L_{\mathrm{aux}}$ belong to the v2 diagnostic encoder
 
 % =============================================================================
 \section{Experimental setup}
+\label{sec:setup}
 % =============================================================================
 
 Table~\ref{tab:aliases} maps development labels that appear in logs to
@@ -990,6 +1008,7 @@ contribution.
 
 % =============================================================================
 \section{Discussion}
+\label{sec:discussion}
 % =============================================================================
 
 \subsection{Threats to validity}
@@ -1215,6 +1234,7 @@ part of this attribution map (Supplementary Material).
 
 % =============================================================================
 \section{Conclusion and future work}
+\label{sec:conclusion}
 % =============================================================================
 We presented DH$^2$A-KT as leakage-audited knowledge attribution: which
 structural and temporal knowledge survives a laddered ablation with
@@ -1266,10 +1286,6 @@ The authors declare that they have no known competing financial interests
 or personal relationships that could have appeared to influence the work
 reported in this paper.
 
-\section*{Funding}
-This research did not receive any specific grant from funding agencies
-in the public, commercial, or not-for-profit sectors.
-
 \section*{Ethics}
 The exploratory rating pilot scores de-identified, model-generated
 explanations. It does not recruit learners, collect new educational
@@ -1305,90 +1321,15 @@ FoundationalASSIST~\cite{foundationalassist2026} must be obtained from
 Hugging Face under its Responsible Use Guidelines and cannot be
 redistributed by the authors.
 
-\section*{Acknowledgment}
+\section*{Acknowledgments}
+This research did not receive any specific grant from funding agencies
+in the public, commercial, or not-for-profit sectors.
 All Tier~1 experiments in this paper are designed to run on a single
 consumer-grade NVIDIA RTX~3090 (24GB), matching the compute budget already
 validated by \cite{daominh2026p0} on the same primary benchmarks.
 FoundationalASSIST~\cite{foundationalassist2026} was accessed under the
 Hugging Face dataset's Responsible Use Guidelines for this study.
 
-\FloatBarrier
-\appendix
-\section{Graph-only encoder as a forced-reliance diagnostic}
-\label{app:graph-only}
-\label{sec:manipulation-result}
-The evaluation arm in Table~\ref{tab:auc-xes3g5m} is QKC-T;
-Zero$+\Delta t$ is the credited-minimal control.
-A graph-only diagnostic encoder (chain
-hyperedges, no question LSTM path; Table~\ref{tab:aliases}) exists so a destruction
-check is interpretable: mean test AUC $0.7516{\pm}0.0015$ vs.\ reused GKT
-$0.8336{\pm}0.0010$ under P0's GKT budget ($L{=}200$;
-Table~\ref{tab:auc-xes3g5m-v2}).
-
-\input{tables/table_auc_xes3g5m_v2}
-
-Frozen-weight node-drop $p{=}0.9$ passes on all three folds
-($\Delta$AUC $0.0323$, $0.0606$, and $0.0574$ on a shared clean AUC
-per fold).
-P0 GKT also drops after retraining on a destroyed pairwise graph
-($0.0877{\pm}0.0009$). Protocol differs (freeze vs.\ retrain). Node-drop
-confirms dependence on some graph input. Degree-preserving rewiring
-passes on folds~0--2 ($\Delta$AUC $0.0318$, $0.0341$, $0.0351$; shared clean
-$0.7485$/$0.7511$/$0.7521$). Relation-label permutation is near-null on every fold
-(Table~\ref{tab:manipulation}). We do not deploy this encoder.
-Dropping $L_{\mathrm{aux}}$
-(\texttt{graph\_sensitivity\_weight}${}=0$) on the graph-only fold~0
-track still yields clean AUC $0.754$ and $\Delta$AUC$=0.039$ (pass).
-
-\input{tables/table_manipulation}
-\input{figures/fig_manipulation_sweep}
-\FloatBarrier
-
-\section{Hyperparameters for Table~\ref{tab:auc-xes3g5m}}
-\label{app:hparams}
-Table~\ref{tab:hparams} records, for each model in
-Table~\ref{tab:auc-xes3g5m}, which knobs were searched, which value was
-used, and how many distinct configurations were tried
-\cite{pineau2021repro}. We do not claim a matched \emph{tuning} budget.
-The tracer architecture was selected from a validation ablation
-ladder---incidence on/off, three $\Delta t$
-injection sites, and the Table~\ref{tab:negative-knowledge}
-diagnostics---whereas each baseline used a single inherited
-hyperparameter vector. That asymmetry favours the DH$^2$ arms in
-configuration search, not the baselines.
-
-\input{tables/table_hparams}
-\input{tables/table_auc_xes3g5m_inherited}
-
-\section{Protocol residual and KC expansion}
-\label{app:protocol-residual}
-Table~\ref{tab:protocol-residual} records the residual between scoring
-every exported KC-row and scoring the masked remainder
-($+0.0101$ on QKC-T fold~0; $+0.0094$/$+0.0091$ on folds~1--2).
-
-\input{tables/table_protocol_residual}
-
-A no-$\Delta t$ Q$\leftarrow$KC residual of $-0.0007$ used
-\texttt{window-mode last} and a different $L$ budget: it does not
-isolate the time branch from the window rule.
-On the fold-0 test export every repeat row has raw
-$\log(1{+}\Delta t){=}0$ ($183{,}741$ rows; $14.4\%$ of unchunked
-P0-protocol targets, not of the $n{=}1{,}093{,}755$ scored set).
-Because $f(0)=b$, that is a zero feature, not a proven zero hidden
-state. The $6{,}413{,}353$ KC-expanded rows versus $5{,}549{,}635$
-recorded attempts in \cite{liu2023xes3g5m} is the same expansion pyKT
-warns about. The retrain uses the shared masking rules; it is not a
-claim that we discovered KC-level row repeats.
-
-\section{Learner-resampled bootstrap on one checkpoint pair}
-\label{app:bootstrap}
-Table~\ref{tab:bootstrap-qkct} records a learner-resampled diagnostic
-used in Section~\ref{sec:time-result}. It
-resamples 3614 learners that appear on both sides of each contrast; it
-does not use the $1{,}093{,}718$-row occurrence join, is not event-aligned,
-and is not a five-seed CI.
-
-\input{tables/table_bootstrap_qkct}
 \FloatBarrier
 
 \section*{Declaration of generative AI and AI-assisted technologies
