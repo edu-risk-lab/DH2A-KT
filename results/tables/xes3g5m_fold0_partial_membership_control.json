@@ -1,0 +1,45 @@
+{
+  "dataset": "xes3g5m",
+  "fold": 0,
+  "seed": 42,
+  "n_hyperedges": 446305,
+  "n_heldout_learners": 5420,
+  "rows": [
+    {
+      "fraction_heldout_learners": 0.0,
+      "n_leaked_learners": 0,
+      "group_membership_leak_rate": 0.0,
+      "heldout_support_share": 0.0
+    },
+    {
+      "fraction_heldout_learners": 0.0001,
+      "n_leaked_learners": 1,
+      "group_membership_leak_rate": 0.9644996134930148,
+      "heldout_support_share": 6.958612726402088e-05
+    },
+    {
+      "fraction_heldout_learners": 0.001,
+      "n_leaked_learners": 5,
+      "group_membership_leak_rate": 0.9999977593797963,
+      "heldout_support_share": 0.0003951810500919262
+    },
+    {
+      "fraction_heldout_learners": 0.01,
+      "n_leaked_learners": 54,
+      "group_membership_leak_rate": 1.0,
+      "heldout_support_share": 0.004430856665066696
+    },
+    {
+      "fraction_heldout_learners": 0.1,
+      "n_leaked_learners": 542,
+      "group_membership_leak_rate": 1.0,
+      "heldout_support_share": 0.04103401773090502
+    },
+    {
+      "fraction_heldout_learners": 1.0,
+      "n_leaked_learners": 5420,
+      "group_membership_leak_rate": 1.0,
+      "heldout_support_share": 0.3008668490920655
+    }
+  ]
+}

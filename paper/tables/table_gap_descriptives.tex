@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Start-to-start gaps on the training split of learner fold~0.
+Zero-gap shares are over non-first rows; ``repeat'' rows are later
+KC-rows of one attempt. Gap AUC scores correctness by $\log(1{+}\Delta t)$
+alone on non-repeat rows (0.5 is uninformative). Lag-1 $r$ is the
+within-learner correlation of consecutive $\log(1{+}\Delta t)$.
+Source: \protect\path{results/tables/gap_descriptives.json}.}
+\label{tab:gap-descriptives}
+\centering
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Corpus & $\Delta t{=}0$ & of which repeat & Median gap & 90th pct. & Gap AUC & Lag-1 $r$ \\
+\midrule
+XES3G5M & 58.1\% & 14.4\% & 19\,min & 6.8\,d & 0.468 & 0.08 \\
+ASSIST2012 & 82.9\% & 0.2\% & 67\,min & 14.0\,d & 0.492 & 0.00 \\
+Junyi & 0.0\% & 0.0\% & 134.7\,d & 828.0\,d & 0.335 & 0.27 \\
+\bottomrule
+\end{tabular}
+\end{table}
