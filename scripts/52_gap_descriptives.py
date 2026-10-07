@@ -116,6 +116,10 @@ def describe(config: Path, fold: int) -> dict:
 
 
 def _fmt_s(seconds: float) -> str:
+    if seconds < 1e-3:
+        return f"{seconds * 1e6:.0f}\\,$\\mu$s"
+    if seconds < 1:
+        return f"{seconds * 1e3:.0f}\\,ms"
     if seconds < 10:
         return f"{seconds:.1f}\\,s"
     if seconds < 120:
@@ -162,7 +166,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--configs", nargs="+", default=list(DEFAULT_CONFIGS))
     parser.add_argument("--fold", type=int, default=0)
+    parser.add_argument(
+        "--from-json",
+        action="store_true",
+        help="Rewrite the LaTeX table from the existing JSON (no data needed)",
+    )
     args = parser.parse_args()
+    if args.from_json:
+        write_table(json.loads(OUT_JSON.read_text(encoding="utf-8")))
+        print(f"wrote {OUT_TEX}")
+        return 0
     rows = []
     for cfg in args.configs:
         row = describe(REPO / cfg, args.fold)

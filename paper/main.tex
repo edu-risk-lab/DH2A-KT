@@ -416,7 +416,13 @@ ASSISTments~2012 export of the pairwise audit, start times are stored
 at a resolution of $1{,}000$\,s, so $82.7\%$ of gaps between distinct
 items are zero and rows inside one $1{,}000$\,s window are ordered by
 item identifier; every ASSISTments arm and control shares this
-ordering. Junyi records completion times in microseconds, and the
+ordering. We therefore re-export ASSISTments~2012 from the raw file at
+one-second resolution with the same rows and learners; the stored
+timestamps of the original export equal the new ones divided by
+$1{,}000$ and rounded down. In the re-export $0.01\%$ of gaps are
+zero, the median positive gap is $50$\,s, and the train-only
+prerequisite edges of fold~0 overlap those of the original export with
+a Jaccard index of $0.59$. Junyi records completion times in microseconds, and the
 tracer received $\log(1{+}\Delta t)$ in those units. For gaps of one
 second or more this differs from the value in seconds by an offset
 between $13.1$ and $\ln 10^{6}\approx 13.8$, close to a constant that
