@@ -41,6 +41,7 @@ Each entry below was resolved from its DOI (doi.org content negotiation, Crossre
 |---|---|---|---|---|
 | badran2025labelleak | 2025 | 10.5220/0013275200003932 | doi.org BibTeX | CSEDU 2025 |
 | kim2026pktreliability | 2026 | 10.48550/arXiv.2605.04727 | arXiv record | Preprint |
+| naranjo2025ktrepro | 2025 | 10.1007/978-981-96-6034-6_32 | doi.org BibTeX + Springer abstract | ICRIC 2024, LNEE 1421, pp. 475–492; documentation-based reproducibility score, DKT case study; full text not read |
 | gervet2020deepkt | 2020 | 10.5281/zenodo.4143614 | doi.org + Zenodo API | JEDM 12(3):31–54; Semantic Scholar rate-limited (429) |
 | schmucker2022assessing | 2022 | 10.5281/zenodo.6450190 | Zenodo API | JEDM 14(1):1–45 |
 | shen2021lpkt | 2021 | 10.1145/3447548.3467237 | doi.org BibTeX | KDD 2021 |

@@ -73,32 +73,29 @@ city={Hanoi},
 country={Vietnam}}
 
 \begin{abstract}
-Knowledge tracing systems are increasingly built by adding auxiliary
+Knowledge tracing systems are often built by adding auxiliary
 knowledge, such as question--concept incidence, concept graphs, or
 response timing, to a sequence model, and are judged by one area under
-the ROC curve (AUC) for the whole system. That number does not show
-which piece of knowledge earned the gain, and a graph built from the
-full log can carry held-out learners into the evaluation. We state a
-credit protocol for validating such knowledge. It builds auxiliary
-knowledge from training learners only, audits hyperedge membership
-leakage, places each message on a capacity-matched,
-architecture-matched, or package-level control, and assigns one of
-three outcomes from five paired seeds under a seed-wise rule and an
-interval rule at $+0.002$ validation AUC. Applied to one elapsed-time
-message across two encoders and three corpora, the same message
-receives different verdicts. On XES3G5M with a recurrent tracer the
-time package is credited, but only at the package level: with its map
-held fixed, the aligned gap input is positive on every seed and not
-credited, on each of three learner folds. ASSISTments~2012 repeats this
-pattern under the same training recipe and credits nothing under its
-own configuration; with a causal attention encoder no time message is
-credited. On Junyi both the package and the aligned gap input are
-credited. Question--concept incidence is not credited on XES3G5M. On
-an ASSISTments export that stores start times at $1{,}000$\,s
-resolution, the package is not credited, so the verdict also depends
-on how timestamps are exported. The two rules agree in all $40$
-contrasts. Credit for auxiliary knowledge should therefore be reported
-per corpus, backbone, recipe, and control level, not as a single map.
+the ROC curve (AUC). That number does not show which piece of knowledge
+earned the gain, and a graph built from the full log can carry held-out
+learners into the evaluation. We state a credit protocol for validating
+such knowledge. It builds auxiliary knowledge from training learners
+only, audits hyperedge membership leakage, places each message on a
+capacity-matched, architecture-matched, or package-level control, and
+assigns one of three outcomes from five paired seeds under a seed-wise
+rule and an interval rule at $+0.002$ validation AUC. Across two
+encoders and three corpora, one elapsed-time message receives
+different verdicts. On XES3G5M with a recurrent tracer
+the time package is credited on each of three learner folds, while the
+aligned gap input, with its map held fixed, is positive on every seed
+but not credited. ASSISTments~2012 repeats this pattern under the same
+training recipe, and credits nothing under its own configuration or on
+an export that stores start times at $1{,}000$\,s resolution. With a
+causal attention encoder no time message is credited; on Junyi both the
+package and the aligned gap input are credited. Question--concept
+incidence is not credited. The two rules agree in all $40$ contrasts.
+Credit for auxiliary knowledge should therefore be reported per corpus,
+backbone, recipe, and control level, not as a single map.
 \end{abstract}
 
 \begin{keyword}
@@ -237,7 +234,12 @@ features beyond question--response pairs and prerequisite structure,
 and report the improvement from each on four large tutoring datasets.
 Kim and Kim~\cite{kim2026pktreliability} re-evaluate
 attention-augmented programming KT and find that the gap to DKT shrinks
-once configuration and sequence construction are controlled. pyKT
+once configuration and sequence construction are controlled. Naranjo
+and Stoffova~\cite{naranjo2025ktrepro} score the reproducibility of KT
+models on a continuum set by documentation and experimental
+transparency, with DKT as a case study; our protocol takes a
+reproducible run as given and asks which added message earns the gain.
+pyKT
 \cite{liu2022pykt} warns that KC-expanded exports let a model copy the
 label of an earlier row of the same attempt. Badran and
 Preisach~\cite{badran2025labelleak} identify this label leakage, show
