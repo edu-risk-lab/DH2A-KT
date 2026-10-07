@@ -27,9 +27,9 @@
 \draw[->, thick] (twins.east) -- (gate.west);
 
 \node[passbox, below=0.95cm of p0.south west, anchor=north west] (pass)
-  {Credited:\\time package, XES3G5M + LSTM;\\time package and aligned gap,\\Junyi + LSTM};
+  {Credited:\\time package, XES3G5M and\\ASSIST2012 (ref.\ recipe), LSTM;\\package and aligned gap, Junyi};
 \node[warnbox, right=0.28cm of pass] (warn)
-  {Consistent-positive, not credited:\\aligned gap, XES3G5M + LSTM;\\all time contrasts on the attention\\encoder and on ASSISTments 2012};
+  {Consistent-positive, not credited:\\aligned gap, XES3G5M and ASSIST2012;\\time contrasts on the attention\\encoder and the 1{,}000\,s export};
 \node[failbox, right=0.28cm of warn] (fail)
   {Unsupported:\\Q--KC incidence (XES3G5M);\\teacher grouping; exp.\ forgetting};
 
@@ -44,6 +44,7 @@ learners only and audited for membership leakage. Each message is then
 placed on a rung with a designated control, run on five paired seeds,
 and assigned one of three outcomes. The boxes give the outcomes of this
 paper (Table~\ref{tab:credit-transfer}); the same time message is
-credited or not depending on corpus, encoder, and rung.}
+credited or not depending on corpus, encoder, recipe, timestamp
+export, and rung.}
 \label{fig:architecture}
 \end{figure}

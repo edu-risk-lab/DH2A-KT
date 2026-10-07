@@ -11,13 +11,15 @@ paired difference at or above $+0.002$.}
 \toprule
 Claim & Evidence & Not inferred \\
 \midrule
-Credit for the same time message depends on corpus and encoder &
-Credited on XES3G5M with the LSTM tracer (package only) and on Junyi
-(package and aligned gap); consistent-positive on the attention encoder
-and on ASSISTments~2012 under both recipes; same outcome under both
-rules in every setting (Table~\ref{tab:credit-transfer}) & Any single
-map, including the XES3G5M one, holds for another corpus or backbone;
-the ASSISTments~2012 outcome holds at finer timestamp resolution \\
+Credit for the same time message depends on corpus, encoder, recipe,
+and timestamp export &
+Package only credited on XES3G5M and on ASSISTments~2012 under the
+same LSTM recipe; package and aligned gap on Junyi; nothing credited on
+the attention encoder, on ASSISTments~2012 under its own configuration,
+or on a $1{,}000$\,s ASSISTments export; same outcome under both rules
+in all $40$ contrasts (Tables~\ref{tab:credit-transfer},
+\ref{tab:credit-assist-resolution}) & Any single map, including the
+XES3G5M one, holds for another corpus, backbone, recipe, or export \\
 On XES3G5M the credit rests on the package rung only &
 Package $5/5$ against no-time and parameter-padded twins, on three
 learner folds; aligned gap against T-zero, T-misaligned, T-shuffled,

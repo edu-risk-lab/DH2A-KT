@@ -47,6 +47,22 @@ def _frozen(prefix: str) -> str:
     return f"{prefix}_s{{seed}}.csv"
 
 
+ASSIST_ARMS = (
+    ("Q$\\leftarrow$KC incidence", "Capacity", "incidence-on", "incidence-off"),
+    ("Package, observed incidence", "Package", "time-on-observed", "incidence-on"),
+    ("Package, zero incidence", "Package", "time-on-zero", "incidence-off"),
+    ("Aligned gap vs.\\ T-zero", "Architecture", "time-on-zero", "t-zero"),
+    ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-on-zero", "t-misaligned"),
+)
+ASSIST_1000S = "ASSIST2012 1{,}000\\,s"
+ASSIST_GROUPS = (
+    ("assist-sec", "ASSIST2012"),
+    ("assist-sec-ref", "ASSIST2012 ref."),
+    ("assist", ASSIST_1000S),
+    ("assist-ref", ASSIST_1000S + " ref."),
+)
+OUT_TEX_RES = REPO / "paper" / "tables" / "table_credit_assist_resolution.tex"
+
 # (corpus, label, rung, on pattern, control pattern)
 CONTRASTS = [
     ("XES3G5M", "Q$\\leftarrow$KC incidence", "Capacity",
@@ -80,36 +96,12 @@ CONTRASTS = [
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-zero")),
     ("XES3G5M attn.", "Aligned gap vs.\\ T-misaligned", "Architecture",
      _ladder("backbone-attn_time-package"), _ladder("backbone-attn_t-misaligned")),
-    ("ASSIST2012", "Q$\\leftarrow$KC incidence", "Capacity",
-     _ladder("assist_incidence-on"), _ladder("assist_incidence-off")),
-    ("ASSIST2012", "Package, observed incidence", "Package",
-     _ladder("assist_time-on-observed"), _ladder("assist_incidence-on")),
-    ("ASSIST2012", "Package, zero incidence", "Package",
-     _ladder("assist_time-on-zero"), _ladder("assist_incidence-off")),
-    ("ASSIST2012", "Aligned gap vs.\\ T-zero", "Architecture",
-     _ladder("assist_time-on-zero"), _ladder("assist_t-zero")),
-    ("ASSIST2012", "Aligned gap vs.\\ T-misaligned", "Architecture",
-     _ladder("assist_time-on-zero"), _ladder("assist_t-misaligned")),
-    ("ASSIST2012 ref.", "Q$\\leftarrow$KC incidence", "Capacity",
-     _ladder("assist-ref_incidence-on"), _ladder("assist-ref_incidence-off")),
-    ("ASSIST2012 ref.", "Package, observed incidence", "Package",
-     _ladder("assist-ref_time-on-observed"), _ladder("assist-ref_incidence-on")),
-    ("ASSIST2012 ref.", "Package, zero incidence", "Package",
-     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_incidence-off")),
-    ("ASSIST2012 ref.", "Aligned gap vs.\\ T-zero", "Architecture",
-     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-zero")),
-    ("ASSIST2012 ref.", "Aligned gap vs.\\ T-misaligned", "Architecture",
-     _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-misaligned")),
+    # One-second export first (main map); the original 1,000 s export is the
+    # resolution sensitivity table.
     *[
         (corpus, label, rung, _ladder(f"{group}_{on}"), _ladder(f"{group}_{ctrl}"))
-        for group, corpus in (("assist-sec", "ASSIST2012 1\\,s"), ("assist-sec-ref", "ASSIST2012 1\\,s ref."))
-        for label, rung, on, ctrl in (
-            ("Q$\\leftarrow$KC incidence", "Capacity", "incidence-on", "incidence-off"),
-            ("Package, observed incidence", "Package", "time-on-observed", "incidence-on"),
-            ("Package, zero incidence", "Package", "time-on-zero", "incidence-off"),
-            ("Aligned gap vs.\\ T-zero", "Architecture", "time-on-zero", "t-zero"),
-            ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-on-zero", "t-misaligned"),
-        )
+        for group, corpus in ASSIST_GROUPS
+        for label, rung, on, ctrl in ASSIST_ARMS
     ],
     ("Junyi (50k)", "Package, zero incidence", "Package",
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_no-time")),
@@ -169,6 +161,53 @@ def _a7_both() -> tuple[dict[int, float], dict[int, dict]]:
     return on, ctrl
 
 
+def _write_resolution_table(rows: list[dict], short: dict[str, str]) -> None:
+    by_key = {(r["corpus"], r["contrast"]): r for r in rows}
+    lines = [
+        "\\begin{table}[t]",
+        "\\caption{ASSISTments~2012 credit outcomes on the original export",
+        "(start times at 1{,}000\\,s resolution) and on the one-second re-export",
+        "of the same rows and learners. Fold~0, five paired seeds, validation",
+        "AUC; mean paired $\\Delta$, lower 95\\% bound, seed-rule outcome with",
+        "passing seeds, and interval-rule outcome. Abbreviations as in",
+        "Table~\\ref{tab:credit-transfer}.}",
+        "\\label{tab:credit-assist-resolution}",
+        "\\centering",
+        "\\scriptsize",
+        "\\setlength{\\tabcolsep}{2.5pt}",
+        "\\resizebox{\\textwidth}{!}{%",
+        "\\begin{tabular}{@{}ll rrll rrll@{}}",
+        "\\toprule",
+        " & & \\multicolumn{4}{c}{1{,}000\\,s export} & \\multicolumn{4}{c}{One-second export} \\\\",
+        "\\cmidrule(lr){3-6}\\cmidrule(l){7-10}",
+        "Recipe & Contrast & Mean & Lower & Seed & Interval & Mean & Lower & Seed & Interval \\\\",
+        "\\midrule",
+    ]
+    for recipe, new, old in (
+        ("Corpus", "ASSIST2012", ASSIST_1000S),
+        ("Reference", "ASSIST2012 ref.", ASSIST_1000S + " ref."),
+    ):
+        first = True
+        for label, _rung, _on, _ctrl in ASSIST_ARMS:
+            a, b = by_key.get((old, label)), by_key.get((new, label))
+            if a is None or b is None:
+                continue
+            cells = []
+            for r in (a, b):
+                cells += [
+                    f"${r['mean_delta_val']:+.5f}$",
+                    f"${r['lcb95_delta_val']:+.5f}$",
+                    f"{short[r['outcome_abs']]} ${r['pass_abs']}/5$",
+                    short[r["outcome_ci"]],
+                ]
+            lines.append(f"{recipe if first else ''} & {label} & " + " & ".join(cells) + " \\\\")
+            first = False
+        if recipe == "Corpus":
+            lines.append("\\addlinespace")
+    lines += ["\\bottomrule", "\\end{tabular}}", "\\end{table}", ""]
+    OUT_TEX_RES.write_text("\n".join(lines), encoding="utf-8")
+
+
 def main() -> int:
     rows = []
     pending = []
@@ -226,8 +265,9 @@ def main() -> int:
         "95\\% bound of the mean paired $\\Delta$ ($t_{0.975,4}$) is at least",
         "$+0.002$. Cons.-pos.: consistent-positive, not credited; Unsupp.:",
         "unsupported. T-shuffled permutes gaps across all rows and learners;",
-        "T-boundary feeds only $1[\\Delta t{=}0]$. ``1\\,s'': ASSIST2012 re-exported",
-        "at one-second timestamp resolution (the original export has 1{,}000\\,s).",
+        "T-boundary feeds only $1[\\Delta t{=}0]$. ASSIST2012 rows use the",
+        "one-second re-export (Table~\\ref{tab:credit-assist-resolution} for the",
+        "original 1{,}000\\,s export).",
         "``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the",
         "reference recipe; the other ASSIST2012 and Junyi rows use corpus",
         "configurations (Section~\\ref{sec:credit-gate}).}",
@@ -244,6 +284,8 @@ def main() -> int:
     ]
     last = None
     for r in rows:
+        if r["corpus"].startswith(ASSIST_1000S):
+            continue
         corpus = r["corpus"] if r["corpus"] != last else ""
         if last is not None and r["corpus"] != last:
             lines.append("\\addlinespace")
@@ -254,6 +296,7 @@ def main() -> int:
         )
     lines += ["\\bottomrule", "\\end{tabular}}", "\\end{table}", ""]
     OUT_TEX.write_text("\n".join(lines), encoding="utf-8")
+    _write_resolution_table(rows, short)
 
     for r in rows:
         print(

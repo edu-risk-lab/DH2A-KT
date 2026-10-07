@@ -1,0 +1,32 @@
+\begin{table}[t]
+\caption{ASSISTments~2012 credit outcomes on the original export
+(start times at 1{,}000\,s resolution) and on the one-second re-export
+of the same rows and learners. Fold~0, five paired seeds, validation
+AUC; mean paired $\Delta$, lower 95\% bound, seed-rule outcome with
+passing seeds, and interval-rule outcome. Abbreviations as in
+Table~\ref{tab:credit-transfer}.}
+\label{tab:credit-assist-resolution}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}ll rrll rrll@{}}
+\toprule
+ & & \multicolumn{4}{c}{1{,}000\,s export} & \multicolumn{4}{c}{One-second export} \\
+\cmidrule(lr){3-6}\cmidrule(l){7-10}
+Recipe & Contrast & Mean & Lower & Seed & Interval & Mean & Lower & Seed & Interval \\
+\midrule
+Corpus & Q$\leftarrow$KC incidence & $+0.00123$ & $+0.00065$ & Cons.-pos. $0/5$ & Cons.-pos. & $+0.00155$ & $+0.00103$ & Cons.-pos. $1/5$ & Cons.-pos. \\
+ & Package, observed incidence & $+0.00212$ & $+0.00160$ & Cons.-pos. $4/5$ & Cons.-pos. & $+0.00169$ & $+0.00042$ & Unsupp. $2/5$ & Unsupp. \\
+ & Package, zero incidence & $+0.00209$ & $+0.00121$ & Cons.-pos. $3/5$ & Cons.-pos. & $+0.00200$ & $+0.00117$ & Cons.-pos. $2/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-zero & $+0.00191$ & $+0.00175$ & Cons.-pos. $2/5$ & Cons.-pos. & $+0.00137$ & $+0.00090$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00238$ & $+0.00197$ & Cons.-pos. $4/5$ & Cons.-pos. & $+0.00173$ & $+0.00157$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+\addlinespace
+Reference & Q$\leftarrow$KC incidence & $+0.00127$ & $+0.00076$ & Cons.-pos. $0/5$ & Cons.-pos. & $+0.00173$ & $+0.00125$ & Cons.-pos. $1/5$ & Cons.-pos. \\
+ & Package, observed incidence & $+0.00235$ & $+0.00076$ & Cons.-pos. $2/5$ & Cons.-pos. & $+0.00232$ & $+0.00149$ & Cons.-pos. $3/5$ & Cons.-pos. \\
+ & Package, zero incidence & $+0.00209$ & $+0.00115$ & Cons.-pos. $3/5$ & Cons.-pos. & $+0.00247$ & $+0.00230$ & Credited $5/5$ & Credited \\
+ & Aligned gap vs.\ T-zero & $+0.00183$ & $+0.00161$ & Cons.-pos. $1/5$ & Cons.-pos. & $+0.00188$ & $+0.00139$ & Cons.-pos. $3/5$ & Cons.-pos. \\
+ & Aligned gap vs.\ T-misaligned & $+0.00216$ & $+0.00166$ & Cons.-pos. $3/5$ & Cons.-pos. & $+0.00165$ & $+0.00124$ & Cons.-pos. $0/5$ & Cons.-pos. \\
+\bottomrule
+\end{tabular}}
+\end{table}

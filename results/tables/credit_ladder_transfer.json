@@ -511,6 +511,316 @@
         2024
       ],
       "delta_val": [
+        0.002054905999198109,
+        0.0011638858511272554,
+        0.001471294207728957,
+        0.0011539565942270125,
+        0.0019307722579489095
+      ],
+      "mean_delta_val": 0.0015549629820460487,
+      "min_delta_val": 0.0011539565942270125,
+      "sd_control_val": 0.0004084532864885361,
+      "sd_delta_val": 0.0004218778085680759,
+      "lcb95_delta_val": 0.0010311324955059684,
+      "tau_abs": 0.002,
+      "pass_abs": 1,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 32,
+      "control_epochs": 10,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Package, observed incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        -5.7316990516365074e-05,
+        0.0023264668945528477,
+        0.0017354080764699908,
+        0.0019457200989883017,
+        0.0025129287567153824
+      ],
+      "mean_delta_val": 0.0016926413672420314,
+      "min_delta_val": -5.7316990516365074e-05,
+      "sd_control_val": 0.0004636535637339888,
+      "sd_delta_val": 0.001025041254068439,
+      "lcb95_delta_val": 0.0004198845453916107,
+      "tau_abs": 0.002,
+      "pass_abs": 2,
+      "outcome_abs": "Unsupported",
+      "outcome_ci": "Unsupported",
+      "control_batch": 32,
+      "control_epochs": 10,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Package, zero incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0014171834005552997,
+        0.00244202003609284,
+        0.001805737352613801,
+        0.0014137523290962406,
+        0.0029304960961477056
+      ],
+      "mean_delta_val": 0.0020018378429011775,
+      "min_delta_val": 0.0014137523290962406,
+      "sd_control_val": 0.0004084532864885361,
+      "sd_delta_val": 0.0006675116675607345,
+      "lcb95_delta_val": 0.0011730126369100524,
+      "tau_abs": 0.002,
+      "pass_abs": 2,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 32,
+      "control_epochs": 10,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0017573201968338337,
+        0.0013827226038670704,
+        0.0016706413061561287,
+        0.0008199183688235578,
+        0.0012025384038328868
+      ],
+      "mean_delta_val": 0.0013666281759026956,
+      "min_delta_val": 0.0008199183688235578,
+      "sd_control_val": 0.000653518219336126,
+      "sd_delta_val": 0.0003778691359623322,
+      "lcb95_delta_val": 0.0008974416737459036,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 32,
+      "control_epochs": 10,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0018561778299349685,
+        0.0015260163560234519,
+        0.0017042136302644062,
+        0.0017905557595492283,
+        0.0017638475928841713
+      ],
+      "mean_delta_val": 0.0017281622337312452,
+      "min_delta_val": 0.0015260163560234519,
+      "sd_control_val": 0.00045599883035450076,
+      "sd_delta_val": 0.00012548992118446546,
+      "lcb95_delta_val": 0.0015723459164590664,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 32,
+      "control_epochs": 10,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "rung": "Capacity",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0018712969055806328,
+        0.0010709237919537262,
+        0.002051805779859084,
+        0.0017140747962269831,
+        0.0019504708856324937
+      ],
+      "mean_delta_val": 0.001731714431850584,
+      "min_delta_val": 0.0010709237919537262,
+      "sd_control_val": 0.00021407404441915737,
+      "sd_delta_val": 0.00038947129247030753,
+      "lcb95_delta_val": 0.0012481219496563135,
+      "tau_abs": 0.002,
+      "pass_abs": 1,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Package, observed incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.001627714536219016,
+        0.003290869263925189,
+        0.0017430071997047714,
+        0.0024288623689266986,
+        0.0025056207994623714
+      ],
+      "mean_delta_val": 0.0023192148336476093,
+      "min_delta_val": 0.001627714536219016,
+      "sd_control_val": 0.0003336959744524089,
+      "sd_delta_val": 0.0006710197457452348,
+      "lcb95_delta_val": 0.0014860337732719062,
+      "tau_abs": 0.002,
+      "pass_abs": 3,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Package, zero incidence",
+      "rung": "Package",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.002370640185274553,
+        0.002599454677811197,
+        0.0022781929714847937,
+        0.0025251988242620538,
+        0.002588211346394975
+      ],
+      "mean_delta_val": 0.0024723396010455146,
+      "min_delta_val": 0.0022781929714847937,
+      "sd_control_val": 0.00021407404441915737,
+      "sd_delta_val": 0.0001417870644033459,
+      "lcb95_delta_val": 0.002296287707764881,
+      "tau_abs": 0.002,
+      "pass_abs": 5,
+      "outcome_abs": "Credited",
+      "outcome_ci": "Credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0013237058916406585,
+        0.0020783920006242074,
+        0.002201475368651229,
+        0.0016035141171544254,
+        0.0022070782992786864
+      ],
+      "mean_delta_val": 0.0018828331354698413,
+      "min_delta_val": 0.0013237058916406585,
+      "sd_control_val": 0.0005821903393960521,
+      "sd_delta_val": 0.00039860803351958934,
+      "lcb95_delta_val": 0.0013878958908537672,
+      "tau_abs": 0.002,
+      "pass_abs": 3,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "rung": "Architecture",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
+        0.0019511173466353338,
+        0.001989860217201933,
+        0.001199718807796124,
+        0.001581201777867025,
+        0.001531903334645368
+      ],
+      "mean_delta_val": 0.0016507602968291568,
+      "min_delta_val": 0.001199718807796124,
+      "sd_control_val": 0.00028197204816984953,
+      "sd_delta_val": 0.0003269582936759644,
+      "lcb95_delta_val": 0.0012447879546575776,
+      "tau_abs": 0.002,
+      "pass_abs": 0,
+      "outcome_abs": "Consistent-positive, not credited",
+      "outcome_ci": "Consistent-positive, not credited",
+      "control_batch": 16,
+      "control_epochs": 30,
+      "n_scored": 807716
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "rung": "Capacity",
+      "seeds": [
+        0,
+        17,
+        42,
+        1234,
+        2024
+      ],
+      "delta_val": [
         0.001280797662795763,
         0.0010406299831418053,
         0.001724871234379033,
@@ -531,7 +841,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012",
+      "corpus": "ASSIST2012 1{,}000\\,s",
       "contrast": "Package, observed incidence",
       "rung": "Package",
       "seeds": [
@@ -562,7 +872,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012",
+      "corpus": "ASSIST2012 1{,}000\\,s",
       "contrast": "Package, zero incidence",
       "rung": "Package",
       "seeds": [
@@ -593,7 +903,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012",
+      "corpus": "ASSIST2012 1{,}000\\,s",
       "contrast": "Aligned gap vs.\\ T-zero",
       "rung": "Architecture",
       "seeds": [
@@ -624,7 +934,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012",
+      "corpus": "ASSIST2012 1{,}000\\,s",
       "contrast": "Aligned gap vs.\\ T-misaligned",
       "rung": "Architecture",
       "seeds": [
@@ -655,7 +965,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012 ref.",
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
       "contrast": "Q$\\leftarrow$KC incidence",
       "rung": "Capacity",
       "seeds": [
@@ -686,7 +996,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012 ref.",
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
       "contrast": "Package, observed incidence",
       "rung": "Package",
       "seeds": [
@@ -717,7 +1027,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012 ref.",
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
       "contrast": "Package, zero incidence",
       "rung": "Package",
       "seeds": [
@@ -748,7 +1058,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012 ref.",
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
       "contrast": "Aligned gap vs.\\ T-zero",
       "rung": "Architecture",
       "seeds": [
@@ -779,7 +1089,7 @@
       "n_scored": 805911
     },
     {
-      "corpus": "ASSIST2012 ref.",
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
       "contrast": "Aligned gap vs.\\ T-misaligned",
       "rung": "Architecture",
       "seeds": [
@@ -934,16 +1244,5 @@
       "n_scored": 7651421
     }
   ],
-  "pending": [
-    "ASSIST2012 1\\,s: Q$\\leftarrow$KC incidence",
-    "ASSIST2012 1\\,s: Package, observed incidence",
-    "ASSIST2012 1\\,s: Package, zero incidence",
-    "ASSIST2012 1\\,s: Aligned gap vs.\\ T-zero",
-    "ASSIST2012 1\\,s: Aligned gap vs.\\ T-misaligned",
-    "ASSIST2012 1\\,s ref.: Q$\\leftarrow$KC incidence",
-    "ASSIST2012 1\\,s ref.: Package, observed incidence",
-    "ASSIST2012 1\\,s ref.: Package, zero incidence",
-    "ASSIST2012 1\\,s ref.: Aligned gap vs.\\ T-zero",
-    "ASSIST2012 1\\,s ref.: Aligned gap vs.\\ T-misaligned"
-  ]
+  "pending": []
 }
