@@ -1,0 +1,3 @@
+dataset,fold,reference_model,p0_auc,dh2_kt_auc,delta_auc,budget_reference,batch_size,epochs,comparison_type,budget_note,n_predictions,val_auc
+assist2012_sec,0,none,,0.7762235604620245,,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,807716,0.7781802136335844
+assist2012_sec,mean,none,,0.7762235604620245,,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,807716,0.7781802136335844
