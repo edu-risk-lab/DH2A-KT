@@ -1,21 +1,23 @@
 \begin{table}[t]
 \caption{Start-to-start gaps on the training split of learner fold~0.
+Resolution is the smallest positive gap in the processed corpus.
 Zero-gap shares are over non-first rows; ``repeat'' rows are later
 KC-rows of one attempt. Gap AUC scores correctness by $\log(1{+}\Delta t)$
-alone on non-repeat rows (0.5 is uninformative). Lag-1 $r$ is the
-within-learner correlation of consecutive $\log(1{+}\Delta t)$.
-Source: \protect\path{results/tables/gap_descriptives.json}.}
+alone on non-repeat rows (0.5 is uninformative; below 0.5, longer gaps
+go with errors). Lag-1 $r$ is the within-learner correlation of
+consecutive $\log(1{+}\Delta t)$.}
 \label{tab:gap-descriptives}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrrrrrr@{}}
+\begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-Corpus & $\Delta t{=}0$ & Repeat & Median & 90th pct. & Gap AUC & Lag-1 $r$ \\
+Corpus & Resolution & $\Delta t{=}0$ & Repeat & Median & 90th pct. & Gap AUC & Lag-1 $r$ \\
 \midrule
-XES3G5M & 58.1\% & 14.4\% & 19\,min & 6.8\,d & 0.468 & 0.08 \\
-ASSIST2012 & 82.9\% & 0.2\% & 67\,min & 14.0\,d & 0.492 & 0.00 \\
-Junyi & 0.0\% & 0.0\% & 134.7\,d & 828.0\,d & 0.335 & 0.27 \\
+XES3G5M & 1.0\,s & 58.1\% & 14.4\% & 19\,min & 6.8\,d & 0.468 & 0.08 \\
+ASSIST2012 & 17\,min & 82.9\% & 0.2\% & 67\,min & 14.0\,d & 0.492 & 0.00 \\
+ASSIST2012 1\,s & 1.0\,s & 0.0\% & 0.0\% & 50\,s & 12\,min & 0.458 & 0.09 \\
+Junyi & 0.0\,s & 0.0\% & 0.0\% & 12\,s & 72\,s & 0.335 & 0.25 \\
 \bottomrule
 \end{tabular}
 \end{table}
