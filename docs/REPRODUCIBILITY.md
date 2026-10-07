@@ -84,15 +84,17 @@ Headline XES3G5M AUC: do **not** rebuild with
 
 ## 6. Clone and test
 
-Snapshot matching the manuscript: tag `kbs-submit-2026-09-15`,
-DOI [10.5281/zenodo.22772808](https://doi.org/10.5281/zenodo.22772808).
-Evaluation freeze: tag `kbs-submit-2026-09-09`,
-DOI [10.5281/zenodo.22676635](https://doi.org/10.5281/zenodo.22676635).
+Snapshot matching the Expert Systems manuscript: tag `es-submit-2026-10-08b`,
+DOI [10.5281/zenodo.23219471](https://doi.org/10.5281/zenodo.23219471).
+Earlier freezes: `kbs-submit-2026-09-15`
+(DOI [10.5281/zenodo.22772808](https://doi.org/10.5281/zenodo.22772808))
+and `kbs-submit-2026-09-09`
+(DOI [10.5281/zenodo.22676635](https://doi.org/10.5281/zenodo.22676635)).
 
 ```bash
 git clone https://github.com/edu-risk-lab/DH2A-KT.git
 cd DH2A-KT
-git checkout kbs-submit-2026-09-15   # optional: exact manuscript snapshot
+git checkout es-submit-2026-10-08b   # optional: exact manuscript snapshot
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt

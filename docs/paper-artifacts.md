@@ -5,11 +5,12 @@ under `results/tables/` is allowlisted when it is a reported number.
 Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 (that exporter writes the graph-only $L{=}200$ format).
 
-The 9 September 2026 tag `kbs-submit-2026-09-09` freezes evaluation code
-and numeric artefacts (DOI https://doi.org/10.5281/zenodo.22676635).
-An earlier manuscript freeze is tag `kbs-submit-2026-09-15`
-(DOI https://doi.org/10.5281/zenodo.22772808); the current PDF supersedes
-that freeze.
+The Expert Systems submission snapshot is tag `es-submit-2026-10-08b`
+(DOI https://doi.org/10.5281/zenodo.23219471).
+Earlier freezes: `kbs-submit-2026-09-09`
+(DOI https://doi.org/10.5281/zenodo.22676635) and
+`kbs-submit-2026-09-15`
+(DOI https://doi.org/10.5281/zenodo.22772808).
 
 | Paper table / figure | Script | Result file |
 |---|---|---|

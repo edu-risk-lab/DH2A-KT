@@ -84,10 +84,12 @@ external/p0_leakage_audit/   pinned P0 snapshot
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff). Manuscript snapshot
-`kbs-submit-2026-09-15`
-(DOI [10.5281/zenodo.22772808](https://doi.org/10.5281/zenodo.22772808));
-evaluation freeze `kbs-submit-2026-09-09`
+See [`CITATION.cff`](CITATION.cff). Expert Systems snapshot
+`es-submit-2026-10-08b`
+(DOI [10.5281/zenodo.23219471](https://doi.org/10.5281/zenodo.23219471)).
+Earlier freezes: `kbs-submit-2026-09-15`
+(DOI [10.5281/zenodo.22772808](https://doi.org/10.5281/zenodo.22772808))
+and `kbs-submit-2026-09-09`
 (DOI [10.5281/zenodo.22676635](https://doi.org/10.5281/zenodo.22676635)).
 
 ## Licence
