@@ -100,6 +100,17 @@ CONTRASTS = [
      _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-zero")),
     ("ASSIST2012 ref.", "Aligned gap vs.\\ T-misaligned", "Architecture",
      _ladder("assist-ref_time-on-zero"), _ladder("assist-ref_t-misaligned")),
+    *[
+        (corpus, label, rung, _ladder(f"{group}_{on}"), _ladder(f"{group}_{ctrl}"))
+        for group, corpus in (("assist-sec", "ASSIST2012 1\\,s"), ("assist-sec-ref", "ASSIST2012 1\\,s ref."))
+        for label, rung, on, ctrl in (
+            ("Q$\\leftarrow$KC incidence", "Capacity", "incidence-on", "incidence-off"),
+            ("Package, observed incidence", "Package", "time-on-observed", "incidence-on"),
+            ("Package, zero incidence", "Package", "time-on-zero", "incidence-off"),
+            ("Aligned gap vs.\\ T-zero", "Architecture", "time-on-zero", "t-zero"),
+            ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-on-zero", "t-misaligned"),
+        )
+    ],
     ("Junyi (50k)", "Package, zero incidence", "Package",
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_no-time")),
     ("Junyi (50k)", "Aligned gap vs.\\ T-zero", "Architecture",
@@ -215,7 +226,8 @@ def main() -> int:
         "95\\% bound of the mean paired $\\Delta$ ($t_{0.975,4}$) is at least",
         "$+0.002$. Cons.-pos.: consistent-positive, not credited; Unsupp.:",
         "unsupported. T-shuffled permutes gaps across all rows and learners;",
-        "T-boundary feeds only $1[\\Delta t{=}0]$.",
+        "T-boundary feeds only $1[\\Delta t{=}0]$. ``1\\,s'': ASSIST2012 re-exported",
+        "at one-second timestamp resolution (the original export has 1{,}000\\,s).",
         "``Ref.'' and ``(all)'' rows, and all XES3G5M rows, use the",
         "reference recipe; the other ASSIST2012 and Junyi rows use corpus",
         "configurations (Section~\\ref{sec:credit-gate}).}",

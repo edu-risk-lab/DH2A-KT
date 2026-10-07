@@ -293,6 +293,7 @@ temp/_diag_pykt_smask/
 !results/tables/credit_ladder_status.json
 !results/tables/credit_ladder_transfer.json
 !results/tables/gap_descriptives.json
+!results/tables/assist2012_sec_build.json
 !results/tables/*_partial_membership_control.json
 !logs/credit_ladder/
 !logs/credit_ladder/**

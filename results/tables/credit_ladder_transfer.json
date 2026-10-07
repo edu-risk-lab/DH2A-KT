@@ -934,5 +934,16 @@
       "n_scored": 7651421
     }
   ],
-  "pending": []
+  "pending": [
+    "ASSIST2012 1\\,s: Q$\\leftarrow$KC incidence",
+    "ASSIST2012 1\\,s: Package, observed incidence",
+    "ASSIST2012 1\\,s: Package, zero incidence",
+    "ASSIST2012 1\\,s: Aligned gap vs.\\ T-zero",
+    "ASSIST2012 1\\,s: Aligned gap vs.\\ T-misaligned",
+    "ASSIST2012 1\\,s ref.: Q$\\leftarrow$KC incidence",
+    "ASSIST2012 1\\,s ref.: Package, observed incidence",
+    "ASSIST2012 1\\,s ref.: Package, zero incidence",
+    "ASSIST2012 1\\,s ref.: Aligned gap vs.\\ T-zero",
+    "ASSIST2012 1\\,s ref.: Aligned gap vs.\\ T-misaligned"
+  ]
 }

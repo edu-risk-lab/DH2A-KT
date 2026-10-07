@@ -23,6 +23,8 @@ Groups, in the order the plan cuts from the end:
                     rows, 2 arms x 5 seeds, frozen XES recipe
   xes-fold1/2       XES3G5M folds 1 and 2, 3 arms x 5 seeds each, frozen
                     XES recipe
+  assist-sec        "assist" on the one-second export (scripts/54), YAML recipe
+  assist-sec-ref    "assist-ref" on the one-second export, frozen XES recipe
 
 "Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
@@ -46,6 +48,9 @@ Usage:
   python scripts/50_credit_ladder_plan.py --group junyi-full --launch-all
   python scripts/50_credit_ladder_plan.py --group xes-gap-controls --launch-all
   python scripts/50_credit_ladder_plan.py --group xes-fold1 --launch-all
+  python scripts/54_build_assist_seconds.py
+  python scripts/50_credit_ladder_plan.py --group assist-sec-ref --launch-all
+  python scripts/50_credit_ladder_plan.py --group assist-sec --launch-all
 """
 
 from __future__ import annotations
@@ -238,6 +243,14 @@ def _jobs() -> list[dict]:
     for seed in SEEDS_5:
         for arm, extra in assist_ref_arms.items():
             add("assist-ref", arm, seed, _dh2(assist, seed, [*extra, *REF_RECIPE]))
+
+    # Same two ASSIST ladders on the one-second export (scripts/54); the
+    # original P0 export stores start_time at 1,000 s resolution.
+    assist_sec = "configs/assist2012_sec.yaml"
+    for seed in SEEDS_5:
+        for arm, extra in assist_ref_arms.items():
+            add("assist-sec", arm, seed, _dh2(assist_sec, seed, extra))
+            add("assist-sec-ref", arm, seed, _dh2(assist_sec, seed, [*extra, *REF_RECIPE]))
 
     for model in ("sparsekt", "stablekt"):
         for seed in SEEDS_3:

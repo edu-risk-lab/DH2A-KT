@@ -20,6 +20,8 @@ that freeze.
 | XES T-boundary / T-shuffled controls | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows in `credit_ladder_transfer.json` |
 | XES folds 1–2 package and aligned gap | `scripts/50_credit_ladder_plan.py --group xes-fold1` / `xes-fold2` | same |
 | Gap descriptives (Junyi in microseconds; ASSIST2012 stored at 1,000 s) | `scripts/52_gap_descriptives.py` | `results/tables/gap_descriptives.json`, `paper/tables/table_gap_descriptives.tex` |
+| ASSIST2012 one-second export (parquet + train-only E_pre/E_sim, dataset `assist2012_sec`) | `scripts/54_build_assist_seconds.py` | `results/tables/assist2012_sec_build.json`; configs `configs/assist2012_sec.yaml`, `configs/p0/assist2012_sec.yaml` |
+| ASSIST2012 1 s ladders | `scripts/50_credit_ladder_plan.py --group assist-sec` / `assist-sec-ref` | rows in `credit_ladder_transfer.json` |
 | Partial membership positive control | `scripts/53_partial_membership_control.py` | `results/tables/xes3g5m_fold0_partial_membership_control.json` |
 | Table A7 per-seed Δval | `results/tables/a7_query_dt_ablation.csv` | `paper/tables/table_a7_query_dt_seeds.tex` |
 | Table inherited DKT/DGEKT | five-seed pyKT rescore | `paper/tables/table_auc_xes3g5m_inherited.tex` |

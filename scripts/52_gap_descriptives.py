@@ -37,8 +37,18 @@ from dh2a_kt.hyperedge.p0_inputs import (  # noqa: E402
     load_interactions_with_ids,
 )
 
-DEFAULT_CONFIGS = ("configs/xes3g5m.yaml", "configs/assist2012.yaml", "configs/junyi.yaml")
-LABELS = {"xes3g5m": "XES3G5M", "assist2012": "ASSIST2012", "junyi": "Junyi"}
+DEFAULT_CONFIGS = (
+    "configs/xes3g5m.yaml",
+    "configs/assist2012.yaml",
+    "configs/assist2012_sec.yaml",
+    "configs/junyi.yaml",
+)
+LABELS = {
+    "xes3g5m": "XES3G5M",
+    "assist2012": "ASSIST2012",
+    "assist2012_sec": "ASSIST2012 1\\,s",
+    "junyi": "Junyi",
+}
 OUT_JSON = REPO / "results" / "tables" / "gap_descriptives.json"
 OUT_TEX = REPO / "paper" / "tables" / "table_gap_descriptives.tex"
 # Junyi time_done is unix microseconds; the magnitude rule in

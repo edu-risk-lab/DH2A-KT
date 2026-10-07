@@ -1,0 +1,28 @@
+# DH2A-KT config for ASSISTments 2012 at one-second timestamp resolution.
+# Same as configs/assist2012.yaml except the P0 export: the original stores
+# start_time at 1,000 s resolution. Built by scripts/54_build_assist_seconds.py.
+# No P0-reused baselines exist for this export, so comparison_models is empty.
+p0_config: configs/p0/assist2012_sec.yaml
+dataset: assist2012_sec
+role: secondary
+
+hyperedge:
+  concept_prerequisite:
+    enabled: true
+    min_chain_len: 3
+    max_chain_len: 8
+    source: p0_e_pre
+  session:
+    enabled: false
+  discussion_thread:
+    enabled: false
+  teacher_intervention:
+    enabled: false
+
+training:
+  comparison_models: []
+
+manipulation_check:
+  p: 0.90
+  operator: node_drop
+  seed: 42
