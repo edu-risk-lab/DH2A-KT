@@ -74,8 +74,8 @@ country={Vietnam}}
 
 \begin{abstract}
 Knowledge tracing systems are often built by adding auxiliary
-knowledge, such as question--concept incidence, concept graphs, or
-response timing, to a sequence model, and are judged by one area under
+knowledge, such as concept graphs or response timing, to a
+sequence model, and are judged by one area under
 the ROC curve (AUC). That number does not show which piece of knowledge
 earned the gain, and a graph built from the full log can carry held-out
 learners into the evaluation. We state a credit protocol for validating
@@ -87,15 +87,16 @@ rule and an interval rule at $+0.002$ validation AUC. Across two
 encoders and three corpora, one elapsed-time message receives
 different verdicts. On XES3G5M with a recurrent tracer
 the time package is credited on each of three learner folds, while the
-aligned gap input, with its map held fixed, is positive on every seed
-but not credited. ASSISTments~2012 repeats this pattern under the same
-training recipe, and credits nothing under its own configuration or on
-an export that stores start times at $1{,}000$\,s resolution. With a
-causal attention encoder no time message is credited; on Junyi both the
-package and the aligned gap input are credited. Question--concept
-incidence is not credited. The two rules agree in all $40$ contrasts.
-Credit for auxiliary knowledge should therefore be reported per corpus,
-backbone, recipe, and control level, not as a single map.
+aligned gap input is positive on every seed
+but not credited. On ASSISTments~2012 under the same recipe the
+package is credited on two of three learner folds and
+consistent-positive on the third, and nothing is credited under the
+corpus configuration or on an export that stores start times at
+$1{,}000$\,s resolution. With a causal attention encoder no time message
+is credited; on Junyi both the package and the aligned gap input are
+credited. The two rules agree in all $44$ contrasts. Credit should be
+reported per corpus, backbone, recipe, learner fold, and control level,
+not as a single map.
 \end{abstract}
 
 \begin{keyword}
@@ -157,8 +158,9 @@ positive on every seed and below the threshold. The package-level
 ablation overstates what the input contributes. A map fed only zeros
 already gains $+0.00071$ over the no-time arm (95\% interval
 $[{+}0.00053,{+}0.00090]$), about a quarter of the package gain.
-ASSISTments~2012 under the same recipe gives the same pattern, and
-under its own configuration credits nothing. With a causal attention
+ASSISTments~2012 under the same recipe credits the package on two of
+three learner folds and not on the third, and under its own
+configuration credits nothing. With a causal attention
 encoder no time message is credited. On Junyi both the package and the
 aligned gap input are credited. Preprocessing matters as well: an
 ASSISTments export with start times at $1{,}000$\,s resolution, which
@@ -174,8 +176,8 @@ single-setting ablation would have credited too much or too little.
   \item \textbf{C2 (credit map across settings).} On two encoders and
   three corpora, the time message is credited, consistent-positive, or
   credited only as a package depending on the setting, the training
-  recipe, and the timestamp resolution of the export; question--KC
-  incidence is not credited on XES3G5M; both rules agree in all $40$
+  recipe, the timestamp resolution, and the learner fold; question--KC
+  incidence is not credited on XES3G5M; both rules agree in all $44$
   contrasts (Section~\ref{sec:transfer-ladder},
   Table~\ref{tab:credit-transfer}).
   \item \textbf{C3 (secondary: hyperedge membership audit).} Of the
@@ -459,8 +461,9 @@ $50{,}000$ training and evaluation learners) keep their corpus
 configurations (concept-prerequisite hypergraph on, batch~32,
 10~epochs), so for those rows corpus and recipe change together. Every
 setting uses learner fold~0 and the five training seeds of
-Section~\ref{sec:prelim}; on XES3G5M with the LSTM, the package and
-the aligned-gap contrast are repeated on learner folds~1 and~2. Credit is decided on validation AUC; test-only
+Section~\ref{sec:prelim}. On XES3G5M with the LSTM, and on
+ASSISTments~2012 under the reference recipe, the package and the
+aligned-gap contrast are repeated on learner folds~1 and~2. Credit is decided on validation AUC; test-only
 AUC is reported for context.
 
 \subsection{Evaluation protocol}
@@ -506,7 +509,7 @@ arm and its designated control over the five seeds and applies both
 rules. Every contrast in the table except XES3G5M incidence and one
 ASSISTments package contrast is positive on every seed; the settings
 differ in which gains reach the threshold. The two rules give the same
-outcome in every row, and in the ten rows of the resolution check.
+outcome in every row of both tables ($44$ contrasts).
 
 \input{tables/table_credit_transfer}
 
@@ -580,6 +583,15 @@ $+0.00200$); with observed incidence one seed is negative
 consistent-positive and reaches the threshold on no seed. The
 ASSISTments package credit therefore depends on the recipe as well as
 the corpus.
+
+On learner folds~1 and~2 under the same recipe the aligned gap stays
+consistent-positive (means $+0.00187$ and $+0.00150$; $3/5$ and $1/5$).
+The package is credited on fold~2 (mean $+0.00241$; lowest seed
+$+0.00206$; lower bound $+0.00209$) and not on fold~1. There the mean
+is $+0.00218$ and four of five seeds clear $+0.002$, but one seed is
+$+0.00116$, so the lower bound is $+0.00146$ and the outcome is
+consistent-positive. The package credit on ASSISTments~2012 therefore
+depends on the learner fold as well as on the recipe.
 
 On the original export, with start times at $1{,}000$\,s resolution,
 no message is credited under either recipe
@@ -693,8 +705,10 @@ is how most auxiliary components are evaluated, would have credited
 the gap input with more than the input supports.
 
 Second, the setting matters. Under the XES3G5M recipe the same message
-is credited as a package on XES3G5M and ASSISTments~2012 and as an
-aligned input on Junyi. It is not credited on ASSISTments~2012 under
+is credited as a package on XES3G5M on all three learner folds and
+on ASSISTments~2012 on two of three folds, and as an aligned input on
+Junyi. On the remaining ASSISTments fold the package is positive on
+every seed and not credited. It is not credited on ASSISTments~2012 under
 the corpus configuration, on XES3G5M once the recurrent encoder is
 replaced by attention, or on an ASSISTments export with coarse
 timestamps. This agrees with the observation that the leading KT
@@ -735,8 +749,8 @@ learners only and run the membership audit before training, because the
 pairwise leakage statistics do not register hyperedge contamination.
 Declare the rung and the control before the run; if only a package
 control is available, report the credit as a package credit and the
-parameter count with it. Report outcomes per corpus, backbone, and
-recipe; a message validated on one corpus is a hypothesis on the next.
+parameter count with it. Report outcomes per corpus, backbone, recipe, and learner fold; a
+message validated on one corpus or one fold is a hypothesis on the next.
 Check the timestamp resolution and row order of every export before
 evaluating a time message, for example by the smallest positive gap
 and the share of zero gaps. Keep
@@ -748,9 +762,12 @@ credited on another here.
 \label{sec:threats}
 \label{sec:limitations}
 \begin{itemize}
-  \item \textbf{Learner folds.} The XES3G5M package and aligned-gap
-  contrasts are repeated on three learner folds; the other settings use
-  fold~0 only. The interval rule was fixed after the runs were scored,
+  \item \textbf{Learner folds.} The package and aligned-gap contrasts
+  are repeated on three learner folds for XES3G5M and for
+  ASSISTments~2012 under the reference recipe. On ASSISTments the
+  package is credited on folds~0 and~2 and consistent-positive on
+  fold~1. The corpus configuration, the attention encoder, and Junyi
+  use fold~0 only. The interval rule was fixed after the runs were scored,
   and its threshold, like the seed-rule threshold, is an operating
   choice.
   \item \textbf{Time versus boundary.} Zero gaps also mark later
@@ -793,18 +810,20 @@ knowledge tracing: train-only construction, a hyperedge membership
 audit, a declared control rung, five paired seeds, and three outcomes
 under a seed-wise and an interval rule. Applied to a linear elapsed-time
 message, it credits the package but not the aligned gap input on
-XES3G5M with a recurrent tracer and on ASSISTments~2012 under the same
-recipe, credits neither on an attention encoder or on ASSISTments~2012
-under its own configuration, and credits both on Junyi.
-Question--concept incidence is not credited on XES3G5M. On XES3G5M
-these outcomes repeat on three learner folds, and an indicator-only
-input reproduces about $60\%$ of the aligned-gap gain. An ASSISTments
-export with $1{,}000$\,s timestamps does not credit the package, so the
-export is part of the setting. A single credit map would have
-misstated what the time message contributes in at least one of these
-settings. Future work, in order: repeat the transfer settings on
-further learner folds; rerun the pairwise audit on the one-second
-ASSISTments export; run DyGKT and recent pyKT models under this
+XES3G5M with a recurrent tracer, on each of three learner folds, and
+on ASSISTments~2012 under the same recipe on two of three folds. On
+the third ASSISTments fold the package stays positive on every seed
+and is not credited. It credits neither message on an attention encoder
+or on ASSISTments~2012 under its own configuration, and credits both
+on Junyi. Question--concept incidence is not credited on XES3G5M. An
+indicator-only input reproduces about $60\%$ of the aligned-gap gain on
+XES3G5M, and an ASSISTments export with $1{,}000$\,s timestamps does
+not credit the package, so the export is part of the setting. A single
+credit map would have misstated what the time message contributes in
+at least one of these settings. Future work, in order: repeat the
+remaining settings (the corpus configuration, the attention encoder,
+and Junyi) on further learner folds; rerun the pairwise audit on the
+one-second ASSISTments export; run DyGKT and recent pyKT models under this
 evaluator; and develop a hyperedge-native leakage statistic that
 measures the amount of contamination rather than detecting it.
 

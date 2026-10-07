@@ -1,5 +1,6 @@
 A credit protocol validates auxiliary knowledge in knowledge tracing.
 Each message gets one of three outcomes against a designated control.
-Seed-wise and interval rules at +0.002 AUC agree in all 40 contrasts.
-XES3G5M and ASSIST2012: time package credited, aligned gap is not.
+Seed-wise and interval rules at +0.002 AUC agree in all 44 contrasts.
+XES3G5M: time package credited on three folds; aligned gap is not.
+ASSIST2012: package credited on two folds and not on the third.
 Credit also depends on encoder, recipe, and timestamp resolution.
