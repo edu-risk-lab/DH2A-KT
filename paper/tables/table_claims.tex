@@ -1,9 +1,9 @@
-\begin{table}[t]
+\begin{table}[H]
 \caption{What this paper claims, and what it does not infer. Rungs:
 (i)~capacity-matched message; (ii)~architecture-matched input;
 (iii)~package (Table~\ref{tab:evidence-types}). Seed rule: every paired
-seed at or above $+0.002$; interval rule: lower 95\% bound of the mean
-paired difference at or above $+0.002$.}
+seed at or above $+2.0\times 10^{-3}$; interval rule: lower 95\% bound of the mean
+paired difference at or above $+2.0\times 10^{-3}$.}
 \label{tab:claims}
 \centering
 \scriptsize
@@ -13,9 +13,10 @@ Claim & Evidence & Not inferred \\
 \midrule
 Credit for the same time message depends on corpus, encoder, recipe,
 timestamp export, and learner fold &
-Package credited on XES3G5M on three folds and on ASSISTments~2012
-under the same LSTM recipe on two of three folds (consistent-positive
-on fold~1, $4/5$); package and aligned gap on Junyi; nothing credited
+Package credited on XES3G5M on three folds and, on the zero-incidence
+tracer, on ASSISTments~2012 under the same LSTM recipe on two of three
+folds (consistent-positive on fold~1, $4/5$); package and aligned gap
+on Junyi; nothing credited
 on the attention encoder, on ASSISTments~2012 under its own
 configuration, or on a $1{,}000$\,s ASSISTments export; same outcome
 under both rules in all $44$ contrasts
@@ -24,13 +25,13 @@ under both rules in all $44$ contrasts
 XES3G5M one, holds for another corpus, backbone, recipe, export, or
 fold \\
 On XES3G5M the credit rests on the package rung only &
-Package $5/5$ against no-time and parameter-padded twins, on three
+Package $5/5$ against no-time and parameter-padded controls, on three
 learner folds; aligned gap against T-zero, T-misaligned, T-shuffled,
 and T-boundary positive on every seed, at most $1/5$ &
 Aligned gap input is credited on XES3G5M; the package credit is an
 input effect \\
 The question--KC incidence message is not credited on this fusion &
-Capacity-matched $0/5$; 95\% interval $[{-}0.00052,{+}0.00032]$ &
+Capacity-matched $0/5$; 95\% interval $[{-}0.52,{+}0.32]\times 10^{-3}$ &
 Question--KC relations are useless under a richer fusion \\
 Of the inherited pairwise leakage diagnostics, only group membership
 works on hyperedge projections & Membership leak $0{\to}1$ under the

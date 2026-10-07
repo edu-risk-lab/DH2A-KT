@@ -50,8 +50,10 @@ Each entry below was resolved from its DOI (doi.org content negotiation, Crossre
 | ferraridacrema2019progress | 2019 | 10.1145/3298689.3347058 | doi.org BibTeX | RecSys 2019 |
 | shehzad2025gnnsbrs | 2025 | 10.1145/3705328.3748156 | doi.org BibTeX | RecSys 2025 |
 | lai2021rktm | 2021 | 10.1111/exsy.12782 | doi.org BibTeX | Expert Systems 38(8):e12782 |
+| feng2009assist | 2009 | 10.1007/s11257-009-9063-7 | doi.org BibTeX | UMUAI 19(3):243–266; the ASSISTments data page asks for this citation when affect columns are unused |
+| chang2015junyi | 2015 | none | EDM 2015 proceedings PDF, pp. 532–535 | Junyi Academy case study; DBLP key conf/edm/ChangHC15; no DOI |
 
-Not cited: Naranjo & Stoffova 2025 (10.1007/978-981-96-6034-6_32). The DOI resolves, but the full text could not be read, so no claim about it is made.
+Naranjo & Stoffova 2025 is cited; the full text was checked on 7 October 2026.
 
 `daominh2026p0` note changed to "Manuscript under review" (no venue named in the bibliography).
 

@@ -1,4 +1,4 @@
-\begin{table}[t]
+\begin{table}[H]
 \caption{Each module exists to test one attribution hypothesis.
 ``Interface'' means the schema is defined and the hypothesis was not
 tested, because the required logs are absent.}
@@ -14,15 +14,15 @@ Module & Hypothesis it tests & Result on the reference ladder \\
 Train-only graph build & Held-out learners do not enter auxiliary edges &
 Reused pairwise construction; not an AUC claim \\
 Membership diagnostic & A hyperedge built from the full log is flagged &
-Leak rate $0{\to}1$ on the positive control \\
-Q$\leftarrow$KC incidence twin & Incidence content raises AUC when maps stay fixed &
+One held-out learner raises the leak rate from $0$ to $0.964$ \\
+Q$\leftarrow$KC incidence control & Incidence content raises AUC when maps stay fixed &
 Unsupported ($0/5$) \\
 Linear $\Delta t$ branch & The timing package raises AUC &
 Credited ($5/5$), package rung \\
 T-zero / T-misaligned & Aligned gap input, with maps held fixed, clears $+0.002$ &
 Consistent-positive, not credited \\
 HypergraphConv on chain hyperedges & Multi-way passing raises AUC on this backbone &
-Single-seed, below the gate \\
+Single-seed, below the rule \\
 Teacher grouping & A group id raises AUC &
 Unsupported ($0/5$) \\
 Per-concept exponential gap & That decay form beats linear $\log(1{+}\Delta t)$ &

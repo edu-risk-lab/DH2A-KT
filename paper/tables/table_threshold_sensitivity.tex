@@ -1,10 +1,10 @@
 \begin{table}[H]
 \caption{Seed-pass counts ($k/5$) if the operating threshold is varied.
-Every cell recounts \emph{unrounded} per-seed $\Delta$val on XES3G5M
-fold~0 (no retraining). The qualitative map holds for any cut in
-$(+0.00175,+0.00236]$; the first tabulated cut at which T-zero leaves
-$5/5$ is $+0.0020$. Source:
-\protect\path{results/tables/threshold_sensitivity_recount.json}.}
+Every cell recounts unrounded per-seed differences on XES3G5M fold~0
+(no retraining). The threshold is in units of $10^{-3}$ validation AUC.
+The qualitative map holds for any cut in $(+1.75,+2.36]$; the first
+tabulated cut at which T-zero leaves $5/5$ is $+2.0$. The recount is
+in the repository.}
 \label{tab:threshold-sensitivity}
 \centering
 \footnotesize
@@ -13,11 +13,11 @@ $5/5$ is $+0.0020$. Source:
 \toprule
 Threshold & Pkg (obs.) & Pkg (zero-inc.) & vs.\ T-zero & vs.\ T-mis.\ & Incidence \\
 \midrule
-$+0.0010$ & $5/5$ & $5/5$ & $5/5$ & $5/5$ & $0/5$ \\
-$+0.0015$ & $5/5$ & $5/5$ & $5/5$ & $2/5$ & $0/5$ \\
-$+0.0020$ & $5/5$ & $5/5$ & $0/5$ & $0/5$ & $0/5$ \\
-$+0.0025$ & $4/5$ & $2/5$ & $0/5$ & $0/5$ & $0/5$ \\
-$+0.0030$ & $1/5$ & $0/5$ & $0/5$ & $0/5$ & $0/5$ \\
+$+1.0$ & $5/5$ & $5/5$ & $5/5$ & $5/5$ & $0/5$ \\
+$+1.5$ & $5/5$ & $5/5$ & $5/5$ & $2/5$ & $0/5$ \\
+$+2.0$ & $5/5$ & $5/5$ & $0/5$ & $0/5$ & $0/5$ \\
+$+2.5$ & $4/5$ & $2/5$ & $0/5$ & $0/5$ & $0/5$ \\
+$+3.0$ & $1/5$ & $0/5$ & $0/5$ & $0/5$ & $0/5$ \\
 \bottomrule
 \end{tabular}
 \end{table}

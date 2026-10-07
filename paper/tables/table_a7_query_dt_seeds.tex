@@ -1,8 +1,9 @@
-\begin{table}[ht]
+\begin{table}[H]
 \caption{Per-seed validation $\Delta$ for the three Linear $\Delta t$
-injection sites on XES3G5M fold~0. Twin is Q$\leftarrow$KC without
-time-gap. Gate is $\Delta\mathrm{val}\ge{+}0.002$.
-Source: \protect\path{results/tables/a7_query_dt_ablation.csv}.}
+injection sites on XES3G5M fold~0. The control is the observed-incidence
+tracer without the time package. The rule is
+$\Delta\mathrm{val}\ge{+}2.0\times 10^{-3}$. The per-seed file is in
+the repository.}
 \label{tab:a7-query-dt-seeds}
 \centering
 \footnotesize
@@ -17,7 +18,7 @@ Seed & \texttt{both} $\Delta$val & \texttt{lstm} $\Delta$val & \texttt{query} $\
 2024 & $+0.00268$ & $+0.00201$ & $+0.00096$ \\
 \midrule
 Mean & $+0.00274$ & $+0.00193$ & $+0.00099$ \\
-Gate & $5/5$ & $2/5$ & $0/5$ \\
+Rule & $5/5$ & $2/5$ & $0/5$ \\
 \bottomrule
 \end{tabular}
 \end{table}

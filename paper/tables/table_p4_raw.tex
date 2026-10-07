@@ -1,16 +1,17 @@
 % P4 raw five-seed records: results/tables/p4_forget_5seed.csv
 % Twin = same-seed QKC-T Linear both (a7 dt_both val_auc).
-\begin{table}[t]
+\begin{table}[H]
 \caption{Per-concept exponential forgetting versus Linear
 $\Delta t$ on the QKC-T backbone (XES3G5M fold~0, five paired seeds).
-Twin is same-seed \texttt{--time-gap-mode both} (QKC-T), not Zero$+\Delta t$.
+The control is the same-seed observed-incidence time package, not the
+zero-incidence package.
 Mean $\Delta\mathrm{val}{=}{-}0.00252{\pm}0.00019$ ($0/5$ seeds pass).}
 \label{tab:p4-raw}
 \centering
 \footnotesize
 \begin{tabular}{@{}rrrrl@{}}
 \toprule
-Seed & Twin val (QKC-T) & P4 val & $\Delta$val & Gate \\
+Seed & Control val & Exponential val & $\Delta$val & Rule \\
 \midrule
 0 & 0.82860 & 0.82596 & $-0.00263$ & no \\
 17 & 0.82858 & 0.82587 & $-0.00270$ & no \\

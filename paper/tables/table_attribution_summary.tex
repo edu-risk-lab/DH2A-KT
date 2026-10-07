@@ -1,4 +1,4 @@
-\begin{table}[t]
+\begin{table}[H]
 \caption{Five-seed credit map on XES3G5M fold~0 (training seeds, not data
 folds). Intervals are 95\% CIs for mean $\Delta$val
 ($\mathrm{mean}\pm t_{0.975,4}\,s/\sqrt{5}$). ``Observed''/``zero'' refer
@@ -32,27 +32,10 @@ Aligned $\Delta t$ input & Architecture-matched T-zero &
 $+0.00183$ $[{+}0.00173,{+}0.00194]$ & 0/5; below rule \\
 Aligned $\Delta t$ input & Architecture-matched T-misaligned &
 $+0.00144$ $[{+}0.00109,{+}0.00178]$ & 0/5; below rule \\
-Teacher grouping & Off-group twin (ASSIST2012) &
+Teacher grouping & Off-group control (ASSIST2012) &
 $+0.00025$ $[{-}0.00063,{+}0.00112]$ & 0/5; bounded null \\
 Per-concept exponential gap & Linear $\Delta t$ &
 $-0.00252$ $[{-}0.00276,{-}0.00228]$ & 0/5; below Linear \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[t]
-\caption{Single-seed diagnostics (not five-seed credit tests).}
-\label{tab:attribution-diagnostics}
-\centering
-\scriptsize
-\begin{tabular}{@{}p{3.6cm}p{3.8cm}rl@{}}
-\toprule
-Knowledge message & Control type & Mean $\Delta$val & Credit \\
-\midrule
-HypergraphConv & No concept convolution & $+0.00025$ & below gate \\
-Hint-item session HE & No hint-item HE & $+0.00007$ & below gate \\
-Full Q-matrix incidence & Matched control & $-0.00010$ & below gate \\
-Expert prerequisite DAG & Matched control (Junyi, 5{,}000 learners) & $+0.00056$ & below gate \\
 \bottomrule
 \end{tabular}
 \end{table}

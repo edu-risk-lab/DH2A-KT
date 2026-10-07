@@ -1,10 +1,9 @@
-\begin{table}[t]
-\caption{Fold~0 first: Linear $\Delta t$ on the capacity-matched
-\emph{zero-incidence} backbone (XES3G5M, repeat-target-masked protocol; five training
-seeds on this one learner fold). Package-level contrast (not
-capacity-matched). Both arms keep zero Q--KC
-incidence; \texttt{zero\_time} adds LSTM+query
-$\log(1{+}\Delta t)$ (\texttt{--time-gap-mode both}). Operating gate:
+\begin{table}[H]
+\caption{Linear $\Delta t$ on the capacity-matched zero-incidence
+backbone (XES3G5M learner fold~0, repeat-target-masked protocol; five
+training seeds). Package-level contrast (not capacity-matched). Both
+arms keep zero question--KC incidence; the on arm adds the gap at the
+LSTM and the query (Table~\ref{tab:aliases}). Rule:
 $\Delta\mathrm{val}\ge{+}0.002$. Mean
 $\Delta\mathrm{val}{=}{+}0.00255{\pm}0.00015$; mean
 $\Delta\mathrm{test\text{-}only}{=}{+}0.00269{\pm}0.00012$. $5/5$ seeds pass:
@@ -15,7 +14,7 @@ differ by the timing parameters (expected).}
 \footnotesize
 \begin{tabular}{@{}rrrrrl@{}}
 \toprule
-Seed & Zero val & Zero$+\Delta t$ val & $\Delta$val & $\Delta$test & Gate \\
+Seed & Zero val & Zero$+\Delta t$ val & $\Delta$val & $\Delta$test & Rule \\
 \midrule
 0 & 0.82610 & 0.82852 & $+0.00242$ & $+0.00270$ & yes \\
 17 & 0.82589 & 0.82835 & $+0.00245$ & $+0.00258$ & yes \\

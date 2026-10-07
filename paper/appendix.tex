@@ -41,24 +41,24 @@
 
 \begin{center}
 {\large\bfseries Appendices to ``Validating Auxiliary Knowledge in
-Knowledge Tracing: A Credit Protocol Shows That Credit Depends on Corpus
-and Encoder''}
+Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
 \end{center}
 
 \FloatBarrier
 \appendix
+\renewcommand{\thealgorithm}{C.\arabic{algorithm}}
 
 \section{Names, aliases, and the reference decision list}
 \label{app:names}
 Table~\ref{tab:aliases} maps the arm names of the paper to
 implementation aliases in the training logs.
 Table~\ref{tab:module-hypothesis} states the hypothesis each module
-tests, and Table~\ref{tab:credit-decisions} is the reference decision
-list on XES3G5M under the seed rule.
+tests. The XES3G5M outcomes are the first rows of
+Table~\ref{tab:credit-transfer}; intervals are in
+Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_aliases}
 \input{tables/table_module_hypothesis}
-\input{tables/table_credit_decisions}
 \FloatBarrier
 
 \section{Per-seed records of the XES3G5M reference run}
@@ -66,14 +66,16 @@ list on XES3G5M under the seed rule.
 Tables~\ref{tab:qkc-capacity}--\ref{tab:p4-raw} give the per-seed
 validation and test differences behind the XES3G5M rows of the credit
 map, and Table~\ref{tab:attribution-summary} collects their 95\%
-intervals. Table~\ref{tab:auc-p0-dt-folds} reports the three-fold
+intervals. In this appendix a printed $\Delta$ is a difference of
+validation AUC, not the $10^{-3}$ unit used in the credit map.
+Table~\ref{tab:auc-p0-dt-folds} reports the three-fold
 stability of the absolute test AUC of QKC-T.
 
 Two-sided paired $t$-tests on the validation differences, with
 Holm--Bonferroni correction over a family of $m{=}3$, are in
 Table~\ref{tab:credit-stats}. The two package contrasts remain
 significant against $H_0{:}\,\mu_\Delta=0$ and the incidence contrast
-does not. The family was chosen after the incidence and timing twins
+does not. The family was chosen after the incidence and timing controls
 existed and is not presented as fixed before any exploratory run. The
 credit rules of the paper do not use these $p$-values.
 
@@ -97,7 +99,7 @@ concepts visited along a path as an unordered member set, so path
 direction is not retained. These groups are used for the audit and for
 optional hypergraph-convolution diagnostic arms
 \cite{bai2021hypergraphconv}; they are not inputs of the credited arms.
-Chain length bounds $[3,8]$ match \texttt{configs/xes3g5m.yaml}.
+Chain length bounds are $[3,8]$, the same bounds used to build the corpus.
 
 \begin{algorithm}[H]
 \caption{Path-derived concept-group hyperedges from audited
@@ -121,7 +123,7 @@ Discussion-thread and teacher-intervention hyperedges are data-blocked
 on the public corpora; session and hint hyperedges are built on
 FoundationalASSIST only (\ref{app:foundational-assist}).
 
-\begin{table}[t]
+\begin{table}[H]
 \caption{Hyperedge-level leakage taxonomy (extends the pairwise taxonomy
 of \cite{daominh2026p0}).}
 \label{tab:leakage-taxonomy}

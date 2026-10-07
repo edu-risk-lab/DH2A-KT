@@ -1,20 +1,20 @@
 % DH^{2} from results/tables/a6_calibration_xes3g5m_fold0.csv (n=1,093,755).
 % pyKT from results/tables/a6_calibration_pykt_xes3g5m_fold0.csv (n=1,093,720).
-\begin{table}[ht]
+\begin{table}[H]
 \caption{Calibration on XES3G5M fold~0 test predictions under the
 repeat-target-masked protocol (mask-repeats, chunked, $L{=}400$). ECE uses 15 equal-width bins;
 lower is better. Tracer checkpoints: seed~42 (QKC-T AUC $0.8296$ is the fold~0
 checkpoint in Table~\ref{tab:auc-p0-dt-folds}, not the five-seed mean
 $0.8295{\pm}0.0001$ in Table~\ref{tab:auc-xes3g5m}; Zero$+\Delta t$ $0.8294$ is the same seed-42
-checkpoint as Table~\ref{tab:qkc-zero-time}; the pathway-off twin $0.8202$ is
+checkpoint as Table~\ref{tab:qkc-zero-time}; the pathway-off control $0.8202$ is
 calibration-only and is not a Table~\ref{tab:auc-xes3g5m} row),
 scored on native $n{=}1{,}093{,}755$ positions. pyKT GIKT/AKT/\textit{simpleKT}
 use the same seed-42 prediction files as the headline intersection
 ($n{=}1{,}093{,}720$). An occurrence join on (user, dense-KC) matches
 $1{,}093{,}718$ rows with $8$ label collisions (kept). The pre-chunk
 $\mathrm{user}{+}\mathrm{timestamp}{+}\mathrm{item}{+}\mathrm{KC}$ key
-matches the same $n$ with zero label disagreement
-(\texttt{a4\_event\_identity.json}). Calibration is not event-paired
+matches the same $n$ with zero label disagreement.
+Calibration is not event-paired
 across the tracer and pyKT. We report
 calibration as a diagnostic and do not apply temperature scaling.
 Reliability curves (tracer arms, including Zero$+\Delta t$) appear in
@@ -29,7 +29,7 @@ Model & AUC & Brier & NLL & ECE \\
 QKC-T & 0.8296 & 0.1207 & 0.3828 & 0.0056 \\
 Zero$+\Delta t$ & 0.8294 & 0.1208 & 0.3831 & 0.0072 \\
 Q$\leftarrow$KC on & 0.8270 & 0.1216 & 0.3857 & 0.0103 \\
-Q$\leftarrow$KC off (twin) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\
+Q$\leftarrow$KC off (control) & 0.8202 & 0.1235 & 0.3911 & 0.0081 \\
 GIKT (training-envelope-matched) & 0.8257 & 0.1219 & 0.3864 & 0.0073 \\
 AKT ($L{=}400$) & 0.8223 & 0.1229 & 0.3893 & 0.0047 \\
 \textit{simpleKT} ($L{=}400$) & 0.8203 & 0.1236 & 0.3916 & 0.0100 \\

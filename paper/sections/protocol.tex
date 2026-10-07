@@ -6,7 +6,9 @@ The protocol decides whether a knowledge message may be credited for a
 change in next-step AUC on a given corpus and backbone. It does not
 define a predictor. The tracer of Section~\ref{sec:encoding} is the
 backbone on which it is run here, and Fig.~\ref{fig:architecture}
-summarises the pipeline.
+summarises the pipeline. Table~\ref{tab:terms} fixes the terms used below.
+
+\input{tables/table_terms}
 
 \subsection{Three rungs}
 \label{sec:protocol-rungs}
@@ -16,7 +18,7 @@ Each contrast is placed on one rung before it is run
 \begin{itemize}
   \item \textbf{(i) Capacity-matched message.} The on and off arms share
   every map; only the message content changes. The question--KC
-  incidence twin, which replaces the train-only incidence matrix by
+  incidence control, which replaces the train-only incidence matrix by
   zeros, is this rung.
   \item \textbf{(ii) Architecture-matched input.} The maps stay and the
   input is replaced. For the gap this means T-zero (every gap set to
@@ -61,36 +63,37 @@ validation AUC of the on arm minus that of the designated control under
 seed $s$. Two rules decide credit at a threshold $\tau$.
 
 \begin{itemize}
-  \item \textbf{Seed rule.} Every $\Delta_s\ge\tau$.
-  \item \textbf{Interval rule.} The lower end of the two-sided 95\%
-  interval of the mean paired difference reaches the threshold,
+  \item \textbf{Interval rule (primary).} The lower end of the two-sided
+  95\% interval of the mean paired difference reaches the threshold,
   $\bar\Delta-t_{0.975,|S|-1}\,s_\Delta/\sqrt{|S|}\ge\tau$, where
   $s_\Delta$ is the sample standard deviation of the paired
   $\Delta_s$.
+  \item \textbf{Seed rule.} Every $\Delta_s\ge\tau$.
 \end{itemize}
 
 Under either rule a message is \textbf{Credited} if the rule holds,
-\textbf{Consistent-positive, not credited} if it fails while every
+\textbf{Consistent-positive (not credited)} if it fails while every
 $\Delta_s>0$, and \textbf{Unsupported} otherwise, including a negative
 mean. The middle outcome is part of the protocol: a gain that is
-positive on every seed is reported without a separate credit line.
+positive on every seed is reported, but not credited.
 
 The seed rule is a minimum over seeds, so it becomes stricter as $|S|$
 grows; $|S|{=}5$ is therefore part of its definition, and maps are
 comparable only at the same $|S|$. The interval rule scales with the
 noise of the paired contrast itself, which is the relevant noise for a
 seed-paired design \cite{bouthillier2021variance}, and it has no
-constant fitted to any corpus. It was fixed after all runs had been
-scored. When the two rules disagree, both outcomes are reported.
+constant fitted to any corpus. When the two rules disagree, both
+outcomes are reported. In this paper they do not.
 
-We use $\tau{=}{+}0.002$ throughout. On XES3G5M learner fold~0 this is
-about nine times the seed standard deviation of the two package control
-arms ($0.00021$ and $0.00023$), and about half the gap between the
-timed tracer and the closest contextual baseline in
-Table~\ref{tab:auc-xes3g5m} ($+0.0037$). Recounting
-the unrounded per-seed differences (Table~\ref{tab:threshold-sensitivity})
-shows that the reference map holds for any seed-rule threshold in
-$(+0.00175,+0.00236]$. The value is an operating rule, not a hypothesis
+Throughout the main text, AUC differences are reported in units of
+$10^{-3}$, and $\tau{=}{+}2.0$ in that unit. On XES3G5M learner
+fold~0 this is about nine times the seed standard deviation of the two
+package control arms ($0.21$ and $0.23$), and about half the gap
+between the timed tracer and the closest contextual baseline in
+Table~\ref{tab:auc-xes3g5m} ($+3.7$). Recounting the unrounded per-seed
+differences (Table~\ref{tab:threshold-sensitivity}) shows that the
+reference map holds for any seed-rule threshold in $(+1.75,+2.36]$.
+The value is an operating rule, not a hypothesis
 test of $\mu_\Delta{=}0$, and not a registered public standard.
 
 \input{tables/table_threshold_sensitivity}
@@ -106,7 +109,7 @@ the repository file \path{docs/REGISTER_MESSAGE.md}.
 \caption{Register a message on the credit ladder.}
 \label{alg:register}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$; $\tau{=}{+}0.002$
+\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$; $\tau{=}{+}2.0\times 10^{-3}$
 \STATE Choose rung (i), (ii), or (iii) and the designated control
 \STATE If rung (iii), record the number of added parameters
 \FOR{each seed $s\in S$}
@@ -117,7 +120,7 @@ the repository file \path{docs/REGISTER_MESSAGE.md}.
   \IF{$R$ holds at $\tau$}
     \STATE outcome$_R\gets$ Credited
   \ELSIF{every $\Delta_s>0$}
-    \STATE outcome$_R\gets$ Consistent-positive, not credited
+    \STATE outcome$_R\gets$ Consistent-positive (not credited)
   \ELSE
     \STATE outcome$_R\gets$ Unsupported
   \ENDIF

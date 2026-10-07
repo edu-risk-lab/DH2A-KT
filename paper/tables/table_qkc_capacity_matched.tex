@@ -1,14 +1,13 @@
-\begin{table}[t]
-\caption{Fold~0 first: capacity-matched Q$\leftarrow$KC attribution on
-XES3G5M (repeat-target-masked protocol; five training seeds on this one learner fold). Both arms keep \texttt{--question-graph} (same
-\texttt{question\_embed}, GCN linear, and input projection); only the
-train-only incidence matrix is replaced by zeros in the twin
-(\texttt{--question-incidence-control zero}). Operating gate:
+\begin{table}[H]
+\caption{Capacity-matched question--KC attribution on XES3G5M learner
+fold~0 (repeat-target-masked protocol; five training seeds). Both arms
+keep the same question pathway; only the train-only incidence matrix is
+replaced by zeros in the control (Table~\ref{tab:aliases}). Rule:
 $\Delta\mathrm{val}\ge{+}0.002$. Checkpoint state shapes match on every
 seed; observed nonzero links $=8848$, zero arm $=0$. Mean
 $\Delta\mathrm{val}{=}{-}0.00010{\pm}0.00034$; mean
 $\Delta\mathrm{test\text{-}only}{\approx}{+}0.00004$. $0/5$ seeds pass: the
-incidence \emph{message} is not credited. An older hard-off twin that
+incidence \emph{message} is not credited. An older hard-off control that
 removed the whole question pathway is capacity-mismatched and is not
 used for this claim. $\Delta$test columns are outer
 test-only AUC (1{,}093{,}755 scored positions).}
@@ -17,7 +16,7 @@ test-only AUC (1{,}093{,}755 scored positions).}
 \footnotesize
 \begin{tabular}{@{}rrrrrl@{}}
 \toprule
-Seed & Observed val & Zero val & $\Delta$val & $\Delta$test-only & Gate \\
+Seed & Observed val & Zero val & $\Delta$val & $\Delta$test-only & Rule \\
 \midrule
 0 & 0.82554 & 0.82610 & $-0.00056$ & $-0.00007$ & no \\
 17 & 0.82579 & 0.82589 & $-0.00010$ & $-0.00018$ & no \\

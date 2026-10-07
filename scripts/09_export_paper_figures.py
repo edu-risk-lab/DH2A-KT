@@ -48,7 +48,7 @@ bars = ax.bar(labels, auc_drops, color=colors, width=0.55, edgecolor="black", li
 
 ax.set_ylabel(r"Manipulation $\Delta$AUC ($p{=}0.9$ node-drop)")
 ax.set_ylim(0, max(0.045, fold0_node_drop + 0.012))
-ax.set_title("XES3G5M fold 0 — graph reliance gate")
+ax.set_title("XES3G5M fold 0 — graph reliance check")
 
 for bar, drop, ok in zip(bars, auc_drops, pass_flags):
     tag = "PASS" if ok else "FAIL"

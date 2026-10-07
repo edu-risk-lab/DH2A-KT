@@ -1,5 +1,5 @@
 \begin{table}[t]
-\caption{Messages that do not reach the $+0.002$ seed rule against their
+\caption{Messages that do not reach the $+2.0\times 10^{-3}$ seed rule against their
 designated control. ``Below the rule'' means the form is not credited in
 the configuration run here, not that the knowledge type is valueless.
 Teacher grouping and exponential forgetting use five paired seeds; the
@@ -14,14 +14,14 @@ concept groups. FA is FoundationalASSIST.}
 \setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xlrrrl@{}}
 \toprule
-Knowledge (corpus) & Seeds & Control val & On val & $\Delta$val & Outcome \\
+Knowledge (corpus) & Seeds & Control val & On val & $\Delta\times 10^{-3}$ & Outcome \\
 \midrule
-Hypergraph convolution on multi-KC hyperedges (XES3G5M) & 1 & 0.82598 & 0.82623 & $+0.00025$ & below rule \\
-Hint-item session hyperedges (FA) & 1 & 0.80861 & 0.80868 & $+0.00007$ & below rule \\
-Full Q-matrix incidence (FA) & 1 & 0.80834 & 0.80824 & $-0.00010$ & below rule \\
-Expert prerequisite DAG (Junyi, 5{,}000 learners) & 1 & 0.7640 & 0.76456 & $+0.00056$ & below rule \\
-Teacher grouping (ASSIST2012) & 5 & 0.76475 & 0.76499 & $+0.00025$ & $0/5$ \\
-Per-concept exponential forgetting (XES3G5M) & 5 & 0.82862 & 0.82610 & $-0.00252$ & $0/5$ \\
+Hypergraph convolution on multi-KC hyperedges (XES3G5M) & 1 & 0.82598 & 0.82623 & $+0.25$ & below rule \\
+Hint-item session hyperedges (FA) & 1 & 0.80861 & 0.80868 & $+0.07$ & below rule \\
+Full Q-matrix incidence (FA) & 1 & 0.80834 & 0.80824 & $-0.10$ & below rule \\
+Expert prerequisite DAG (Junyi, 5{,}000 learners) & 1 & 0.7640 & 0.76456 & $+0.56$ & below rule \\
+Teacher grouping (ASSIST2012) & 5 & 0.76475 & 0.76499 & $+0.25$ & $0/5$ \\
+Per-concept exponential forgetting (XES3G5M) & 5 & 0.82862 & 0.82610 & $-2.52$ & $0/5$ \\
 \bottomrule
 \end{tabularx}
 \end{table}

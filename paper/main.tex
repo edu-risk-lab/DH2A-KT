@@ -44,8 +44,8 @@
 \begin{frontmatter}
 
 \title{Validating Auxiliary Knowledge in Knowledge Tracing: A Credit
-Protocol Shows That Credit Depends on Corpus and Encoder\tnoteref{rt}}
-\tnotetext[rt]{Running title: Credit protocol for knowledge tracing.}
+Protocol and Its Dependence on Setting\tnoteref{rt}}
+\tnotetext[rt]{Running title: Credit depends on the setting.}
 
 \author[utehy]{Tuan Dao Minh}
 \ead{tuanymc@utehy.edu.vn}
@@ -74,29 +74,24 @@ country={Vietnam}}
 
 \begin{abstract}
 Knowledge tracing systems are often built by adding auxiliary
-knowledge, such as concept graphs or response timing, to a
-sequence model, and are judged by one area under
-the ROC curve (AUC). That number does not show which piece of knowledge
-earned the gain, and a graph built from the full log can carry held-out
-learners into the evaluation. We state a credit protocol for validating
-such knowledge. It builds auxiliary knowledge from training learners
-only, audits hyperedge membership leakage, places each message on a
-capacity-matched, architecture-matched, or package-level control, and
-assigns one of three outcomes from five paired seeds under a seed-wise
-rule and an interval rule at $+0.002$ validation AUC. Across two
-encoders and three corpora, one elapsed-time message receives
-different verdicts. On XES3G5M with a recurrent tracer
-the time package is credited on each of three learner folds, while the
-aligned gap input is positive on every seed
-but not credited. On ASSISTments~2012 under the same recipe the
-package is credited on two of three learner folds and
-consistent-positive on the third, and nothing is credited under the
-corpus configuration or on an export that stores start times at
-$1{,}000$\,s resolution. With a causal attention encoder no time message
-is credited; on Junyi both the package and the aligned gap input are
-credited. The two rules agree in all $44$ contrasts. Credit should be
-reported per corpus, backbone, recipe, learner fold, and control level,
-not as a single map.
+knowledge, such as concept graphs or response timing, to a sequence
+model, and are then judged by one area under the ROC curve. That single
+number does not show which added piece earned the gain, and knowledge
+built from the full log can carry held-out learners into the evaluation.
+We propose a credit protocol that builds such knowledge from training
+learners only, audits membership leakage, compares each component with
+a control declared in advance, and assigns one of three outcomes from
+paired seeds. We apply it to one elapsed-time component on three
+corpora and two encoders. On XES3G5M with a recurrent tracer the
+component is credited only as a package (the input together with the
+weights added to read it), and a copy of those weights fed only zeros
+already accounts for about a quarter of that gain; the gap input itself
+is credited only on Junyi. The package is not credited under an
+attention encoder or on a coarse timestamp export. On ASSISTments~2012
+it is credited only when question--concept incidence is set to zero,
+and only on some learner folds. Question--concept
+links are not credited, so credit should be reported per corpus,
+backbone, recipe, learner fold, and control level.
 \end{abstract}
 
 \begin{keyword}
@@ -111,9 +106,8 @@ Knowledge tracing \sep knowledge validation \sep knowledge engineering
 % =============================================================================
 
 Knowledge tracing (KT) estimates a learner's latent mastery from an
-interaction history and predicts the next response. Intelligent
-tutoring systems use these predictions to select items and to schedule
-practice \cite{piech2015dkt,lai2021rktm}. Modern tracers are built in a
+interaction history and predicts the next response, so that a tutor
+can choose the next item \cite{corbett1995bkt}. Modern tracers are built in a
 knowledge-engineering fashion: knowledge is acquired from the log or
 from experts, represented as question--concept incidence, prerequisite
 graphs, hyperedges, or timing features, and injected into a sequence
@@ -140,68 +134,57 @@ question for a knowledge engineer is narrower: which piece of the
 injected knowledge may be credited, against what control, and does that
 decision hold on another corpus or backbone?
 
-This paper states a credit protocol for that decision. Auxiliary
-knowledge is built from training learners only and audited for
-hyperedge membership leakage. Each message is placed on a declared rung
-with a designated control---capacity-matched, architecture-matched, or
-package-level---and is run on five paired training seeds. It receives
-one of three outcomes (credited; consistent-positive, not credited;
-unsupported) under a seed-wise rule and an interval rule at $+0.002$
-validation AUC (Section~\ref{sec:protocol}).
+This paper proposes a credit protocol for that decision
+(Section~\ref{sec:protocol}). Auxiliary knowledge is built from training
+learners only, audited for membership leakage, and compared with a
+control declared before the run. Each comparison receives one of three
+outcomes.
 
-We apply the protocol to a linear elapsed-time message on two encoders
-and three corpora (Table~\ref{tab:credit-transfer}). The same message
-receives different verdicts. On XES3G5M with a recurrent tracer the
-time package is credited, but only at the package level: the control
-that keeps the map and replaces the gap input leaves a gain that is
-positive on every seed and below the threshold. The package-level
-ablation overstates what the input contributes. A map fed only zeros
-already gains $+0.00071$ over the no-time arm (95\% interval
-$[{+}0.00053,{+}0.00090]$), about a quarter of the package gain.
-ASSISTments~2012 under the same recipe credits the package on two of
-three learner folds and not on the third, and under its own
-configuration credits nothing. With a causal attention
-encoder no time message is credited. On Junyi both the package and the
-aligned gap input are credited. Preprocessing matters as well: an
-ASSISTments export with start times at $1{,}000$\,s resolution, which
-we found while describing the gaps, does not credit the package. A
-single-setting ablation would have credited too much or too little.
+When the protocol is applied to one elapsed-time message on two
+encoders and three corpora, its verdict depends on the setting
+(Table~\ref{tab:credit-transfer}). On XES3G5M with a recurrent tracer
+the time package is credited, but only as a package: a map fed only
+zeros already accounts for about a quarter of that gain, so a
+package-level ablation overstates what the gap input contributes. The
+same gap input is credited on Junyi and is not credited on XES3G5M.
+On ASSISTments the time package on the tracer whose question--concept
+incidence is zeroed is credited on some learner folds and not on
+others, and nothing is credited under that corpus's own configuration
+or on an export whose timestamps are too coarse to order events inside
+a session. On XES3G5M, an attention encoder credits no time message.
+A single-setting ablation would have credited too much or too little.
 
 \subsection{Contributions}
 \begin{itemize}
   \item \textbf{C1 (protocol).} Three control rungs, three outcomes,
-  a seed-wise and an interval rule at $+0.002$, and an algorithm for
+  a seed-wise and an interval rule at $+2.0\times 10^{-3}$, and an algorithm for
   registering a new message (Section~\ref{sec:protocol},
   Algorithm~\ref{alg:register}).
   \item \textbf{C2 (credit map across settings).} On two encoders and
-  three corpora, the time message is credited, consistent-positive, or
-  credited only as a package depending on the setting, the training
-  recipe, the timestamp resolution, and the learner fold; question--KC
-  incidence is not credited on XES3G5M; both rules agree in all $44$
-  contrasts (Section~\ref{sec:transfer-ladder},
+  three corpora, the time message is credited as an input, credited
+  only as a package, or not credited. The verdict depends on the
+  setting, the training recipe, the timestamp resolution, and the
+  learner fold. Question--KC incidence is not credited on XES3G5M
+  (Section~\ref{sec:transfer-ladder},
   Table~\ref{tab:credit-transfer}).
-  \item \textbf{C3 (secondary: hyperedge membership audit).} Of the
+  \item \textbf{C3 (hyperedge membership audit).} Of the
   pairwise leakage diagnostics inherited from train-only graph
   construction, only group membership separates a leaky hyperedge set
   from a clean one; TBMR does not, and $|\rho|$ is degenerate on
   hyperedge projections (Section~\ref{sec:leakage-ext}).
 \end{itemize}
 The ladder attributes messages on a fixed backbone. It does not
-decompose the gap from the tracer to DKT ($+0.0286$ test AUC on
+decompose the gap from the tracer to DKT ($+28.6\times 10^{-3}$ test AUC on
 XES3G5M), which also reflects architecture, optimisation, and protocol.
 Table~\ref{tab:claims} lists each claim with what it does not infer.
 \input{tables/table_claims}
 
-The paper is structured as follows. Section~\ref{sec:related} reviews
-related work and Section~\ref{sec:prelim} fixes notation and the reused
-train-only construction. Section~\ref{sec:protocol} states the
-protocol. Section~\ref{sec:tracer} describes the tracer, the second
-encoder, and the hyperedge audit; Section~\ref{sec:setup} gives data,
-recipes, evaluation, and baselines. Section~\ref{sec:results} reports
-the credit map across settings and the reference run on XES3G5M.
-Section~\ref{sec:discussion} discusses interpretation, implications for
-building KT systems, and limitations, and Section~\ref{sec:conclusion}
-concludes. Appendices are supplied as a separate file.
+Section~\ref{sec:related} reviews related work.
+Sections~\ref{sec:prelim}--\ref{sec:setup} set out notation, the
+protocol, the tracer, and the experimental setup.
+Section~\ref{sec:results} reports the credit map, and
+Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss it.
+Appendices are supplied as a separate file.
 
 % =============================================================================
 \section{Related work}
@@ -210,7 +193,7 @@ concludes. Appendices are supplied as a separate file.
 
 \subsection{Auxiliary knowledge in knowledge tracing}
 Graph-based tracers propagate over concept or question--concept edges
-\cite{nakagawa2019gkt,yang2021gikt}, dynamic variants add temporal
+\cite{nakagawa2019gkt,tong2020skt,yang2021gikt}, dynamic variants add temporal
 graph memory \cite{dygkt2024,dgekt2024}, and hypergraph tracers group
 KCs, exercises, and learners into multi-way relations
 \cite{thmn2025,hgkt2025,htkt2025,psykt2024,hhskt2023}. Time has a
@@ -222,9 +205,11 @@ the recurrent knowledge tracing machine of Lai et
 al.~\cite{lai2021rktm} enriches factorisation-based tracers with
 temporal knowledge states. Badran et al.~\cite{badran2025leakage}
 encode step recency (rows since a concept last appeared), which differs
-from the wall-clock gap studied here. These papers report a model AUC.
-The question here is which of their messages survives a designated
-control, and where.
+from the wall-clock gap studied here. These papers evaluate components
+by ablations that remove an input together with its parameters, and
+report one AUC per variant. The question
+here is which of their messages survives a designated control, and on
+which corpus and backbone.
 
 \subsection{Evaluation reliability and leakage in knowledge tracing}
 \label{sec:related-leakage}
@@ -243,7 +228,7 @@ transparency, with DKT as a case study. They also find that papers
 reporting on ASSISTments 2009--2010 differ in learner, skill, and record
 counts without disclosing their preprocessing. Our protocol takes a
 reproducible run as given and asks which added message earns the gain.
-pyKT
+The pyKT benchmark
 \cite{liu2022pykt} warns that KC-expanded exports let a model copy the
 label of an earlier row of the same attempt. Badran and
 Preisach~\cite{badran2025labelleak} identify this label leakage, show
@@ -261,14 +246,13 @@ from data sampling, initialisation, and hyperparameter choice markedly
 affects benchmark conclusions.
 
 These studies re-evaluate whole models or diagnose one leakage channel.
-In ACM Digital Library, IEEE Xplore, Scopus, arXiv, and Google Scholar
-(searched on 10~September~2026 with the terms ``hypergraph knowledge
-tracing'', ``leakage audit'', ``graph provenance'', ``KT label
-leakage'', ``question-level evaluation'', and ``controlled
-attribution''), we did not find a protocol that applies
+In ACM Digital Library, IEEE Xplore, Scopus, arXiv, and Google Scholar,
+searched on 7~October~2026, we did not find a protocol that applies
 leakage diagnostics at the hyperedge level and assigns credit to a
-message by control rung across corpora and backbones. The search log is
-in the repository.
+message by control rung across corpora and backbones. The query terms
+were ``hypergraph knowledge tracing'', ``leakage audit'', ``graph
+provenance'', ``KT label leakage'', ``question-level evaluation'', and
+``controlled attribution''. The search log is in the repository.
 
 % =============================================================================
 \section{Preliminaries}
@@ -291,16 +275,17 @@ For each fold $f$, prerequisite and similarity edges
 $E_{\mathrm{pre}}^f$ and $E_{\mathrm{sim}}^f$ are built from
 training-fold interactions only and cycle-pruned to a DAG
 \cite{daominh2026p0}. Four pairwise diagnostics are computed on the
-train-only graph against held-out learners:
-$\mathrm{ECR}^{\mathrm{flag}}$, a structural learner-overlap indicator;
-$\mathrm{ECR}^{\mathrm{overlap}}$, held-out pattern overlap on retained
-edges; $|\rho|$, the magnitude of the Pearson correlation between edge
-weight and held-out outcome; and TBMR, the share of post-cutoff
-training mass that supports retained prerequisite transitions (a
-within-train temporal measure, not a train/test violation). Switching
+train-only graph against held-out learners.
+$\mathrm{ECR}^{\mathrm{flag}}$ is a structural learner-overlap indicator,
+and $\mathrm{ECR}^{\mathrm{overlap}}$ is held-out pattern overlap on
+retained edges. $|\rho|$ is the magnitude of the Pearson correlation
+between edge weight and held-out outcome. TBMR is the share of
+post-cutoff training mass that supports retained prerequisite
+transitions; it is a within-train temporal measure, not a train/test
+violation. Switching
 from full-log to train-only construction shifts baseline AUC by at most
 $0.003$ on XES3G5M, ASSISTments~2012, and Junyi \cite{daominh2026p0}.
-We pin that code to commit \texttt{5e3d6a0}.
+That code is fixed at commit \texttt{5e3d6a0}.
 
 A hyperedge $h=(\kappa,\{(\tau_i,e_i)\},f)$ has a kind $\kappa$
 (path-derived concept group, session, discussion thread, or teacher
@@ -333,17 +318,20 @@ propagation step, in the spirit of GIKT \cite{yang2021gikt}, is
 \label{eq:qkc}
 \end{equation}
 with one shared $W$ on the sum, followed by the LSTM input projection.
-The capacity-matched twin keeps the same pathway and replaces $\bar{A}$
+The capacity-matched control keeps the same pathway and replaces $\bar{A}$
 by zeros, so the incidence result concerns this shared-sum fusion, not
 question--KC relations under a richer gate. Interaction embeddings of
-$(c_t,y_t)$ and Rasch-style item parameters feed the LSTM, and step
+$(c_t,y_t)$ and Rasch-style item parameters
+\cite{ghosh2020akt,liu2023simplekt} feed the LSTM, and step
 $t{+}1$ is scored by a query at the known identity of the next item and
-KC. Two named arms recur: QKC-T (observed incidence and the time
-package) and Zero$+\Delta t$ (zeroed incidence and the time package).
+KC. In the tables the observed-incidence time package is called QKC-T
+and the zero-incidence time package is called Zero$+\Delta t$.
 Implementation aliases are listed in Table~\ref{tab:aliases}.
 
 \paragraph{Time package}
-The time branch is a map $f(x)=Wx+b$ of $x=\log(1+\Delta t)$
+The elapsed-time package is one linear map of the log gap, because a
+single added branch has to be comparable across corpora. The map is
+$f(x)=Wx+b$ of $x=\log(1+\Delta t)$
 ($\mathrm{Linear}(1,128)$ with bias) added on the LSTM input, the
 next-step query, or both. XES3G5M records the start time of answering
 in milliseconds and no end time \cite{liu2023xes3g5m}. Rows are sorted
@@ -361,7 +349,7 @@ step's response.
 \subsection{Second encoder}
 \label{sec:second-encoder}
 A message is credited inside one backbone, so the second backbone must
-accept the same time branch and query; the pyKT forwards of simpleKT
+accept the same time branch and query; the pyKT implementations of simpleKT
 and AKT take no gap input. The second backbone is therefore built
 inside the tracer: a two-layer causal
 Transformer encoder (four heads, feed-forward width twice the hidden
@@ -402,8 +390,8 @@ with $p$ ($0.0004$, $0.0044$, $0.041$, and $0.30$ at $p{=}0.001$,
 $0.01$, $0.1$, and $1$). The membership rate therefore detects
 contamination down to a single learner but saturates at once, so it is
 a detector and not a measure of how much held-out data entered; the
-support share gives the amount. Source:
-\path{results/tables/xes3g5m_fold0_partial_membership_control.json}.
+support share gives the amount. The per-learner counts are in the
+repository.
 
 \input{tables/table_leakage_audit}
 
@@ -414,9 +402,12 @@ support share gives the amount. Source:
 
 \subsection{Datasets}
 \label{sec:reuse}
+Three public corpora carry the credit map, and the timestamp unit of
+each export changes what a time message can mean.
 XES3G5M \cite{liu2023xes3g5m} is the reference corpus: 18{,}066
 learners, 7{,}652 items, 865~KCs, and 5{,}549{,}635 attempts, which
-expand to 6{,}413{,}353 KC-level rows. ASSISTments~2012 and Junyi, as
+expand to 6{,}413{,}353 KC-level rows. ASSISTments~2012
+\cite{feng2009assist} and Junyi \cite{chang2015junyi}, as
 processed by the pairwise audit \cite{daominh2026p0}, are the transfer
 corpora. On ASSISTments~2012 the train-only incidence links $51{,}321$
 of $53{,}086$ items (mean degree $0.97$). Junyi has about 25~million
@@ -463,8 +454,8 @@ configurations (concept-prerequisite hypergraph on, batch~32,
 setting uses learner fold~0 and the five training seeds of
 Section~\ref{sec:prelim}. On XES3G5M with the LSTM, and on
 ASSISTments~2012 under the reference recipe, the package and the
-aligned-gap contrast are repeated on learner folds~1 and~2. Credit is decided on validation AUC; test-only
-AUC is reported for context.
+aligned-gap contrast are repeated on learner folds~1 and~2.
+Outcomes use validation AUC; test-only AUC is reported for context.
 
 \subsection{Evaluation protocol}
 \label{sec:clean-protocol}
@@ -511,130 +502,86 @@ ASSISTments package contrast is positive on every seed; the settings
 differ in which gains reach the threshold. The two rules give the same
 outcome in every row of both tables ($44$ contrasts).
 
+\input{figures/fig_credit_heatmap}
 \input{tables/table_credit_transfer}
 
+ASSISTments rows in Table~\ref{tab:credit-transfer} use the one-second
+export; the $1{,}000$\,s export is
+Table~\ref{tab:credit-assist-resolution}. Rows marked Ref.\ or (all),
+and every XES3G5M row, use the reference recipe; the other ASSISTments
+and Junyi rows use the corpus configuration.
+
 \paragraph{XES3G5M, LSTM tracer}
-The time package is credited against the no-time twin with observed
-incidence (mean $+0.00274$) and with zeroed incidence (mean $+0.00255$);
-the lower interval bounds are $+0.0024$ for both. With the map held
-fixed, the aligned gap input gains $+0.00183$ over T-zero and $+0.00144$
-over T-misaligned, positive on every seed and $0/5$ at the threshold;
-its lower bounds are $+0.0017$ and $+0.0011$. Question--KC incidence is
-unsupported (mean $-0.00010$). The credit on the reference corpus
-therefore rests on the package rung alone.
-
-A no-time arm that allocates the same 256 parameters and multiplies
-their output by zero is beaten on every seed (mean $+0.00265$; lowest
-seed $+0.00228$; lower bound $+0.0023$). Padded and unpadded no-time arms
-differ by a mean of $-0.00010$ with mixed signs. The padded weights
-receive no gradient, so this control checks the parameter count only;
-rung~(ii) remains the control that keeps a working map.
-
-Two further rung-(ii) controls keep the map and change only its input.
-T-shuffled permutes the gaps across all rows and learners, so it keeps
-the marginal gap distribution and removes both alignment and each
-learner's pace. The aligned gap beats it by $+0.00147$ (lower bound
-$+0.0011$), almost the same as against T-misaligned ($+0.00144$),
-which permutes within a learner; per-learner pace adds little, in line
-with a lag-1 gap correlation of $0.08$
-(Table~\ref{tab:gap-descriptives}). T-boundary feeds only the
-indicator $1[\Delta t{=}0]$, which marks learner starts and later
-KC-rows of one attempt. It gains $+0.00111$ over T-zero (lower bound
-$+0.0009$), and the aligned gap gains a further $+0.00072$ over it
-(lower bound $+0.0005$). Both are positive on every seed and
-consistent-positive, not credited. Of the $+0.00183$ by which the
-aligned gap beats T-zero, the indicator alone reproduces about
-$60\%$; as for the package ladder, these are differences between
-separately trained arms, not a causal split.
-
-On learner folds~1 and~2 the reference outcomes repeat. The package is
-credited (means $+0.00316$ and $+0.00272$; lower bounds $+0.0030$ and
-$+0.0025$), and the aligned gap against T-zero is consistent-positive
-(means $+0.00172$ on both folds; lower bounds $+0.0016$ and $+0.0014$;
-$0/5$ and $1/5$ seeds at the threshold).
+The time package is credited, and the credit rests on the package rung
+alone (Table~\ref{tab:credit-transfer}). With the map held fixed, the
+aligned gap input is consistent-positive against T-zero, T-misaligned,
+T-shuffled, and T-boundary. Question--KC incidence is unsupported.
+A no-time control that allocates the same 256 parameters and multiplies
+their output by zero is also beaten on every seed, but those weights
+receive no gradient, so that control checks the parameter count only.
+T-shuffled removes each learner's pace as well as the alignment, and
+the aligned gap beats it by about as much as it beats T-misaligned;
+per-learner pace adds little, in line with a lag-1 gap correlation of
+$0.08$ (Table~\ref{tab:gap-descriptives}). Of the aligned gap's gain
+over T-zero, the indicator $1[\Delta t{=}0]$ alone reproduces about
+$60\%$. These are differences between separately trained arms.
+On learner folds~1 and~2 the package stays credited and the aligned
+gap stays consistent-positive.
 
 \paragraph{XES3G5M, attention encoder}
-The no-time arm reaches a mean validation AUC of $0.8241$, against
-$0.8260$ for the LSTM. The time package is positive on every seed (mean
-$+0.00178$) and reaches the threshold on two of five; the aligned-gap
-contrasts reach it on none. No time message is credited. Control seed
-standard deviations are two to three times the LSTM values. The
-XES3G5M package credit belongs to the LSTM tracer, not to the gap input
-in general.
+No time message is credited. The no-time arm reaches $0.824$, close to
+the LSTM's $0.826$, and its seed standard deviation is two to three
+times the LSTM value. The package credit belongs to the LSTM tracer,
+not to the gap input in general.
 
 \paragraph{ASSISTments 2012}
-Under the reference recipe, where only the corpus differs from
-XES3G5M, the outcome pattern of the XES3G5M LSTM repeats. The package
-on zeroed incidence is credited (mean $+0.00247$; lowest seed
-$+0.00228$; lower bound $+0.0023$), and the aligned gap is
-consistent-positive against T-zero (mean $+0.00188$; $3/5$) and
-T-misaligned (mean $+0.00165$; $0/5$). With observed incidence the
-package reaches the threshold on three of five seeds (mean $+0.00232$)
-and is not credited. Incidence is positive on every seed (mean
-$+0.00173$; $1/5$), so on this corpus it is consistent-positive rather
-than the unsupported null of XES3G5M. Early stopping restores epochs
-4--7 of~30, and control seed standard deviations are
-$0.0002$--$0.0006$.
-
-Under the corpus configuration no message is credited. The package
-reaches the threshold on two of five seeds with zero incidence (mean
-$+0.00200$); with observed incidence one seed is negative
-($-0.00006$), so that contrast is unsupported. The aligned gap is
-consistent-positive and reaches the threshold on no seed. The
-ASSISTments package credit therefore depends on the recipe as well as
-the corpus.
-
-On learner folds~1 and~2 under the same recipe the aligned gap stays
-consistent-positive (means $+0.00187$ and $+0.00150$; $3/5$ and $1/5$).
-The package is credited on fold~2 (mean $+0.00241$; lowest seed
-$+0.00206$; lower bound $+0.00209$) and not on fold~1. There the mean
-is $+0.00218$ and four of five seeds clear $+0.002$, but one seed is
-$+0.00116$, so the lower bound is $+0.00146$ and the outcome is
-consistent-positive. The package credit on ASSISTments~2012 therefore
-depends on the learner fold as well as on the recipe.
-
+Under the reference recipe the zero-incidence package is
+credited on folds~0 and~2 and consistent-positive on fold~1, where one
+seed falls below the threshold (Table~\ref{tab:credit-transfer}). The
+aligned gap is consistent-positive on all three folds. With observed
+incidence the package is not credited. Incidence is consistent-positive
+here, rather than the unsupported null of XES3G5M. Early stopping
+selects a checkpoint from epochs 4--7 of~30, so these runs stop far
+earlier than the Junyi runs, which often continue past epoch~25.
+Under the corpus configuration no message is credited: with observed
+incidence one seed is negative, so that contrast is unsupported.
+The package credit on ASSISTments therefore depends on the recipe and
+on the learner fold.
 On the original export, with start times at $1{,}000$\,s resolution,
 no message is credited under either recipe
-(Table~\ref{tab:credit-assist-resolution}); under the reference
-recipe the package on zeroed incidence reaches the threshold on three
-of five seeds (mean $+0.00209$; lower bound $+0.0012$). Restoring the
-timestamp order also raises the no-time arm from $0.7645$ to $0.7774$
-mean validation AUC and lowers its seed standard deviation from
-$0.00095$ to $0.00021$. A coarse timestamp export thus moved this
-verdict from credited to consistent-positive, which is a reason to
-report the timestamp resolution with any time message.
+(Table~\ref{tab:credit-assist-resolution}). The one-second re-export
+raises the no-time arm from $0.764$ to $0.777$ mean validation AUC.
+On the $1{,}000$\,s export the reference-recipe package is
+consistent-positive (not credited); on the one-second re-export it is
+credited.
 
 \input{tables/table_credit_assist_resolution}
 
 \paragraph{Junyi}
-On all learners under the reference recipe, the package (mean
-$+0.00336$; lowest seed $+0.00307$) and the aligned gap against T-zero
-(mean $+0.00334$; lowest $+0.00308$) are both credited, with lower
-bounds $+0.0032$ and $+0.0030$. Control seed standard deviations are
-$0.00015$ and $0.00012$. Three of the five timed runs restored a
-checkpoint from epoch~25 or later, so a longer budget could change the
-size of the gain. The 50{,}000-learner subsample under the corpus
-configuration gives the same outcomes with larger gains. Junyi is the
-only setting in which the aligned gap input itself is credited. Since
-the full Junyi ladder shares the XES3G5M recipe, that difference comes
-from the corpus.
+On all learners under the reference recipe, both the package and the
+aligned gap input are credited. Three of the five timed runs restored
+a checkpoint from epoch~25 or later, so a longer budget could change
+the size of the gain. The 50{,}000-learner subsample under the corpus
+configuration gives the same outcomes. Junyi is the only setting in
+which the aligned gap input itself is credited, and the full ladder
+shares the XES3G5M recipe, so that difference comes from the corpus.
 
 \subsection{Reference run on XES3G5M}
 \label{sec:rq1-result}
 \label{sec:time-result}
 \paragraph{Incidence}
 Capacity-matched zeroing of the question--KC incidence gives a mean
-validation difference of $-0.00010{\pm}0.00034$ ($0/5$; 95\% interval
-$[{-}0.00052,{+}0.00032]$). Under the shared-sum fusion of
+validation difference of $-0.10{\pm}0.34$ ($0/5$; 95\% interval
+$[{-}0.52,{+}0.32]$). Under the shared-sum fusion of
 Eq.~\eqref{eq:qkc}, the interval bounds the mean incidence contribution
-above by about $+0.0003$ AUC, so we report a bounded null. Per-seed
+above by about $+0.3$, so we report a bounded null. Per-seed
 records are in Table~\ref{tab:qkc-capacity}.
 
 \paragraph{What the package contains}
 On the zero-incidence backbone the three separately trained arms give a
-ladder of mean validation differences: $+0.00071$ from no time to
-T-zero (95\% interval $[{+}0.00053,{+}0.00090]$), $+0.00183$ from T-zero
-to real gaps, and $+0.00255$ from no time to real gaps. The first step
+ladder of mean validation differences: $+0.71$ from no time to
+T-zero (95\% interval $[{+}0.53,{+}0.90]$), $+1.83$ from T-zero
+to real gaps, and $+2.55$ from no time to real gaps. The first step
 adds a map whose input is zero everywhere, so only its bias and the
 re-optimised network can account for it. These are absolute figures
 from separate arms, not shares of a causal decomposition. T-zero removes
@@ -647,24 +594,27 @@ Table~\ref{tab:a7-query-dt} varies where the package enters. Only
 injection into both the LSTM and the next-step query is credited.
 History-only injection, which uses only gaps already observed, is
 positive on every seed and reaches the threshold on two of five (mean
-$+0.00193$); query-only reaches it on none (mean $+0.00099$). Both are
-consistent-positive, not credited. A tracer that must score before the
+$+1.93$); query-only reaches it on none (mean $+0.99$). Both are
+consistent-positive (not credited). A tracer that must score before the
 learner opens the next item cannot use the query-side gap and therefore
 cannot claim the credited package. A two-bin split of
 $\log(1{+}\Delta t)$ shows gains for short gaps ($\lesssim$18\,min,
-$+0.0028$) and long gaps ($+0.0019$), with both intervals excluding $0$.
+$+2.8$) and long gaps ($+1.9$), with both intervals excluding $0$.
 
 \input{tables/table_a7_query_dt}
 
 \paragraph{Contextual AUC}
-Table~\ref{tab:auc-xes3g5m} locates the tracer. QKC-T and
-Zero$+\Delta t$ both reach $0.8295{\pm}0.0001$ test-only AUC, and QKC-T
-is $0.8295{\pm}0.0004$ across three learner folds
-(Table~\ref{tab:auc-p0-dt-folds}). The gaps from Zero$+\Delta t$ to
-GIKT, AKT, and \textit{simpleKT} are $+0.0037$, $+0.0072$, and
-$+0.0081$; a learner-resampled bootstrap on one checkpoint pair gives
-95\% intervals $[+0.0035,+0.0043]$, $[+0.0068,+0.0077]$, and
-$[+0.0088,+0.0098]$ (\ref{app:bootstrap}). These gaps are contextual,
+Table~\ref{tab:auc-xes3g5m} locates the tracer. The observed-incidence
+and zero-incidence time packages both reach $0.8295{\pm}0.0001$
+test-only AUC, and the observed-incidence package is
+$0.8295{\pm}0.0004$ across three learner folds
+(Table~\ref{tab:auc-p0-dt-folds}). The gaps from the zero-incidence
+package to
+GIKT, AKT, and \textit{simpleKT} are $+3.7$, $+7.2$, and
+$+8.1$; a learner-resampled
+bootstrap on one checkpoint pair gives
+95\% intervals $[+3.5,+4.3]$, $[+6.8,+7.7]$, and
+$[+8.8,+9.8]$ (\ref{app:bootstrap}). These gaps are contextual,
 not a superiority claim. Calibration is reported in
 \ref{app:calibration}; no reported expected calibration error exceeds
 $0.05$.
@@ -676,13 +626,14 @@ $0.05$.
 Table~\ref{tab:negative-knowledge} lists messages that do not reach the
 threshold. Teacher grouping on the $1{,}000$\,s ASSISTments~2012 export
 is a bounded null over
-five seeds (mean $+0.00025$; 95\% interval $[{-}0.00063,{+}0.00112]$).
+five seeds (mean $+0.25$; 95\% interval $[{-}0.63,{+}1.12]$).
 Per-concept exponential forgetting,
 $\exp(-\mathrm{softplus}(\theta_c)\cdot\mathrm{gap})$, loses to the
-linear package on every seed (mean $-0.00252$). Hypergraph convolution
+linear package on every seed (mean $-2.52$). Hypergraph convolution
 on multi-KC hyperedges, hint-item session hyperedges, a full Q-matrix,
 and a Junyi expert DAG are single-seed diagnostics below the threshold.
-A full reference decision list is in Table~\ref{tab:credit-decisions}.
+Intervals for the XES3G5M reference rows are in
+Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_negative_knowledge}
 
@@ -700,7 +651,7 @@ Tables~\ref{tab:credit-transfer} and~\ref{tab:credit-assist-resolution}.
 First, the rung matters. On XES3G5M the time message is credited only
 as a package. Holding the map fixed and replacing the gap leaves a gain
 that is real on every seed and below the threshold, and a map fed only
-zeros already accounts for $+0.00071$. A package-level ablation, which
+zeros already accounts for $+0.71$. A package-level ablation, which
 is how most auxiliary components are evaluated, would have credited
 the gap input with more than the input supports.
 
@@ -728,14 +679,16 @@ identify their cause.
 
 Third, preprocessing is part of the setting. The two ASSISTments
 exports have the same rows and learners and differ only in timestamp
-resolution, yet the package verdict changes from consistent-positive to
-credited and the tracer gains $0.013$ validation AUC. Coarse timestamps
+resolution. On the $1{,}000$\,s export the package is consistent-positive
+(not credited); on the one-second re-export it is credited, and the
+tracer gains $0.013$ in validation AUC. Coarse timestamps
 remove most within-session gaps and reorder rows inside each window, so
 a time message evaluated on such an export is evaluated on a different
 signal. The credit record of a time message should therefore state
 the timestamp resolution and the row order it was evaluated on.
 
-Fourth, structure messages fail locally. Question--KC incidence is a
+Fourth, structural messages fail only in the forms and backbones
+tested. Question--KC incidence is a
 bounded null under the shared-sum fusion on XES3G5M and is
 consistent-positive on ASSISTments~2012. Hypergraph convolution,
 teacher grouping, and exponential forgetting do not reach the threshold
@@ -744,19 +697,24 @@ backbones, not about the value of structural knowledge in general.
 
 \subsection{Implications for building knowledge tracing systems}
 For a knowledge engineer adding auxiliary knowledge to a tracer, the
-results suggest five practices. Build the knowledge from training
-learners only and run the membership audit before training, because the
-pairwise leakage statistics do not register hyperedge contamination.
-Declare the rung and the control before the run; if only a package
-control is available, report the credit as a package credit and the
-parameter count with it. Report outcomes per corpus, backbone, recipe, and learner fold; a
-message validated on one corpus or one fold is a hypothesis on the next.
-Check the timestamp resolution and row order of every export before
-evaluating a time message, for example by the smallest positive gap
-and the share of zero gaps. Keep
-consistent-positive results in the record, since a gain that is
-positive on every seed and below the threshold on one corpus was
-credited on another here.
+results suggest five practices.
+\begin{enumerate}
+  \item Build the knowledge from training learners only and run the
+  membership audit before training, because the pairwise leakage
+  statistics do not register hyperedge contamination.
+  \item Declare the rung and the control before the run; if only a
+  package control is available, report the credit as a package credit
+  and the parameter count with it.
+  \item Report outcomes per corpus, backbone, recipe, and learner fold,
+  because a message validated on one corpus or one fold is a hypothesis
+  on the next.
+  \item Check the timestamp resolution and row order of every export
+  before evaluating a time message, for example by the smallest
+  positive gap and the share of zero gaps.
+  \item Keep consistent-positive (not credited) results in the record,
+  since a gain that is positive on every seed and below the threshold
+  on one corpus was credited on another here.
+\end{enumerate}
 
 \subsection{Threats to validity and limitations}
 \label{sec:threats}
@@ -782,8 +740,10 @@ credited on another here.
   pairwise results were computed on the $1{,}000$\,s export; the
   teacher-grouping diagnostic was also run on the $1{,}000$\,s export.
   The Junyi gap entered the tracer in microseconds
-  (Section~\ref{sec:reuse}), which changes the input by a near-constant
-  offset.
+  (Section~\ref{sec:reuse}). For gaps of one second or more the change
+  is a near-constant offset that the bias of the linear map can absorb,
+  so we expect the credit outcome to be unchanged; we did not rerun
+  Junyi in seconds.
   \item \textbf{Second encoder.} The attention encoder is a swap inside
   the tracer under the LSTM recipe, not simpleKT or AKT as published,
   and was run on XES3G5M only. Its larger seed variance may reflect less
@@ -805,17 +765,19 @@ credited on another here.
 \section{Conclusion and future work}
 \label{sec:conclusion}
 % =============================================================================
-We stated a credit protocol for validating auxiliary knowledge in
+We propose a credit protocol for validating auxiliary knowledge in
 knowledge tracing: train-only construction, a hyperedge membership
 audit, a declared control rung, five paired seeds, and three outcomes
-under a seed-wise and an interval rule. Applied to a linear elapsed-time
-message, it credits the package but not the aligned gap input on
-XES3G5M with a recurrent tracer, on each of three learner folds, and
-on ASSISTments~2012 under the same recipe on two of three folds. On
-the third ASSISTments fold the package stays positive on every seed
-and is not credited. It credits neither message on an attention encoder
-or on ASSISTments~2012 under its own configuration, and credits both
-on Junyi. Question--concept incidence is not credited on XES3G5M. An
+under a seed-wise and an interval rule. On XES3G5M with a recurrent
+tracer, the protocol credits the time package but not the aligned gap
+input, on all three learner folds. On ASSISTments~2012 under the same
+recipe, the zero-incidence package is credited on two of three folds
+and stays positive, but not
+credited, on the third. On XES3G5M with an attention encoder the
+protocol credits neither the package nor the gap input. On
+ASSISTments~2012 under its own configuration it credits nothing, and on
+Junyi it credits both the package and the aligned gap input.
+Question--concept incidence is not credited on XES3G5M. An
 indicator-only input reproduces about $60\%$ of the aligned-gap gain on
 XES3G5M, and an ASSISTments export with $1{,}000$\,s timestamps does
 not credit the package, so the export is part of the setting. A single
@@ -846,34 +808,11 @@ or personal relationships that could have appeared to influence the work
 reported in this paper.
 
 \section*{Ethics}
-The exploratory rating pilot in the Supplementary Material scores
-de-identified, model-generated explanations. It does not recruit
-learners, collect new educational records, or intervene in instruction.
-The authors' institutions do not require research-ethics board review
-for this form of expert rating of model output. Sex and gender are not
-recorded in the public logs used here and are not analysed.
-
-\section*{Data availability}
-Code, run lists, per-seed comparison files, and the scripts that
-recompute every credit outcome are at
-\url{https://github.com/edu-risk-lab/DH2A-KT}; a table-to-script map is
-in \texttt{docs/paper-artifacts.md}. An archived snapshot of the
-XES3G5M reference ladder is at
-\url{https://doi.org/10.5281/zenodo.22676635}; the state reported here
-will be archived under a new DOI before publication. The reused
-train-only construction and baselines are pinned at commit
-\texttt{5e3d6a0} of the pairwise audit repository \cite{daominh2026p0}.
-XES3G5M, ASSISTments~2012, and Junyi are public. FoundationalASSIST
-\cite{foundationalassist2026} must be obtained from Hugging Face under
-its Responsible Use Guidelines and cannot be redistributed by the
-authors.
-
-\section*{Acknowledgments}
-This research did not receive any specific grant from funding agencies
-in the public, commercial, or not-for-profit sectors. All experiments
-were run on a single NVIDIA RTX~3090 (24\,GB).
-
-\FloatBarrier
+The experiments use public, de-identified interaction logs. They do not
+recruit learners, collect new educational records, or intervene in
+instruction. Sex and gender are not recorded in these logs and are not
+analysed. An exploratory rating of model-generated explanations is kept
+in the repository and is not part of this submission.
 
 \section*{Declaration of generative AI and AI-assisted technologies
 in the manuscript preparation process}
@@ -882,6 +821,31 @@ in order to draft and revise LaTeX wording, tables, and cover-letter
 text under author direction. After using this tool, the authors reviewed
 and edited the content as needed and take full responsibility for the
 content of the published article.
+
+\section*{Data availability}
+Code, run lists, per-seed comparison files, and the scripts that
+recompute every credit outcome are at
+\url{https://github.com/edu-risk-lab/DH2A-KT}; a table-to-script map is
+in \texttt{docs/paper-artifacts.md}. An archived snapshot of the
+XES3G5M reference ladder is at
+\url{https://doi.org/10.5281/zenodo.22676635}. The credit map in
+Tables~\ref{tab:credit-transfer} and~\ref{tab:credit-assist-resolution}
+and in Figure~\ref{fig:credit-heatmap} is recomputed from the per-seed
+files in that repository; those transfer runs are not in the Zenodo
+snapshot. The reused
+train-only construction and baselines are pinned at commit
+\texttt{5e3d6a0} of the pairwise audit repository \cite{daominh2026p0}.
+XES3G5M, ASSISTments~2012, and Junyi are public. FoundationalASSIST
+\cite{foundationalassist2026} must be obtained from Hugging Face under
+its Responsible Use Guidelines and cannot be redistributed by the
+authors.
+
+\section*{Funding}
+This research did not receive any specific grant from funding agencies
+in the public, commercial, or not-for-profit sectors. All experiments
+were run on a single NVIDIA RTX~3090 (24\,GB).
+
+\FloatBarrier
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}

@@ -21,30 +21,14 @@
 \node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
 \node[box, right=0.32cm of p0] (audit) {Hyperedge\\membership audit};
 \node[box, right=0.32cm of audit] (twins) {Rung and control\\(cap.\ / arch.\ / pkg)};
-\node[box, right=0.32cm of twins] (gate) {Seed and interval\\rules at $+0.002$};
+\node[box, right=0.32cm of twins] (gate) {Seed and interval\\rules at $+2.0\times 10^{-3}$};
 \draw[->, thick] (p0.east) -- (audit.west);
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
-
-\node[passbox, below=0.95cm of p0.south west, anchor=north west] (pass)
-  {Credited:\\time package, XES3G5M (3 folds)\\and ASSIST2012 (folds 0 and 2);\\package and aligned gap, Junyi};
-\node[warnbox, right=0.28cm of pass] (warn)
-  {Consistent-positive, not credited:\\ASSIST2012 package, fold 1;\\aligned gap; attention encoder;\\the 1{,}000\,s export};
-\node[failbox, right=0.28cm of warn] (fail)
-  {Unsupported:\\Q--KC incidence (XES3G5M);\\teacher grouping; exp.\ forgetting};
-
-\coordinate (fork) at ([yshift=-0.38cm]gate.south);
-\draw[thick] (gate.south) -- (fork);
-\draw[->, thick] (fork) -| (pass.north);
-\draw[->, thick] (fork) -| (warn.north);
-\draw[->, thick] (fork) -| (fail.north);
 \end{tikzpicture}
 \caption{The credit protocol. Auxiliary knowledge is built from training
 learners only and audited for membership leakage. Each message is then
 placed on a rung with a designated control, run on five paired seeds,
-and assigned one of three outcomes. The boxes give the outcomes of this
-paper (Table~\ref{tab:credit-transfer}); the same time message is
-credited or not depending on corpus, encoder, recipe, timestamp
-export, learner fold, and rung.}
+and assigned one of three outcomes (Figure~\ref{fig:credit-heatmap}).}
 \label{fig:architecture}
 \end{figure}

@@ -1,6 +1,6 @@
 \begin{table}[H]
 \caption{Repeat-mask residual on stored checkpoints (no new training).
-P0-protocol scores every exported KC-row; clean masks repeat-row
+The earlier evaluator scores every exported KC-row; clean masks repeat-row
 targets. The QKC-T drop is the pyKT repeat-format effect
 \cite{liu2022pykt}, not an attempt-level collapse. The no-$\Delta t$
 row uses \texttt{window-mode last} and does not isolate the time
@@ -10,7 +10,7 @@ branch.}
 \footnotesize
 \begin{tabular}{@{}llrrr@{}}
 \toprule
-Checkpoint & Window & P0-protocol & Clean & Residual \\
+Checkpoint & Window & Earlier evaluator & Clean & Residual \\
 \midrule
 QKC-T fold~0 & chunked & 0.8397 & 0.8296 & $+0.0101$ \\
 QKC-T fold~1 & chunked & 0.8392 & 0.8298 & $+0.0094$ \\

@@ -4,14 +4,13 @@ $p{=}0.9$, degree-preserving rewiring, and relation-label permutation on
 the graph-only diagnostic encoder (Table~\ref{tab:aliases}): train on clean
 hyperedges, re-evaluate frozen weights on destroyed hyperedges
 (folds~0--2). All three operators now share one clean AUC per fold
-(\texttt{b9\_same\_ckpt\_destruction.json}; max
-$|\mathrm{AUC}_{\mathrm{local}}-\mathrm{AUC}_{\mathrm{shared}}|{=}2.0{\times}10^{-9}$).
-The older printed mismatch (fold~0 $0.753$ vs.\ $0.749$) was evaluator
-drift, not an operator effect. Node-drop confirms dependence on some
+(max $|\mathrm{AUC}_{\mathrm{local}}-\mathrm{AUC}_{\mathrm{shared}}|{=}2.0{\times}10^{-9}$;
+records in the repository).
+Node-drop confirms dependence on some
 graph input, not correct use of relation structure.
 Rewiring moves AUC on all three folds
 ($\Delta$AUC $0.0318$--$0.0351$); label permutation is near-null (expected for a
-single-kind encoder). GKT: P0 DDR-downstream mean $\Delta$AUC over
+single-kind encoder). GKT: pairwise-audit DDR-downstream mean $\Delta$AUC over
 $n{=}9$ fold--seed runs (\cite{daominh2026p0}; retrain on destroyed
 pairwise graph). simpleKT has no concept-graph input, so graph
 destruction is undefined. QKC-T and Zero$+\Delta t$ do not take
@@ -33,8 +32,8 @@ Diagnostic encoder, degree-preserving rewiring (fold~2) & 0.7521 & 0.0351 & 0.05
 Diagnostic encoder, relation-label permutation (fold~0) & 0.7485 & ${\approx}0$ & 0.000 & No \\
 Diagnostic encoder, relation-label permutation (fold~1) & 0.7511 & ${\approx}0$ & 0.000 & No \\
 Diagnostic encoder, relation-label permutation (fold~2) & 0.7521 & ${\approx}0$ & 0.000 & No \\
-GKT (P0, mean$\pm$SD), node-drop $p{=}0.9$ & --- & $0.0877{\pm}0.0009$ & 0.990 & Yes \\
-simpleKT (P0) & --- & N/A & --- & N/A \\
+GKT (audit, mean$\pm$SD), node-drop $p{=}0.9$ & --- & $0.0877{\pm}0.0009$ & 0.990 & Yes \\
+simpleKT (audit) & --- & N/A & --- & N/A \\
 \bottomrule
 \end{tabularx}
 \end{table}

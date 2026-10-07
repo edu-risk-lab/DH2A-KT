@@ -1,0 +1,26 @@
+\begin{table}[H]
+\caption{Terms used in this paper.}
+\label{tab:terms}
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.3cm}X@{}}
+\toprule
+Term & Meaning \\
+\midrule
+Message & One auxiliary input placed under test. A component is the same object \\
+On arm & The arm that contains the message \\
+Control & The comparison arm. It differs from the on arm only as the rung specifies \\
+Rung & Capacity-matched message, architecture-matched input, or package \\
+Package & A component added together with the maps that read it \\
+Aligned gap input & The observed $\log(1{+}\Delta t)$, with its map held fixed \\
+T-zero & That map with every gap set to $0$ \\
+T-misaligned & That map with gaps permuted inside each learner \\
+T-shuffled & That map with gaps permuted across learners \\
+T-boundary & That map fed only $1[\Delta t{=}0]$ \\
+Reference recipe & The training recipe of the XES3G5M ladder \\
+Corpus configuration & The recipe stored with that corpus \\
+Seed rule & Every paired seed difference is at least $+2.0\times 10^{-3}$ \\
+Interval rule & The lower 95\% bound of the mean paired difference is at least $+2.0\times 10^{-3}$ \\
+\bottomrule
+\end{tabularx}
+\end{table}

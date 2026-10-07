@@ -1,6 +1,8 @@
-\begin{table}[t]
-\caption{Architecture names used in this paper. Flags in parentheses are
-implementation aliases from training logs, not model names.}
+\begin{table}[H]
+\caption{Architecture names used in this paper. Only this table prints
+command-line flags and log aliases, including \texttt{v4}, \texttt{v2},
+and \texttt{v4q\_clean}. Those strings are implementation aliases from
+training logs, not model names.}
 \label{tab:aliases}
 \centering
 \footnotesize
@@ -10,18 +12,17 @@ implementation aliases from training logs, not model names.}
 \toprule
 Name in this paper & Architecture \\
 \midrule
-DH$^2$A-KT & Attribution pipeline: train-only construction, membership
-audit, laddered ablation, credit gate, and knowledge map; not one
-predictor \\
-QKC-T (eval.\ arm) & LSTM with train-only Q$\leftarrow$KC
+This paper & A credit protocol: train-only construction, membership
+audit, laddered comparison, and three outcomes. It is not a predictor \\
+QKC-T (table name) & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\
 Q$\leftarrow$KC only & Same LSTM without the $\Delta t$ branch \\
-Pathway-off twin & Same LSTM with the question pathway removed
+Pathway-off control & Same LSTM with the question pathway removed
 (historical hard-off; capacity-mismatched) \\
-Capacity-matched zero twin & Same question pathway with incidence matrix
+Capacity-matched zero control & Same question pathway with incidence matrix
 zeroed (\texttt{--question-incidence-control zero}) \\
-Zero$+\Delta t$ (credited-minimal) & Capacity-matched zero twin plus Linear
+Zero$+\Delta t$ (credited-minimal) & Capacity-matched zero control plus Linear
 $\log(1{+}\Delta t)$ at LSTM and query (\texttt{zero\_time}; T-real) \\
 T-zero / T-misaligned & Same Zero$+\Delta t$ maps with
 \texttt{--time-gap-control zero} or \texttt{misaligned} \\

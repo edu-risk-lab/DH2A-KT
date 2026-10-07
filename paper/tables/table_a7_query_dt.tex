@@ -3,22 +3,23 @@
 \begin{table}[ht]
 \caption{Injection site of the time package on XES3G5M fold~0 (five
 paired seeds). The control is the observed-incidence tracer without the
-time branch (package rung). $k/5$ counts seeds at or above $+0.002$
-validation AUC; every seed is positive in every row. The AUC column is
+time branch (package rung). $k/5$ counts seeds at or above
+$+2.0\times 10^{-3}$ validation AUC; every seed is positive in every
+row. Mean $\Delta$ is in units of $10^{-3}$. The AUC column is
 the test-only metric of Table~\ref{tab:auc-xes3g5m}. Only LSTM$+$query
-injection is credited; the other two are consistent-positive, not
-credited. Per-seed values: Table~\ref{tab:a7-query-dt-seeds}.}
+injection is credited; the other two are consistent-positive (not
+credited). Per-seed values: Table~\ref{tab:a7-query-dt-seeds}.}
 \label{tab:a7-query-dt}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3.8pt}
 \begin{tabular}{@{}llccc@{}}
 \toprule
-Injection site & Gaps used & Test-only AUC & $k/5$ & Mean $\Delta$val \\
+Injection site & Gaps used & Test-only AUC & $k/5$ & $\Delta\times 10^{-3}$ \\
 \midrule
-LSTM $+$ query & history and next-step wait & $0.8295{\pm}0.0001$ & $5/5$ & $+0.00274$ \\
-LSTM only (history-only) & observed gaps only & $0.8286{\pm}0.0002$ & $2/5$ & $+0.00193$ \\
-Query only & next-step wait only & $0.8278{\pm}0.0002$ & $0/5$ & $+0.00099$ \\
+LSTM $+$ query & history and next-step wait & $0.8295{\pm}0.0001$ & $5/5$ & $+2.74$ \\
+LSTM only (history-only) & observed gaps only & $0.8286{\pm}0.0002$ & $2/5$ & $+1.93$ \\
+Query only & next-step wait only & $0.8278{\pm}0.0002$ & $0/5$ & $+0.99$ \\
 \bottomrule
 \end{tabular}
 \end{table}
