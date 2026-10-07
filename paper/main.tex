@@ -354,8 +354,10 @@ step's response.
 
 \subsection{Second encoder}
 \label{sec:second-encoder}
-The vendored pyKT forwards of simpleKT and AKT take no gap tensor, so
-the second backbone is built inside the tracer: a two-layer causal
+A message is credited inside one backbone, so the second backbone must
+accept the same time branch and query; the pyKT forwards of simpleKT
+and AKT take no gap input. The second backbone is therefore built
+inside the tracer: a two-layer causal
 Transformer encoder (four heads, feed-forward width twice the hidden
 size, sinusoidal positions, causal mask) replaces the LSTM, and the
 inputs, the time branch, the query, and the readout are unchanged. It
@@ -474,7 +476,7 @@ event-identity checks are in \ref{app:protocol-detail}.
 \label{sec:baselines-reuse}
 DKT \cite{piech2015dkt}, AKT \cite{ghosh2020akt}, \textit{simpleKT}
 \cite{liu2023simplekt}, GIKT \cite{yang2021gikt}, and DGEKT
-\cite{dgekt2024} are retrained with the vendored pyKT implementations
+\cite{dgekt2024} are retrained with their pyKT implementations
 under the same masked, chunked protocol. GIKT shares the tracer's
 training envelope (batch~16, 30~epochs, patience~5); the others keep
 their inherited defaults with $L$ raised to 400 (\ref{app:hparams}).
@@ -483,8 +485,9 @@ baseline used one inherited hyperparameter vector, so the comparison
 favours the tracer and is contextual. The protocol credits messages
 inside one backbone; baseline rows locate that backbone and are not
 part of the credit map. DyGKT \cite{dygkt2024}, the nearest
-temporal-graph tracer, has no maintained recipe in the vendored stack
-at this protocol and was not run.
+temporal-graph tracer, is not among the pyKT implementations used here
+and was not run, since a re-implementation would add a row of context
+without changing any credit outcome.
 
 % =============================================================================
 \section{Results}
