@@ -25,6 +25,8 @@ Groups, in the order the plan cuts from the end:
                     XES recipe
   assist-sec        "assist" on the one-second export (scripts/54), YAML recipe
   assist-sec-ref    "assist-ref" on the one-second export, frozen XES recipe
+  assist-sec-fold1/2  one-second export, folds 1 and 2, no time / package /
+                    T-zero x 5 seeds each, frozen XES recipe
 
 "Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
@@ -51,6 +53,8 @@ Usage:
   python scripts/54_build_assist_seconds.py
   python scripts/50_credit_ladder_plan.py --group assist-sec-ref --launch-all
   python scripts/50_credit_ladder_plan.py --group assist-sec --launch-all
+  python scripts/50_credit_ladder_plan.py --group assist-sec-fold1 --launch-all
+  python scripts/50_credit_ladder_plan.py --group assist-sec-fold2 --launch-all
 """
 
 from __future__ import annotations
@@ -394,6 +398,21 @@ def _jobs() -> list[dict]:
                     arm,
                     seed,
                     _dh2("configs/xes3g5m.yaml", seed, [*extra, *REF_RECIPE], fold=fold),
+                )
+
+    # Learner folds 1 and 2 for the ASSIST one-second package and aligned
+    # gap, frozen XES recipe (the setting credited on fold 0).
+    assist_fold_arms = {
+        arm: assist_ref_arms[arm] for arm in ("incidence-off", "time-on-zero", "t-zero")
+    }
+    for fold in (1, 2):
+        for seed in SEEDS_5:
+            for arm, extra in assist_fold_arms.items():
+                add(
+                    f"assist-sec-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2(assist_sec, seed, [*extra, *REF_RECIPE], fold=fold),
                 )
     return jobs
 

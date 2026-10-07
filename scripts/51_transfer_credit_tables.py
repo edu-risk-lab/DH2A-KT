@@ -103,6 +103,13 @@ CONTRASTS = [
         for group, corpus in ASSIST_GROUPS
         for label, rung, on, ctrl in ASSIST_ARMS
     ],
+    *[
+        (f"ASSIST2012 ref.\\ fold {fold}", label, rung,
+         _ladder(f"assist-sec-fold{fold}_{on}"), _ladder(f"assist-sec-fold{fold}_{ctrl}"))
+        for fold in (1, 2)
+        for label, rung, on, ctrl in ASSIST_ARMS
+        if ctrl in ("incidence-off", "t-zero") and on == "time-on-zero"
+    ],
     ("Junyi (50k)", "Package, zero incidence", "Package",
      _ladder("junyi-partial_time-package"), _ladder("junyi-partial_no-time")),
     ("Junyi (50k)", "Aligned gap vs.\\ T-zero", "Architecture",
