@@ -533,6 +533,7 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="Ignore existing .ok stamps")
     parser.add_argument("--min-vram-mib", type=int, default=20000)
     parser.add_argument("--group", default=None, help="Restrict to one group name")
+    parser.add_argument("--seed", type=int, default=None, help="Restrict to one seed")
     args = parser.parse_args()
     if args.launch and args.launch_all:
         raise SystemExit("use either --launch or --launch-all")
@@ -540,6 +541,8 @@ def main() -> int:
     jobs = _jobs()
     if args.group:
         jobs = [j for j in jobs if j["group"] == args.group]
+    if args.seed is not None:
+        jobs = [j for j in jobs if j["seed"] == args.seed]
     runnable = [j for j in jobs if j["cmd"] is not None]
     blocked = [j for j in jobs if j["cmd"] is None]
     payload = {

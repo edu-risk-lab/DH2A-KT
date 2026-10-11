@@ -211,7 +211,8 @@ marginal distribution of the scalar where stated, and the same seeds
 Training jobs (GPU server):
 
 - Credit map: `python scripts/50_credit_ladder_plan.py --group <group> --launch-all`
-  in the order of Section 3.3. At this commit script 50 lists 601 missing
+  in the order of Section 3.3; the reproducibility check is
+  `--group xes-ref --seed 42 --launch-all`. At this commit script 50 lists 601 missing
   credit-map runs; finished runs are skipped by their stamps.
 - Leakage simulation: group `leak-sim` of script 50, arms
   `crossmodal-leak`, `crossmodal-clean`, `hint-leak`, `hint-clean`, seeds
