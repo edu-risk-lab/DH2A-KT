@@ -18,11 +18,19 @@ from the frozen CSVs.
 Writes results/tables/credit_ladder_transfer.json and
 paper/tables/table_credit_transfer.tex. Does not retrain anything.
 
+``--n-seeds 10`` (docs/preregistration_round2.md) adds the seeds
+7, 99, 314, 2718, 3407 and the fold 1-2 rows of the attention encoder,
+ASSIST2012 corpus configuration, and Junyi, with t at df = 9. XES3G5M
+fold-0 rows take the new seeds from the ``xes-ref`` ladder group. Its
+outputs carry a ``_10seed`` suffix; the five-seed outputs are untouched.
+
     python scripts/51_transfer_credit_tables.py
+    python scripts/51_transfer_credit_tables.py --n-seeds 10
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
@@ -31,12 +39,27 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 TABLES = REPO / "results" / "tables"
-SEEDS = (0, 17, 42, 1234, 2024)
+SEEDS_5 = (0, 17, 42, 1234, 2024)
+NEW_SEEDS = (7, 99, 314, 2718, 3407)
+SEEDS = SEEDS_5
 TAU = 0.002
-# Two-sided 95% Student t quantile, df = len(SEEDS) - 1 = 4.
-T_975 = 2.7764451051977987
+# Two-sided 95% Student t quantiles, df = 4 and df = 9.
+T_975_DF = {5: 2.7764451051977987, 10: 2.2621571627409915}
+T_975 = T_975_DF[5]
+SEED_WORD = {5: "five", 10: "ten"}
+LABEL_SUFFIX = ""
 OUT_JSON = TABLES / "credit_ladder_transfer.json"
 OUT_TEX = REPO / "paper" / "tables" / "table_credit_transfer.tex"
+
+# Frozen XES3G5M fold-0 arms and the xes-ref ladder arm that repeats each
+# one on the new seeds.
+FROZEN_TO_XES_REF = {
+    "qkc_cm_observed": "incidence-on",
+    "qkc_cm_zero": "no-time",
+    "qkc_cm_zero_time": "time-package",
+    "a1_t_zero": "t-zero",
+    "a1_t_misaligned": "t-misaligned",
+}
 
 
 def _ladder(arm: str) -> str:
@@ -121,28 +144,82 @@ CONTRASTS = [
      _ladder("junyi-full_time-package"), _ladder("junyi-full_t-zero")),
 ]
 
+# Ten-seed map only: (row after which to insert, corpus, label, rung, on, control).
+_PKG = ("Package, zero incidence", "Package", "time-package", "no-time")
+_GAP0 = ("Aligned gap vs.\\ T-zero", "Architecture", "time-package", "t-zero")
+_GAPM = ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-package", "t-misaligned")
+EXTRA_CONTRASTS_10 = [
+    *[
+        ("XES3G5M attn.", f"XES3G5M attn.\\ fold {fold}",
+         "Package (backbone)" if label == _PKG[0] else rung,
+         label, _ladder(f"backbone-attn-fold{fold}_{on}"), _ladder(f"backbone-attn-fold{fold}_{ctrl}"))
+        for fold in (1, 2)
+        for label, rung, on, ctrl in (_PKG, _GAP0, _GAPM)
+    ],
+    *[
+        ("ASSIST2012", f"ASSIST2012 fold {fold}", rung, label,
+         _ladder(f"assist-sec-cfg-fold{fold}_{on}"), _ladder(f"assist-sec-cfg-fold{fold}_{ctrl}"))
+        for fold in (1, 2)
+        for label, rung, on, ctrl in ASSIST_ARMS
+    ],
+    *[
+        (base, f"{base} fold {fold}", rung, label,
+         _ladder(f"{group}-fold{fold}_{on}"), _ladder(f"{group}-fold{fold}_{ctrl}"))
+        for base, group in (("Junyi (50k)", "junyi-partial"), ("Junyi (all)", "junyi-full"))
+        for fold in (1, 2)
+        for label, rung, on, ctrl in (_PKG, _GAP0)
+    ],
+]
+
+
+def _contrasts() -> list[tuple]:
+    if len(SEEDS) == 5:
+        return CONTRASTS
+    out = list(CONTRASTS)
+    block = {}
+    for after, corpus, rung, label, on, ctrl in EXTRA_CONTRASTS_10:
+        block.setdefault(after, {after}).add(corpus)
+        last = max(i for i, c in enumerate(out) if c[0] in block[after])
+        out.insert(last + 1, (corpus, label, rung, on, ctrl))
+    return out
+
+
+def _path(pattern: str, seed: int) -> Path:
+    if seed in NEW_SEEDS and not pattern.startswith("dh2_kt_ladder_"):
+        prefix = pattern[: -len("_s{seed}.csv")]
+        pattern = _ladder(f"xes-ref_{FROZEN_TO_XES_REF[prefix]}")
+    return TABLES / pattern.format(seed=seed)
+
 
 def _available(pattern: str | None) -> bool:
     if pattern is None:
-        return True
-    return all((TABLES / pattern.format(seed=s)).exists() for s in SEEDS)
+        # Observed-incidence package: a7 file on the first five seeds,
+        # xes-ref time-on-observed vs incidence-on on the new ones.
+        if len(SEEDS) == 5:
+            return True
+        return all(
+            _path(_ladder(f"xes-ref_{arm}"), s).exists()
+            for arm in ("time-on-observed", "incidence-on")
+            for s in NEW_SEEDS
+        )
+    return all(_path(pattern, s).exists() for s in SEEDS)
 
 
 def _read(pattern: str) -> dict[int, dict]:
-    out = {}
-    for seed in SEEDS:
-        path = TABLES / pattern.format(seed=seed)
-        with path.open(encoding="utf-8") as fh:
-            row = next(csv.DictReader(fh))
-        out[seed] = {
-            "val_auc": float(row["val_auc"]),
-            "auc": float(row["dh2_kt_auc"]),
-            "n": int(row["n_predictions"]),
-            "batch": int(row["batch_size"]),
-            "epochs": int(row["epochs"]),
-            "file": path.name,
-        }
-    return out
+    return {seed: _read_one(_path(pattern, seed)) for seed in SEEDS}
+
+
+def _read_one(path: Path) -> dict:
+    with path.open(encoding="utf-8") as fh:
+        row = next(csv.DictReader(fh))
+    return {
+        "val_auc": float(row["val_auc"]),
+        "auc": float(row["dh2_kt_auc"]),
+        "n": int(row["n_predictions"]),
+        "batch": int(row["batch_size"]),
+        "epochs": int(row["epochs"]),
+        "file": path.name,
+    }
 
 
 def _outcome(credited: bool, deltas: list[float]) -> str:
@@ -166,6 +243,10 @@ def _a7_both() -> tuple[dict[int, float], dict[int, dict]]:
             seed = int(row["seed"])
             on[seed] = float(row["val_auc"])
             ctrl[seed] = {"val_auc": float(row["twin_val_auc"]), "n": 0, "batch": 16, "epochs": 30}
+    for seed in SEEDS:
+        if seed in NEW_SEEDS:
+            on[seed] = _read_one(_path(_ladder("xes-ref_time-on-observed"), seed))["val_auc"]
+            ctrl[seed] = _read_one(_path(_ladder("xes-ref_incidence-on"), seed))
     return on, ctrl
 
 
@@ -244,7 +325,7 @@ def _write_heatmap(rows: list[dict]) -> None:
             )
     lines += [
         "\\end{tikzpicture}}",
-        "\\caption{Credit outcomes; row names match Table~\\ref{tab:credit-transfer}.",
+        f"\\caption{{Credit outcomes; row names match Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}.",
         "A check on blue is credited, a circle on orange is consistent-positive",
         "(not credited), and a cross on grey is unsupported. Column labels:",
         "Incidence; Pkg, obs.\\ and Pkg, zero, the package with observed and with",
@@ -253,8 +334,8 @@ def _write_heatmap(rows: list[dict]) -> None:
         "the package against the parameter-padded control; Bnd vs 0, T-boundary",
         "against T-zero. The number is the mean paired difference in units of",
         "$10^{-3}$ validation AUC. An empty cell was not run.",
-        "The $1{,}000$\\,s export is Table~\\ref{tab:credit-assist-resolution}.}",
-        "\\label{fig:credit-heatmap}",
+        f"The $1{{,}}000$\\,s export is Table~\\ref{{tab:credit-assist-resolution{LABEL_SUFFIX}}}.}}",
+        f"\\label{{fig:credit-heatmap{LABEL_SUFFIX}}}",
         "\\end{figure}",
         "",
     ]
@@ -266,12 +347,20 @@ def _milli(value: float) -> str:
 
 
 def _one_outcome(row: dict, short: dict[str, str]) -> str:
+    n = len(SEEDS)
     if row["outcome_abs"] == row["outcome_ci"]:
-        return f"{short[row['outcome_abs']]} ${row['pass_abs']}/5$"
+        return f"{short[row['outcome_abs']]} ${row['pass_abs']}/{n}$"
     return (
         f"{short[row['outcome_abs']]}/{short[row['outcome_ci']]} "
-        f"${row['pass_abs']}/5$"
+        f"${row['pass_abs']}/{n}$"
     )
+
+
+def _rules_sentence(rows: list[dict]) -> tuple[str, str]:
+    """The agreement sentence split across two caption source lines."""
+    if all(r["outcome_abs"] == r["outcome_ci"] for r in rows):
+        return "The outcome is the same under both", "rules."
+    return "Where the rules differ, the outcome", "is given as seed rule/interval rule."
 
 
 def _write_resolution_table(rows: list[dict], short: dict[str, str]) -> None:
@@ -280,11 +369,11 @@ def _write_resolution_table(rows: list[dict], short: dict[str, str]) -> None:
         "\\begin{table}[H]",
         "\\caption{ASSISTments~2012 on the original export, whose start times",
         "are stored at 1{,}000\\,s resolution. The one-second re-export of the",
-        "same rows is in Table~\\ref{tab:credit-transfer}. Fold~0, five paired",
+        f"same rows is in Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}. Fold~0, {SEED_WORD[len(SEEDS)]} paired",
         "seeds. Differences are in units of $10^{-3}$ validation AUC; the",
-        "bracket is the lower 95\\% bound. The outcome is the same under both",
-        "rules. Abbreviations as in Table~\\ref{tab:credit-transfer}.}",
-        "\\label{tab:credit-assist-resolution}",
+        f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
+        f"{_rules_sentence(rows)[1]} Abbreviations as in Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}.}}",
+        f"\\label{{tab:credit-assist-resolution{LABEL_SUFFIX}}}",
         "\\centering",
         "\\scriptsize",
         "\\setlength{\\tabcolsep}{3pt}",
@@ -314,10 +403,27 @@ def _write_resolution_table(rows: list[dict], short: dict[str, str]) -> None:
     OUT_TEX_RES.write_text("\n".join(lines), encoding="utf-8")
 
 
+def _configure(n_seeds: int) -> None:
+    global SEEDS, T_975, LABEL_SUFFIX, OUT_JSON, OUT_TEX, OUT_TEX_RES, OUT_HEAT
+    if n_seeds == 5:
+        return
+    SEEDS = SEEDS_5 + NEW_SEEDS
+    T_975 = T_975_DF[n_seeds]
+    LABEL_SUFFIX = "-10seed"
+    OUT_JSON = OUT_JSON.with_name(OUT_JSON.stem + "_10seed.json")
+    OUT_TEX = OUT_TEX.with_name(OUT_TEX.stem + "_10seed.tex")
+    OUT_TEX_RES = OUT_TEX_RES.with_name(OUT_TEX_RES.stem + "_10seed.tex")
+    OUT_HEAT = OUT_HEAT.with_name(OUT_HEAT.stem + "_10seed.tex")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--n-seeds", type=int, choices=(5, 10), default=5)
+    _configure(parser.parse_args().n_seeds)
+    n = len(SEEDS)
     rows = []
     pending = []
-    for corpus, label, rung, on_pat, ctrl_pat in CONTRASTS:
+    for corpus, label, rung, on_pat, ctrl_pat in _contrasts():
         if not (_available(on_pat) and _available(ctrl_pat)):
             pending.append(f"{corpus}: {label}")
             continue
@@ -355,8 +461,8 @@ def main() -> int:
 
     payload = {
         "tau_abs": TAU,
-        "t_975_df4": T_975,
-        "interval_rule": "mean - t_975 * SD(delta) / sqrt(5) >= tau",
+        f"t_975_df{n - 1}": T_975,
+        "interval_rule": f"mean - t_975 * SD(delta) / sqrt({n}) >= tau",
         "rows": rows,
         "pending": pending,
     }
@@ -366,11 +472,11 @@ def main() -> int:
     lines = [
         "\\begin{table}[H]",
         "\\caption{Credit map. Differences are $10^{-3}$ validation AUC; the",
-        "bracket is the lower 95\\% bound. The outcome is the same under both",
-        "rules. Cons.-pos.:",
+        f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
+        f"{_rules_sentence(rows)[1]} Cons.-pos.:",
         "consistent-positive (not credited). Abbreviations are in",
         "Section~\\ref{sec:credit-gate}.}",
-        "\\label{tab:credit-transfer}",
+        f"\\label{{tab:credit-transfer{LABEL_SUFFIX}}}",
         "\\centering",
         "\\scriptsize",
         "\\setlength{\\tabcolsep}{3pt}",
@@ -401,7 +507,7 @@ def main() -> int:
         print(
             f"{r['corpus']:15} {r['contrast']:40} mean={r['mean_delta_val']:+.6f} "
             f"min={r['min_delta_val']:+.6f} sd_delta={r['sd_delta_val']:.6f} "
-            f"lcb95={r['lcb95_delta_val']:+.6f} seed={r['pass_abs']}/5 {r['outcome_abs']} | "
+            f"lcb95={r['lcb95_delta_val']:+.6f} seed={r['pass_abs']}/{n} {r['outcome_abs']} | "
             f"interval {r['outcome_ci']}"
         )
     for p in pending:

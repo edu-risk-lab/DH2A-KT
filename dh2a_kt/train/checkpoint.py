@@ -64,6 +64,8 @@ def save_trained_fold(path: Path, trained: TrainedFold) -> None:
             "group_embed": bool(getattr(cfg, "group_embed", False)),
             "n_groups": int(getattr(cfg, "n_groups", 1)),
             "expert_graph": bool(getattr(cfg, "expert_graph", False)),
+            "aux_scalar": bool(getattr(cfg, "aux_scalar", False)),
+            "aux_scalar_mode": str(getattr(cfg, "aux_scalar_mode", "query")),
         },
     }
     torch.save(payload, path)
@@ -125,6 +127,8 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         group_embed=bool(cfg_dict.get("group_embed", False)),
         n_groups=int(cfg_dict.get("n_groups", 1)),
         expert_graph=bool(cfg_dict.get("expert_graph", False)),
+        aux_scalar=bool(cfg_dict.get("aux_scalar", False)),
+        aux_scalar_mode=str(cfg_dict.get("aux_scalar_mode", "query")),
     )
     model = build_model(
         config.n_concepts,
@@ -164,6 +168,8 @@ def load_trained_fold(path: Path, *, device: str = "cpu") -> TrainedFold:
         group_embed=config.group_embed,
         n_groups=config.n_groups,
         expert_graph=config.expert_graph,
+        aux_scalar=config.aux_scalar,
+        aux_scalar_mode=config.aux_scalar_mode,
     )
     state = payload["model_state"]
     if config.question_graph and "A_qs_norm" in state:

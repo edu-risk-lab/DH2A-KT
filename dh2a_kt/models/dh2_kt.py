@@ -181,6 +181,12 @@ class DH2KTConfig:
     """Vocabulary size for ``group_embed`` (0 = unknown / missing)."""
     expert_graph: bool = False
     """v4 only: expert concept DAG refine (Junyi), not absorbable into concept_embed."""
+    aux_scalar: bool = False
+    """v4 only: Linear(1, hidden) on a precomputed per-row scalar (leakage simulation,
+    ``dh2a_kt.data.leak_sim``)."""
+    aux_scalar_mode: str = "query"
+    """``query``: the scalar of row ``t+1`` joins the query; ``lstm``: the scalar of
+    row ``t`` joins the recurrent input at ``t``."""
     max_hyperedge_members: int = 8
     """v5 star transport: pad width for members of one hyperedge."""
     max_hedges_per_concept: int = 8
@@ -222,6 +228,8 @@ class DH2KTBatch:
     """v4 ``time_split``: ``(B, T)`` log1p seconds spent on the current step."""
     idles: torch.Tensor | None = None
     """v4 ``time_split``: ``(B, T)`` log1p idle seconds before the current step."""
+    aux_scalars: torch.Tensor | None = None
+    """v4 ``aux_scalar``: ``(B, T)`` per-row scalar of the leakage simulation."""
 
 
 if _TORCH_AVAILABLE:
@@ -609,6 +617,12 @@ if _TORCH_AVAILABLE:
                     raise ValueError(
                         f"time_gap_mode must be both/lstm/query, got {mode!r}"
                     )
+                if config.aux_scalar:
+                    if config.aux_scalar_mode not in ("query", "lstm"):
+                        raise ValueError(
+                            f"aux_scalar_mode must be query/lstm, got {config.aux_scalar_mode!r}"
+                        )
+                    self.aux_scalar_proj = nn.Linear(1, hidden)
                 if config.saw_input:
                     self.saw_embed = nn.Embedding(2, hidden)
                 if config.group_embed:
@@ -936,6 +950,9 @@ if _TORCH_AVAILABLE:
                 x = x + self.expert_in_proj(expert_refine[concepts])
             x = self._add_shared_time_gap(x, batch.time_gaps, where="lstm")
             x = self._add_time_split(x, batch.durations, batch.idles, where="lstm")
+            use_aux = self.config.aux_scalar and batch.aux_scalars is not None
+            if use_aux and self.config.aux_scalar_mode == "lstm":
+                x = x + self.aux_scalar_proj(batch.aux_scalars.unsqueeze(-1).to(dtype=x.dtype))
             if self.config.saw_input and batch.saw_flags is not None:
                 x = x + self.saw_embed(batch.saw_flags.long().clamp(0, 1))
             if self.config.group_embed and batch.group_ids is not None:
@@ -977,6 +994,10 @@ if _TORCH_AVAILABLE:
             queried = self._add_time_split(
                 queried, batch.durations, batch.idles, where="query"
             )
+            if use_aux and self.config.aux_scalar_mode == "query":
+                aux = batch.aux_scalars
+                next_aux = torch.cat([aux[:, 1:], aux[:, -1:]], dim=1)
+                queried = queried + self.aux_scalar_proj(next_aux.unsqueeze(-1).to(dtype=queried.dtype))
             if self.config.group_embed and batch.group_ids is not None:
                 n_groups = max(int(self.config.n_groups), 1)
                 next_groups = torch.cat(

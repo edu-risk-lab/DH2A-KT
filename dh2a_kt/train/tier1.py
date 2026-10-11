@@ -136,6 +136,8 @@ def aux_kwargs(batch: dict, device: torch.device | str) -> dict:
         out["durations"] = batch["durations"].to(device)
     if "idles" in batch:
         out["idles"] = batch["idles"].to(device)
+    if "aux_scalars" in batch:
+        out["aux_scalars"] = batch["aux_scalars"].to(device)
     return out
 
 
@@ -259,6 +261,7 @@ if _TORCH_AVAILABLE:
             include_time_split: bool = False,
             time_gap_control: str = "real",
             time_gap_seed: int = 0,
+            include_aux_scalar: bool = False,
         ):
             if window_mode not in ("first", "last", "chunked"):
                 raise ValueError(
@@ -342,6 +345,12 @@ if _TORCH_AVAILABLE:
             else:
                 self._durations = None
                 self._idles = None
+            if include_aux_scalar:
+                if "aux_scalar" not in sorted_df.columns:
+                    raise ValueError("include_aux_scalar=True needs an 'aux_scalar' column")
+                self._aux = sorted_df["aux_scalar"].to_numpy(dtype=np.float32)
+            else:
+                self._aux = None
             self._n_users = 0
             self._window_users: list[int] = []
             if len(user_ids) == 0:
@@ -433,6 +442,10 @@ if _TORCH_AVAILABLE:
                 idles = torch.zeros(self.max_seq_len, dtype=torch.float)
                 idles[:length] = torch.from_numpy(self._idles[start:end])
                 item["idles"] = idles
+            if self._aux is not None:
+                aux = torch.zeros(self.max_seq_len, dtype=torch.float)
+                aux[:length] = torch.from_numpy(self._aux[start:end])
+                item["aux_scalars"] = aux
             if self._kc_set_ids is not None and self._kc_set_mask is not None:
                 kc_set_ids = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.long)
                 kc_set_mask = torch.zeros(self.max_seq_len, self.max_kcs, dtype=torch.bool)
@@ -459,7 +472,7 @@ if _TORCH_AVAILABLE:
             collated["kc_set_mask"] = torch.stack(
                 [item["kc_set_mask"] for item in batch_items]
             )
-        for aux_key in ("time_gaps", "saw_flags", "group_ids", "durations", "idles"):
+        for aux_key in ("time_gaps", "saw_flags", "group_ids", "durations", "idles", "aux_scalars"):
             if aux_key in batch_items[0]:
                 collated[aux_key] = torch.stack([item[aux_key] for item in batch_items])
         return collated
@@ -645,6 +658,7 @@ if _TORCH_AVAILABLE:
                             group_ids=dh2_batch.group_ids,
                             durations=dh2_batch.durations,
                             idles=dh2_batch.idles,
+                            aux_scalars=dh2_batch.aux_scalars,
                             **kc_sets,
                         )
                         ablated_batch = DH2KTBatch(
@@ -658,6 +672,7 @@ if _TORCH_AVAILABLE:
                             group_ids=dh2_batch.group_ids,
                             durations=dh2_batch.durations,
                             idles=dh2_batch.idles,
+                            aux_scalars=dh2_batch.aux_scalars,
                             **kc_sets,
                         )
                         logits_full = model(full_batch)
@@ -798,6 +813,8 @@ if _TORCH_AVAILABLE:
         group_embed: bool = False,
         n_groups: int = 1,
         expert_graph: bool = False,
+        aux_scalar: bool = False,
+        aux_scalar_mode: str = "query",
     ) -> DH2KT:
         config = DH2KTConfig(
             n_concepts=n_concepts,
@@ -838,8 +855,21 @@ if _TORCH_AVAILABLE:
             group_embed=group_embed,
             n_groups=n_groups,
             expert_graph=expert_graph,
+            aux_scalar=aux_scalar,
+            aux_scalar_mode=aux_scalar_mode,
         )
         return DH2KT(config)
+
+
+def internal_val_users(train_df: pd.DataFrame, val_frac: float) -> set:
+    """Training learners held out for epoch selection when ``val_frac > 0``."""
+    users = np.sort(train_df["user_id"].unique())
+    # Fixed regardless of `seed`: multi-seed runs should vary initialisation
+    # and batch order, not which learners are held out for selection.
+    rng = np.random.default_rng(42)
+    rng.shuffle(users)
+    n_val = max(1, int(round(len(users) * val_frac)))
+    return set(users[:n_val].tolist())
 
 
 def train_fold(
@@ -900,6 +930,8 @@ def train_fold(
     skill_item_kc_map: dict[int, list[int]] | None = None,
     full_qmatrix: bool = False,
     expert_edges: pd.DataFrame | None = None,
+    aux_scalar: bool = False,
+    aux_scalar_mode: str = "query",
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -1063,6 +1095,8 @@ def train_fold(
         group_embed=group_embed,
         n_groups=n_groups,
         expert_graph=expert_graph,
+        aux_scalar=aux_scalar,
+        aux_scalar_mode=aux_scalar_mode,
     ).to(device)
     if (question_kc_agg or question_graph) and architecture == "v4":
         # Observed Q–KC incidence from TRAIN only (not E_pre / not eval).
@@ -1161,13 +1195,7 @@ def train_fold(
     # the selection split is carved out of the training users instead.
     val_df: pd.DataFrame | None = None
     if val_frac > 0.0:
-        users = np.sort(train_df["user_id"].unique())
-        # Fixed regardless of `seed`: multi-seed runs should vary initialisation
-        # and batch order, not which learners are held out for selection.
-        rng = np.random.default_rng(42)
-        rng.shuffle(users)
-        n_val = max(1, int(round(len(users) * val_frac)))
-        val_users = set(users[:n_val].tolist())
+        val_users = internal_val_users(train_df, val_frac)
         val_df = train_df[train_df["user_id"].isin(val_users)]
         train_df = train_df[~train_df["user_id"].isin(val_users)]
         logger.info(
@@ -1193,6 +1221,7 @@ def train_fold(
                 include_time_split=time_split,
                 time_gap_control=time_gap_control,
                 time_gap_seed=time_gap_seed,
+                include_aux_scalar=aux_scalar,
             ),
             batch_size=budget.batch_size,
             shuffle=shuffle,
@@ -1289,6 +1318,8 @@ def train_and_evaluate_fold(
     skill_item_kc_map: dict[int, list[int]] | None = None,
     full_qmatrix: bool = False,
     expert_edges: pd.DataFrame | None = None,
+    aux_scalar: bool = False,
+    aux_scalar_mode: str = "query",
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -1350,6 +1381,8 @@ def train_and_evaluate_fold(
         skill_item_kc_map=skill_item_kc_map,
         full_qmatrix=full_qmatrix,
         expert_edges=expert_edges,
+        aux_scalar=aux_scalar,
+        aux_scalar_mode=aux_scalar_mode,
     )
     auc, n_predictions = evaluate_auc(
         trained.model,

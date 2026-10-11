@@ -336,6 +336,13 @@ def main() -> int:
         default=None,
         help="Suffix for default output/checkpoint names, e.g. 'v4q_tuned'.",
     )
+    parser.add_argument(
+        "--aux-scalar",
+        choices=("crossmodal-leak", "crossmodal-clean", "hint-leak", "hint-clean"),
+        default=None,
+        help="v4: synthetic leakage-simulation scalar through Linear(1, hidden) "
+        "(dh2a_kt.data.leak_sim; docs/preregistration_round2.md Section 6).",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
@@ -646,6 +653,24 @@ def main() -> int:
                 f"[fold {fold}] hint-item hyperedges: built={len(raw_hint)} "
                 f"selected={len(hint_hyperedges)} (train users={len(train_users)})"
             )
+        aux_scalar_mode = "query"
+        if args.aux_scalar:
+            from dh2a_kt.data.leak_sim import attach_leak_scalar
+            from dh2a_kt.train.tier1 import internal_val_users
+
+            if architecture != "v4" or val_frac <= 0.0 or args.max_users is not None:
+                raise SystemExit("--aux-scalar needs v4, --val-frac > 0 and no --max-users")
+            fit_users = set(splits["train"]["user_id"].unique()) - internal_val_users(
+                splits["train"], val_frac
+            )
+            splits["train"], eval_df, aux_scalar_mode = attach_leak_scalar(
+                splits["train"], eval_df, args.aux_scalar, fit_users
+            )
+            print(
+                f"[fold {fold}] aux scalar {args.aux_scalar} ({aux_scalar_mode}): "
+                f"train mean={float(splits['train']['aux_scalar'].mean()):.4f} "
+                f"eval mean={float(eval_df['aux_scalar'].mean()):.4f}"
+            )
         fold_result = train_and_evaluate_fold(
             splits["train"],
             eval_df,
@@ -703,6 +728,8 @@ def main() -> int:
             skill_item_kc_map=skill_item_kc_map,
             full_qmatrix=full_qmatrix,
             expert_edges=expert_edges,
+            aux_scalar=args.aux_scalar is not None,
+            aux_scalar_mode=aux_scalar_mode,
             checkpoint_path=args.save_checkpoint
             or (
                 REPO_ROOT

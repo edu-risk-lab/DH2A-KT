@@ -91,6 +91,20 @@ def main() -> int:
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--hp",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="Override one engine hyperparameter (repeatable), e.g. --hp dropout=0.1 "
+        "--hp d_model=128 --hp lr=3e-4. Used by the round-2 baseline grid.",
+    )
+    parser.add_argument(
+        "--report-valid",
+        action="store_true",
+        help="Also score the validation split from the saved checkpoint, for "
+        "selection without touching test AUC.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
 
@@ -116,6 +130,15 @@ def main() -> int:
     lr = float(hp.get("lr", pykt_cfg.get("lr", 1e-3)))
     if args.patience is not None:
         hp["patience"] = int(args.patience)
+    overrides = {}
+    for item in args.hp:
+        key, sep, value = item.partition("=")
+        if not sep:
+            raise SystemExit(f"--hp expects KEY=VALUE, got {item!r}")
+        overrides[key.strip()] = float(value) if any(c in value for c in ".e") else int(value)
+    if "lr" in overrides:
+        lr = float(overrides.pop("lr"))
+    hp.update(overrides)
 
     interactions = load_interactions_with_ids(p0_cfg)
     splits = get_fold_splits(interactions, p0_cfg, args.fold)
@@ -176,6 +199,33 @@ def main() -> int:
     )
     elapsed = time.time() - started
 
+    val_auc = None
+    if args.report_valid:
+        from sklearn.metrics import roc_auc_score
+
+        # The checkpoint now exists, so this call only re-scores: it returns
+        # validation positions first, then the same test positions.
+        _, _, _, _, ts_all, ps_all, _, _ = run_pykt_fold(
+            display_model=args.model,
+            pykt_name=args.model,
+            work_dir=work_dir,
+            num_q=stats["num_q"],
+            num_c=stats["num_c"],
+            graph_npz=graph_npz,
+            graph_tag=graph_tag,
+            hyperparams=hp,
+            epochs=epochs,
+            batch_size=batch_size,
+            lr=lr,
+            seed=int(args.seed) + int(args.fold) * 97,
+            max_seq_len=max_seq_len,
+            include_valid_predictions=True,
+        )
+        n_val = len(ts_all) - len(ts)
+        if n_val <= 0 or not np.allclose(ps_all[n_val:], ps):
+            raise SystemExit("validation re-score did not reproduce the test predictions")
+        val_auc = float(roc_auc_score(ts_all[:n_val], ps_all[:n_val]))
+
     # Per-position predictions with learner ids enable a bootstrap that resamples
     # learners, which is how the DH2-KT comparison gets a confidence interval.
     np.savez(work_dir / "test_predictions.npz", ts=ts, ps=ps, cs=cs, us=us)
@@ -197,6 +247,8 @@ def main() -> int:
         "epochs": epochs,
         "max_seq_len": max_seq_len,
         "lr": lr,
+        "val_auc": val_auc,
+        "hp_overrides": ";".join(f"{k}={v}" for k, v in sorted(overrides.items())) or None,
         "p0_published_auc": published,
         "delta_vs_published": (auc - published) if published is not None else None,
         "minutes": round(elapsed / 60.0, 1),

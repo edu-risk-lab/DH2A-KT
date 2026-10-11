@@ -9,7 +9,8 @@ reports
 
   * group-membership leak rate (share of hyperedges with any tainted member);
   * held-out support share (mean over hyperedges of the share of supporting
-    interactions that are held-out), which is continuous in p.
+    interactions that are held-out), which is continuous in p, and the same
+    share weighted by hyperedge support (round 2).
 
 Writes results/tables/xes3g5m_fold0_partial_membership_control.json.
 
@@ -43,19 +44,26 @@ from dh2a_kt.hyperedge.p0_inputs import (  # noqa: E402
 FRACTIONS = (0.0, 0.0001, 0.001, 0.01, 0.1, 1.0)
 
 
-def _support_share(hyperedges: list, built_from: pd.DataFrame, held_out: set[int]) -> float:
+def _support_share(hyperedges: list, built_from: pd.DataFrame, held_out: set[int]) -> tuple[float, float]:
+    """Held-out support share: (mean over hyperedges, support-weighted)."""
     # Each interaction row carries one kc_id, so concept supports are disjoint
     # and a hyperedge's held-out share is a ratio of summed per-concept counts.
     is_held = built_from["interaction_id"].isin(held_out)
     total = {int(k): int(v) for k, v in built_from.groupby("kc_id").size().items()}
     held = {int(k): int(v) for k, v in is_held.groupby(built_from["kc_id"]).sum().items()}
     shares = []
+    held_sum = support_sum = 0
     for he in hyperedges:
         kcs = [int(m[1]) for m in he.members if m[0] == "concept"]
         n = sum(total.get(k, 0) for k in kcs)
         if n > 0:
-            shares.append(sum(held.get(k, 0) for k in kcs) / n)
-    return float(np.mean(shares)) if shares else 0.0
+            h = sum(held.get(k, 0) for k in kcs)
+            shares.append(h / n)
+            held_sum += h
+            support_sum += n
+    if not shares:
+        return 0.0, 0.0
+    return float(np.mean(shares)), float(held_sum / support_sum)
 
 
 def main() -> int:
@@ -91,16 +99,20 @@ def main() -> int:
         )
         member_map = build_concept_member_interaction_map(built_from)
         rate = compute_group_membership_leakage(hyperedges, held_out, member_map)
-        share = _support_share(hyperedges, built_from, held_out)
+        share, weighted = _support_share(hyperedges, built_from, held_out)
         rows.append(
             {
                 "fraction_heldout_learners": p,
                 "n_leaked_learners": n_leak,
                 "group_membership_leak_rate": rate,
                 "heldout_support_share": share,
+                "heldout_support_share_weighted": weighted,
             }
         )
-        print(f"p={p:<7} learners={n_leak:>6} leak_rate={rate:.4f} support_share={share:.6f}")
+        print(
+            f"p={p:<7} learners={n_leak:>6} leak_rate={rate:.4f} "
+            f"support_share={share:.6f} weighted={weighted:.6f}"
+        )
 
     out = args.out or REPO / "results" / "tables" / f"{dataset}_fold{args.fold}_partial_membership_control.json"
     out.parent.mkdir(parents=True, exist_ok=True)

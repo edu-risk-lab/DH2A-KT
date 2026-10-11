@@ -28,6 +28,21 @@ Groups, in the order the plan cuts from the end:
   assist-sec-fold1/2  one-second export, folds 1 and 2, no time / package /
                     T-zero x 5 seeds each, frozen XES recipe
 
+Round 2 (docs/preregistration_round2.md): every group of the credit map
+runs on ten seeds (SEEDS_10). Finished seeds are skipped by their .ok
+stamps. New groups:
+
+  xes-ref           XES3G5M fold 0, the six frozen arms of scripts 31/34/38
+                    with the same flags, seed 42 (reproducibility check)
+                    plus the five new seeds
+  backbone-attn-fold1/2   attention encoder on XES3G5M folds 1 and 2
+  assist-sec-cfg-fold1/2  one-second ASSIST, corpus configuration, folds 1-2
+  junyi-full-fold1/2      Junyi all learners, frozen XES recipe, folds 1-2
+  junyi-partial-fold1/2   Junyi first 50,000 learners, corpus config, folds 1-2
+  leak-sim          XES3G5M fold 0, credited time package plus a synthetic
+                    leakage scalar (crossmodal/hint, leaky/clean), 5 seeds;
+                    scored by scripts/58_leak_simulation_audit.py
+
 "Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
 ``--time-gap-pad`` allocates Linear(1, hidden) and adds a zero multiple,
@@ -68,6 +83,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 SEEDS_5 = (42, 17, 1234, 0, 2024)
+NEW_SEEDS = (7, 99, 314, 2718, 3407)
+SEEDS_10 = SEEDS_5 + NEW_SEEDS
 SEEDS_3 = (42, 17, 1234)
 STATUS = REPO / "results" / "tables" / "credit_ladder_status.json"
 
@@ -159,12 +176,12 @@ def _jobs() -> list[dict]:
         "t-zero": [*timed, "--time-gap-control", "zero"],
         "t-misaligned": [*timed, "--time-gap-control", "misaligned"],
     }
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm, extra in backbone_arms.items():
             add("backbone-attn", arm, seed, _dh2("configs/xes3g5m.yaml", seed, [*extra, *attn]))
 
     assist = "configs/assist2012.yaml"
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         add("assist", "incidence-off", seed, _dh2(assist, seed, ["--question-graph", "--question-incidence-control", "zero"]))
         add(
             "assist",
@@ -244,14 +261,14 @@ def _jobs() -> list[dict]:
         "t-zero": [*timed, "--time-gap-control", "zero"],
         "t-misaligned": [*timed, "--time-gap-control", "misaligned"],
     }
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm, extra in assist_ref_arms.items():
             add("assist-ref", arm, seed, _dh2(assist, seed, [*extra, *REF_RECIPE]))
 
     # Same two ASSIST ladders on the one-second export (scripts/54); the
     # original P0 export stores start_time at 1,000 s resolution.
     assist_sec = "configs/assist2012_sec.yaml"
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm, extra in assist_ref_arms.items():
             add("assist-sec", arm, seed, _dh2(assist_sec, seed, extra))
             add("assist-sec-ref", arm, seed, _dh2(assist_sec, seed, [*extra, *REF_RECIPE]))
@@ -309,7 +326,7 @@ def _jobs() -> list[dict]:
         )
 
     junyi = "configs/junyi.yaml"
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         add(
             "junyi-partial",
             "no-time",
@@ -348,7 +365,7 @@ def _jobs() -> list[dict]:
             ),
         )
 
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         add(
             "package-matched",
             "no-time-param-padded",
@@ -362,7 +379,7 @@ def _jobs() -> list[dict]:
         "time-package": timed,
         "t-zero": [*timed, "--time-gap-control", "zero"],
     }
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm, extra in junyi_arms.items():
             add("junyi-full", arm, seed, _dh2(junyi, seed, [*extra, *REF_RECIPE]))
 
@@ -371,7 +388,7 @@ def _jobs() -> list[dict]:
     # only 1[dt=0], so time-package vs boundary isolates elapsed time from
     # attempt-boundary structure. "shuffled" permutes gaps across all rows:
     # same marginal, a map that receives gradient, no timing information.
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm, control in (("t-boundary", "boundary"), ("t-shuffled", "shuffled")):
             add(
                 "xes-gap-controls",
@@ -391,7 +408,7 @@ def _jobs() -> list[dict]:
         "t-zero": [*timed, "--time-gap-control", "zero"],
     }
     for fold in (1, 2):
-        for seed in SEEDS_5:
+        for seed in SEEDS_10:
             for arm, extra in xes_fold_arms.items():
                 add(
                     f"xes-fold{fold}",
@@ -406,13 +423,64 @@ def _jobs() -> list[dict]:
         arm: assist_ref_arms[arm] for arm in ("incidence-off", "time-on-zero", "t-zero")
     }
     for fold in (1, 2):
-        for seed in SEEDS_5:
+        for seed in SEEDS_10:
             for arm, extra in assist_fold_arms.items():
                 add(
                     f"assist-sec-fold{fold}",
                     arm,
                     seed,
                     _dh2(assist_sec, seed, [*extra, *REF_RECIPE], fold=fold),
+                )
+
+    # XES3G5M fold-0 arms first trained by scripts 34 (qkc_cm_*), 38 (a1_*)
+    # and 31 (a7_dt_both), same flags. Seed 42 must reproduce the frozen
+    # validation AUC before the new seeds are used.
+    observed_q = ["--question-graph", "--question-incidence-control", "observed"]
+    xes_ref_arms = {
+        "incidence-on": observed_q,
+        "no-time": zero_q,
+        "time-package": timed,
+        "time-on-observed": [*observed_q, "--time-gap", "--time-gap-mode", "both"],
+        "t-zero": [*timed, "--time-gap-control", "zero"],
+        "t-misaligned": [*timed, "--time-gap-control", "misaligned"],
+    }
+    for seed in (42, *NEW_SEEDS):
+        for arm, extra in xes_ref_arms.items():
+            add("xes-ref", arm, seed, _dh2("configs/xes3g5m.yaml", seed, [*extra, *REF_RECIPE]))
+
+    for seed in SEEDS_5:
+        for arm in ("crossmodal-leak", "crossmodal-clean", "hint-leak", "hint-clean"):
+            add("leak-sim", arm, seed,
+                _dh2("configs/xes3g5m.yaml", seed, [*timed, *REF_RECIPE, "--aux-scalar", arm]))
+
+    for fold in (1, 2):
+        for seed in SEEDS_10:
+            for arm, extra in backbone_arms.items():
+                add(
+                    f"backbone-attn-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2("configs/xes3g5m.yaml", seed, [*extra, *attn], fold=fold),
+                )
+            for arm, extra in assist_ref_arms.items():
+                add(
+                    f"assist-sec-cfg-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2(assist_sec, seed, extra, fold=fold),
+                )
+            for arm, extra in junyi_arms.items():
+                add(
+                    f"junyi-full-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2(junyi, seed, [*extra, *REF_RECIPE], fold=fold),
+                )
+                add(
+                    f"junyi-partial-fold{fold}",
+                    arm,
+                    seed,
+                    _dh2(junyi, seed, extra, max_users=50000, fold=fold),
                 )
     return jobs
 
