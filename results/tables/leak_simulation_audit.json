@@ -1,0 +1,43 @@
+{
+  "fold": 0,
+  "fractions": [
+    0.0,
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
+    1.0
+  ],
+  "n_train_rows": 4490513,
+  "crossmodal": {
+    "statistic": "support-weighted share of supporting interactions after t or from a held-out learner",
+    "leaky": 1.0,
+    "clean": 0.0,
+    "graded": {
+      "0.0": 0.0,
+      "0.0001": 0.00014767094705898744,
+      "0.001": 0.0015234327485738588,
+      "0.01": 0.015863961202479272,
+      "0.1": 0.1501481810169447,
+      "1.0": 1.0
+    },
+    "mean_scalar_train": {
+      "leaky": 0.7893287583543878,
+      "clean": 0.8004642364818806
+    }
+  },
+  "hint": {
+    "statistic": "share of hint rows whose selection used an outcome at or after the scored step",
+    "fit_rate": 0.04396382299664017,
+    "leaky": 1.0,
+    "clean": 0.0,
+    "graded": {
+      "0.0": 0.0,
+      "0.0001": 9.595571896085007e-05,
+      "0.001": 0.0009797287060510872,
+      "0.01": 0.009876530735965727,
+      "0.1": 0.10049885888554522,
+      "1.0": 1.0
+    }
+  }
+}
