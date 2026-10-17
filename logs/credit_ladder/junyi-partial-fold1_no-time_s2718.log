@@ -1,0 +1,70 @@
+dataset=junyi architecture=v4 tag=ladder_junyi-partial-fold1_no-time_s2718 hyperedge_source=from config no_graph=False use_questions=True window_mode=chunked val_frac=0.1 mask_repeats=True seed=2718 sequence_encoder=lstm n_attn_layers=2 n_attn_heads=4 time_gap_pad=False recap_attention=False question_kc_agg=False question_graph=True question_incidence_control=zero question_hypergraph=False hint_hypergraph=False full_qmatrix=False time_gap=False time_gap_mode=both time_gap_control=real time_split=False concept_forget=False saw_input=False group_embed=False expert_graph=False memory_dim=16 max_degree=16 graph_transport=0.5 event_pool=mean transport=clique hyperedge_embed=False kind_conditioned=False graph_dropout=0.0 laux=0.0 budget=gkt matched_p0=False batch=32 epochs=10 lr=0.001 max_seq_len=400
+NOTE: clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines
+INFO:src.io_utils:Loading interactions from D:\TUAN\DH2A-KT\DH2A-KT\external\p0_leakage_audit\data\processed\junyi.parquet
+INFO:src.io_utils:Loaded interactions shape=(25925992, 5)
+
+[fold 1] loading splits + e_pre...
+INFO:src.split_checker:Creating learner split shape=(25925992, 6) ratios=(0.7, 0.1, 0.2) seed=42
+INFO:src.split_checker:Created split sizes={'train': 18188758, 'valid': 2569639, 'test': 5167595}
+INFO:src.split_checker:Creating learner split shape=(25925992, 6) ratios=(0.7, 0.1, 0.2) seed=43
+INFO:src.split_checker:Created split sizes={'train': 18105687, 'valid': 2640999, 'test': 5179306}
+INFO:dh2a_kt.train.tier1:seed=2718 (weight init and batch order)
+INFO:dh2a_kt.train.tier1:Building concept-prerequisite hyperedges source=chain fold=1
+INFO:dh2a_kt.hyperedge.construction:Built 599240 concept-prerequisite hyperedges (fold=1)
+INFO:dh2a_kt.train.tier1:question_graph: registered Q–KC incidence for 0/716 items (mean degree=0.00, full_qmatrix=False, control=zero; observed links=706 across 706 items)
+INFO:dh2a_kt.train.tier1:train_fold: architecture=v4 concepts=716 exercises=716 hyperedges=599240 kinds=['concept_prerequisite'] device=cuda
+INFO:dh2a_kt.train.tier1:internal selection split: 45000 train users / 5000 val users (val_frac=0.10)
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 44186 windows (mode=chunked) from 4592077 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 49446 windows (mode=chunked) from 5261320 interactions
+INFO:dh2a_kt.train.tier1:UserSequenceDataset: 5000 windows (mode=chunked) from 554430 interactions
+INFO:dh2a_kt.train.tier1:clean protocol: repeat-row targets excluded from the loss and from val AUC
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=500/1381 loss=0.4021
+INFO:dh2a_kt.train.tier1:epoch=1/10 batch=1000/1381 loss=0.3895
+INFO:dh2a_kt.train.tier1:epoch=1/10 loss=0.3854 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=1/10 val_auc=0.7903 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=500/1381 loss=0.3668
+INFO:dh2a_kt.train.tier1:epoch=2/10 batch=1000/1381 loss=0.3671
+INFO:dh2a_kt.train.tier1:epoch=2/10 loss=0.3674 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=2/10 val_auc=0.7958 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=500/1381 loss=0.3632
+INFO:dh2a_kt.train.tier1:epoch=3/10 batch=1000/1381 loss=0.3632
+INFO:dh2a_kt.train.tier1:epoch=3/10 loss=0.3635 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=3/10 val_auc=0.7972 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=500/1381 loss=0.3634
+INFO:dh2a_kt.train.tier1:epoch=4/10 batch=1000/1381 loss=0.3628
+INFO:dh2a_kt.train.tier1:epoch=4/10 loss=0.3624 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=4/10 val_auc=0.7977 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=500/1381 loss=0.3601
+INFO:dh2a_kt.train.tier1:epoch=5/10 batch=1000/1381 loss=0.3596
+INFO:dh2a_kt.train.tier1:epoch=5/10 loss=0.3608 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=5/10 val_auc=0.7977 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=500/1381 loss=0.3623
+INFO:dh2a_kt.train.tier1:epoch=6/10 batch=1000/1381 loss=0.3598
+INFO:dh2a_kt.train.tier1:epoch=6/10 loss=0.3596 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=6/10 val_auc=0.7979 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=500/1381 loss=0.3577
+INFO:dh2a_kt.train.tier1:epoch=7/10 batch=1000/1381 loss=0.3574
+INFO:dh2a_kt.train.tier1:epoch=7/10 loss=0.3585 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=7/10 val_auc=0.7993 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=500/1381 loss=0.3584
+INFO:dh2a_kt.train.tier1:epoch=8/10 batch=1000/1381 loss=0.3585
+INFO:dh2a_kt.train.tier1:epoch=8/10 loss=0.3580 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=8/10 val_auc=0.7998 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=500/1381 loss=0.3560
+INFO:dh2a_kt.train.tier1:epoch=9/10 batch=1000/1381 loss=0.3569
+INFO:dh2a_kt.train.tier1:epoch=9/10 loss=0.3572 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=9/10 val_auc=0.7994 val_n=548621
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=500/1381 loss=0.3561
+INFO:dh2a_kt.train.tier1:epoch=10/10 batch=1000/1381 loss=0.3569
+INFO:dh2a_kt.train.tier1:epoch=10/10 loss=0.3569 batches=1381 skipped_nonfinite=0
+INFO:dh2a_kt.train.tier1:epoch=10/10 val_auc=0.7995 val_n=548621
+INFO:dh2a_kt.train.tier1:restored best epoch=8 train_loss=0.3580 val_auc=0.7998 (of 10)
+INFO:dh2a_kt.train.tier1:wrote DH2-KT checkpoint -> D:\TUAN\DH2A-KT\DH2A-KT\results\checkpoints\junyi_fold1_ladder_junyi-partial-fold1_no-time_s2718.pt
+[fold 1] AUC=0.7994 val_auc=0.7998 n_predictions=5203844
+
+Wrote comparison table: D:\TUAN\DH2A-KT\DH2A-KT\results\tables\dh2_kt_ladder_junyi-partial-fold1_no-time_s2718_vs_p0.csv
+dataset fold reference_model   p0_auc  dh2_kt_auc  delta_auc budget_reference  batch_size  epochs comparison_type                                                                           budget_note  n_predictions  val_auc
+  junyi    1             gkt      NaN    0.799362        NaN              gkt          32      10   observational clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        5203844  0.79984
+  junyi    1        simplekt 0.984443    0.799362  -0.185081              gkt          32      10   observational clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        5203844  0.79984
+  junyi mean             gkt      NaN    0.799362        NaN              gkt          32      10   observational clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        5203844  0.79984
+  junyi mean        simplekt 0.984443    0.799362  -0.185081              gkt          32      10   observational clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines        5203844  0.79984

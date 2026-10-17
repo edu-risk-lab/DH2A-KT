@@ -1,0 +1,5 @@
+dataset,fold,reference_model,p0_auc,dh2_kt_auc,delta_auc,budget_reference,batch_size,epochs,comparison_type,budget_note,n_predictions,val_auc
+junyi,1,gkt,,0.7992816691682461,,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,5203844,0.8003518085349466
+junyi,1,simplekt,0.9844429068708304,0.7992816691682461,-0.1851612377025843,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,5203844,0.8003518085349466
+junyi,mean,gkt,,0.7992816691682461,,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,5203844,0.8003518085349466
+junyi,mean,simplekt,0.9844429068708304,0.7992816691682461,-0.1851612377025843,gkt,32,10,observational,clean protocol (repeat-row targets masked): AUC is NOT comparable to the P0 baselines,5203844,0.8003518085349466
