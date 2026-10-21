@@ -1,16 +1,17 @@
 cff-version: 1.2.0
 message: >-
-  If you use this software, please cite this repository (and the KBS
-  manuscript once a DOI is assigned).
+  If you use this software, please cite the version DOI of the snapshot you
+  used (and the Expert Systems manuscript once a DOI is assigned).
 type: software
-title: "DH2A-KT: Leakage-Audited Knowledge Attribution for Knowledge Tracing"
+title: "Validating Auxiliary Knowledge in Knowledge Tracing: A Credit Protocol and Its Dependence on Setting"
 abstract: >-
-  Companion code for DH2A-KT. The pipeline constructs train-only auxiliary
-  knowledge, audits hyperedge leakage, and credits only messages that
-  survive a matched-twin operating rule. It is not a new hypergraph
-  predictor. Pairwise train-only graph construction is reused from the
-  companion P0 protocol (edu-risk-lab/leakage-controlled-kt-audit, pin
-  5e3d6a0).
+  Companion code for the Expert Systems manuscript. The pipeline builds
+  auxiliary knowledge from training learners only, audits membership
+  leakage, compares each knowledge message with a declared control, and
+  assigns one of three outcomes from ten paired seeds under an interval
+  rule and a seed rule. It is not a new knowledge-tracing predictor.
+  Pairwise train-only graph construction is reused from
+  edu-risk-lab/leakage-controlled-kt-audit at commit 5e3d6a0.
 authors:
   - family-names: Dao Minh
     given-names: Tuan
@@ -38,30 +39,35 @@ authors:
     affiliation: Vietnam National University
 repository-code: https://github.com/edu-risk-lab/DH2A-KT
 url: https://github.com/edu-risk-lab/DH2A-KT
-doi: 10.5281/zenodo.22772808
+doi: 10.5281/zenodo.23521413
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.22772808
-    description: This version (tag kbs-submit-2026-09-15)
+    value: 10.5281/zenodo.23521413
+    description: Ten-seed manuscript state (tag es-submit-2026-10-21)
+  - type: doi
+    value: 10.5281/zenodo.23219471
+    description: Five-seed manuscript state (tag es-submit-2026-10-08b)
   - type: doi
     value: 10.5281/zenodo.22676635
-    description: Evaluation freeze (tag kbs-submit-2026-09-09)
+    description: Evaluation freeze of the XES3G5M reference ladder (tag kbs-submit-2026-09-09)
   - type: doi
     value: 10.5281/zenodo.22676634
     description: All versions (concept DOI)
 license: MIT
-version: kbs-submit-2026-09-15
-date-released: "2026-09-15"
+version: es-submit-2026-10-21
+date-released: "2026-10-21"
 keywords:
   - knowledge tracing
-  - knowledge attribution
-  - hypergraph
+  - knowledge validation
+  - knowledge engineering
   - data leakage
-  - reproducibility
+  - ablation protocol
+  - educational data mining
 preferred-citation:
   type: article
   title: >-
-    DH2A-KT: Leakage-Audited Knowledge Attribution for Knowledge Tracing
+    Validating Auxiliary Knowledge in Knowledge Tracing: A Credit Protocol
+    and Its Dependence on Setting
   authors:
     - family-names: Dao Minh
       given-names: Tuan
@@ -82,12 +88,10 @@ preferred-citation:
       given-names: Hoang Son
       orcid: https://orcid.org/0000-0001-6356-0046
   year: 2026
-  journal: Knowledge-Based Systems
+  journal: Expert Systems
   publisher:
-    name: Elsevier
+    name: Wiley
   notes: >-
-    Manuscript prepared for Knowledge-Based Systems. Update volume, pages,
-    and DOI upon publication.     Canonical source: paper/main.tex. Snapshot tag
-    kbs-submit-2026-09-15; software DOI
-    10.5281/zenodo.22772808. Evaluation freeze
-    kbs-submit-2026-09-09, DOI 10.5281/zenodo.22676635.
+    Manuscript submitted to Expert Systems. Update volume, pages, and DOI
+    upon publication. Canonical source: paper/main.tex. Snapshot tag
+    es-submit-2026-10-21, version DOI 10.5281/zenodo.23521413.
