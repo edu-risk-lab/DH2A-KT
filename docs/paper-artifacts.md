@@ -22,6 +22,8 @@ Earlier freezes: `kbs-submit-2026-09-09`
 | Table Holm over all contrasts (appendix) | `scripts/55_holm_all_contrasts.py [--n-seeds 10]` | `results/tables/holm_all_contrasts{,_10seed}.json`, `paper/tables/table_holm_all_contrasts{,_10seed}.tex` |
 | Table threshold recount, every row (appendix) | `scripts/56_threshold_all_corpora.py [--n-seeds 10]` | `results/tables/threshold_sensitivity_all_corpora{,_10seed}.json`, `paper/tables/table_threshold_all_corpora{,_10seed}.tex` |
 | Grid-tuned AKT / simpleKT rows | `scripts/57_baseline_grid.py --stage grid/seeds/select` | `results/tables/baseline_grid_xes3g5m_fold0.csv` |
+| Table credit map on test-only AUC (appendix) | `scripts/51_transfer_credit_tables.py --n-seeds 10 --metric test` | `results/tables/credit_ladder_transfer_10seed_test.json`, `paper/tables/table_credit_test_10seed.tex` |
+| Junyi history-only check (addendum, pending runs) | `scripts/50_credit_ladder_plan.py --group junyi-hist --launch-all`, then `scripts/59_junyi_history_check.py` | `results/tables/junyi_history_check.json`, `paper/tables/table_junyi_history.tex` |
 | Table leakage simulation | `scripts/58_leak_simulation_audit.py --stage audit/auc/table` | `results/tables/leak_simulation_audit.json`, `leak_simulation_auc.json`, `paper/tables/table_leak_simulation.tex` |
 | Graded membership control, weighted support share | `scripts/53_partial_membership_control.py` | `results/tables/xes3g5m_fold0_partial_membership_control.json`, lower block of `paper/tables/table_leakage_audit.tex` |
 | XES T-boundary / T-shuffled controls | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows in `credit_ladder_transfer.json` |

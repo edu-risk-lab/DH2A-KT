@@ -1,4 +1,5 @@
 {
+  "metric": "val_auc",
   "tau_abs": 0.002,
   "t_975_df4": 2.7764451051977987,
   "interval_rule": "mean - t_975 * SD(delta) / sqrt(5) >= tau",
@@ -30,6 +31,7 @@
       "pass_abs": 0,
       "outcome_abs": "Unsupported",
       "outcome_ci": "Unsupported",
+      "outcome_ci_lcb_middle": "Unsupported",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -61,9 +63,10 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
-      "n_scored": 0
+      "n_scored": 1640242
     },
     {
       "corpus": "XES3G5M",
@@ -92,6 +95,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -123,6 +127,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -154,6 +159,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -185,6 +191,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -216,6 +223,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -247,6 +255,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -278,6 +287,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -309,6 +319,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1639666
@@ -340,6 +351,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1639666
@@ -371,6 +383,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1636300
@@ -402,6 +415,7 @@
       "pass_abs": 1,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1636300
@@ -433,6 +447,7 @@
       "pass_abs": 2,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -464,6 +479,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -495,6 +511,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 1640242
@@ -526,6 +543,7 @@
       "pass_abs": 1,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 807716
@@ -557,6 +575,7 @@
       "pass_abs": 2,
       "outcome_abs": "Unsupported",
       "outcome_ci": "Unsupported",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 807716
@@ -588,6 +607,7 @@
       "pass_abs": 2,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 807716
@@ -619,6 +639,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 807716
@@ -650,6 +671,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 807716
@@ -681,6 +703,7 @@
       "pass_abs": 1,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 807716
@@ -712,6 +735,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 807716
@@ -743,6 +767,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 807716
@@ -774,6 +799,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 807716
@@ -805,6 +831,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 807716
@@ -836,6 +863,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 805911
@@ -867,6 +895,7 @@
       "pass_abs": 4,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 805911
@@ -898,6 +927,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 805911
@@ -929,6 +959,7 @@
       "pass_abs": 2,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 805911
@@ -960,6 +991,7 @@
       "pass_abs": 4,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 805911
@@ -991,6 +1023,7 @@
       "pass_abs": 0,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 805911
@@ -1022,6 +1055,7 @@
       "pass_abs": 2,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 805911
@@ -1053,6 +1087,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 805911
@@ -1084,6 +1119,7 @@
       "pass_abs": 1,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 805911
@@ -1115,6 +1151,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 805911
@@ -1146,6 +1183,7 @@
       "pass_abs": 4,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 797522
@@ -1177,6 +1215,7 @@
       "pass_abs": 3,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 797522
@@ -1208,6 +1247,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 792212
@@ -1239,6 +1279,7 @@
       "pass_abs": 1,
       "outcome_abs": "Consistent-positive, not credited",
       "outcome_ci": "Consistent-positive, not credited",
+      "outcome_ci_lcb_middle": "Consistent-positive, not credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 792212
@@ -1270,6 +1311,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 5122539
@@ -1301,6 +1343,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 32,
       "control_epochs": 10,
       "n_scored": 5122539
@@ -1332,6 +1375,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 7651421
@@ -1363,6 +1407,7 @@
       "pass_abs": 5,
       "outcome_abs": "Credited",
       "outcome_ci": "Credited",
+      "outcome_ci_lcb_middle": "Credited",
       "control_batch": 16,
       "control_epochs": 30,
       "n_scored": 7651421

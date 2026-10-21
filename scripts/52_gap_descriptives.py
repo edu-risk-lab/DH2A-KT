@@ -1,4 +1,8 @@
-"""Descriptive statistics of the start-to-start gap on the three corpora.
+"""Descriptive statistics of the row-to-row gap on the three corpora.
+
+XES3G5M and ASSISTments 2012 store start times (start-to-start gaps);
+Junyi stores completion times (time_done), so its gap includes the time
+spent on the later item.
 
 No model is trained. For learner fold 0, train split, rows sorted as in
 ``UserSequenceDataset`` (user, timestamp, item), reports:
@@ -134,7 +138,11 @@ def _fmt_s(seconds: float) -> str:
 def write_table(rows: list[dict]) -> None:
     lines = [
         "\\begin{table}[t]",
-        "\\caption{Start-to-start gaps on the training split of learner fold~0.",
+        "\\caption{Gaps between consecutive rows on the training split of learner",
+        "fold~0. XES3G5M and ASSISTments~2012 store start times, so their gaps",
+        "run from start to start; Junyi stores completion times, so its gap",
+        "runs from completion to completion and includes the time spent on the",
+        "later item (Section~\\ref{sec:reuse}).",
         "Resolution is the smallest positive gap in the processed corpus.",
         "Zero-gap shares are over non-first rows; ``repeat'' rows are later",
         "KC-rows of one attempt. Gap AUC scores correctness by $\\log(1{+}\\Delta t)$",

@@ -75,7 +75,13 @@ Under either rule a message is \textbf{Credited} if the rule holds,
 \textbf{Consistent-positive (not credited)} if it fails while every
 $\Delta_s>0$, and \textbf{Unsupported} otherwise, including a negative
 mean. The middle outcome is part of the protocol: a gain that is
-positive on every seed is reported, but not credited.
+positive on every seed is reported, but not credited. Under both rules
+it uses the preregistered condition that every $\Delta_s>0$. Taking it
+from the interval instead (consistent-positive when the lower bound lies
+between $0$ and $\tau$) changes one cell of the map: ASSISTments~2012
+under the corpus configuration, observed-incidence package, lower bound
+$+1.26$ with one negative seed, moves from unsupported to
+consistent-positive.
 
 The seed rule is a minimum over seeds, so it becomes stricter as $|S|$
 grows; $|S|$ is therefore part of its definition, and maps are

@@ -84,15 +84,17 @@ advance, and assigns one of three outcomes from ten paired seeds. We
 apply it to one elapsed-time component on three corpora, two encoders,
 and three learner folds. On XES3G5M with a recurrent tracer the
 component is credited only as a package (the input with the weights
-that read it); the gap input itself is credited only on Junyi. The
-package is not credited under an attention encoder or on a coarse
+that read it), and those weights fed only zeros give about a quarter of
+the gain. The gap input itself is credited only on Junyi, whose
+completion timestamps let it carry the duration of the scored response.
+The package is not credited under an attention encoder or on a coarse
 timestamp export. On ASSISTments~2012 the gain sits at the threshold,
-so the outcome depends on the learner fold and on which of two
-decision rules is applied. Question--concept links are not credited.
-In a simulation, a hint chosen with knowledge of the next response
-raises AUC by $5.4\times 10^{-3}$ and passes the credit rules, so the
-audit must come first. Credit should be reported per corpus, backbone,
-recipe, learner fold, and control level.
+so the outcome depends on the fold and the decision rule. Question--concept
+links are not credited. In a simulation, a hint chosen with knowledge
+of the next response raises AUC by $5.4\times 10^{-3}$ and passes both
+rules; only an audit of how hints were chosen flags it. Credit should
+be reported per corpus, backbone, recipe, learner fold, and control
+level.
 \end{abstract}
 
 \begin{keyword}
@@ -148,15 +150,18 @@ with a recurrent tracer the time package is credited, but only as a
 package: a map fed only zeros already accounts for about a quarter of
 that gain, so a package-level ablation overstates what the gap input
 contributes. The same gap input is credited on Junyi and is not
-credited on XES3G5M. On ASSISTments the package is close to the
-threshold: the interval rule credits it on every fold of the reference
-recipe and on one of three folds of the corpus configuration, the seed
-rule on one fold only, and nothing is credited on an export whose
-timestamps are too coarse to order events inside a session. On
-XES3G5M, an attention encoder credits no time message on any fold. A
-single-setting ablation would have credited too much or too little.
-A synthetic simulation adds a second warning: a leaked hint passes the
-credit rules, so the rules are not a substitute for the leakage audit.
+credited on XES3G5M, but Junyi stores completion times, so its
+query-side gap includes the time spent on the scored item. On
+ASSISTments the package is close to the threshold. The interval rule
+credits it on every fold of the reference recipe and on one of three
+folds of the corpus configuration; the seed rule credits it on one fold
+only. Nothing is credited on an export whose timestamps are too coarse
+to order events inside a session. On XES3G5M, an attention encoder
+credits no time message on any fold. A single-setting ablation would
+have credited too much or too little. A synthetic simulation adds a
+second warning: a leaked hint passes the credit rules and is flagged
+only by an audit that records how each hint was chosen, so the rules
+are not a substitute for that audit.
 
 \subsection{Contributions}
 \begin{itemize}
@@ -178,8 +183,8 @@ credit rules, so the rules are not a substitute for the leakage audit.
   does not, and $|\rho|$ is degenerate on hyperedge projections
   (Section~\ref{sec:leakage-ext}). In a synthetic simulation of two
   leakage classes that the public logs cannot show, a leaked hint is
-  credited by the rules and flagged by the audit
-  (Section~\ref{sec:leak-sim}).
+  credited by the rules and flagged only by an audit that records hint
+  provenance (Section~\ref{sec:leak-sim}).
 \end{itemize}
 The ladder attributes messages on a fixed backbone. It does not
 decompose the gap from the tracer to DKT ($+28.6\times 10^{-3}$ test AUC on
@@ -335,9 +340,9 @@ question--KC relations under a richer gate. Interaction embeddings of
 $(c_t,y_t)$ and Rasch-style item parameters
 \cite{ghosh2020akt,liu2023simplekt} feed the LSTM, and step
 $t{+}1$ is scored by a query at the known identity of the next item and
-KC. In the tables the observed-incidence time package is called QKC-T
-and the zero-incidence time package is called Zero$+\Delta t$.
-Implementation aliases are listed in Table~\ref{tab:aliases}.
+KC. Table~\ref{tab:terms} names the two timed tracers (QKC-T and
+Zero$+\Delta t$); implementation aliases are listed in
+Table~\ref{tab:aliases}.
 
 \paragraph{Time package}
 The elapsed-time package is one linear map of the log gap, because a
@@ -355,7 +360,13 @@ item plus idle time and is not the duration of the scored item. We
 score at attempt onset: the prediction for item $t{+}1$ is produced when
 the learner opens it, so the query-side gap has elapsed and the item's
 identity is part of the request. The query never sees the scored
-step's response.
+step's response. This holds for start timestamps, which XES3G5M and
+ASSISTments~2012 store. Junyi stores completion times, so the gap of
+row $t{+}1$ includes the time the learner spent on item $t{+}1$, and the
+query-side gap carries information about the response being scored.
+Junyi results with a query-side gap are therefore not attempt-onset
+results; the recurrent-side gap at step $t$ covers only item $t$, whose
+response is already an input, and has no such look-ahead.
 
 \subsection{Second encoder}
 \label{sec:second-encoder}
@@ -434,9 +445,11 @@ single-seed diagnostics (\ref{app:foundational-assist}).
 Table~\ref{tab:gap-descriptives} describes the gap on each corpus. Two
 properties of the processed corpora bear on the time message. In the
 ASSISTments~2012 export of the pairwise audit, start times are stored
-at a resolution of $1{,}000$\,s, so $82.7\%$ of gaps between distinct
-items are zero and rows inside one $1{,}000$\,s window are ordered by
-item identifier. We therefore re-export ASSISTments~2012 from the raw
+at a resolution of $1{,}000$\,s, so $82.7\%$ of non-first rows have a
+zero gap between distinct items ($82.9\%$ in
+Table~\ref{tab:gap-descriptives} also counts the repeat KC-rows of one
+attempt), and rows inside one $1{,}000$\,s window are ordered by item
+identifier. We therefore re-export ASSISTments~2012 from the raw
 file at one-second resolution with the same rows and learners; the
 stored timestamps of the original export equal the new ones divided by
 $1{,}000$ and rounded down. In the re-export $0.01\%$ of gaps are
@@ -446,8 +459,11 @@ a Jaccard index of $0.59$. The one-second export is used for every
 ASSISTments row of the credit map; the original export is kept as a
 resolution sensitivity check (Table~\ref{tab:credit-assist-resolution-10seed}),
 and the teacher-grouping diagnostic of Section~\ref{sec:below-rule} was
-run on it. Junyi records completion times in microseconds, and the
-tracer received $\log(1{+}\Delta t)$ in those units. For gaps of one
+run on it. Junyi records completion times (\texttt{time\_done}) in
+microseconds. A gap between completion times includes the time spent
+on the later item, so on Junyi the query-side gap contains the duration
+of the response being scored (Section~\ref{sec:encoding}). The
+tracer received $\log(1{+}\Delta t)$ in microseconds. For gaps of one
 second or more this differs from the value in seconds by an offset
 between $13.1$ and $\ln 10^{6}\approx 13.8$, close to a constant that
 the bias of the linear map can absorb; zero gaps, $0.004\%$ of Junyi
@@ -555,6 +571,16 @@ under both rules: nine Junyi rows that stay credited and five rows that
 are never credited. Every credited row outside Junyi loses its credit
 at $\tau{=}{+}3.0$.
 
+Outcomes use validation AUC, which also selects the checkpoint by early
+stopping, so each arm is scored at its best validation epoch. Recomputed
+on test-only AUC, which plays no part in that choice
+(Table~\ref{tab:credit-test-10seed}), every XES3G5M and Junyi outcome is
+unchanged. On ASSISTments four interval outcomes and two seed-rule
+outcomes change. The interval rule then credits the zero-incidence
+package only on reference-recipe folds~1 and~2, and the seed rule
+credits no ASSISTments row, so the ASSISTments credit also depends on
+which split scores it.
+
 \paragraph{XES3G5M, LSTM tracer}
 The time package is credited, and the credit rests on the package rung
 alone (Table~\ref{tab:credit-transfer-10seed}). With the map held fixed, the
@@ -616,7 +642,12 @@ from epoch~25 or later, so a longer budget could change the size of the
 gain. The 50{,}000-learner subsample under the corpus configuration
 gives the same outcomes on all three folds. Junyi is the only setting
 in which the aligned gap input itself is credited, and the full ladder
-shares the XES3G5M recipe, so that difference comes from the corpus.
+shares the XES3G5M recipe, so the difference does not come from the
+recipe. It need not come from the learners either. Junyi gaps run
+between completion times, so in these arms the query-side gap includes
+the time spent on the scored item, a signal that is not available when
+the item opens. These Junyi credits are completion-time results, not
+attempt-onset results.
 
 \subsection{Reference run on XES3G5M}
 \label{sec:rq1-result}
@@ -767,7 +798,8 @@ Second, the setting matters. Under the XES3G5M recipe the same message
 is credited as a package on XES3G5M on all three learner folds, on
 ASSISTments~2012 on all three folds under the interval rule but on one
 under the seed rule, and as an aligned input on Junyi on all three
-folds. It is credited on one of three folds of ASSISTments~2012 under
+folds, where the gap runs between completion times. By the interval
+rule it is credited on one of three folds of ASSISTments~2012 under
 the corpus configuration, and on no fold of XES3G5M once the recurrent
 encoder is replaced by attention, nor on an ASSISTments export with
 coarse timestamps. Where the gain sits at the threshold, as on
@@ -775,13 +807,15 @@ ASSISTments, the outcome also depends on the rule, and ten seeds do not
 remove that dependence. This agrees with the observation that the leading KT
 model family depends on the dataset and on how much temporal
 information matters \cite{gervet2020deepkt}. The gap descriptives in
-Table~\ref{tab:gap-descriptives} are consistent with the corpus
-reading. Scored alone, $\log(1{+}\Delta t)$ separates correct from
+Table~\ref{tab:gap-descriptives} show where the gap carries the most
+signal. Scored alone, $\log(1{+}\Delta t)$ separates correct from
 incorrect responses far more on Junyi (AUC $0.335$, that is $0.665$
 with the sign reversed) than on XES3G5M ($0.468$) or the one-second
-ASSISTments export ($0.458$), and only on Junyi is the aligned gap
-credited; on the $1{,}000$\,s export the gap AUC is $0.492$ and the
-package is not credited. Neither descriptive explains the attention or
+ASSISTments export ($0.458$). Part of that separation is expected,
+because the Junyi gap includes the time spent on the scored item, and
+Junyi is also the only corpus on which the aligned gap is credited. On
+the $1{,}000$\,s export the gap AUC is $0.492$ and the package is not
+credited. Neither descriptive explains the attention or
 recipe results, since those comparisons hold the corpus fixed; a
 recurrent state may use an additive gap input more readily than
 attention does. The ladder records these dependences; it does not
@@ -808,27 +842,31 @@ backbones, not about the value of structural knowledge in general.
 Fifth, the credit rules do not detect leakage. A hint flag chosen with
 knowledge of the next response gains $+5.4$, more than twice the
 threshold, on every seed. The rules ask whether a gain is large and
-stable; a leaked input is both. Only the audit, run before training,
-separates such a message from a legitimate one, which is why the
-protocol places it first.
+stable; a leaked input is both. In the simulation the audit separates
+the leaky arm only because it records how each hint was chosen. The
+data-only residual check flags a dependence but cannot tell leakage
+from a hint that changes learning. A leak of this class is therefore
+caught only if the provenance of each hint is logged and audited before
+credit is assessed, which is why the protocol places the audit first.
 
 \subsection{Implications for building knowledge tracing systems}
 For a knowledge engineer adding auxiliary knowledge to a tracer, the
 results suggest five practices.
 \begin{enumerate}
-  \item Build the knowledge from training learners only and run the
-  membership audit before training, because the pairwise leakage
-  statistics do not register hyperedge contamination and a leaked
-  input can pass the credit rules.
+  \item Build the knowledge from training learners only, run the
+  membership audit before training, and log how each hint-like input
+  was chosen, because the pairwise leakage statistics do not register
+  hyperedge contamination and a leaked input can pass the credit rules.
   \item Declare the rung and the control before the run; if only a
   package control is available, report the credit as a package credit
   and the parameter count with it.
   \item Report outcomes per corpus, backbone, recipe, and learner fold,
   because a message validated on one corpus or one fold is a hypothesis
   on the next.
-  \item Check the timestamp resolution and row order of every export
-  before evaluating a time message, for example by the smallest
-  positive gap and the share of zero gaps.
+  \item Check the timestamp resolution, row order, and meaning of every
+  export before evaluating a time message: the smallest positive gap,
+  the share of zero gaps, and whether a timestamp marks the start or the
+  completion of an attempt.
   \item Keep consistent-positive (not credited) results in the record,
   since a gain that is positive on every seed and below the threshold
   on one corpus was credited on another here; and report both rules,
@@ -848,7 +886,15 @@ results suggest five practices.
   added folds were fixed in the preregistration before the new runs,
   and the threshold of both rules remains an operating choice. On
   ASSISTments the two rules disagree on four contrasts, so the credit
-  on that corpus should be read with both outcomes.
+  on that corpus should be read with both outcomes. The middle outcome
+  keeps the preregistered every-seed-positive condition under the
+  interval rule too; an interval-based middle outcome would change one
+  ASSISTments cell.
+  \item \textbf{Validation scoring.} Outcomes use the validation AUC
+  that also drives early stopping, which favours each arm. On test-only
+  AUC the XES3G5M and Junyi outcomes are unchanged, and the ASSISTments
+  credit shrinks to two reference-recipe folds under the interval rule
+  (Table~\ref{tab:credit-test-10seed}).
   \item \textbf{Time versus boundary.} Zero gaps also mark later
   KC-rows of one attempt and learner starts, so the credited package
   is attempt-context timing and boundary information, not a pure
@@ -860,7 +906,11 @@ results suggest five practices.
   one-second re-export of the pairwise-audit corpus, whose reused
   pairwise results were computed on the $1{,}000$\,s export; the
   teacher-grouping diagnostic was also run on the $1{,}000$\,s export.
-  The Junyi gap entered the tracer in microseconds
+  Junyi stores completion times, so its query-side gap includes the
+  time spent on the scored item and is not available at attempt
+  onset; its credit of the aligned gap is a completion-time result, and
+  a tracer that must score when the item opens cannot claim it.
+  The Junyi gap also entered the tracer in microseconds
   (Section~\ref{sec:reuse}). For gaps of one second or more the change
   is a near-constant offset that the bias of the linear map can absorb,
   so we expect the credit outcome to be unchanged; we did not rerun
@@ -881,10 +931,10 @@ results suggest five practices.
   \item \textbf{Audit coverage.} Discussion-thread and
   teacher-intervention hyperedges are data-blocked on public corpora.
   The cross-modal and intervention-timing classes are simulated with
-  one scalar each on one corpus and fold, not observed, and the
-  simulation statistics use provenance that a real log may not record;
-  only the residual check is data-only, and it does not separate
-  leakage from a hint that changes learning.
+  one scalar each on one corpus and fold, with five seeds, not observed.
+  The simulation statistics use provenance that a real log may not
+  record. The residual check is the only data-only test, and it does
+  not separate leakage from a hint that changes learning.
 \end{itemize}
 
 % =============================================================================
@@ -901,15 +951,19 @@ under the same recipe, the interval rule credits the zero-incidence
 package on all three folds and the seed rule on one; under the corpus
 configuration the interval rule credits it on one fold of three. On
 XES3G5M with an attention encoder the protocol credits neither the
-package nor the gap input on any fold, and on Junyi it credits both on
-every fold. Question--concept incidence is not credited on XES3G5M. An
+package nor the gap input on any fold. On Junyi it credits both on
+every fold, but there the gap runs between completion times and
+includes the time spent on the scored item, so that credit does not
+transfer to a tracer that scores when the item opens.
+Question--concept incidence is not credited on XES3G5M. An
 indicator-only input reproduces about $60\%$ of the aligned-gap gain on
 XES3G5M, and an ASSISTments export with $1{,}000$\,s timestamps does
 not credit the package, so the export is part of the setting. A single
 credit map would have misstated what the time message contributes in
 at least one of these settings. In a synthetic simulation a leaked
-hint gains $+5.4\times 10^{-3}$ and passes both rules while the audit
-flags it, so the audit has to precede the rules. Future work, in
+hint gains $+5.4\times 10^{-3}$ and passes both rules; it is flagged
+only by an audit that records how each hint was chosen, so provenance
+must be logged and audited before credit is assessed. Future work, in
 order: rerun the pairwise audit on the one-second ASSISTments export;
 test the attention encoder and a tuned optimiser on the other corpora;
 run DyGKT and recent pyKT models under this evaluator; and replace the
@@ -956,7 +1010,7 @@ recompute every credit outcome are at
 in \texttt{docs/paper-artifacts.md}, and the preregistration of the
 ten-seed map, the baseline grid, and the leakage simulation is
 \texttt{docs/preregistration.md} (first committed as \texttt{99521c6};
-the archive below holds it under its earlier file name). The manuscript state,
+archived under an earlier file name). The manuscript state,
 including the per-seed files behind
 Tables~\ref{tab:credit-transfer-10seed}
 and~\ref{tab:credit-assist-resolution-10seed} and
