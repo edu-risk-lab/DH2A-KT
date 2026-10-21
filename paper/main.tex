@@ -73,29 +73,26 @@ city={Hanoi},
 country={Vietnam}}
 
 \begin{abstract}
-Knowledge tracing systems are often built by adding auxiliary
-knowledge, such as concept graphs or response timing, to a sequence
-model, and are then judged by one area under the ROC curve. That single
-number does not show which added piece earned the gain, and knowledge
-built from the full log can carry held-out learners into the evaluation.
-We propose a credit protocol that builds such knowledge from training
-learners only, audits membership leakage, compares each component with
-a control declared in advance, and assigns one of three outcomes from
-ten paired seeds. We apply it to one elapsed-time component on three
-corpora, two encoders, and three learner folds. On XES3G5M with a
-recurrent tracer the component is credited only as a package (the input
-with the weights that read it), and those weights fed only zeros
-already give about a quarter of that gain; the gap input itself is
-credited only on Junyi. The package is not credited under an attention
-encoder or on a coarse timestamp export. On ASSISTments~2012 the
-primary interval rule credits it on every reference-recipe fold, the
-stricter seed rule on one. Question--concept links are not credited.
+Knowledge tracing systems often add auxiliary knowledge, such as
+concept graphs or response timing, to a sequence model and are judged
+by one area under the ROC curve. That number does not show which added
+piece earned the gain, and knowledge built from the full log can carry
+held-out learners into the evaluation. We propose a credit protocol
+that builds such knowledge from training learners only, audits
+membership leakage, compares each component with a control declared in
+advance, and assigns one of three outcomes from ten paired seeds. We
+apply it to one elapsed-time component on three corpora, two encoders,
+and three learner folds. On XES3G5M with a recurrent tracer the
+component is credited only as a package (the input with the weights
+that read it); the gap input itself is credited only on Junyi. The
+package is not credited under an attention encoder or on a coarse
+timestamp export. On ASSISTments~2012 the gain sits at the threshold,
+so the outcome depends on the learner fold and on which of two
+decision rules is applied. Question--concept links are not credited.
 In a simulation, a hint chosen with knowledge of the next response
 raises AUC by $5.4\times 10^{-3}$ and passes the credit rules, so the
-audit must come first. Contextual baselines, two of them
-grid-tuned, locate the tracer and are not a superiority claim. Credit
-should be reported per corpus, backbone, recipe, learner fold, and
-control level.
+audit must come first. Credit should be reported per corpus, backbone,
+recipe, learner fold, and control level.
 \end{abstract}
 
 \begin{keyword}
@@ -278,8 +275,8 @@ $\mathcal{F}=(\mathcal{F}_{\mathrm{train}},\mathcal{F}_{\mathrm{val}},
 $0.7/0.1/0.2$). Three learner folds are drawn with split seeds
 $42/43/44$, as in the pairwise audit \cite{daominh2026p0}. Training
 seeds are a separate family that initialises models: the credit map
-uses the ten seeds $\{0,17,42,1234,2024,7,99,314,2718,3407\}$, of which
-the first five are those of an earlier five-seed map and of the
+uses the ten seeds $\{0,17,42,1234,2024,7,99,314,2718,3407\}$. The
+first five are the seeds of an earlier five-seed map and of the
 contextual baselines. The value $42$ occurs in both families by
 coincidence.
 
@@ -544,13 +541,10 @@ Table~\ref{tab:credit-assist-resolution-10seed}. Rows marked Ref.\ or
 (all), and every XES3G5M row, use the reference recipe; the other
 ASSISTments and Junyi rows use the corpus configuration.
 
-Against the earlier five-seed map (\ref{app:five-seed}), two interval
-outcomes change, both on ASSISTments under the reference recipe: the
-fold-0 observed-incidence package and the fold-1 zero-incidence
-package move from consistent-positive to credited, and no interval
-credit is lost. Under the seed rule the fold-0 zero-incidence package
-of that ladder loses its credit ($5/5$ at five seeds, $9/10$ at ten),
-as a minimum over seeds can when seeds are added. A two-sided paired $t$-test of $\mu_\Delta{=}0$ with
+Adding five seeds changes two interval outcomes and one seed-rule
+outcome, all on ASSISTments packages under the reference recipe;
+\ref{app:five-seed} compares the two maps.
+A two-sided paired $t$-test of $\mu_\Delta{=}0$ with
 Holm correction over all $68$ contrasts rejects $67$; the exception is
 XES3G5M incidence ($p{=}0.95$; Table~\ref{tab:holm-all-10seed}). The
 consistent-positive rows are therefore small positive effects, not
@@ -559,7 +553,7 @@ credit. Across thresholds from $+1.0$ to $+3.0$
 (Table~\ref{tab:threshold-all-10seed}), $14$ rows keep their outcome
 under both rules: nine Junyi rows that stay credited and five rows that
 are never credited. Every credited row outside Junyi loses its credit
-by $\tau{=}{+}3.0$.
+at $\tau{=}{+}3.0$.
 
 \paragraph{XES3G5M, LSTM tracer}
 The time package is credited, and the credit rests on the package rung
@@ -587,7 +581,11 @@ twice the LSTM value ($0.47$ against $0.25$). The package credit
 belongs to the LSTM tracer, not to the gap input in general.
 
 \paragraph{ASSISTments 2012}
-This corpus is where the two rules part. Under the reference recipe the
+On ASSISTments the package gain sits at the threshold: the
+zero-incidence package means lie between $+2.05$ and $+2.53$ on the six
+one-second ladders, so its credit depends on the learner fold, the
+recipe, and the rule. This is the corpus where the two rules part.
+Under the reference recipe the
 interval rule credits the zero-incidence package on all three folds;
 the seed rule credits it on fold~2 only, because one or two of the ten
 seeds fall below the threshold on folds~0 and~1 ($9/10$ and $8/10$;
@@ -600,10 +598,7 @@ of~30, so these runs stop far earlier than the Junyi runs. Under the
 corpus configuration the zero-incidence package is credited on fold~1
 by the interval rule only ($8/10$) and is consistent-positive on
 folds~0 and~2; with observed incidence one fold-0 seed is negative, so
-that contrast is unsupported. The package credit on ASSISTments
-therefore depends on the recipe, the learner fold, and the decision
-rule; with zero-incidence package means between $+2.05$ and $+2.53$
-on the six one-second ladders, it sits at the threshold. On the original export, with start times at $1{,}000$\,s
+that contrast is unsupported. On the original export, with start times at $1{,}000$\,s
 resolution, no message is credited under either recipe or either rule
 (Table~\ref{tab:credit-assist-resolution-10seed}). The one-second
 re-export raises the reference-recipe no-time arm from $0.7645$ to
@@ -687,40 +682,43 @@ exceeds $0.05$.
 
 \subsection{Synthetic leakage simulation}
 \label{sec:leak-sim}
+\paragraph{Design}
 The public corpora have no forum, video, or teacher logs, so the
 cross-modal and intervention-timing classes of
 Table~\ref{tab:leakage-taxonomy} cannot be observed on them. Both were
 simulated on XES3G5M fold~0 with the design fixed in the
 preregistration. Each class adds one per-row scalar through one
-$\mathrm{Linear}(1,128)$ branch to the credited zero-incidence package,
-in a leaky form and a clean twin that share the branch and the five
-seeds of the earlier map. The cross-modal scalar stands in for a
-content embedding pooled after the cutoff: it is the mean correctness
-of the item over all later interactions in the full log, including
-held-out learners, shrunk toward the training mean with ten
-pseudo-counts, and it enters the next-step query. Its twin uses only
-earlier interactions of training learners. The intervention-timing
-scalar is a hint flag at step $t$ drawn with probability $0.10$ if the
-response at $t{+}1$ is wrong and $0.03$ if it is right, and it enters
-the recurrent input at $t$; its twin is drawn independently at the same
+$\mathrm{Linear}(1,128)$ branch to the credited zero-incidence package.
+The scalar comes in a leaky form and a clean control, which share the
+branch and the five seeds of the earlier map. The cross-modal scalar
+stands in for a content embedding pooled after the cutoff. It is the
+mean correctness of the item over all later interactions in the full
+log, including held-out learners, shrunk toward the training mean with
+ten pseudo-counts, and it enters the next-step query. Its clean control
+uses only earlier interactions of training learners. The
+intervention-timing scalar is a hint flag at step $t$ that enters the
+recurrent input at $t$. In the leaky form it is drawn with probability
+$0.10$ if the response at $t{+}1$ is wrong and $0.03$ if it is right;
+in the clean control it is drawn independently at the same
 training-split rate ($4.4\%$). Neither scalar is evidence about a
 public corpus.
 
-Table~\ref{tab:leak-simulation} gives the result. The leaked hint
-raises validation AUC by $+5.40$ (95\% interval $[+5.25,+5.55]$) and
-test-only AUC by $+5.18$. Every seed clears the threshold, so the
-leaky arm compared with its twin would be credited by both rules: the
-credit rules alone do not catch this leak. The cross-modal scalar adds
+\paragraph{Result}
+The credit rules alone do not catch the leaked hint
+(Table~\ref{tab:leak-simulation}). It raises validation AUC by $+5.40$
+(95\% interval $[+5.25,+5.55]$) and test-only AUC by $+5.18$, and every
+seed clears the threshold, so the leaky arm compared with its clean
+control would be credited by both rules. The cross-modal scalar adds
 nothing measurable ($-0.09$ validation, $-0.05$ test). A plausible
 reading, which we did not test, is that the item embedding already
 carries item difficulty, so a future item mean adds little; a richer
 content channel could behave differently. The audit statistics separate
-both leaky arms from their twins ($1$ against $0$), and under graded
+both leaky arms from their clean controls ($1$ against $0$), and under graded
 contamination they grow roughly linearly with the leaky fraction, so
 unlike the membership rate they measure the amount. The selection-after-outcome
 rate is known only because the simulation records how each hint was
 chosen. A data-only check that a real audit could run, the residual
-$y_{t+1}-p_{t+1}$ of the clean-twin model, is about $0.19$ lower on
+$y_{t+1}-p_{t+1}$ of the clean-control model, is about $0.19$ lower on
 hinted than on unhinted training positions on every seed: hinted steps
 are followed by more errors than the model expects. A hint chosen
 because the learner was about to fail produces that sign, but so could
@@ -957,7 +955,8 @@ recompute every credit outcome are at
 \url{https://github.com/edu-risk-lab/DH2A-KT}; a table-to-script map is
 in \texttt{docs/paper-artifacts.md}, and the preregistration of the
 ten-seed map, the baseline grid, and the leakage simulation is
-\texttt{docs/preregistration\_round2.md}. The manuscript state,
+\texttt{docs/preregistration.md} (first committed as \texttt{99521c6};
+the archive below holds it under its earlier file name). The manuscript state,
 including the per-seed files behind
 Tables~\ref{tab:credit-transfer-10seed}
 and~\ref{tab:credit-assist-resolution-10seed} and

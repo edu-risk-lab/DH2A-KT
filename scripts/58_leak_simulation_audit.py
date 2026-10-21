@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Leakage simulation report (docs/preregistration_round2.md, Section 6).
+"""Leakage simulation report (docs/preregistration.md, Section 6).
 
 Stage ``audit`` (no training, CPU): audit statistics for both synthetic
 classes on the XES3G5M fold-0 training split, for the leaky arm, its clean
@@ -293,12 +293,13 @@ def stage_table() -> int:
         "\\begin{table}[H]",
         "\\caption{Synthetic leakage simulation on XES3G5M fold~0 (zero-incidence",
         "time package plus one scalar branch, five paired seeds). Inflation is",
-        "the leaky arm minus its clean twin in units of $10^{-3}$ AUC, with the",
-        "95\\% interval; Gate is the outcome the credit rules would give that",
-        "difference at $\\tau={+}2.0$. Audit columns give the audit statistic of",
-        "each class on the training split for the leaky arm, the clean twin, and",
-        "graded fractions of rows built the leaky way. The hint residual check",
-        "(mean $y_{t+1}-p_{t+1}$ on hinted minus unhinted positions, clean-twin",
+        "the leaky arm minus its clean control in units of $10^{-3}$ AUC, with the",
+        "95\\% interval; Outcome is what the credit rules would give that",
+        "difference at $\\tau={+}2.0$. The lower block gives the audit statistic",
+        "of each class on the training split for the leaky arm, the clean",
+        "control, and mixtures in which a fraction $f$ of the rows is built the",
+        "leaky way and the rest the clean way. The hint residual check",
+        "(mean $y_{t+1}-p_{t+1}$ on hinted minus unhinted positions, clean-control",
         f"model) is between ${min(resid):+.3f}$ and ${max(resid):+.3f}$ on the five seeds.}}",
         "\\label{tab:leak-simulation}",
         "\\centering",
@@ -306,7 +307,7 @@ def stage_table() -> int:
         "\\setlength{\\tabcolsep}{3pt}",
         "\\begin{tabular}{@{}lllrl@{}}",
         "\\toprule",
-        "Class & Validation inflation & Test-only inflation & Seeds $\\ge\\tau$ & Gate \\\\",
+        "Class & Validation inflation & Test-only inflation & Seeds $\\ge\\tau$ & Outcome \\\\",
         "\\midrule",
     ]
     infl = auc["inflation_leaky_minus_clean"]

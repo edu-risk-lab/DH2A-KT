@@ -1,4 +1,4 @@
-"""Synthetic leakage classes for the round-2 simulation (docs/preregistration_round2.md, Section 6).
+"""Synthetic leakage classes for the round-2 simulation (docs/preregistration.md, Section 6).
 
 Two classes, each with a leaky scalar and a clean twin, built per interaction
 row. Neither is evidence about a public corpus; they test whether the audit

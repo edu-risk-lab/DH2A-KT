@@ -341,7 +341,7 @@ def main() -> int:
         choices=("crossmodal-leak", "crossmodal-clean", "hint-leak", "hint-clean"),
         default=None,
         help="v4: synthetic leakage-simulation scalar through Linear(1, hidden) "
-        "(dh2a_kt.data.leak_sim; docs/preregistration_round2.md Section 6).",
+        "(dh2a_kt.data.leak_sim; docs/preregistration.md Section 6).",
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)

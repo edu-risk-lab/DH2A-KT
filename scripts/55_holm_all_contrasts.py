@@ -1,4 +1,4 @@
-"""Holm-Bonferroni over every contrast of the credit map (docs/preregistration_round2.md, Section 4).
+"""Holm-Bonferroni over every contrast of the credit map (docs/preregistration.md, Section 4).
 
 Reads the paired per-seed deltas that scripts/51_transfer_credit_tables.py
 stores, runs a two-sided paired t-test of mean delta = 0 per contrast, and

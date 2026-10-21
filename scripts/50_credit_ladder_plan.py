@@ -28,7 +28,7 @@ Groups, in the order the plan cuts from the end:
   assist-sec-fold1/2  one-second export, folds 1 and 2, no time / package /
                     T-zero x 5 seeds each, frozen XES recipe
 
-Round 2 (docs/preregistration_round2.md): every group of the credit map
+Round 2 (docs/preregistration.md): every group of the credit map
 runs on ten seeds (SEEDS_10). Finished seeds are skipped by their .ok
 stamps. New groups:
 

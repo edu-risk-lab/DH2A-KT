@@ -1,4 +1,4 @@
-"""Threshold sensitivity on every row of the credit map (docs/preregistration_round2.md, Section 4).
+"""Threshold sensitivity on every row of the credit map (docs/preregistration.md, Section 4).
 
 For tau in {1.0, 1.5, 2.0, 2.5, 3.0} x 1e-3, recounts the seed rule (seeds
 with delta >= tau) and the interval rule (mean - t * SD / sqrt(n) >= tau)

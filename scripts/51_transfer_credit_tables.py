@@ -18,7 +18,7 @@ from the frozen CSVs.
 Writes results/tables/credit_ladder_transfer.json and
 paper/tables/table_credit_transfer.tex. Does not retrain anything.
 
-``--n-seeds 10`` (docs/preregistration_round2.md) adds the seeds
+``--n-seeds 10`` (docs/preregistration.md) adds the seeds
 7, 99, 314, 2718, 3407 and the fold 1-2 rows of the attention encoder,
 ASSIST2012 corpus configuration, and Junyi, with t at df = 9. XES3G5M
 fold-0 rows take the new seeds from the ``xes-ref`` ladder group. Its
@@ -321,7 +321,7 @@ def _write_heatmap(rows: list[dict]) -> None:
             mark = _HEAT_MARK[row["outcome_ci"]]
             text = _milli(row["mean_delta_val"])
             if row["outcome_abs"] != row["outcome_ci"]:
-                text += "$^{\\dagger}$"
+                text += "$\\,\\boldsymbol{\\dagger}$"
             lines.append(
                 f"\\node[draw, fill={fill}, minimum width={col_w-0.08}cm, "
                 f"minimum height={row_h-0.06}cm] at ({x},{y}) {{{mark}\\,{text}}};"

@@ -19,6 +19,16 @@
 \externaldocument{main}
 \usepackage{xurl}
 \usepackage{placeins}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.75}
+\makeatletter
+\let\dh@origtable\table
+\renewcommand{\table}[1][]{\dh@origtable[!htbp]}
+\let\dh@origfigure\figure
+\renewcommand{\figure}[1][]{\dh@origfigure[!htbp]}
+\makeatother
 % Elsevier-like float spacing (review 12pt, one column). Avoid [!t],
 % which ignores \topfraction and leaves near-empty pages.
 \setlength{\textfloatsep}{14pt plus 4pt minus 4pt}
@@ -48,6 +58,7 @@ Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
 \appendix
 \renewcommand{\thealgorithm}{\Alph{section}.\arabic{algorithm}}
 
+\FloatBarrier
 \section{Names, aliases, and the reference decision list}
 \label{app:names}
 Table~\ref{tab:aliases} maps the arm names of the paper to
@@ -86,6 +97,14 @@ Table~\ref{tab:threshold-sensitivity} is the five-seed threshold recount
 on XES3G5M fold~0. The seed rule is a minimum over seeds, so these
 outcomes are comparable with each other and not with the ten-seed
 seed-rule outcomes.
+
+Against this map, two interval outcomes of the ten-seed map change,
+both on ASSISTments~2012 under the reference recipe: the fold-0
+observed-incidence package and the fold-1 zero-incidence package move
+from consistent-positive to credited, and no interval credit is lost.
+Under the seed rule the fold-0 zero-incidence package of that ladder
+loses its credit ($5/5$ at five seeds, $9/10$ at ten), as a minimum
+over seeds can when seeds are added.
 
 \input{tables/table_credit_transfer}
 \input{tables/table_credit_assist_resolution}
@@ -188,6 +207,7 @@ against $0$ (Table~\ref{tab:leak-simulation}) \\
 \end{tabularx}
 \end{table}
 
+\FloatBarrier
 \section{Evaluation protocol details}
 \label{app:protocol-detail}
 Because the logits at position $t$ predict row $t{+}1$, local index $0$
@@ -208,6 +228,7 @@ needs stored per-row scores, which are not in the public snapshot, so
 baseline gaps remain contextual locations rather than event-paired
 differences.
 
+\FloatBarrier
 \section{Protocol residual and KC expansion}
 \label{app:protocol-residual}
 Table~\ref{tab:protocol-residual} records the residual between scoring
@@ -256,6 +277,7 @@ differ, and the comparison stays contextual.
 \input{tables/table_hparams}
 \input{tables/table_auc_xes3g5m_inherited}
 
+\FloatBarrier
 \section{Calibration}
 \label{app:calibration}
 \label{sec:calibration}
@@ -271,6 +293,7 @@ ECE exceeds $0.05$.
 \input{tables/table_calibration_xes3g5m}
 \input{figures/fig_reliability_xes3g5m}
 
+\FloatBarrier
 \section{Graph-only encoder as a forced-reliance diagnostic}
 \label{app:graph-only}
 \label{sec:manipulation-result}

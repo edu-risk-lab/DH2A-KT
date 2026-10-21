@@ -1,4 +1,4 @@
-"""Round-2 hyperparameter grid for AKT and simpleKT (docs/preregistration_round2.md, Section 5).
+"""Round-2 hyperparameter grid for AKT and simpleKT (docs/preregistration.md, Section 5).
 
 Stage ``grid``: 12 configurations per model on seed 42, scored on the
 validation split. Stage ``seeds``: the configuration with the highest

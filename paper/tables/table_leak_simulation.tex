@@ -2,12 +2,13 @@
 \begin{table}[H]
 \caption{Synthetic leakage simulation on XES3G5M fold~0 (zero-incidence
 time package plus one scalar branch, five paired seeds). Inflation is
-the leaky arm minus its clean twin in units of $10^{-3}$ AUC, with the
-95\% interval; Gate is the outcome the credit rules would give that
-difference at $\tau={+}2.0$. Audit columns give the audit statistic of
-each class on the training split for the leaky arm, the clean twin, and
-graded fractions of rows built the leaky way. The hint residual check
-(mean $y_{t+1}-p_{t+1}$ on hinted minus unhinted positions, clean-twin
+the leaky arm minus its clean control in units of $10^{-3}$ AUC, with the
+95\% interval; Outcome is what the credit rules would give that
+difference at $\tau={+}2.0$. The lower block gives the audit statistic
+of each class on the training split for the leaky arm, the clean
+control, and mixtures in which a fraction $f$ of the rows is built the
+leaky way and the rest the clean way. The hint residual check
+(mean $y_{t+1}-p_{t+1}$ on hinted minus unhinted positions, clean-control
 model) is between $-0.192$ and $-0.188$ on the five seeds.}
 \label{tab:leak-simulation}
 \centering
@@ -15,7 +16,7 @@ model) is between $-0.192$ and $-0.188$ on the five seeds.}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lllrl@{}}
 \toprule
-Class & Validation inflation & Test-only inflation & Seeds $\ge\tau$ & Gate \\
+Class & Validation inflation & Test-only inflation & Seeds $\ge\tau$ & Outcome \\
 \midrule
 Cross-modal & $-0.09$ [$-0.17, -0.01$] & $-0.05$ [$-0.11, +0.01$] & $0/5$ & Unsupp. \\
 Intervention-timing & $+5.40$ [$+5.25, +5.55$] & $+5.18$ [$+4.96, +5.40$] & $5/5$ & Credited \\

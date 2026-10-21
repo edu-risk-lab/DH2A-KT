@@ -83,14 +83,22 @@ comparable only at the same $|S|$. The interval rule scales with the
 noise of the paired contrast itself, which is the relevant noise for a
 seed-paired design \cite{bouthillier2021variance}, and it narrows as
 $|S|$ grows; it has no constant fitted to any corpus. The main map uses
-$|S|{=}10$, and the interval rule is primary. Both choices, the added
-seeds, folds, and analyses were fixed in a preregistration
-(\path{docs/preregistration_round2.md}) before the new runs; an earlier
-five-seed map is kept in \ref{app:five-seed}. When the two rules
+$|S|{=}10$, and the interval rule is primary. These two choices,
+together with the added seeds, folds, and analyses, were fixed in a
+preregistration (\path{docs/preregistration.md}) before the new runs.
+The file was committed to the public repository as \texttt{99521c6} on
+12~October 2026, and its only later change (\texttt{fc64361}, the same
+day) adds a run command; the first new result was committed in
+\texttt{2cce76b}, after both. An earlier five-seed map is kept in
+\ref{app:five-seed}. When the two rules
 disagree, both outcomes are reported. At five seeds they agree on all
 $44$ contrasts; at ten seeds they disagree on $4$ of $68$, all
 ASSISTments package contrasts on which $8$ or $9$ of the ten seeds
-reach the threshold.
+reach the threshold. The diagnostics in
+Tables~\ref{tab:a7-query-dt}, \ref{tab:leak-simulation},
+and~\ref{tab:negative-knowledge} use the five seeds of the earlier map;
+their outcomes are comparable with \ref{app:five-seed}, not with
+Table~\ref{tab:credit-transfer-10seed}.
 
 Throughout the main text, AUC differences are reported in units of
 $10^{-3}$, and $\tau{=}{+}2.0$ in that unit. On XES3G5M learner
