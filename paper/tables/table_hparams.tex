@@ -6,9 +6,12 @@ including Zero$+\Delta t$ (same optimiser as QKC-T; incidence zeroed).
 The tracer \emph{architecture} was chosen from a validation ablation
 ladder (Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and three
 $\Delta t$ injection sites); its \emph{optimiser} recipe is a single
-vector. GIKT/AKT/\textit{simpleKT}/DKT/DGEKT each used one inherited
-\textsc{pyKT} vector \cite{liu2022pykt}. AKT and \textit{simpleKT} were
-not retuned when $L$ moved from the pairwise audit's 200 to 400. GIKT seed~42
+vector. GIKT/DKT/DGEKT and the inherited AKT/\textit{simpleKT} rows each
+used one inherited \textsc{pyKT} vector \cite{liu2022pykt}. The
+grid-tuned AKT and \textit{simpleKT} rows searched $12$ configurations
+each at $L{=}400$ (batch 64, at most 30 epochs, engine patience 3),
+selected on seed-42 validation AUC only; the inherited vector is one of
+the twelve. GIKT seed~42
 restored best valid AUC at epoch~8
 and stopped by epoch~13 under patience~5 (cap~30).}
 \label{tab:hparams}
@@ -23,9 +26,11 @@ QKC-T / Zero$+\Delta t$ & architecture & ablation ladder & LSTM; Zero$+\Delta t$
 QKC-T / Zero$+\Delta t$ & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & one recipe $\times$ 5 seeds \\
 GIKT & batch / epochs / patience / $L$ & --- & 16 / 30 / 5 / 400 & match tracer training envelope ($n{=}1$) \\
 GIKT & remaining pyKT hparams & none & pairwise-audit / pyKT defaults & inherited ($n{=}1$) \\
-AKT & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\
-AKT & lr / dropout / d\_model & none at $L{=}400$ & pairwise-audit / pyKT defaults & inherited from $L{=}200$ recipe \\
-\textit{simpleKT} & $L$ / other hparams & $\{400\}$ override & 400 + pairwise-audit defaults & inherited ($n{=}1$, 5 seeds) \\
+AKT (inherited) & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\
+AKT (inherited) & lr / dropout / d\_model & none at $L{=}400$ & pairwise-audit / pyKT defaults & inherited from $L{=}200$ recipe \\
+\textit{simpleKT} (inherited) & $L$ / other hparams & $\{400\}$ override & 400 + pairwise-audit defaults & inherited ($n{=}1$, 5 seeds) \\
+AKT (grid-tuned) & lr / dropout / d\_model & $\{10^{-3},3{\times}10^{-4}\}\times\{0.05,0.10,0.20\}\times\{128,256\}$ & $10^{-3}$ / 0.10 / 128 & seed-42 validation AUC ($n{=}12$), then 5 seeds \\
+\textit{simpleKT} (grid-tuned) & lr / dropout / d\_model & same grid & $10^{-3}$ / 0.20 / 128 & seed-42 validation AUC ($n{=}12$), then 5 seeds; dropout at the grid edge \\
 DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + pairwise-audit defaults & inherited, contextual ($n{=}1$, 5 seeds) \\
 \bottomrule
 \end{tabularx}

@@ -46,7 +46,7 @@ Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
 
 \FloatBarrier
 \appendix
-\renewcommand{\thealgorithm}{C.\arabic{algorithm}}
+\renewcommand{\thealgorithm}{\thesection.\arabic{algorithm}}
 
 \section{Names, aliases, and the reference decision list}
 \label{app:names}
@@ -54,19 +54,52 @@ Table~\ref{tab:aliases} maps the arm names of the paper to
 implementation aliases in the training logs.
 Table~\ref{tab:module-hypothesis} states the hypothesis each module
 tests. The XES3G5M outcomes are the first rows of
-Table~\ref{tab:credit-transfer}; intervals are in
+Table~\ref{tab:credit-transfer-10seed}; five-seed intervals are in
 Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_aliases}
 \input{tables/table_module_hypothesis}
 \FloatBarrier
 
+\section{Multiplicity and threshold recount of the ten-seed map}
+\label{app:ten-seed-stats}
+Table~\ref{tab:holm-all-10seed} gives a two-sided paired $t$-test of
+$\mu_\Delta{=}0$ for every contrast of the ten-seed map, with
+Holm--Bonferroni correction over all $68$; the family and the test were
+fixed in the preregistration. Holm is reported beside the credit
+outcome and is not a credit rule. Table~\ref{tab:threshold-all-10seed}
+recounts the outcome of every row at five thresholds. On the five-seed
+map the same analyses reject $43$ of $44$ contrasts and leave $14$ of
+$44$ rows stable over the threshold grid; the files are in the
+repository.
+
+\input{tables/table_holm_all_contrasts_10seed}
+\input{tables/table_threshold_all_corpora_10seed}
+\FloatBarrier
+
+\section{The earlier five-seed map}
+\label{app:five-seed}
+Tables~\ref{tab:credit-transfer} and~\ref{tab:credit-assist-resolution}
+are the credit map on the first five seeds $\{0,17,42,1234,2024\}$,
+with the same rows minus the folds added for the ten-seed map. At five
+seeds the two rules agree on all $44$ contrasts.
+Table~\ref{tab:threshold-sensitivity} is the five-seed threshold recount
+on XES3G5M fold~0. The seed rule is a minimum over seeds, so these
+outcomes are comparable with each other and not with the ten-seed
+seed-rule outcomes.
+
+\input{tables/table_credit_transfer}
+\input{tables/table_credit_assist_resolution}
+\input{tables/table_threshold_sensitivity}
+\FloatBarrier
+
 \section{Per-seed records of the XES3G5M reference run}
 \label{app:reference-run}
 Tables~\ref{tab:qkc-capacity}--\ref{tab:p4-raw} give the per-seed
-validation and test differences behind the XES3G5M rows of the credit
-map, and Table~\ref{tab:attribution-summary} collects their 95\%
-intervals. In this appendix a printed $\Delta$ is a difference of
+validation and test differences on the first five seeds behind the
+XES3G5M rows of the credit map, and Table~\ref{tab:attribution-summary}
+collects their 95\% intervals; the files of the other five seeds are in
+the repository. In this appendix a printed $\Delta$ is a difference of
 validation AUC, not the $10^{-3}$ unit used in the credit map.
 Table~\ref{tab:auc-p0-dt-folds} reports the three-fold
 stability of the absolute test AUC of QKC-T.
@@ -76,8 +109,10 @@ Holm--Bonferroni correction over a family of $m{=}3$, are in
 Table~\ref{tab:credit-stats}. The two package contrasts remain
 significant against $H_0{:}\,\mu_\Delta=0$ and the incidence contrast
 does not. The family was chosen after the incidence and timing controls
-existed and is not presented as fixed before any exploratory run. The
-credit rules of the paper do not use these $p$-values.
+existed and is not presented as fixed before any exploratory run; the
+preregistered family over all contrasts is
+Table~\ref{tab:holm-all-10seed}. The credit rules of the paper do not
+use these $p$-values.
 
 \input{tables/table_qkc_capacity_matched}
 \input{tables/table_qkc_zero_time}
@@ -141,12 +176,15 @@ Group-membership & A hyperedge with $\ge 1$ member drawn from a held-out
 interaction while other members are train-only & Group-membership leak
 rate (XES3G5M fold~0: $0$; Table~\ref{tab:leakage-measured}) \\
 Cross-modal & A forum or video embedding pooled over content timestamped
-after the prediction cutoff & Not instantiated (no forum or video logs
-on the corpora used) \\
+after the prediction cutoff & No forum or video logs on the corpora
+used; simulated with a post-cutoff item statistic, post-cutoff support
+share $1$ against $0$ (Table~\ref{tab:leak-simulation}) \\
 Intervention-timing & A teacher or hint hyperedge whose content was
 chosen using knowledge of the student's later correctness & Not
-instantiated for teachers; hint members on FoundationalASSIST use
-train-only session construction (group-membership leak $0$) \\
+observable for teachers; hint members on FoundationalASSIST use
+train-only session construction (group-membership leak $0$); simulated
+with an outcome-dependent hint flag, selection-after-outcome rate $1$
+against $0$ (Table~\ref{tab:leak-simulation}) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -210,8 +248,12 @@ was used, and how many configurations were tried
 \cite{pineau2021repro}. We do not claim a matched tuning budget. The
 tracer was selected from a validation ablation ladder (incidence on or
 off, three injection sites, and the diagnostics of
-Table~\ref{tab:negative-knowledge}), whereas each baseline used one
-inherited hyperparameter vector; that asymmetry favours the tracer.
+Table~\ref{tab:negative-knowledge}) with a single optimiser vector.
+GIKT, DKT, DGEKT, and the inherited AKT and \textit{simpleKT} rows used
+one inherited hyperparameter vector each; the grid-tuned AKT and
+\textit{simpleKT} rows searched $12$ configurations each, with the
+selection fixed in the preregistration. The budgets therefore still
+differ, and the comparison stays contextual.
 
 \input{tables/table_hparams}
 \input{tables/table_auc_xes3g5m_inherited}

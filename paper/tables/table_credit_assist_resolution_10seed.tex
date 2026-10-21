@@ -1,0 +1,29 @@
+\begin{table}[H]
+\caption{ASSISTments~2012 on the original export, whose start times
+are stored at 1{,}000\,s resolution. The one-second re-export of the
+same rows is in Table~\ref{tab:credit-transfer-10seed}. Fold~0, ten paired
+seeds. Differences are in units of $10^{-3}$ validation AUC; the
+bracket is the lower 95\% bound. Where the rules differ, the outcome
+is given as seed rule/interval rule. Abbreviations as in Table~\ref{tab:credit-transfer-10seed}.}
+\label{tab:credit-assist-resolution-10seed}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Recipe & Contrast & Mean [lower] & Outcome \\
+\midrule
+Corpus & Q$\leftarrow$KC incidence & $+1.23$ [$+0.80$] & Cons.-pos. $1/10$ \\
+ & Package, observed incidence & $+2.22$ [$+1.92$] & Cons.-pos. $7/10$ \\
+ & Package, zero incidence & $+2.20$ [$+1.58$] & Cons.-pos. $6/10$ \\
+ & Aligned gap vs.\ T-zero & $+1.91$ [$+1.70$] & Cons.-pos. $4/10$ \\
+ & Aligned gap vs.\ T-misaligned & $+2.27$ [$+1.98$] & Cons.-pos. $7/10$ \\
+\addlinespace
+Reference & Q$\leftarrow$KC incidence & $+1.36$ [$+1.04$] & Cons.-pos. $1/10$ \\
+ & Package, observed incidence & $+2.31$ [$+1.68$] & Cons.-pos. $6/10$ \\
+ & Package, zero incidence & $+2.14$ [$+1.63$] & Cons.-pos. $5/10$ \\
+ & Aligned gap vs.\ T-zero & $+1.88$ [$+1.71$] & Cons.-pos. $3/10$ \\
+ & Aligned gap vs.\ T-misaligned & $+2.17$ [$+1.82$] & Cons.-pos. $7/10$ \\
+\bottomrule
+\end{tabular}
+\end{table}

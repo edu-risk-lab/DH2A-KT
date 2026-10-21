@@ -78,38 +78,46 @@ mean. The middle outcome is part of the protocol: a gain that is
 positive on every seed is reported, but not credited.
 
 The seed rule is a minimum over seeds, so it becomes stricter as $|S|$
-grows; $|S|{=}5$ is therefore part of its definition, and maps are
+grows; $|S|$ is therefore part of its definition, and maps are
 comparable only at the same $|S|$. The interval rule scales with the
 noise of the paired contrast itself, which is the relevant noise for a
-seed-paired design \cite{bouthillier2021variance}, and it has no
-constant fitted to any corpus. When the two rules disagree, both
-outcomes are reported. In this paper they do not.
+seed-paired design \cite{bouthillier2021variance}, and it narrows as
+$|S|$ grows; it has no constant fitted to any corpus. The main map uses
+$|S|{=}10$, and the interval rule is primary. Both choices, the added
+seeds, folds, and analyses were fixed in a preregistration
+(\path{docs/preregistration_round2.md}) before the new runs; an earlier
+five-seed map is kept in \ref{app:five-seed}. When the two rules
+disagree, both outcomes are reported. At five seeds they agree on all
+$44$ contrasts; at ten seeds they disagree on $4$ of $68$, all
+ASSISTments package contrasts on which $8$ or $9$ of the ten seeds
+reach the threshold.
 
 Throughout the main text, AUC differences are reported in units of
 $10^{-3}$, and $\tau{=}{+}2.0$ in that unit. On XES3G5M learner
-fold~0 this is about nine times the seed standard deviation of the two
-package control arms ($0.21$ and $0.23$), and about half the gap
+fold~0 this is seven to eight times the seed standard deviation of the
+two package control arms ($0.28$ and $0.25$), and about half the gap
 between the timed tracer and the closest contextual baseline in
 Table~\ref{tab:auc-xes3g5m} ($+3.7$). Recounting the unrounded per-seed
-differences (Table~\ref{tab:threshold-sensitivity}) shows that the
-reference map holds for any seed-rule threshold in $(+1.75,+2.36]$.
-The value is an operating rule, not a hypothesis
-test of $\mu_\Delta{=}0$, and not a registered public standard.
-
-\input{tables/table_threshold_sensitivity}
+differences shows that the XES3G5M fold-0 map holds for any seed-rule
+threshold in $(+1.53,+2.10]$ and any interval-rule threshold in
+$(+1.72,+2.38]$; Table~\ref{tab:threshold-all-10seed} repeats the
+recount for every row. The value is an operating rule, not a
+hypothesis test of $\mu_\Delta{=}0$, and not a registered public
+standard.
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
 Algorithm~\ref{alg:register} is the interface. A new message enters
-the ladder only with a declared rung, a designated control, five
-paired seeds, and an outcome under both rules. A worked example is in
+the ladder only with a declared rung, a designated control, a fixed
+set of paired seeds (ten in this paper), and an outcome under both
+rules. A worked example is in
 the repository file \path{docs/REGISTER_MESSAGE.md}.
 
 \begin{algorithm}[t]
 \caption{Register a message on the credit ladder.}
 \label{alg:register}
 \begin{algorithmic}[1]
-\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}5$; $\tau{=}{+}2.0\times 10^{-3}$
+\STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}10$; $\tau{=}{+}2.0\times 10^{-3}$
 \STATE Choose rung (i), (ii), or (iii) and the designated control
 \STATE If rung (iii), record the number of added parameters
 \FOR{each seed $s\in S$}

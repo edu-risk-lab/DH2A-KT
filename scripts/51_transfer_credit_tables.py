@@ -316,9 +316,11 @@ def _write_heatmap(rows: list[dict]) -> None:
                     f"minimum height={row_h-0.06}cm] at ({x},{y}) {{}};"
                 )
                 continue
-            fill = _HEAT_FILL[row["outcome_abs"]]
-            mark = _HEAT_MARK[row["outcome_abs"]]
+            fill = _HEAT_FILL[row["outcome_ci"]]
+            mark = _HEAT_MARK[row["outcome_ci"]]
             text = _milli(row["mean_delta_val"])
+            if row["outcome_abs"] != row["outcome_ci"]:
+                text += "$^{\\dagger}$"
             lines.append(
                 f"\\node[draw, fill={fill}, minimum width={col_w-0.08}cm, "
                 f"minimum height={row_h-0.06}cm] at ({x},{y}) {{{mark}\\,{text}}};"
@@ -334,6 +336,14 @@ def _write_heatmap(rows: list[dict]) -> None:
         "the package against the parameter-padded control; Bnd vs 0, T-boundary",
         "against T-zero. The number is the mean paired difference in units of",
         "$10^{-3}$ validation AUC. An empty cell was not run.",
+        *(
+            []
+            if all(r["outcome_abs"] == r["outcome_ci"] for r in keep)
+            else [
+                "Colours follow the interval rule; a dagger marks a cell where",
+                "the seed rule gives consistent-positive instead.",
+            ]
+        ),
         f"The $1{{,}}000$\\,s export is Table~\\ref{{tab:credit-assist-resolution{LABEL_SUFFIX}}}.}}",
         f"\\label{{fig:credit-heatmap{LABEL_SUFFIX}}}",
         "\\end{figure}",

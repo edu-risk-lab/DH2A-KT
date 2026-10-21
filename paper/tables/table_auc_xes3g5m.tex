@@ -6,7 +6,9 @@ the recipe and are not event-paired differences
 (Section~\ref{sec:clean-protocol}). Mean $\pm$ sample SD over five
 training seeds. QKC-T has observed incidence and the time package;
 Zero$+\Delta t$ has zeroed incidence and the time package. GIKT shares
-the training envelope, not a hyperparameter search (\ref{app:hparams}).
+the training envelope, not a hyperparameter search. Grid-tuned rows use
+the configuration with the highest seed-42 validation AUC over a
+12-point grid (\ref{app:hparams}); the inherited rows are kept.
 Inherited DKT and DGEKT: Table~\ref{tab:auc-inherited}.}
 \label{tab:auc-xes3g5m}
 \centering
@@ -18,7 +20,9 @@ QKC-T & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 Zero$+\Delta t$ & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 Q$\leftarrow$KC only & $0.8268{\pm}0.0002$ & 1{,}093{,}755 & 5 \\
 GIKT (training-envelope-matched) & $0.8258{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
+\textit{simpleKT} ($L{=}400$; grid-tuned) & $0.8254{\pm}0.0002$ & 1{,}093{,}720 & 5 \\
 AKT ($L{=}400$; inherited) & $0.8223{\pm}0.0001$ & 1{,}093{,}720 & 5 \\
+AKT ($L{=}400$; grid-tuned) & $0.8218{\pm}0.0006$ & 1{,}093{,}720 & 5 \\
 \textit{simpleKT} ($L{=}400$; inherited) & $0.8214{\pm}0.0007$ & 1{,}093{,}720 & 5 \\
 \bottomrule
 \end{tabular}

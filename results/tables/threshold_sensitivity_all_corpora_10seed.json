@@ -1,0 +1,2394 @@
+{
+  "source": "credit_ladder_transfer_10seed.json",
+  "thresholds": [
+    0.001,
+    0.0015,
+    0.002,
+    0.0025,
+    0.003
+  ],
+  "t_975": 2.2621571627409915,
+  "n_seeds": 10,
+  "rows": [
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": -6.529401538724056e-06,
+      "min_delta_val": -0.0005622772954489985,
+      "lcb95_delta_val": -0.00024267854746593296,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0015": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0026316243521183336,
+      "min_delta_val": 0.0022117070115131865,
+      "lcb95_delta_val": 0.0024336702668264092,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0025464116144972237,
+      "min_delta_val": 0.0023726353688234836,
+      "lcb95_delta_val": 0.0024031328625991814,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0018505720915523605,
+      "min_delta_val": 0.0015325299306970797,
+      "lcb95_delta_val": 0.0017173873522242815,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0014518834188964492,
+      "min_delta_val": 0.001082149820677225,
+      "lcb95_delta_val": 0.0013133155627607122,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Package vs.\\ param-padded no-time",
+      "mean_delta_val": 0.0026278065278874997,
+      "min_delta_val": 0.002097234245801327,
+      "lcb95_delta_val": 0.002377273802327531,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-shuffled",
+      "mean_delta_val": 0.0014756043151915143,
+      "min_delta_val": 0.0010843358707730566,
+      "lcb95_delta_val": 0.001329432460081461,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "Aligned gap vs.\\ T-boundary",
+      "mean_delta_val": 0.0007395906361305049,
+      "min_delta_val": 0.00046364375916518874,
+      "lcb95_delta_val": 0.0005772148874902908,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0015": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "XES3G5M",
+      "contrast": "T-boundary vs.\\ T-zero",
+      "mean_delta_val": 0.0011109814554218556,
+      "min_delta_val": 0.000640886848579103,
+      "lcb95_delta_val": 0.0009284959023977432,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0015": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "XES3G5M fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0029528941296949273,
+      "min_delta_val": 0.0023146176029332777,
+      "lcb95_delta_val": 0.0027112974432826576,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.001930916620770784,
+      "min_delta_val": 0.0015274440969460512,
+      "lcb95_delta_val": 0.0016799665005269974,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0027323293655801663,
+      "min_delta_val": 0.0024794341508177498,
+      "lcb95_delta_val": 0.0025920358399833285,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0018827965281560943,
+      "min_delta_val": 0.0014316555918807428,
+      "lcb95_delta_val": 0.0016129061738990621,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.001697220060850635,
+      "min_delta_val": 0.0009994885266775277,
+      "lcb95_delta_val": 0.0013601672118804186,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0015465398143568953,
+      "min_delta_val": 0.000802511700073727,
+      "lcb95_delta_val": 0.0012611454771315493,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0013001370090555907,
+      "min_delta_val": 0.0008015098092073458,
+      "lcb95_delta_val": 0.0010841384625328678,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0017671433765117151,
+      "min_delta_val": 0.0006493838540406749,
+      "lcb95_delta_val": 0.0013463142962789674,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0018380862951551725,
+      "min_delta_val": 0.001330803957202753,
+      "lcb95_delta_val": 0.0015741970563406052,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 1",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0015875065380021702,
+      "min_delta_val": 0.0006069880612182832,
+      "lcb95_delta_val": 0.0011772433486088767,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.002099165493652644,
+      "min_delta_val": 0.0008768691134557471,
+      "lcb95_delta_val": 0.0016284058256340835,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.001942710092424249,
+      "min_delta_val": 0.0015008294589743398,
+      "lcb95_delta_val": 0.0016102470776744057,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "XES3G5M attn.\\ fold 2",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0014364483217432333,
+      "min_delta_val": 0.0009796671175835714,
+      "lcb95_delta_val": 0.0011871771662225166,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0015605086665943623,
+      "min_delta_val": 0.0011220644509384314,
+      "lcb95_delta_val": 0.001304528797459303,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0017698810274578425,
+      "min_delta_val": -5.7316990516365074e-05,
+      "lcb95_delta_val": 0.0012618234535488244,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Unsupported",
+          "outcome_interval": "Unsupported"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.002053003737166359,
+      "min_delta_val": 0.0014137523290962406,
+      "lcb95_delta_val": 0.001701428572601143,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0013166635561956187,
+      "min_delta_val": 0.0008155955343938093,
+      "lcb95_delta_val": 0.0009680873598425638,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0015": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "ASSIST2012",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.001803715394234695,
+      "min_delta_val": 0.0010101173087595505,
+      "lcb95_delta_val": 0.0015117845233330427,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 1",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0019047548445216723,
+      "min_delta_val": 0.0011586772304991166,
+      "lcb95_delta_val": 0.0016741269331730958,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 1",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0018132662983482927,
+      "min_delta_val": 0.00103273527880976,
+      "lcb95_delta_val": 0.0015402688183021123,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.002359644366941682,
+      "min_delta_val": 0.001377895286290065,
+      "lcb95_delta_val": 0.0020182504394769744,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0015184455899242665,
+      "min_delta_val": 0.0004615086386560163,
+      "lcb95_delta_val": 0.0010282627689443221,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 1",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0018327976603080831,
+      "min_delta_val": 0.0012389967376142952,
+      "lcb95_delta_val": 0.0015601175815018796,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 2",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0017270728251903233,
+      "min_delta_val": 0.0008971596088878098,
+      "lcb95_delta_val": 0.0014396250819801839,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 2",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0019833697070522293,
+      "min_delta_val": 0.0005054655486165238,
+      "lcb95_delta_val": 0.0014075636300915728,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.002426090495552524,
+      "min_delta_val": 0.0010783639967040237,
+      "lcb95_delta_val": 0.00175770312413781,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.00177782160911244,
+      "min_delta_val": 0.0007884285109618361,
+      "lcb95_delta_val": 0.0013241365936642897,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 fold 2",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0018436658825953134,
+      "min_delta_val": 0.0014642986219529641,
+      "lcb95_delta_val": 0.0016677217719430946,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0015795869079407777,
+      "min_delta_val": 0.0005641962716683713,
+      "lcb95_delta_val": 0.0011768374505854325,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.002444009849371598,
+      "min_delta_val": 0.001627714536219016,
+      "lcb95_delta_val": 0.002086860137794073,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0024134585737784044,
+      "min_delta_val": 0.0018018518043637632,
+      "lcb95_delta_val": 0.0020970958370150694,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0019619990104170703,
+      "min_delta_val": 0.0013237058916406585,
+      "lcb95_delta_val": 0.0016547161953119514,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0017291233635051805,
+      "min_delta_val": 0.0009086242743376882,
+      "lcb95_delta_val": 0.0013867976398547065,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0012329807963078255,
+      "min_delta_val": 0.0004533815511358341,
+      "lcb95_delta_val": 0.000803645076591758,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0015": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0022203604000431308,
+      "min_delta_val": 0.0016974808776032413,
+      "lcb95_delta_val": 0.001915322247005585,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0022047331333274077,
+      "min_delta_val": 0.0011247071268984943,
+      "lcb95_delta_val": 0.0015803180916277595,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0019071407687359376,
+      "min_delta_val": 0.0012128662765678033,
+      "lcb95_delta_val": 0.0017029059816949038,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.002265996040710572,
+      "min_delta_val": 0.0015927509525103245,
+      "lcb95_delta_val": 0.0019783671120388786,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
+      "contrast": "Q$\\leftarrow$KC incidence",
+      "mean_delta_val": 0.0013613771446139955,
+      "min_delta_val": 0.0007547161365899502,
+      "lcb95_delta_val": 0.0010425994429276,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
+      "contrast": "Package, observed incidence",
+      "mean_delta_val": 0.0023071348126862735,
+      "min_delta_val": 0.0010763897467148675,
+      "lcb95_delta_val": 0.0016798181277508225,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0021420133444398637,
+      "min_delta_val": 0.0009862113068864753,
+      "lcb95_delta_val": 0.0016273991208506304,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0018816755751195236,
+      "min_delta_val": 0.001459693513938709,
+      "lcb95_delta_val": 0.001706389533381003,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 1{,}000\\,s ref.",
+      "contrast": "Aligned gap vs.\\ T-misaligned",
+      "mean_delta_val": 0.0021705510944395544,
+      "min_delta_val": 0.0012263207935460096,
+      "lcb95_delta_val": 0.0018151897202147154,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.\\ fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0024932467720381714,
+      "min_delta_val": 0.0011627817262052087,
+      "lcb95_delta_val": 0.002006529965672729,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 5,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 3,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.\\ fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.002031943414476067,
+      "min_delta_val": 0.0008927163225119772,
+      "lcb95_delta_val": 0.0015112641417694434,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 8,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 7,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.\\ fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.002534595849078625,
+      "min_delta_val": 0.002062616444293841,
+      "lcb95_delta_val": 0.002255675048126731,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 4,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 1,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "ASSIST2012 ref.\\ fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0016370986674460243,
+      "min_delta_val": 0.0008845569169135814,
+      "lcb95_delta_val": 0.0013020219316731794,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 6,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0020": {
+          "pass_seed": 2,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0025": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        },
+        "0.0030": {
+          "pass_seed": 0,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Consistent-positive, not credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "Junyi (50k)",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0041399207078520964,
+      "min_delta_val": 0.00347085674066705,
+      "lcb95_delta_val": 0.003909318177148531,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (50k)",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.003895901642068167,
+      "min_delta_val": 0.0034867941401339753,
+      "lcb95_delta_val": 0.003621508622830413,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (50k) fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.004057160989907427,
+      "min_delta_val": 0.003514766536938385,
+      "lcb95_delta_val": 0.0037772288760546443,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (50k) fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0038413908458730718,
+      "min_delta_val": 0.0032272766698268063,
+      "lcb95_delta_val": 0.0035621332975860095,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (50k) fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.003643078320387394,
+      "min_delta_val": 0.0032168865316519746,
+      "lcb95_delta_val": 0.0034366031901368814,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (50k) fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.00341485342714849,
+      "min_delta_val": 0.003089440543800781,
+      "lcb95_delta_val": 0.0031975318222726957,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (all)",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0032636834830851668,
+      "min_delta_val": 0.0028900491448493604,
+      "lcb95_delta_val": 0.003117431608052711,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "Junyi (all)",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0032562208793482372,
+      "min_delta_val": 0.0028483442837676787,
+      "lcb95_delta_val": 0.0030926038310084528,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "Junyi (all) fold 1",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0034282510965340184,
+      "min_delta_val": 0.003249889529549188,
+      "lcb95_delta_val": 0.003341609359019034,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (all) fold 1",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.0033856761916038593,
+      "min_delta_val": 0.003167067462581219,
+      "lcb95_delta_val": 0.0032783037223082976,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    },
+    {
+      "corpus": "Junyi (all) fold 2",
+      "contrast": "Package, zero incidence",
+      "mean_delta_val": 0.0033154637711113157,
+      "min_delta_val": 0.0029388853392960934,
+      "lcb95_delta_val": 0.0031750492110190877,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 9,
+          "outcome_seed": "Consistent-positive, not credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": false
+    },
+    {
+      "corpus": "Junyi (all) fold 2",
+      "contrast": "Aligned gap vs.\\ T-zero",
+      "mean_delta_val": 0.003299287292763531,
+      "min_delta_val": 0.0030983796549094444,
+      "lcb95_delta_val": 0.0031877382343329713,
+      "by_tau": {
+        "0.0010": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0015": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0020": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0025": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        },
+        "0.0030": {
+          "pass_seed": 10,
+          "outcome_seed": "Credited",
+          "outcome_interval": "Credited"
+        }
+      },
+      "stable_over_grid": true
+    }
+  ]
+}

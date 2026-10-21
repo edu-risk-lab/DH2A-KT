@@ -17,7 +17,13 @@ Earlier freezes: `kbs-submit-2026-09-09`
 | Fig. 1 attribution pipeline | TikZ | `paper/figures/fig_architecture.tex` |
 | Table evidence types (credit ladder) | hand-maintained | `paper/tables/table_evidence_types.tex` |
 | Table threshold sensitivity | `scripts/45_recount_threshold_sensitivity.py` | `results/tables/threshold_sensitivity_recount.json`, `paper/tables/table_threshold_sensitivity.tex` |
-| Table credit map (all settings; seed rule and interval rule) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex` |
+| Table credit map, five seeds (appendix) | `scripts/51_transfer_credit_tables.py` (runs from `scripts/50_credit_ladder_plan.py`) | `results/tables/credit_ladder_transfer.json`, `paper/tables/table_credit_transfer.tex`, `table_credit_assist_resolution.tex`, `paper/figures/fig_credit_heatmap.tex` |
+| Table and Figure credit map, ten seeds (main) | `scripts/51_transfer_credit_tables.py --n-seeds 10` | `results/tables/credit_ladder_transfer_10seed.json`, `paper/tables/table_credit_transfer_10seed.tex`, `table_credit_assist_resolution_10seed.tex`, `paper/figures/fig_credit_heatmap_10seed.tex` |
+| Table Holm over all contrasts (appendix) | `scripts/55_holm_all_contrasts.py [--n-seeds 10]` | `results/tables/holm_all_contrasts{,_10seed}.json`, `paper/tables/table_holm_all_contrasts{,_10seed}.tex` |
+| Table threshold recount, every row (appendix) | `scripts/56_threshold_all_corpora.py [--n-seeds 10]` | `results/tables/threshold_sensitivity_all_corpora{,_10seed}.json`, `paper/tables/table_threshold_all_corpora{,_10seed}.tex` |
+| Grid-tuned AKT / simpleKT rows | `scripts/57_baseline_grid.py --stage grid/seeds/select` | `results/tables/baseline_grid_xes3g5m_fold0.csv` |
+| Table leakage simulation | `scripts/58_leak_simulation_audit.py --stage audit/auc/table` | `results/tables/leak_simulation_audit.json`, `leak_simulation_auc.json`, `paper/tables/table_leak_simulation.tex` |
+| Graded membership control, weighted support share | `scripts/53_partial_membership_control.py` | `results/tables/xes3g5m_fold0_partial_membership_control.json`, lower block of `paper/tables/table_leakage_audit.tex` |
 | XES T-boundary / T-shuffled controls | `scripts/50_credit_ladder_plan.py --group xes-gap-controls` | rows in `credit_ladder_transfer.json` |
 | XES folds 1–2 package and aligned gap | `scripts/50_credit_ladder_plan.py --group xes-fold1` / `xes-fold2` | same |
 | Gap descriptives (Junyi in microseconds; ASSIST2012 stored at 1,000 s) | `scripts/52_gap_descriptives.py` | `results/tables/gap_descriptives.json`, `paper/tables/table_gap_descriptives.tex` |
