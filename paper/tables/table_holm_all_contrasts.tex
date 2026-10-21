@@ -3,7 +3,7 @@
 \caption{Paired two-sided $t$-tests of mean difference $=0$ over 5
 seeds, Holm-adjusted across all 44 contrasts ($\alpha=0.05$).
 Reported beside the credit outcome; Holm is not a credit rule. Mean is
-in units of $10^{-3}$ validation AUC.}
+in units of $10^{-3}$ validation AUC. Credit: C credited, P consistent-positive (not credited), U unsupported.}
 \label{tab:holm-all}
 \centering
 \scriptsize
@@ -13,61 +13,61 @@ in units of $10^{-3}$ validation AUC.}
 \toprule
 Setting & Contrast & Mean & $p$ & $p_{\mathrm{Holm}}$ & Credit \\
 \midrule
-XES3G5M & Q$\leftarrow$KC incidence & $-0.10$ & $0.5345$ & $0.5345$ & Unsupp. \\
- & Package, observed incidence & $+2.74$ & $1.8\times10^{-5}$ & $0.0006$ & Credited \\
- & Package, zero incidence & $+2.55$ & $2.9\times10^{-6}$ & $0.0001$ & Credited \\
- & Aligned gap vs.\ T-zero & $+1.83$ & $9.4\times10^{-7}$ & $4.1\times10^{-5}$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+1.44$ & $0.0003$ & $0.0075$ & Cons.-pos. \\
- & Package vs.\ param-padded no-time & $+2.65$ & $4.2\times10^{-5}$ & $0.0013$ & Credited \\
- & Aligned gap vs.\ T-shuffled & $+1.47$ & $0.0004$ & $0.0075$ & Cons.-pos. \\
- & Aligned gap vs.\ T-boundary & $+0.72$ & $0.0017$ & $0.0216$ & Cons.-pos. \\
- & T-boundary vs.\ T-zero & $+1.11$ & $5.7\times10^{-5}$ & $0.0016$ & Cons.-pos. \\
+XES3G5M & Q$\leftarrow$KC incidence & $-0.10$ & $0.5345$ & $0.5345$ & U \\
+ & Package, observed incidence & $+2.74$ & $1.8\times10^{-5}$ & $0.0006$ & C \\
+ & Package, zero incidence & $+2.55$ & $2.9\times10^{-6}$ & $0.0001$ & C \\
+ & Aligned gap vs.\ T-zero & $+1.83$ & $9.4\times10^{-7}$ & $4.1\times10^{-5}$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+1.44$ & $0.0003$ & $0.0075$ & P \\
+ & Package vs.\ param-padded no-time & $+2.65$ & $4.2\times10^{-5}$ & $0.0013$ & C \\
+ & Aligned gap vs.\ T-shuffled & $+1.47$ & $0.0004$ & $0.0075$ & P \\
+ & Aligned gap vs.\ T-boundary & $+0.72$ & $0.0017$ & $0.0216$ & P \\
+ & T-boundary vs.\ T-zero & $+1.11$ & $5.7\times10^{-5}$ & $0.0016$ & P \\
 \addlinespace
-XES3G5M fold 1 & Package, zero incidence & $+3.16$ & $1.7\times10^{-6}$ & $7.3\times10^{-5}$ & Credited \\
- & Aligned gap vs.\ T-zero & $+1.72$ & $5.1\times10^{-6}$ & $0.0002$ & Cons.-pos. \\
+XES3G5M fold 1 & Package, zero incidence & $+3.16$ & $1.7\times10^{-6}$ & $7.3\times10^{-5}$ & C \\
+ & Aligned gap vs.\ T-zero & $+1.72$ & $5.1\times10^{-6}$ & $0.0002$ & P \\
 \addlinespace
-XES3G5M fold 2 & Package, zero incidence & $+2.72$ & $7.7\times10^{-6}$ & $0.0003$ & Credited \\
- & Aligned gap vs.\ T-zero & $+1.72$ & $0.0001$ & $0.0038$ & Cons.-pos. \\
+XES3G5M fold 2 & Package, zero incidence & $+2.72$ & $7.7\times10^{-6}$ & $0.0003$ & C \\
+ & Aligned gap vs.\ T-zero & $+1.72$ & $0.0001$ & $0.0038$ & P \\
 \addlinespace
-XES3G5M attn. & Package, zero incidence & $+1.78$ & $0.0026$ & $0.0249$ & Cons.-pos. \\
- & Aligned gap vs.\ T-zero & $+1.35$ & $0.0022$ & $0.0249$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+1.11$ & $0.0003$ & $0.0074$ & Cons.-pos. \\
+XES3G5M attn. & Package, zero incidence & $+1.78$ & $0.0026$ & $0.0249$ & P \\
+ & Aligned gap vs.\ T-zero & $+1.35$ & $0.0022$ & $0.0249$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+1.11$ & $0.0003$ & $0.0074$ & P \\
 \addlinespace
-ASSIST2012 & Q$\leftarrow$KC incidence & $+1.55$ & $0.0012$ & $0.0189$ & Cons.-pos. \\
- & Package, observed incidence & $+1.69$ & $0.0210$ & $0.0441$ & Unsupp. \\
- & Package, zero incidence & $+2.00$ & $0.0026$ & $0.0249$ & Cons.-pos. \\
- & Aligned gap vs.\ T-zero & $+1.37$ & $0.0013$ & $0.0191$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+1.73$ & $6.6\times10^{-6}$ & $0.0002$ & Cons.-pos. \\
+ASSIST2012 & Q$\leftarrow$KC incidence & $+1.55$ & $0.0012$ & $0.0189$ & P \\
+ & Package, observed incidence & $+1.69$ & $0.0210$ & $0.0441$ & U \\
+ & Package, zero incidence & $+2.00$ & $0.0026$ & $0.0249$ & P \\
+ & Aligned gap vs.\ T-zero & $+1.37$ & $0.0013$ & $0.0191$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+1.73$ & $6.6\times10^{-6}$ & $0.0002$ & P \\
 \addlinespace
-ASSIST2012 ref. & Q$\leftarrow$KC incidence & $+1.73$ & $0.0006$ & $0.0103$ & Cons.-pos. \\
- & Package, observed incidence & $+2.32$ & $0.0015$ & $0.0211$ & Cons.-pos. \\
- & Package, zero incidence & $+2.47$ & $2.6\times10^{-6}$ & $0.0001$ & Credited \\
- & Aligned gap vs.\ T-zero & $+1.88$ & $0.0005$ & $0.0086$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+1.65$ & $0.0004$ & $0.0075$ & Cons.-pos. \\
+ASSIST2012 ref. & Q$\leftarrow$KC incidence & $+1.73$ & $0.0006$ & $0.0103$ & P \\
+ & Package, observed incidence & $+2.32$ & $0.0015$ & $0.0211$ & P \\
+ & Package, zero incidence & $+2.47$ & $2.6\times10^{-6}$ & $0.0001$ & C \\
+ & Aligned gap vs.\ T-zero & $+1.88$ & $0.0005$ & $0.0086$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+1.65$ & $0.0004$ & $0.0075$ & P \\
 \addlinespace
-ASSIST2012 1{,}000\,s & Q$\leftarrow$KC incidence & $+1.23$ & $0.0043$ & $0.0249$ & Cons.-pos. \\
- & Package, observed incidence & $+2.12$ & $0.0003$ & $0.0075$ & Cons.-pos. \\
- & Package, zero incidence & $+2.09$ & $0.0027$ & $0.0249$ & Cons.-pos. \\
- & Aligned gap vs.\ T-zero & $+1.91$ & $5.2\times10^{-6}$ & $0.0002$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+2.38$ & $9.1\times10^{-5}$ & $0.0025$ & Cons.-pos. \\
+ASSIST2012 1{,}000\,s & Q$\leftarrow$KC incidence & $+1.23$ & $0.0043$ & $0.0249$ & P \\
+ & Package, observed incidence & $+2.12$ & $0.0003$ & $0.0075$ & P \\
+ & Package, zero incidence & $+2.09$ & $0.0027$ & $0.0249$ & P \\
+ & Aligned gap vs.\ T-zero & $+1.91$ & $5.2\times10^{-6}$ & $0.0002$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+2.38$ & $9.1\times10^{-5}$ & $0.0025$ & P \\
 \addlinespace
-ASSIST2012 1{,}000\,s ref. & Q$\leftarrow$KC incidence & $+1.27$ & $0.0024$ & $0.0249$ & Cons.-pos. \\
- & Package, observed incidence & $+2.35$ & $0.0147$ & $0.0441$ & Cons.-pos. \\
- & Package, zero incidence & $+2.09$ & $0.0034$ & $0.0249$ & Cons.-pos. \\
- & Aligned gap vs.\ T-zero & $+1.83$ & $2.1\times10^{-5}$ & $0.0007$ & Cons.-pos. \\
- & Aligned gap vs.\ T-misaligned & $+2.16$ & $0.0003$ & $0.0073$ & Cons.-pos. \\
+ASSIST2012 1{,}000\,s ref. & Q$\leftarrow$KC incidence & $+1.27$ & $0.0024$ & $0.0249$ & P \\
+ & Package, observed incidence & $+2.35$ & $0.0147$ & $0.0441$ & P \\
+ & Package, zero incidence & $+2.09$ & $0.0034$ & $0.0249$ & P \\
+ & Aligned gap vs.\ T-zero & $+1.83$ & $2.1\times10^{-5}$ & $0.0007$ & P \\
+ & Aligned gap vs.\ T-misaligned & $+2.16$ & $0.0003$ & $0.0073$ & P \\
 \addlinespace
-ASSIST2012 ref.\ fold 1 & Package, zero incidence & $+2.18$ & $0.0011$ & $0.0183$ & Cons.-pos. \\
- & Aligned gap vs.\ T-zero & $+1.87$ & $0.0021$ & $0.0249$ & Cons.-pos. \\
+ASSIST2012 ref.\ fold 1 & Package, zero incidence & $+2.18$ & $0.0011$ & $0.0183$ & P \\
+ & Aligned gap vs.\ T-zero & $+1.87$ & $0.0021$ & $0.0249$ & P \\
 \addlinespace
-ASSIST2012 ref.\ fold 2 & Package, zero incidence & $+2.41$ & $3.1\times10^{-5}$ & $0.0010$ & Credited \\
- & Aligned gap vs.\ T-zero & $+1.50$ & $0.0037$ & $0.0249$ & Cons.-pos. \\
+ASSIST2012 ref.\ fold 2 & Package, zero incidence & $+2.41$ & $3.1\times10^{-5}$ & $0.0010$ & C \\
+ & Aligned gap vs.\ T-zero & $+1.50$ & $0.0037$ & $0.0249$ & P \\
 \addlinespace
-Junyi (50k) & Package, zero incidence & $+4.12$ & $1.7\times10^{-5}$ & $0.0006$ & Credited \\
- & Aligned gap vs.\ T-zero & $+3.95$ & $4.8\times10^{-5}$ & $0.0014$ & Credited \\
+Junyi (50k) & Package, zero incidence & $+4.12$ & $1.7\times10^{-5}$ & $0.0006$ & C \\
+ & Aligned gap vs.\ T-zero & $+3.95$ & $4.8\times10^{-5}$ & $0.0014$ & C \\
 \addlinespace
-Junyi (all) & Package, zero incidence & $+3.36$ & $1.6\times10^{-6}$ & $7.0\times10^{-5}$ & Credited \\
- & Aligned gap vs.\ T-zero & $+3.34$ & $7.1\times10^{-6}$ & $0.0003$ & Credited \\
+Junyi (all) & Package, zero incidence & $+3.36$ & $1.6\times10^{-6}$ & $7.0\times10^{-5}$ & C \\
+ & Aligned gap vs.\ T-zero & $+3.34$ & $7.1\times10^{-6}$ & $0.0003$ & C \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -46,7 +46,7 @@ Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
 
 \FloatBarrier
 \appendix
-\renewcommand{\thealgorithm}{\thesection.\arabic{algorithm}}
+\renewcommand{\thealgorithm}{\Alph{section}.\arabic{algorithm}}
 
 \section{Names, aliases, and the reference decision list}
 \label{app:names}
@@ -59,7 +59,6 @@ Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_aliases}
 \input{tables/table_module_hypothesis}
-\FloatBarrier
 
 \section{Multiplicity and threshold recount of the ten-seed map}
 \label{app:ten-seed-stats}
@@ -158,7 +157,7 @@ Discussion-thread and teacher-intervention hyperedges are data-blocked
 on the public corpora; session and hint hyperedges are built on
 FoundationalASSIST only (\ref{app:foundational-assist}).
 
-\begin{table}[H]
+\begin{table}[tbp]
 \caption{Hyperedge-level leakage taxonomy (extends the pairwise taxonomy
 of \cite{daominh2026p0}).}
 \label{tab:leakage-taxonomy}
@@ -188,7 +187,6 @@ against $0$ (Table~\ref{tab:leak-simulation}) \\
 \bottomrule
 \end{tabularx}
 \end{table}
-\FloatBarrier
 
 \section{Evaluation protocol details}
 \label{app:protocol-detail}
@@ -257,7 +255,6 @@ differ, and the comparison stays contextual.
 
 \input{tables/table_hparams}
 \input{tables/table_auc_xes3g5m_inherited}
-\FloatBarrier
 
 \section{Calibration}
 \label{app:calibration}
@@ -273,7 +270,6 @@ ECE exceeds $0.05$.
 
 \input{tables/table_calibration_xes3g5m}
 \input{figures/fig_reliability_xes3g5m}
-\FloatBarrier
 
 \section{Graph-only encoder as a forced-reliance diagnostic}
 \label{app:graph-only}

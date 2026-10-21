@@ -48,6 +48,7 @@ T_975_DF = {5: 2.7764451051977987, 10: 2.2621571627409915}
 T_975 = T_975_DF[5]
 SEED_WORD = {5: "five", 10: "ten"}
 LABEL_SUFFIX = ""
+SPLIT_BEFORE = "ASSIST2012 fold 1"
 OUT_JSON = TABLES / "credit_ladder_transfer.json"
 OUT_TEX = REPO / "paper" / "tables" / "table_credit_transfer.tex"
 
@@ -479,36 +480,54 @@ def main() -> int:
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     short = {"Credited": "Credited", "Consistent-positive, not credited": "Cons.-pos.", "Unsupported": "Unsupp."}
-    lines = [
-        "\\begin{table}[H]",
-        "\\caption{Credit map. Differences are $10^{-3}$ validation AUC; the",
-        f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
-        f"{_rules_sentence(rows)[1]} Cons.-pos.:",
-        "consistent-positive (not credited). Abbreviations are in",
-        "Section~\\ref{sec:credit-gate}.}",
-        f"\\label{{tab:credit-transfer{LABEL_SUFFIX}}}",
-        "\\centering",
-        "\\scriptsize",
-        "\\setlength{\\tabcolsep}{3pt}",
-        "\\renewcommand{\\arraystretch}{0.84}",
-        "\\begin{tabular}{@{}llrl@{}}",
-        "\\toprule",
-        "Setting & Contrast & Mean [lower] & Outcome \\\\",
-        "\\midrule",
-    ]
-    last = None
-    for r in rows:
-        if r["corpus"].startswith(ASSIST_1000S):
-            continue
-        corpus = r["corpus"] if r["corpus"] != last else ""
-        if last is not None and r["corpus"] != last:
-            lines.append("\\addlinespace")
-        last = r["corpus"]
-        lines.append(
-            f"{corpus} & {r['contrast']} & ${_milli(r['mean_delta_val'])}$ "
-            f"[${_milli(r['lcb95_delta_val'])}$] & {_one_outcome(r, short)} \\\\"
-        )
-    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
+    map_rows = [r for r in rows if not r["corpus"].startswith(ASSIST_1000S)]
+    # Ten-seed map has too many rows for one page: split into two floats.
+    split = SPLIT_BEFORE if LABEL_SUFFIX else None
+    cut = next((i for i, r in enumerate(map_rows) if r["corpus"] == split), len(map_rows))
+    parts = [map_rows[:cut], map_rows[cut:]] if cut < len(map_rows) else [map_rows]
+    label = f"tab:credit-transfer{LABEL_SUFFIX}"
+    lines: list[str] = []
+    for k, part in enumerate(parts):
+        if k == 0:
+            caption = [
+                "\\caption{Credit map. Differences are $10^{-3}$ validation AUC; the",
+                f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
+                f"{_rules_sentence(rows)[1]} Cons.-pos.:",
+                "consistent-positive (not credited). Abbreviations are in",
+                "Section~\\ref{sec:credit-gate}."
+                + (f" Continued in Table~\\ref{{{label}-b}}.}}" if len(parts) > 1 else "}"),
+                f"\\label{{{label}}}",
+            ]
+        else:
+            caption = [
+                f"\\caption{{Credit map, continued from Table~\\ref{{{label}}}:",
+                "ASSISTments~2012 folds~1--2 and reference recipe, and Junyi. Notation as",
+                f"in Table~\\ref{{{label}}}.}}",
+                f"\\label{{{label}-b}}",
+            ]
+        lines += [
+            "\\begin{table}[tbp]",
+            *caption,
+            "\\centering",
+            "\\scriptsize",
+            "\\setlength{\\tabcolsep}{3pt}",
+            "\\renewcommand{\\arraystretch}{0.84}",
+            "\\begin{tabular}{@{}llrl@{}}",
+            "\\toprule",
+            "Setting & Contrast & Mean [lower] & Outcome \\\\",
+            "\\midrule",
+        ]
+        last = None
+        for r in part:
+            corpus = r["corpus"] if r["corpus"] != last else ""
+            if last is not None and r["corpus"] != last:
+                lines.append("\\addlinespace")
+            last = r["corpus"]
+            lines.append(
+                f"{corpus} & {r['contrast']} & ${_milli(r['mean_delta_val'])}$ "
+                f"[${_milli(r['lcb95_delta_val'])}$] & {_one_outcome(r, short)} \\\\"
+            )
+        lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
     OUT_TEX.write_text("\n".join(lines), encoding="utf-8")
     _write_resolution_table(rows, short)
     _write_heatmap(rows)

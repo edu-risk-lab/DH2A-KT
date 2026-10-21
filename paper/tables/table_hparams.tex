@@ -1,4 +1,4 @@
-\begin{table}[H]
+\begin{table}[tbp]
 \caption{Training recipes for every model in Table~\ref{tab:auc-xes3g5m}
 and Table~\ref{tab:auc-inherited},
 including Zero$+\Delta t$ (same optimiser as QKC-T; incidence zeroed).
@@ -18,7 +18,8 @@ and stopped by epoch~13 under patience~5 (cap~30).}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{@{}lXlXX@{}}
+\renewcommand{\arraystretch}{0.9}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}XXXX@{}}
 \toprule
 Model & Parameter & Range searched & Selected & How chosen ($n$ configs) \\
 \midrule
@@ -29,7 +30,7 @@ GIKT & remaining pyKT hparams & none & pairwise-audit / pyKT defaults & inherite
 AKT (inherited) & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\
 AKT (inherited) & lr / dropout / d\_model & none at $L{=}400$ & pairwise-audit / pyKT defaults & inherited from $L{=}200$ recipe \\
 \textit{simpleKT} (inherited) & $L$ / other hparams & $\{400\}$ override & 400 + pairwise-audit defaults & inherited ($n{=}1$, 5 seeds) \\
-AKT (grid-tuned) & lr / dropout / d\_model & $\{10^{-3},3{\times}10^{-4}\}\times\{0.05,0.10,0.20\}\times\{128,256\}$ & $10^{-3}$ / 0.10 / 128 & seed-42 validation AUC ($n{=}12$), then 5 seeds \\
+AKT (grid-tuned) & lr / dropout / d\_model & lr $\{10^{-3}, 3{\times}10^{-4}\}$; dropout $\{0.05, 0.10, 0.20\}$; d\_model $\{128, 256\}$ & $10^{-3}$ / 0.10 / 128 & seed-42 validation AUC ($n{=}12$), then 5 seeds \\
 \textit{simpleKT} (grid-tuned) & lr / dropout / d\_model & same grid & $10^{-3}$ / 0.20 / 128 & seed-42 validation AUC ($n{=}12$), then 5 seeds; dropout at the grid edge \\
 DKT, DGEKT & $L$ / other hparams & $\{400\}$ override & 400 + pairwise-audit defaults & inherited, contextual ($n{=}1$, 5 seeds) \\
 \bottomrule

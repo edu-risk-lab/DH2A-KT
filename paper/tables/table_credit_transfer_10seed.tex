@@ -1,9 +1,9 @@
-\begin{table}[H]
+\begin{table}[tbp]
 \caption{Credit map. Differences are $10^{-3}$ validation AUC; the
 bracket is the lower 95\% bound. Where the rules differ, the outcome
 is given as seed rule/interval rule. Cons.-pos.:
 consistent-positive (not credited). Abbreviations are in
-Section~\ref{sec:credit-gate}.}
+Section~\ref{sec:credit-gate}. Continued in Table~\ref{tab:credit-transfer-10seed-b}.}
 \label{tab:credit-transfer-10seed}
 \centering
 \scriptsize
@@ -46,7 +46,23 @@ ASSIST2012 & Q$\leftarrow$KC incidence & $+1.56$ [$+1.30$] & Cons.-pos. $2/10$ \
  & Package, zero incidence & $+2.05$ [$+1.70$] & Cons.-pos. $4/10$ \\
  & Aligned gap vs.\ T-zero & $+1.32$ [$+0.97$] & Cons.-pos. $1/10$ \\
  & Aligned gap vs.\ T-misaligned & $+1.80$ [$+1.51$] & Cons.-pos. $1/10$ \\
-\addlinespace
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[tbp]
+\caption{Credit map, continued from Table~\ref{tab:credit-transfer-10seed}:
+ASSISTments~2012 folds~1--2 and reference recipe, and Junyi. Notation as
+in Table~\ref{tab:credit-transfer-10seed}.}
+\label{tab:credit-transfer-10seed-b}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.84}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Setting & Contrast & Mean [lower] & Outcome \\
+\midrule
 ASSIST2012 fold 1 & Q$\leftarrow$KC incidence & $+1.90$ [$+1.67$] & Cons.-pos. $4/10$ \\
  & Package, observed incidence & $+1.81$ [$+1.54$] & Cons.-pos. $2/10$ \\
  & Package, zero incidence & $+2.36$ [$+2.02$] & Cons.-pos./Credited $8/10$ \\
