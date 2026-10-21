@@ -43,6 +43,13 @@ stamps. New groups:
                     leakage scalar (crossmodal/hint, leaky/clean), 5 seeds;
                     scored by scripts/58_leak_simulation_audit.py
 
+Addendum (docs/preregistration_junyi_onset.md):
+
+  junyi-hist        Junyi first 50,000 learners, fold 0, corpus config,
+                    gap on the recurrent side only (time_done gaps include
+                    the scored item's duration on the query side),
+                    2 arms x 10 seeds; scored by scripts/59_junyi_history_check.py
+
 "Frozen XES recipe" is REF_RECIPE below, the flags of scripts 34 and 38.
 
 ``--time-gap-pad`` allocates Linear(1, hidden) and adds a zero multiple,
@@ -482,6 +489,14 @@ def _jobs() -> list[dict]:
                     seed,
                     _dh2(junyi, seed, extra, max_users=50000, fold=fold),
                 )
+
+    history = [*zero_q, "--time-gap", "--time-gap-mode", "lstm"]
+    for seed in SEEDS_10:
+        for arm, extra in (
+            ("time-history", history),
+            ("t-zero-history", [*history, "--time-gap-control", "zero"]),
+        ):
+            add("junyi-hist", arm, seed, _dh2(junyi, seed, extra, max_users=50000))
     return jobs
 
 
