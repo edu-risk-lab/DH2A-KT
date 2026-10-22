@@ -1,9 +1,7 @@
 \begin{table}[tbp]
 \caption{Credit map. Differences are $10^{-3}$ validation AUC; the
 bracket is the lower 95\% bound. The outcome is the same under both
-rules. Cons.-pos.:
-consistent-positive (not credited). Abbreviations are in
-Section~\ref{sec:credit-gate}.}
+rules. Abbreviations are defined below the table. Continued in Table~\ref{tab:credit-transfer-b}.}
 \label{tab:credit-transfer}
 \centering
 \scriptsize
@@ -22,40 +20,82 @@ XES3G5M & Q$\leftarrow$KC incidence & $-0.10$ [$-0.52$] & Unsupp. $0/5$ \\
  & Aligned gap vs.\ T-shuffled & $+1.47$ [$+1.10$] & Cons.-pos. $0/5$ \\
  & Aligned gap vs.\ T-boundary & $+0.72$ [$+0.45$] & Cons.-pos. $0/5$ \\
  & T-boundary vs.\ T-zero & $+1.11$ [$+0.94$] & Cons.-pos. $0/5$ \\
-\addlinespace
+\addlinespace[1pt]
 XES3G5M fold 1 & Package, zero incidence & $+3.16$ [$+2.96$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+1.72$ [$+1.58$] & Cons.-pos. $0/5$ \\
-\addlinespace
+\addlinespace[1pt]
 XES3G5M fold 2 & Package, zero incidence & $+2.72$ [$+2.47$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+1.72$ [$+1.38$] & Cons.-pos. $1/5$ \\
-\addlinespace
+\addlinespace[1pt]
 XES3G5M attn. & Package, zero incidence & $+1.78$ [$+1.04$] & Cons.-pos. $2/5$ \\
  & Aligned gap vs.\ T-zero & $+1.35$ [$+0.81$] & Cons.-pos. $0/5$ \\
  & Aligned gap vs.\ T-misaligned & $+1.11$ [$+0.84$] & Cons.-pos. $0/5$ \\
-\addlinespace
+\bottomrule
+\end{tabular}
+
+\smallskip
+\parbox{0.92\linewidth}{\scriptsize
+Q$\leftarrow$KC incidence, question--knowledge-component incidence;
+package, the gap input with the maps that read it; T-zero,
+T-misaligned, T-shuffled, and T-boundary, the gap map fed zeros, gaps
+permuted within each learner, gaps permuted across learners, and only
+$1[\Delta t{=}0]$; param-padded, a no-time control with matched
+parameters; attn., attention encoder (otherwise the LSTM tracer); ref.,
+reference training recipe (otherwise the corpus configuration); 50k
+and all, the first $50{,}000$ or all Junyi learners; Cons.-pos.,
+consistent-positive (not credited); Unsupp., unsupported.
+}
+\end{table}
+
+\begin{table}[tbp]
+\caption{Credit map, continued from Table~\ref{tab:credit-transfer}:
+ASSISTments~2012 and Junyi. Units, bracket, and outcome format as there;
+abbreviations below.}
+\label{tab:credit-transfer-b}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.84}
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Setting & Contrast & Mean [lower] & Outcome \\
+\midrule
 ASSIST2012 & Q$\leftarrow$KC incidence & $+1.55$ [$+1.03$] & Cons.-pos. $1/5$ \\
  & Package, observed incidence & $+1.69$ [$+0.42$] & Unsupp. $2/5$ \\
  & Package, zero incidence & $+2.00$ [$+1.17$] & Cons.-pos. $2/5$ \\
  & Aligned gap vs.\ T-zero & $+1.37$ [$+0.90$] & Cons.-pos. $0/5$ \\
  & Aligned gap vs.\ T-misaligned & $+1.73$ [$+1.57$] & Cons.-pos. $0/5$ \\
-\addlinespace
+\addlinespace[1pt]
 ASSIST2012 ref. & Q$\leftarrow$KC incidence & $+1.73$ [$+1.25$] & Cons.-pos. $1/5$ \\
  & Package, observed incidence & $+2.32$ [$+1.49$] & Cons.-pos. $3/5$ \\
  & Package, zero incidence & $+2.47$ [$+2.30$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+1.88$ [$+1.39$] & Cons.-pos. $3/5$ \\
  & Aligned gap vs.\ T-misaligned & $+1.65$ [$+1.24$] & Cons.-pos. $0/5$ \\
-\addlinespace
+\addlinespace[1pt]
 ASSIST2012 ref.\ fold 1 & Package, zero incidence & $+2.18$ [$+1.46$] & Cons.-pos. $4/5$ \\
  & Aligned gap vs.\ T-zero & $+1.87$ [$+1.14$] & Cons.-pos. $3/5$ \\
-\addlinespace
+\addlinespace[1pt]
 ASSIST2012 ref.\ fold 2 & Package, zero incidence & $+2.41$ [$+2.09$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+1.50$ [$+0.81$] & Cons.-pos. $1/5$ \\
-\addlinespace
-Junyi (50k) & Package, zero incidence & $+4.12$ [$+3.65$] & Credited $5/5$ \\
+\addlinespace[1pt]
+Junyi (50k)$^{\ddagger}$ & Package, zero incidence & $+4.12$ [$+3.65$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+3.95$ [$+3.37$] & Credited $5/5$ \\
-\addlinespace
-Junyi (all) & Package, zero incidence & $+3.36$ [$+3.15$] & Credited $5/5$ \\
+\addlinespace[1pt]
+Junyi (all)$^{\ddagger}$ & Package, zero incidence & $+3.36$ [$+3.15$] & Credited $5/5$ \\
  & Aligned gap vs.\ T-zero & $+3.34$ [$+3.03$] & Credited $5/5$ \\
 \bottomrule
 \end{tabular}
+
+\smallskip
+\parbox{0.92\linewidth}{\scriptsize
+Q$\leftarrow$KC incidence, question--knowledge-component incidence;
+package, the gap input with the maps that read it; T-zero and
+T-misaligned, the gap map fed zeros or gaps permuted within each
+learner; ref., reference training recipe; 50k and all, the first
+$50{,}000$ or all Junyi learners; Cons.-pos., consistent-positive (not credited);
+Unsupp., unsupported.
+$^{\ddagger}$\,Junyi stores completion times, so the query-side gap
+includes the scored item's duration; these credits are not
+attempt-onset results (Table~\ref{tab:junyi-history}).
+}
 \end{table}

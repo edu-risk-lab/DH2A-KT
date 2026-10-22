@@ -1,20 +1,24 @@
 \begin{table}[t]
-\caption{Contextual test-only AUC on XES3G5M fold~0 (repeat-target-masked,
-$L{=}400$). Tracer arms are scored on $n{=}1{,}093{,}755$ positions;
+\caption{Contextual test-only AUC (area under the receiver operating
+characteristic curve) on XES3G5M fold~0 (repeat-target-masked,
+maximum sequence length $L{=}400$). Tracer arms are scored on $n{=}1{,}093{,}755$ positions;
 pyKT rows on the library intersection $n{=}1{,}093{,}720$. Gaps locate
 the recipe and are not event-paired differences
 (Section~\ref{sec:clean-protocol}). Mean $\pm$ sample SD over five
 training seeds. QKC-T has observed incidence and the time package;
-Zero$+\Delta t$ has zeroed incidence and the time package. GIKT shares
+Zero$+\Delta t$ has zeroed incidence and the time package;
+Q$\leftarrow$KC only has observed question--knowledge-component
+incidence and no time branch. GIKT shares
 the training envelope, not a hyperparameter search. Grid-tuned rows use
 the configuration with the highest seed-42 validation AUC over a
 12-point grid (\ref{app:hparams}); the inherited rows are kept.
-Inherited DKT and DGEKT: Table~\ref{tab:auc-inherited}.}
+Inherited deep knowledge tracing (DKT) and DGEKT:
+Table~\ref{tab:auc-inherited}.}
 \label{tab:auc-xes3g5m}
 \centering
 \begin{tabular}{@{}lccc@{}}
 \toprule
-Model & Test-only AUC & $n$ scored & Seeds \\
+Model & Test-only AUC (mean ${\pm}$ SD) & $n$ scored & Seeds \\
 \midrule
 QKC-T & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\
 Zero$+\Delta t$ & $0.8295{\pm}0.0001$ & 1{,}093{,}755 & 5 \\

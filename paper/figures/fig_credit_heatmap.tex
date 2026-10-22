@@ -94,7 +94,7 @@
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (9.52,0.92) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (10.9,0.92) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (12.28,0.92) {};
-\node[anchor=east, font=\footnotesize\sffamily] at (0.0,0.46) {Junyi (50k)};
+\node[anchor=east, font=\footnotesize\sffamily] at (0.0,0.46) {Junyi (50k)$^{\ddagger}$};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (1.24,0.46) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (2.62,0.46) {};
 \node[draw, fill=cbBlue!35, minimum width=1.2999999999999998cm, minimum height=0.4cm] at (4.0,0.46) {$\checkmark$\,+4.12};
@@ -104,7 +104,7 @@
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (9.52,0.46) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (10.9,0.46) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (12.28,0.46) {};
-\node[anchor=east, font=\footnotesize\sffamily] at (0.0,0.0) {Junyi (all)};
+\node[anchor=east, font=\footnotesize\sffamily] at (0.0,0.0) {Junyi (all)$^{\ddagger}$};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (1.24,0.0) {};
 \node[minimum width=1.2999999999999998cm, minimum height=0.4cm] at (2.62,0.0) {};
 \node[draw, fill=cbBlue!35, minimum width=1.2999999999999998cm, minimum height=0.4cm] at (4.0,0.0) {$\checkmark$\,+3.36};
@@ -124,6 +124,9 @@ against T-zero, T-misaligned, T-shuffled, and T-boundary; Pkg vs pad,
 the package against the parameter-padded control; Bnd vs 0, T-boundary
 against T-zero. The number is the mean paired difference in units of
 $10^{-3}$ validation AUC. An empty cell was not run.
+$^{\ddagger}$\,Junyi stores completion times, so the query-side gap
+includes the scored item's duration; these credits are not
+attempt-onset results (Table~\ref{tab:junyi-history}).
 The $1{,}000$\,s export is Table~\ref{tab:credit-assist-resolution}.}
 \label{fig:credit-heatmap}
 \end{figure}

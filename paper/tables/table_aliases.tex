@@ -2,7 +2,8 @@
 \caption{Architecture names used in this paper. Only this table prints
 command-line flags and log aliases, including \texttt{v4}, \texttt{v2},
 and \texttt{v4q\_clean}. Those strings are implementation aliases from
-training logs, not model names.}
+training logs, not model names. LSTM, long short-term memory;
+Q$\leftarrow$KC, question--knowledge-component.}
 \label{tab:aliases}
 \centering
 \footnotesize
@@ -12,8 +13,9 @@ training logs, not model names.}
 \toprule
 Name in this paper & Architecture \\
 \midrule
-This paper & A credit protocol: train-only construction, membership
-audit, laddered comparison, and three outcomes. It is not a predictor \\
+Credit protocol (not a model) & Train-only construction, membership
+audit, laddered comparison, and three outcomes; it has no alias and is
+not a predictor \\
 QKC-T (table name) & LSTM with train-only Q$\leftarrow$KC
 incidence and Linear $\log(1{+}\Delta t)$; concept-stack HypergraphConv
 off (\texttt{v4}, \texttt{--question-graph}, \texttt{--no-graph}) \\

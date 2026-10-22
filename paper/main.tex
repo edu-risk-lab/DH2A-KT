@@ -75,25 +75,27 @@ country={Vietnam}}
 \begin{abstract}
 Knowledge tracing systems often add auxiliary knowledge, such as
 concept graphs or response timing, to a sequence model and are judged
-by one area under the ROC curve, which does not show which added piece
-earned the gain. Knowledge built from the full log can also carry
-held-out learners into the evaluation. We propose a credit protocol
-that builds such knowledge from training learners only, audits
-membership leakage, compares each component with a control declared in
-advance, and assigns one of three outcomes from ten paired seeds. We
-apply it to one elapsed-time component on three corpora, two encoders,
-and three learner folds. On XES3G5M with a recurrent tracer the
-component is credited only as a package (the input with the weights
-that read it), and those weights fed only zeros give about a quarter of
-the gain. On Junyi the gap input is credited only while its completion
-timestamps let it carry the duration of the scored response. Nothing is
-credited under an attention encoder or on a coarse timestamp export,
-and on ASSISTments~2012 the outcome depends on the fold and the
-decision rule. In a simulation, a hint chosen with knowledge of the
-next response raises AUC by $5.4\times 10^{-3}$ and passes both rules;
-only an audit of how hints were chosen flags it. Credit should be
-reported per corpus, backbone, recipe, timestamp meaning, learner fold,
-and control level.
+by one area under the receiver operating characteristic curve (AUC),
+which does not show which added piece earned the gain. Knowledge built
+from the full log can also carry held-out learners into the
+evaluation. We propose a credit protocol that builds such knowledge
+from training learners only, audits membership leakage, compares each
+component with a control declared in advance, and assigns one of three
+outcomes from ten paired seeds. Unlike single-AUC comparisons and
+ablations that drop an input with its weights, it separates
+the two and repeats the decision across settings. We apply it to one
+elapsed-time component on three corpora, two encoders, and three
+learner folds. On XES3G5M with a recurrent tracer the component is
+credited only as a package (input plus weights), and those weights fed
+only zeros give about a quarter of the gain. On Junyi the gap input is
+credited only because its completion timestamps carry the duration of
+the scored response. Nothing is credited under an attention encoder or
+on a coarse timestamp export, and on ASSISTments~2012 the outcome
+depends on the fold and the decision rule. In a simulation, a hint
+chosen with knowledge of the next response raises AUC by
+$5.4\times 10^{-3}$ and passes both rules; only an audit of how hints
+were chosen flags it. Credit should be reported per corpus, backbone,
+recipe, timestamp meaning, learner fold, and control level.
 \end{abstract}
 
 \begin{keyword}
@@ -114,7 +116,8 @@ knowledge-engineering fashion: knowledge is acquired from the log or
 from experts, represented as question--concept incidence, prerequisite
 graphs, hyperedges, or timing features, and injected into a sequence
 model \cite{yang2021gikt,nakagawa2019gkt,shen2021lpkt}. The resulting
-system is then usually validated by one AUC for the whole model.
+system is then usually validated by one area under the receiver
+operating characteristic curve (AUC) for the whole model.
 
 That validation step is weak in two ways. First, one AUC does not say
 which added piece of knowledge earned the gain. A new branch adds both
@@ -129,8 +132,9 @@ shrink or vanish under fair comparison
 \cite{ferraridacrema2019progress,shehzad2025gnnsbrs}. Inside KT, which
 model family leads depends on the dataset \cite{gervet2020deepkt}, and
 gains from attention-augmented models shrink under a controlled
-protocol \cite{kim2026pktreliability}; the KC-expanded data format can
-itself leak labels \cite{badran2025labelleak,liu2022pykt}. These
+protocol \cite{kim2026pktreliability}; exports that repeat an item
+once per knowledge component (KC), known as KC-expanded exports, can
+themselves leak labels \cite{badran2025labelleak,liu2022pykt}. These
 studies ask whether one model beats another under a fair protocol. The
 question for a knowledge engineer is narrower: which piece of the
 injected knowledge may be credited, against what control, and does that
@@ -156,7 +160,9 @@ XES3G5M. On
 ASSISTments the package is close to the threshold. The interval rule
 credits it on every fold of the reference recipe and on one of three
 folds of the corpus configuration; the seed rule credits it on one fold
-only. Nothing is credited on an export whose timestamps are too coarse
+only, and on test-only AUC the interval rule credits it only on two
+folds of the reference recipe.
+Nothing is credited on an export whose timestamps are too coarse
 to order events inside a session. On XES3G5M, an attention encoder
 credits no time message on any fold. A single-setting ablation would
 have credited too much or too little. A synthetic simulation adds a
@@ -182,15 +188,16 @@ are not a substitute for that audit.
   Table~\ref{tab:credit-transfer-10seed}).
   \item \textbf{C3 (leakage audit).} Of the pairwise leakage
   diagnostics inherited from train-only graph construction, only group
-  membership separates a leaky hyperedge set from a clean one; TBMR
-  does not, and $|\rho|$ is degenerate on hyperedge projections
+  membership separates a leaky hyperedge set from a clean one; the
+  temporal boundary mixing rate (TBMR) does not, and $|\rho|$ is degenerate on hyperedge projections
   (Section~\ref{sec:leakage-ext}). In a synthetic simulation of two
   leakage classes that the public logs cannot show, a leaked hint is
   credited by the rules and flagged only by an audit that records hint
   provenance (Section~\ref{sec:leak-sim}).
 \end{itemize}
 The ladder attributes messages on a fixed backbone. It does not
-decompose the gap from the tracer to DKT ($+28.6\times 10^{-3}$ test AUC on
+decompose the gap from the tracer to deep knowledge tracing (DKT)
+\cite{piech2015dkt} ($+28.6\times 10^{-3}$ test AUC on
 XES3G5M), which also reflects architecture, optimisation, and protocol.
 Table~\ref{tab:claims} lists each claim with what it does not infer.
 \input{tables/table_claims}
@@ -200,7 +207,7 @@ Sections~\ref{sec:prelim}--\ref{sec:setup} set out notation, the
 protocol, the tracer, and the experimental setup.
 Section~\ref{sec:results} reports the credit map, and
 Sections~\ref{sec:discussion} and~\ref{sec:conclusion} discuss it.
-Appendices are supplied as a separate file.
+The appendices are supplied as a separate Supporting Information file.
 
 % =============================================================================
 \section{Related work}
@@ -292,13 +299,15 @@ coincidence.
 \label{sec:p0-selfcontained}
 For each fold $f$, prerequisite and similarity edges
 $E_{\mathrm{pre}}^f$ and $E_{\mathrm{sim}}^f$ are built from
-training-fold interactions only and cycle-pruned to a DAG
-\cite{daominh2026p0}. Four pairwise diagnostics are computed on the
-train-only graph against held-out learners.
+training-fold interactions only and cycle-pruned to a directed acyclic
+graph (DAG) \cite{daominh2026p0}. Four pairwise diagnostics are
+computed on the train-only graph against held-out learners; their
+symbols follow \cite{daominh2026p0}.
 $\mathrm{ECR}^{\mathrm{flag}}$ is a structural learner-overlap indicator,
 and $\mathrm{ECR}^{\mathrm{overlap}}$ is held-out pattern overlap on
 retained edges. $|\rho|$ is the magnitude of the Pearson correlation
-between edge weight and held-out outcome. TBMR is the share of
+between edge weight and held-out outcome. TBMR, the temporal boundary
+mixing rate, is the share of
 post-cutoff training mass that supports retained prerequisite
 transitions; it is a within-train temporal measure, not a train/test
 violation. Switching
@@ -326,7 +335,8 @@ the credited arms.
 
 \subsection{Reference tracer}
 \label{sec:encoding}
-The reference backbone is an LSTM tracer with train-only question--KC
+The reference backbone is a long short-term memory (LSTM) tracer with
+train-only question--KC
 incidence and an optional linear gap branch; concept-level hypergraph
 convolution is off. Let $A\in\mathbb{R}^{N_q\times N_c}$ be the
 train-only question--KC incidence, row-normalised to $\bar{A}$. Each
@@ -652,7 +662,9 @@ query-side gap includes the time spent on the scored item, a signal
 that is not available when the item opens.
 
 A check fixed in a preregistration addendum before its runs
-(\path{docs/preregistration_junyi_onset.md}) feeds the gap to the
+(\path{docs/preregistration_junyi_onset.md}, committed as
+\texttt{3f0e089} on 21~October 2026; first result \texttt{911d06c},
+22~October) feeds the gap to the
 recurrent input only, where it covers items whose responses are
 already inputs (Table~\ref{tab:junyi-history}). On the
 $50{,}000$-learner subsample, fold~0, the history-only package gains
@@ -874,6 +886,13 @@ data-only residual check flags a dependence but cannot tell leakage
 from a hint that changes learning. A leak of this class is therefore
 caught only if the provenance of each hint is logged and audited before
 credit is assessed, which is why the protocol places the audit first.
+Junyi gives a case on real data. A query-side gap that carries the
+duration of the scored attempt passed both rules on all three folds,
+and it was exposed only by asking what the timestamp marks and
+rerunning without that gap (Table~\ref{tab:junyi-history}). We add
+this timestamp-semantics class to the leakage taxonomy
+(Table~\ref{tab:leakage-taxonomy}); its diagnostic is the fourth
+practice below.
 
 \subsection{Implications for building knowledge tracing systems}
 For a knowledge engineer adding auxiliary knowledge to a tracer, the
@@ -892,7 +911,8 @@ results suggest five practices.
   \item Check the timestamp resolution, row order, and meaning of every
   export before evaluating a time message: the smallest positive gap,
   the share of zero gaps, and whether a timestamp marks the start or the
-  completion of an attempt.
+  completion of an attempt. If it marks completion, rerun the credit
+  with the gap in the recurrent history only.
   \item Keep consistent-positive (not credited) results in the record,
   since a gain that is positive on every seed and below the threshold
   on one corpus was credited on another here; and report both rules,
@@ -978,11 +998,12 @@ recurrent tracer, the protocol credits the time package but not the
 aligned gap input, on all three learner folds. On ASSISTments~2012
 under the same recipe, the interval rule credits the zero-incidence
 package on all three folds and the seed rule on one; under the corpus
-configuration the interval rule credits it on one fold of three. On
-XES3G5M with an attention encoder the protocol credits neither the
-package nor the gap input on any fold. On Junyi it credits both on
-every fold, but there the gap runs between completion times and
-includes the time spent on the scored item; fed to the recurrent input
+configuration the interval rule credits it on one fold of three, and
+on test-only AUC only two folds of the reference recipe keep the
+credit. On XES3G5M with an attention encoder the protocol credits
+neither the package nor the gap input on any fold. On Junyi it credits
+both on every fold, but there the gap runs between completion times and
+includes the time spent on the scored item. Fed to the recurrent input
 only, neither is credited, so no attempt-onset gap input is credited on
 any corpus.
 Question--concept incidence is not credited on XES3G5M. An
@@ -1014,7 +1035,12 @@ editing.
 \textbf{Le Hoang Son:} Conceptualization, Supervision, Project
 administration, Writing -- review \& editing.
 
-\section*{Declaration of competing interest}
+\section*{Acknowledgments}
+This research did not receive any specific grant from funding agencies
+in the public, commercial, or not-for-profit sectors. All experiments
+were run on a single NVIDIA RTX~3090 (24\,GB).
+
+\section*{Conflict of Interest Statement}
 The authors declare that they have no known competing financial interests
 or personal relationships that could have appeared to influence the work
 reported in this paper.
@@ -1034,19 +1060,24 @@ text under author direction. After using this tool, the authors reviewed
 and edited the content as needed and take full responsibility for the
 content of the published article.
 
-\section*{Data availability}
+\section*{Data Availability Statement}
 Code, run lists, per-seed comparison files, and the scripts that
 recompute every credit outcome are at
 \url{https://github.com/edu-risk-lab/DH2A-KT}; a table-to-script map is
 in \texttt{docs/paper-artifacts.md}, and the preregistration of the
 ten-seed map, the baseline grid, and the leakage simulation is
 \texttt{docs/preregistration.md} (first committed as \texttt{99521c6};
-archived under an earlier file name). The manuscript state,
-including the per-seed files behind
-Tables~\ref{tab:credit-transfer-10seed}
-and~\ref{tab:credit-assist-resolution-10seed} and
-Figure~\ref{fig:credit-heatmap-10seed}, is archived at
-\url{https://doi.org/10.5281/zenodo.23521413}
+archived under an earlier file name). The Junyi history-only check is
+fixed in the addendum \texttt{docs/preregistration\_junyi\_onset.md}
+(committed as \texttt{3f0e089}, before its first result
+\texttt{911d06c}). The manuscript state, including the addendum, its
+results, and the per-seed files behind
+Tables~\ref{tab:credit-transfer-10seed},
+\ref{tab:credit-assist-resolution-10seed},
+and~\ref{tab:junyi-history} and
+Figure~\ref{fig:credit-heatmap-10seed}, is archived on Zenodo under
+tag \texttt{es-submit-2026-10-22}. The ten-seed state before the
+Junyi check is \url{https://doi.org/10.5281/zenodo.23521413}
 (tag \texttt{es-submit-2026-10-21}). The five-seed state is
 \url{https://doi.org/10.5281/zenodo.23219471}
 (tag \texttt{es-submit-2026-10-08b}), and an earlier snapshot of the
@@ -1058,11 +1089,6 @@ XES3G5M, ASSISTments~2012, and Junyi are public. FoundationalASSIST
 \cite{foundationalassist2026} must be obtained from Hugging Face under
 its Responsible Use Guidelines and cannot be redistributed by the
 authors.
-
-\section*{Funding}
-This research did not receive any specific grant from funding agencies
-in the public, commercial, or not-for-profit sectors. All experiments
-were run on a single NVIDIA RTX~3090 (24\,GB).
 
 \FloatBarrier
 

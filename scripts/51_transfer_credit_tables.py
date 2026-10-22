@@ -100,6 +100,40 @@ ASSIST_GROUPS = (
 )
 OUT_TEX_RES = REPO / "paper" / "tables" / "table_credit_assist_resolution.tex"
 OUT_HEAT = REPO / "paper" / "figures" / "fig_credit_heatmap.tex"
+HISTORY_JSON = TABLES / "junyi_history_check.json"
+HISTORY_TO_MAP = {
+    "History-only package": "Package, zero incidence",
+    "History-only gap vs.\\ T-zero": "Aligned gap vs.\\ T-zero",
+}
+DDAGGER = "$^{\\ddagger}$"
+JUNYI_NOTE = [
+    f"{DDAGGER}\\,Junyi stores completion times, so the query-side gap",
+    "includes the scored item's duration; these credits are not",
+    "attempt-onset results (Table~\\ref{tab:junyi-history}).",
+]
+MAP_LEGEND = [
+    "Q$\\leftarrow$KC incidence, question--knowledge-component incidence;",
+    "package, the gap input with the maps that read it; T-zero,",
+    "T-misaligned, T-shuffled, and T-boundary, the gap map fed zeros, gaps",
+    "permuted within each learner, gaps permuted across learners, and only",
+    "$1[\\Delta t{=}0]$; param-padded, a no-time control with matched",
+    "parameters; attn., attention encoder (otherwise the LSTM tracer); ref.,",
+    "reference training recipe (otherwise the corpus configuration); 50k",
+    "and all, the first $50{,}000$ or all Junyi learners; Cons.-pos.,",
+    "consistent-positive (not credited); Unsupp., unsupported.",
+]
+MAP_LEGEND_B = [
+    "Q$\\leftarrow$KC incidence, question--knowledge-component incidence;",
+    "package, the gap input with the maps that read it; T-zero and",
+    "T-misaligned, the gap map fed zeros or gaps permuted within each",
+    "learner; ref., reference training recipe; 50k and all, the first",
+    "$50{,}000$ or all Junyi learners; Cons.-pos., consistent-positive (not credited);",
+    "Unsupp., unsupported.",
+]
+
+
+def _show_corpus(corpus: str) -> str:
+    return corpus + DDAGGER if corpus.startswith("Junyi") else corpus
 
 # (corpus, label, rung, on pattern, control pattern)
 CONTRASTS = [
@@ -308,6 +342,18 @@ def _write_heatmap(rows: list[dict]) -> None:
         if row["corpus"] not in corpora:
             corpora.append(row["corpus"])
     lookup = {(r["corpus"], r["contrast"]): r for r in keep}
+    history = "Junyi (50k) history-only"
+    with_history = bool(LABEL_SUFFIX) and HISTORY_JSON.exists()
+    if with_history:
+        for h in json.loads(HISTORY_JSON.read_text(encoding="utf-8"))["rows"]:
+            if h["contrast"] in HISTORY_TO_MAP:
+                v = h["val"]
+                lookup[(history, HISTORY_TO_MAP[h["contrast"]])] = {
+                    "mean_delta_val": v["mean"],
+                    "outcome_abs": v["outcome_abs"],
+                    "outcome_ci": v["outcome_ci"],
+                }
+        corpora.insert(corpora.index("Junyi (50k)") + 1, history)
     col_w, row_h = 1.38, 0.46
     label_x = 0.0
     x0 = 0.55 + col_w / 2
@@ -330,7 +376,8 @@ def _write_heatmap(rows: list[dict]) -> None:
     for i, corpus in enumerate(corpora):
         y = (len(corpora) - 1 - i) * row_h
         lines.append(
-            f"\\node[anchor=east, font=\\footnotesize\\sffamily] at ({label_x},{y}) {{{corpus}}};"
+            f"\\node[anchor=east, font=\\footnotesize\\sffamily] at ({label_x},{y}) "
+            f"{{{corpus if corpus == history else _show_corpus(corpus)}}};"
         )
         for j, contrast in enumerate(contrasts):
             row = lookup.get((corpus, contrast))
@@ -368,6 +415,12 @@ def _write_heatmap(rows: list[dict]) -> None:
                 "Colours follow the interval rule; a dagger marks a cell where",
                 "the seed rule gives consistent-positive instead.",
             ]
+        ),
+        *JUNYI_NOTE,
+        *(
+            ["The history-only row feeds the Junyi gap to the recurrent input only."]
+            if with_history
+            else []
         ),
         f"The $1{{,}}000$\\,s export is Table~\\ref{{tab:credit-assist-resolution{LABEL_SUFFIX}}}.}}",
         f"\\label{{fig:credit-heatmap{LABEL_SUFFIX}}}",
@@ -407,7 +460,12 @@ def _write_resolution_table(rows: list[dict], short: dict[str, str]) -> None:
         f"same rows is in Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}. Fold~0, {SEED_WORD[len(SEEDS)]} paired",
         "seeds. Differences are in units of $10^{-3}$ validation AUC; the",
         f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
-        f"{_rules_sentence(rows)[1]} Abbreviations as in Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}.}}",
+        f"{_rules_sentence(rows)[1]} Corpus, the corpus configuration;",
+        "Reference, the reference training recipe; Q$\\leftarrow$KC incidence,",
+        "question--knowledge-component incidence; package, the gap input with",
+        "the maps that read it; T-zero and T-misaligned, the gap map fed zeros",
+        "or gaps permuted within each learner; Cons.-pos., consistent-positive",
+        "(not credited).}",
         f"\\label{{tab:credit-assist-resolution{LABEL_SUFFIX}}}",
         "\\centering",
         "\\scriptsize",
@@ -565,8 +623,13 @@ def main() -> int:
     OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     map_rows = [r for r in rows if not r["corpus"].startswith(ASSIST_1000S)]
-    # Ten-seed map has too many rows for one page: split into two floats.
-    split = SPLIT_BEFORE if LABEL_SUFFIX else None
+    # The map with its legend is too tall for one page: split into two floats.
+    split = SPLIT_BEFORE if LABEL_SUFFIX else "ASSIST2012"
+    b_desc = (
+        "ASSISTments~2012 folds~1--2 and reference recipe, and Junyi."
+        if LABEL_SUFFIX
+        else "ASSISTments~2012 and Junyi."
+    )
     cut = next((i for i, r in enumerate(map_rows) if r["corpus"] == split), len(map_rows))
     parts = [map_rows[:cut], map_rows[cut:]] if cut < len(map_rows) else [map_rows]
     label = f"tab:credit-transfer{LABEL_SUFFIX}"
@@ -576,17 +639,15 @@ def main() -> int:
             caption = [
                 "\\caption{Credit map. Differences are $10^{-3}$ validation AUC; the",
                 f"bracket is the lower 95\\% bound. {_rules_sentence(rows)[0]}",
-                f"{_rules_sentence(rows)[1]} Cons.-pos.:",
-                "consistent-positive (not credited). Abbreviations are in",
-                "Section~\\ref{sec:credit-gate}."
+                f"{_rules_sentence(rows)[1]} Abbreviations are defined below the table."
                 + (f" Continued in Table~\\ref{{{label}-b}}.}}" if len(parts) > 1 else "}"),
                 f"\\label{{{label}}}",
             ]
         else:
             caption = [
                 f"\\caption{{Credit map, continued from Table~\\ref{{{label}}}:",
-                "ASSISTments~2012 folds~1--2 and reference recipe, and Junyi. Notation as",
-                f"in Table~\\ref{{{label}}}.}}",
+                f"{b_desc} Units, bracket, and outcome format as there;",
+                "abbreviations below.}",
                 f"\\label{{{label}-b}}",
             ]
         lines += [
@@ -603,15 +664,26 @@ def main() -> int:
         ]
         last = None
         for r in part:
-            corpus = r["corpus"] if r["corpus"] != last else ""
+            corpus = _show_corpus(r["corpus"]) if r["corpus"] != last else ""
             if last is not None and r["corpus"] != last:
-                lines.append("\\addlinespace")
+                lines.append("\\addlinespace[1pt]")
             last = r["corpus"]
             lines.append(
                 f"{corpus} & {r['contrast']} & ${_milli(r['mean_delta_val'])}$ "
                 f"[${_milli(r['lcb95_delta_val'])}$] & {_one_outcome(r, short)} \\\\"
             )
-        lines += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
+        lines += [
+            "\\bottomrule",
+            "\\end{tabular}",
+            "",
+            "\\smallskip",
+            "\\parbox{0.92\\linewidth}{\\scriptsize",
+            *(MAP_LEGEND if k == 0 else MAP_LEGEND_B),
+            *(JUNYI_NOTE if any(r["corpus"].startswith("Junyi") for r in part) else []),
+            "}",
+            "\\end{table}",
+            "",
+        ]
     OUT_TEX.write_text("\n".join(lines), encoding="utf-8")
     _write_resolution_table(rows, short)
     _write_heatmap(rows)

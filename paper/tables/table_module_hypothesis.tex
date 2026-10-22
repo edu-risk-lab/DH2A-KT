@@ -1,26 +1,36 @@
 \begin{table}[tbp]
 \caption{Each module exists to test one attribution hypothesis.
 ``Interface'' means the schema is defined and the hypothesis was not
-tested, because the required logs are absent.}
+tested, because the required logs are absent. Counts are seeds at or
+above $+2.0\times 10^{-3}$ under the seed rule; ten-seed results are
+from Table~\ref{tab:credit-transfer-10seed} (XES3G5M fold~0 unless
+stated), and teacher grouping and exponential forgetting were run on
+five seeds (Table~\ref{tab:negative-knowledge}).}
 \label{tab:module-hypothesis}
 \centering
-\footnotesize
+\scriptsize
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.4cm}
 >{\raggedright\arraybackslash}X
 >{\raggedright\arraybackslash}p{3.6cm}@{}}
 \toprule
-Module & Hypothesis it tests & Result on the reference ladder \\
+Module & Hypothesis it tests & Result \\
 \midrule
 Train-only graph build & Held-out learners do not enter auxiliary edges &
 Reused pairwise construction; not an AUC claim \\
 Membership diagnostic & A hyperedge built from the full log is flagged &
 One held-out learner raises the leak rate from $0$ to $0.964$ \\
 Q$\leftarrow$KC incidence control & Incidence content raises AUC when maps stay fixed &
-Unsupported ($0/5$) \\
+Unsupported ($0/10$) \\
 Linear $\Delta t$ branch & The timing package raises AUC &
-Credited ($5/5$), package rung \\
+Credited ($10/10$ on each of three folds), package rung \\
 T-zero / T-misaligned & Aligned gap input, with maps held fixed, clears $+0.002$ &
-Consistent-positive, not credited \\
+Consistent-positive, not credited (at most $3/10$) \\
+History-only gap on Junyi & The Junyi gap credit survives without the
+query-side gap & Consistent-positive, not credited ($2/10$;
+Table~\ref{tab:junyi-history}) \\
+Simulated leaked hint & The credit rules reject an outcome-dependent hint &
+Passes both rules ($5/5$); caught only with hint provenance
+(Table~\ref{tab:leak-simulation}) \\
 HypergraphConv on chain hyperedges & Multi-way passing raises AUC on this backbone &
 Single-seed, below the rule \\
 Teacher grouping & A group id raises AUC &

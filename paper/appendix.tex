@@ -54,6 +54,10 @@
 Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
 \end{center}
 
+\noindent Table, figure, and section numbers without a letter refer to
+the main document. Reference numbers in this file refer to its own
+list at the end, not to the list of the main document.
+
 \FloatBarrier
 \appendix
 \renewcommand{\thealgorithm}{\Alph{section}.\arabic{algorithm}}
@@ -85,7 +89,11 @@ repository.
 
 Table~\ref{tab:credit-test-10seed} repeats the map on test-only AUC,
 which plays no part in early stopping, and lists the rows whose outcome
-changes.
+changes. Of the $68$ contrasts, four change their interval-rule outcome
+and two their seed-rule outcome, all on ASSISTments~2012; every
+XES3G5M and Junyi outcome is unchanged. On test-only AUC the interval
+rule credits the ASSISTments package only on folds~1 and~2 of the
+reference recipe, and the seed rule credits no ASSISTments contrast.
 
 \input{tables/table_credit_test_10seed}
 \input{tables/table_holm_all_contrasts_10seed}
@@ -127,6 +135,15 @@ validation AUC, not the $10^{-3}$ unit used in the credit map.
 Table~\ref{tab:auc-p0-dt-folds} reports the three-fold
 stability of the absolute test AUC of QKC-T.
 
+\input{tables/table_qkc_capacity_matched}
+\input{tables/table_qkc_zero_time}
+\input{tables/table_a1_timing_controls}
+\input{tables/table_a7_query_dt_seeds}
+\input{tables/table_p4_raw}
+\input{tables/table_attribution_summary}
+\input{tables/table_credit_stats}
+\input{tables/table_auc_p0_dt_folds}
+
 Two-sided paired $t$-tests on the validation differences, with
 Holm--Bonferroni correction over a family of $m{=}3$, are in
 Table~\ref{tab:credit-stats}. The two package contrasts remain
@@ -136,16 +153,6 @@ existed and is not presented as fixed before any exploratory run; the
 preregistered family over all contrasts is
 Table~\ref{tab:holm-all-10seed}. The credit rules of the paper do not
 use these $p$-values.
-
-\input{tables/table_qkc_capacity_matched}
-\input{tables/table_qkc_zero_time}
-\input{tables/table_a1_timing_controls}
-\input{tables/table_a7_query_dt_seeds}
-\input{tables/table_p4_raw}
-\input{tables/table_attribution_summary}
-\input{tables/table_credit_stats}
-\input{tables/table_auc_p0_dt_folds}
-\FloatBarrier
 
 \section{Path-derived hyperedges and the leakage taxonomy}
 \label{app:hyperedge-construction}
@@ -176,17 +183,20 @@ $E_{\mathrm{pre}}^f$.}
 \end{algorithm}
 
 Table~\ref{tab:leakage-taxonomy} lists the three hyperedge-level
-leakage classes that a pairwise projection does not express.
+leakage classes that a pairwise projection does not express, and one
+timestamp-semantics class that the credit map itself exposed on Junyi.
 Discussion-thread and teacher-intervention hyperedges are data-blocked
 on the public corpora; session and hint hyperedges are built on
 FoundationalASSIST only (\ref{app:foundational-assist}).
 
 \begin{table}[tbp]
-\caption{Hyperedge-level leakage taxonomy (extends the pairwise taxonomy
-of \cite{daominh2026p0}).}
+\caption{Leakage taxonomy (extends the pairwise taxonomy of
+\cite{daominh2026p0}): three hyperedge-level classes and one
+timestamp-semantics class. AUC, area under the receiver operating
+characteristic curve, in units of $10^{-3}$.}
 \label{tab:leakage-taxonomy}
 \centering
-\small
+\footnotesize
 \begin{tabularx}{\textwidth}{@{}
   >{\raggedright\arraybackslash}p{3.35cm}
   >{\raggedright\arraybackslash}X
@@ -208,6 +218,11 @@ observable for teachers; hint members on FoundationalASSIST use
 train-only session construction (group-membership leak $0$); simulated
 with an outcome-dependent hint flag, selection-after-outcome rate $1$
 against $0$ (Table~\ref{tab:leak-simulation}) \\
+Timestamp-semantics & A timestamp that marks completion, so a gap fed
+to the next-step query includes the duration of the scored attempt &
+Rerun the credit with the gap in the history only; Junyi package
+$+4.14$ (credited) against $+1.92$ (consistent-positive)
+(Table~\ref{tab:junyi-history}) \\
 \bottomrule
 \end{tabularx}
 \end{table}
