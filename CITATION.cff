@@ -39,11 +39,14 @@ authors:
     affiliation: Vietnam National University
 repository-code: https://github.com/edu-risk-lab/DH2A-KT
 url: https://github.com/edu-risk-lab/DH2A-KT
-doi: 10.5281/zenodo.23521413
+doi: 10.5281/zenodo.23552539
 identifiers:
   - type: doi
+    value: 10.5281/zenodo.23552539
+    description: Manuscript state with the Junyi history-only check (tag es-submit-2026-10-22)
+  - type: doi
     value: 10.5281/zenodo.23521413
-    description: Ten-seed manuscript state (tag es-submit-2026-10-21)
+    description: Ten-seed manuscript state before the Junyi check (tag es-submit-2026-10-21)
   - type: doi
     value: 10.5281/zenodo.23219471
     description: Five-seed manuscript state (tag es-submit-2026-10-08b)
@@ -54,8 +57,8 @@ identifiers:
     value: 10.5281/zenodo.22676634
     description: All versions (concept DOI)
 license: MIT
-version: es-submit-2026-10-21
-date-released: "2026-10-21"
+version: es-submit-2026-10-22
+date-released: "2026-10-22"
 keywords:
   - knowledge tracing
   - knowledge validation
@@ -94,4 +97,4 @@ preferred-citation:
   notes: >-
     Manuscript submitted to Expert Systems. Update volume, pages, and DOI
     upon publication. Canonical source: paper/main.tex. Snapshot tag
-    es-submit-2026-10-21, version DOI 10.5281/zenodo.23521413.
+    es-submit-2026-10-22, version DOI 10.5281/zenodo.23552539.
