@@ -73,29 +73,27 @@ city={Hanoi},
 country={Vietnam}}
 
 \begin{abstract}
-Knowledge tracing systems often add auxiliary knowledge, such as
-concept graphs or response timing, to a sequence model and are judged
+Knowledge tracing systems add auxiliary knowledge, such as concept
+graphs or response timing, to a sequence model and are often judged
 by one area under the receiver operating characteristic curve (AUC),
-which does not show which added piece earned the gain. Knowledge built
-from the full log can also carry held-out learners into the
-evaluation. We propose a credit protocol that builds such knowledge
+which hides which piece earned the gain. Knowledge built from the full
+log can also leak held-out learners into training. We propose a credit protocol that builds such knowledge
 from training learners only, audits membership leakage, compares each
 component with a control declared in advance, and assigns one of three
-outcomes from ten paired seeds. Unlike single-AUC comparisons and
-ablations that drop an input with its weights, it separates
-the two and repeats the decision across settings. We apply it to one
-elapsed-time component on three corpora, two encoders, and three
-learner folds. On XES3G5M with a recurrent tracer the component is
-credited only as a package (input plus weights), and those weights fed
-only zeros give about a quarter of the gain. On Junyi the gap input is
-credited only because its completion timestamps carry the duration of
-the scored response. Nothing is credited under an attention encoder or
-on a coarse timestamp export, and on ASSISTments~2012 the outcome
-depends on the fold and the decision rule. In a simulation, a hint
-chosen with knowledge of the next response raises AUC by
-$5.4\times 10^{-3}$ and passes both rules; only an audit of how hints
-were chosen flags it. Credit should be reported per corpus, backbone,
-recipe, timestamp meaning, learner fold, and control level.
+outcomes from ten paired seeds. Unlike single-AUC ablations, it
+separates an input from the weights that read it and repeats the
+decision across settings. We apply it to one elapsed-time component on
+three corpora, two encoders, and three learner folds. On XES3G5M with
+a recurrent tracer the component is credited only together with its
+weights, and those weights fed zeros give about a quarter of the gain. On
+Junyi the gap input is credited only because its completion timestamps
+carry the duration of the scored response. Nothing is credited under
+an attention encoder or on a coarse timestamp export; on
+ASSISTments~2012 the outcome depends on the fold and the rule. In a
+simulation, a hint chosen with knowledge of the next response raises
+AUC by $0.0054$ and passes both rules; only an audit of hint
+provenance flags it. Credit should be reported per setting, including
+timestamp meaning, and per control level.
 \end{abstract}
 
 \begin{keyword}
@@ -283,7 +281,7 @@ provenance'', ``KT label leakage'', ``question-level evaluation'', and
 % =============================================================================
 
 Let $\mathcal{D}=\{(u,t,q,c,y)\}$ be a KT log with learner $u$,
-timestamp $t$, item $q$, knowledge component (KC) $c$, and correctness
+timestamp $t$, item $q$, KC $c$, and correctness
 $y\in\{0,1\}$. A learner-based split
 $\mathcal{F}=(\mathcal{F}_{\mathrm{train}},\mathcal{F}_{\mathrm{val}},
 \mathcal{F}_{\mathrm{test}})$ assigns each learner to one part (ratios
@@ -567,7 +565,7 @@ seeds fall just below $+2.0$ while the lower bound stays above it
 
 ASSISTments rows in Table~\ref{tab:credit-transfer-10seed} use the
 one-second export; the $1{,}000$\,s export is
-Table~\ref{tab:credit-assist-resolution-10seed}. Rows marked Ref.\ or
+Table~\ref{tab:credit-assist-resolution-10seed}. Rows marked ref.\ or
 (all), and every XES3G5M row, use the reference recipe; the other
 ASSISTments and Junyi rows use the corpus configuration.
 
@@ -687,7 +685,8 @@ history-only package, run on five seeds, is likewise consistent-positive
 \label{sec:time-result}
 \paragraph{Incidence}
 Capacity-matched zeroing of the question--KC incidence gives a mean
-validation difference of $-0.01{\pm}0.33$ over ten seeds ($0/10$; 95\%
+validation difference of $-0.01{\pm}0.33$ (mean ${\pm}$ SD,
+$10^{-3}$) over ten seeds ($0/10$; 95\%
 interval $[{-}0.24,{+}0.23]$). Under the shared-sum fusion of
 Eq.~\eqref{eq:qkc}, the interval bounds the mean incidence contribution
 above by about $+0.2$, so we report a bounded null. Per-seed records
@@ -818,7 +817,7 @@ The protocol answers which message survived which control, not whether
 a hypergraph network beats GIKT. Four findings follow from
 Tables~\ref{tab:credit-transfer-10seed}
 and~\ref{tab:credit-assist-resolution-10seed}, and a fifth from the
-simulation.
+simulation and the Junyi check (Table~\ref{tab:junyi-history}).
 
 First, the rung matters. On XES3G5M the time message is credited only
 as a package. Holding the map fixed and replacing the gap leaves a gain

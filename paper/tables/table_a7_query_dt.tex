@@ -8,8 +8,9 @@ $+2.0\times 10^{-3}$ validation AUC; every seed is positive in every
 row. Mean $\Delta$ is the mean paired validation difference in units
 of $10^{-3}$. The AUC (area under the receiver operating characteristic
 curve) column is the test-only metric of Table~\ref{tab:auc-xes3g5m},
-with the sample SD over the five seeds. LSTM, the long short-term
-memory input of the tracer; query, its next-step query. Only LSTM$+$query
+with the sample SD over the five seeds. LSTM, the input of the long
+short-term memory (recurrent) layer; query, the next-step query of the
+tracer. Only LSTM$+$query
 injection is credited; the other two are consistent-positive (not
 credited). Per-seed values: Table~\ref{tab:a7-query-dt-seeds}.}
 \label{tab:a7-query-dt}
@@ -18,7 +19,9 @@ credited). Per-seed values: Table~\ref{tab:a7-query-dt-seeds}.}
 \setlength{\tabcolsep}{3.8pt}
 \begin{tabular}{@{}llccc@{}}
 \toprule
-Injection site & Gaps used & Test-only AUC (mean ${\pm}$ SD) & $k/5$ & Mean $\Delta\times 10^{-3}$ \\
+Injection site & Gaps used &
+\begin{tabular}[b]{@{}c@{}}Test-only AUC\\(mean ${\pm}$ SD)\end{tabular} & $k/5$ &
+\begin{tabular}[b]{@{}c@{}}Mean $\Delta$\\($10^{-3}$)\end{tabular} \\
 \midrule
 LSTM $+$ query & history and next-step wait & $0.8295{\pm}0.0001$ & $5/5$ & $+2.74$ \\
 LSTM only (history-only) & observed gaps only & $0.8286{\pm}0.0002$ & $2/5$ & $+1.93$ \\

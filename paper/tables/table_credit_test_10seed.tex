@@ -6,7 +6,9 @@ Table~\ref{tab:credit-transfer-10seed}. Of 68 contrasts, 4 change
 their interval-rule outcome and 2 their seed-rule outcome; only
 the rows that change are listed, with the validation outcome first.
 Differences are $10^{-3}$ test-only AUC; the bracket is the lower 95\%
-bound; outcomes are seed rule/interval rule.}
+bound; outcomes are seed rule/interval rule, with C credited,
+P consistent-positive (not credited), and U unsupported. ref., the
+reference training recipe (otherwise the corpus configuration).}
 \label{tab:credit-test-10seed}
 \centering
 \scriptsize
@@ -15,11 +17,11 @@ bound; outcomes are seed rule/interval rule.}
 \toprule
 Setting & Contrast & Test mean [lower] & Validation & Test \\
 \midrule
-ASSIST2012 & Package, observed incidence & $+1.74$ [$+1.26$] & Unsupp./Unsupp. & Cons.-pos./Cons.-pos. \\
-ASSIST2012 fold 1 & Package, zero incidence & $+1.98$ [$+1.42$] & Cons.-pos./Credited & Cons.-pos./Cons.-pos. \\
-ASSIST2012 ref. & Package, observed incidence & $+2.00$ [$+1.59$] & Cons.-pos./Credited & Cons.-pos./Cons.-pos. \\
-ASSIST2012 ref. & Package, zero incidence & $+2.39$ [$+1.77$] & Cons.-pos./Credited & Cons.-pos./Cons.-pos. \\
-ASSIST2012 ref.\ fold 2 & Package, zero incidence & $+2.46$ [$+2.11$] & Credited/Credited & Cons.-pos./Credited \\
+ASSIST2012 & Package, observed incidence & $+1.74$ [$+1.26$] & U/U & P/P \\
+ASSIST2012 fold 1 & Package, zero incidence & $+1.98$ [$+1.42$] & P/C & P/P \\
+ASSIST2012 ref. & Package, observed incidence & $+2.00$ [$+1.59$] & P/C & P/P \\
+ASSIST2012 ref. & Package, zero incidence & $+2.39$ [$+1.77$] & P/C & P/P \\
+ASSIST2012 ref.\ fold 2 & Package, zero incidence & $+2.46$ [$+2.11$] & C/C & P/C \\
 \bottomrule
 \end{tabular}
 \end{table}

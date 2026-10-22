@@ -392,14 +392,20 @@ def _write_heatmap(rows: list[dict]) -> None:
             mark = _HEAT_MARK[row["outcome_ci"]]
             text = _milli(row["mean_delta_val"])
             if row["outcome_abs"] != row["outcome_ci"]:
-                text += "$\\,\\boldsymbol{\\dagger}$"
+                text += "$^{\\dagger}$"
             lines.append(
                 f"\\node[draw, fill={fill}, minimum width={col_w-0.08}cm, "
                 f"minimum height={row_h-0.06}cm] at ({x},{y}) {{{mark}\\,{text}}};"
             )
     lines += [
         "\\end{tikzpicture}}",
-        f"\\caption{{Credit outcomes; row names match Table~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}.",
+        (
+            f"\\caption{{Credit outcomes; row names match Tables~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}},"
+            f" \\ref{{tab:credit-transfer{LABEL_SUFFIX}-b}}, and~\\ref{{tab:junyi-history}}."
+            if with_history
+            else f"\\caption{{Credit outcomes; row names match Tables~\\ref{{tab:credit-transfer{LABEL_SUFFIX}}}"
+            f" and~\\ref{{tab:credit-transfer{LABEL_SUFFIX}-b}}."
+        ),
         "A check on blue is credited, a circle on orange is consistent-positive",
         "(not credited), and a cross on grey is unsupported. Column labels:",
         "Incidence; Pkg, obs.\\ and Pkg, zero, the package with observed and with",
@@ -518,7 +524,9 @@ def _write_test_table(rows: list[dict], short: dict[str, str]) -> None:
         f"their interval-rule outcome and {n_abs} their seed-rule outcome; only",
         "the rows that change are listed, with the validation outcome first.",
         "Differences are $10^{-3}$ test-only AUC; the bracket is the lower 95\\%",
-        "bound; outcomes are seed rule/interval rule.}",
+        "bound; outcomes are seed rule/interval rule, with C credited,",
+        "P consistent-positive (not credited), and U unsupported. ref., the",
+        "reference training recipe (otherwise the corpus configuration).}",
         f"\\label{{tab:credit-test{LABEL_SUFFIX}}}",
         "\\centering",
         "\\scriptsize",
@@ -528,13 +536,14 @@ def _write_test_table(rows: list[dict], short: dict[str, str]) -> None:
         "Setting & Contrast & Test mean [lower] & Validation & Test \\\\",
         "\\midrule",
     ]
+    letter = {"Credited": "C", "Consistent-positive, not credited": "P", "Unsupported": "U"}
     for r in changed:
         v = val[(r["corpus"], r["contrast"])]
         lines.append(
             f"{r['corpus']} & {r['contrast']} & ${_milli(r['mean_delta_val'])}$ "
             f"[${_milli(r['lcb95_delta_val'])}$] & "
-            f"{short[v['outcome_abs']]}/{short[v['outcome_ci']]} & "
-            f"{short[r['outcome_abs']]}/{short[r['outcome_ci']]} \\\\"
+            f"{letter[v['outcome_abs']]}/{letter[v['outcome_ci']]} & "
+            f"{letter[r['outcome_abs']]}/{letter[r['outcome_ci']]} \\\\"
         )
     if not changed:
         lines.append("\\multicolumn{5}{@{}l}{No outcome changes.} \\\\")
