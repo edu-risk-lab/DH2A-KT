@@ -75,8 +75,8 @@ country={Vietnam}}
 \begin{abstract}
 Knowledge tracing systems often add auxiliary knowledge, such as
 concept graphs or response timing, to a sequence model and are judged
-by one area under the ROC curve. That number does not show which added
-piece earned the gain, and knowledge built from the full log can carry
+by one area under the ROC curve, which does not show which added piece
+earned the gain. Knowledge built from the full log can also carry
 held-out learners into the evaluation. We propose a credit protocol
 that builds such knowledge from training learners only, audits
 membership leakage, compares each component with a control declared in
@@ -85,16 +85,15 @@ apply it to one elapsed-time component on three corpora, two encoders,
 and three learner folds. On XES3G5M with a recurrent tracer the
 component is credited only as a package (the input with the weights
 that read it), and those weights fed only zeros give about a quarter of
-the gain. The gap input itself is credited only on Junyi, whose
-completion timestamps let it carry the duration of the scored response.
-The package is not credited under an attention encoder or on a coarse
-timestamp export. On ASSISTments~2012 the gain sits at the threshold,
-so the outcome depends on the fold and the decision rule. Question--concept
-links are not credited. In a simulation, a hint chosen with knowledge
-of the next response raises AUC by $5.4\times 10^{-3}$ and passes both
-rules; only an audit of how hints were chosen flags it. Credit should
-be reported per corpus, backbone, recipe, learner fold, and control
-level.
+the gain. On Junyi the gap input is credited only while its completion
+timestamps let it carry the duration of the scored response. Nothing is
+credited under an attention encoder or on a coarse timestamp export,
+and on ASSISTments~2012 the outcome depends on the fold and the
+decision rule. In a simulation, a hint chosen with knowledge of the
+next response raises AUC by $5.4\times 10^{-3}$ and passes both rules;
+only an audit of how hints were chosen flags it. Credit should be
+reported per corpus, backbone, recipe, timestamp meaning, learner fold,
+and control level.
 \end{abstract}
 
 \begin{keyword}
@@ -149,9 +148,11 @@ on the setting (Table~\ref{tab:credit-transfer-10seed}). On XES3G5M
 with a recurrent tracer the time package is credited, but only as a
 package: a map fed only zeros already accounts for about a quarter of
 that gain, so a package-level ablation overstates what the gap input
-contributes. The same gap input is credited on Junyi and is not
-credited on XES3G5M, but Junyi stores completion times, so its
-query-side gap includes the time spent on the scored item. On
+contributes. The same gap input is credited on Junyi, but Junyi stores
+completion times, so its query-side gap includes the time spent on the
+scored item. Fed to the recurrent input only, where it carries no such
+look-ahead, the Junyi gap is consistent-positive (not credited), as on
+XES3G5M. On
 ASSISTments the package is close to the threshold. The interval rule
 credits it on every fold of the reference recipe and on one of three
 folds of the corpus configuration; the seed rule credits it on one fold
@@ -173,8 +174,10 @@ are not a substitute for that audit.
   three corpora, and three learner folds, with ten paired seeds per
   contrast, the time message is credited as an input, credited only as
   a package, or not credited. The verdict depends on the setting, the
-  training recipe, the timestamp resolution, the learner fold, and, on
-  ASSISTments, the decision rule. Question--KC incidence is not credited
+  training recipe, the timestamp resolution and meaning, the learner
+  fold, and, on ASSISTments, the decision rule; the only input credit,
+  on Junyi, disappears once the gap can no longer carry the scored
+  item's duration. Question--KC incidence is not credited
   on XES3G5M (Section~\ref{sec:transfer-ladder},
   Table~\ref{tab:credit-transfer-10seed}).
   \item \textbf{C3 (leakage audit).} Of the pairwise leakage
@@ -366,7 +369,8 @@ row $t{+}1$ includes the time the learner spent on item $t{+}1$, and the
 query-side gap carries information about the response being scored.
 Junyi results with a query-side gap are therefore not attempt-onset
 results; the recurrent-side gap at step $t$ covers only item $t$, whose
-response is already an input, and has no such look-ahead.
+response is already an input, and has no such look-ahead
+(Table~\ref{tab:junyi-history}).
 
 \subsection{Second encoder}
 \label{sec:second-encoder}
@@ -643,11 +647,28 @@ gain. The 50{,}000-learner subsample under the corpus configuration
 gives the same outcomes on all three folds. Junyi is the only setting
 in which the aligned gap input itself is credited, and the full ladder
 shares the XES3G5M recipe, so the difference does not come from the
-recipe. It need not come from the learners either. Junyi gaps run
-between completion times, so in these arms the query-side gap includes
-the time spent on the scored item, a signal that is not available when
-the item opens. These Junyi credits are completion-time results, not
-attempt-onset results.
+recipe. Junyi gaps run between completion times, so in these arms the
+query-side gap includes the time spent on the scored item, a signal
+that is not available when the item opens.
+
+A check fixed in a preregistration addendum before its runs
+(\path{docs/preregistration_junyi_onset.md}) feeds the gap to the
+recurrent input only, where it covers items whose responses are
+already inputs (Table~\ref{tab:junyi-history}). On the
+$50{,}000$-learner subsample, fold~0, the history-only package gains
+$+1.92$ over no time (lower bound $+1.61$, $5/10$ seeds at the
+threshold), and the history-only gap gains $+1.75$ over its T-zero
+($+1.52$, $2/10$). Both are consistent-positive (not credited) under
+both rules and on test-only AUC, while the arms with the query-side gap
+on the same learners and seeds give $+4.14$ and $+3.90$. The Junyi
+credit of the gap input therefore cannot be separated from that
+look-ahead, and the Junyi rows of the map are completion-time results
+only. Without the query-side gap, Junyi behaves like XES3G5M: the gap
+is positive on every seed and below the threshold. The XES3G5M
+history-only package, run on five seeds, is likewise consistent-positive
+($+1.93$; Table~\ref{tab:a7-query-dt}).
+
+\input{tables/table_junyi_history}
 
 \subsection{Reference run on XES3G5M}
 \label{sec:rq1-result}
@@ -798,7 +819,7 @@ Second, the setting matters. Under the XES3G5M recipe the same message
 is credited as a package on XES3G5M on all three learner folds, on
 ASSISTments~2012 on all three folds under the interval rule but on one
 under the seed rule, and as an aligned input on Junyi on all three
-folds, where the gap runs between completion times. By the interval
+folds while the gap runs between completion times. By the interval
 rule it is credited on one of three folds of ASSISTments~2012 under
 the corpus configuration, and on no fold of XES3G5M once the recurrent
 encoder is replaced by attention, nor on an ASSISTments export with
@@ -811,9 +832,9 @@ Table~\ref{tab:gap-descriptives} show where the gap carries the most
 signal. Scored alone, $\log(1{+}\Delta t)$ separates correct from
 incorrect responses far more on Junyi (AUC $0.335$, that is $0.665$
 with the sign reversed) than on XES3G5M ($0.468$) or the one-second
-ASSISTments export ($0.458$). Part of that separation is expected,
-because the Junyi gap includes the time spent on the scored item, and
-Junyi is also the only corpus on which the aligned gap is credited. On
+ASSISTments export ($0.458$). Much of that separation is expected,
+because the Junyi gap includes the time spent on the scored item; the
+history-only check shows that the Junyi input credit rests on it. On
 the $1{,}000$\,s export the gap AUC is $0.492$ and the package is not
 credited. Neither descriptive explains the attention or
 recipe results, since those comparisons hold the corpus fixed; a
@@ -828,8 +849,13 @@ resolution. On the $1{,}000$\,s export the package is consistent-positive
 it, and the tracer gains $0.013$ in validation AUC. Coarse timestamps
 remove most within-session gaps and reorder rows inside each window, so
 a time message evaluated on such an export is evaluated on a different
-signal. The credit record of a time message should therefore state
-the timestamp resolution and the row order it was evaluated on.
+signal. What a timestamp marks matters as much as its resolution. On
+Junyi, where it marks completion, the query-side gap carries the
+scored item's duration and the aligned gap is credited on every fold;
+fed to the recurrent input only, the same gap is not credited. The
+credit record of a time message should therefore state the timestamp
+resolution, its meaning (start or completion), and the row order it
+was evaluated on.
 
 Fourth, structural messages fail only in the forms and backbones
 tested. Question--KC incidence is a
@@ -908,8 +934,11 @@ results suggest five practices.
   teacher-grouping diagnostic was also run on the $1{,}000$\,s export.
   Junyi stores completion times, so its query-side gap includes the
   time spent on the scored item and is not available at attempt
-  onset; its credit of the aligned gap is a completion-time result, and
-  a tracer that must score when the item opens cannot claim it.
+  onset. The history-only check removes the credit, but it was run on
+  the $50{,}000$-learner subsample and fold~0 only; start times
+  ($\texttt{time\_done}$ minus $\texttt{time\_taken}$) were not
+  reconstructed, so the attempt-onset package with a query-side gap was
+  not run on Junyi.
   The Junyi gap also entered the tracer in microseconds
   (Section~\ref{sec:reuse}). For gaps of one second or more the change
   is a near-constant offset that the bias of the linear map can absorb,
@@ -953,8 +982,9 @@ configuration the interval rule credits it on one fold of three. On
 XES3G5M with an attention encoder the protocol credits neither the
 package nor the gap input on any fold. On Junyi it credits both on
 every fold, but there the gap runs between completion times and
-includes the time spent on the scored item, so that credit does not
-transfer to a tracer that scores when the item opens.
+includes the time spent on the scored item; fed to the recurrent input
+only, neither is credited, so no attempt-onset gap input is credited on
+any corpus.
 Question--concept incidence is not credited on XES3G5M. An
 indicator-only input reproduces about $60\%$ of the aligned-gap gain on
 XES3G5M, and an ASSISTments export with $1{,}000$\,s timestamps does
@@ -965,6 +995,7 @@ hint gains $+5.4\times 10^{-3}$ and passes both rules; it is flagged
 only by an audit that records how each hint was chosen, so provenance
 must be logged and audited before credit is assessed. Future work, in
 order: rerun the pairwise audit on the one-second ASSISTments export;
+rebuild Junyi with start times and rerun its ladder;
 test the attention encoder and a tuned optimiser on the other corpora;
 run DyGKT and recent pyKT models under this evaluator; and replace the
 simulated cross-modal and intervention-timing classes with logs that
