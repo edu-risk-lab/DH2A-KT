@@ -501,7 +501,11 @@ ASSISTments~2012 under its corpus configuration they repeat every
 fold-0 contrast. The seed-42 runs of the XES3G5M reference arms were
 retrained for this map and reproduced the stored validation and test
 AUCs exactly. Outcomes use validation AUC; test-only AUC is reported
-for context.
+for context. The run plan (\path{scripts/50_credit_ladder_plan.py})
+holds $896$ training runs, each on one NVIDIA RTX~3090 (24\,GB); they
+cover the map, its five-seed predecessor, and the leakage simulation.
+The first five seeds of the XES3G5M fold-0 arms and the contextual
+baselines were trained separately.
 
 \subsection{Evaluation protocol}
 \label{sec:clean-protocol}
