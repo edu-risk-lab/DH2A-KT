@@ -298,6 +298,8 @@ temp/_diag_pykt_smask/
 !results/tables/credit_ladder_transfer_10seed.json
 !results/tables/credit_ladder_transfer_10seed_test.json
 !results/tables/junyi_history_check.json
+!results/tables/junyi_onset_check.json
+!results/tables/learner_bootstrap.json
 !results/tables/holm_all_contrasts*.json
 !results/tables/threshold_sensitivity_all_corpora*.json
 !results/tables/baseline_grid_xes3g5m_fold0.csv

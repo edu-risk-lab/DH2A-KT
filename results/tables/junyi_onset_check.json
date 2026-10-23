@@ -1,0 +1,50 @@
+{
+  "raw_file": "external\\p0_leakage_audit\\data\\raw\\junyi\\junyi_ProblemLog_original.csv",
+  "columns": [
+    "user_id",
+    "exercise",
+    "problem_type",
+    "problem_number",
+    "topic_mode",
+    "suggested",
+    "review_mode",
+    "time_done",
+    "time_taken",
+    "time_taken_attempts",
+    "correct",
+    "count_attempts",
+    "hint_used",
+    "count_hints",
+    "hint_time_taken_list",
+    "earned_proficiency",
+    "points_earned"
+  ],
+  "duration_fields": [
+    "time_taken",
+    "time_taken_attempts"
+  ],
+  "n_rows": 25925992,
+  "fields": {
+    "time_taken": {
+      "valid_share": 0.9999595772458775,
+      "median_seconds": 8.0,
+      "p99_seconds": 194.0,
+      "onset_before_previous_completion_share": 0.10851028497718261
+    },
+    "sum_time_taken_attempts": {
+      "valid_share": 0.997316129697178,
+      "median_seconds": 8.0,
+      "p99_seconds": 195.0,
+      "onset_before_previous_completion_share": 0.10873952672278228
+    },
+    "first_time_taken_attempts": {
+      "valid_share": 0.9971298301719757,
+      "median_seconds": 8.0,
+      "p99_seconds": 151.0,
+      "onset_before_previous_completion_share": 0.03010376078583734
+    }
+  },
+  "time_taken_equals_attempt_sum_share": 0.9994471773042505,
+  "chosen_field": "time_taken",
+  "decision": "onset runs (Section 8.2, first branch)"
+}

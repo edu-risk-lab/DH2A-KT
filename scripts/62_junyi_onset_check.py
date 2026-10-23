@@ -31,8 +31,23 @@ def _first_attempt_seconds(series: pd.Series) -> pd.Series:
 
 
 def _sum_attempt_seconds(series: pd.Series) -> pd.Series:
-    parts = series.astype(str).str.split("&", expand=True)
-    return parts.apply(pd.to_numeric, errors="coerce").sum(axis=1, min_count=1)
+    # Some rows list hundreds of attempt times. Expanding them into columns
+    # asks for a frame of tens of millions by hundreds and does not fit in memory.
+    values = series.astype(str).to_numpy()
+    out = np.empty(len(values), dtype=np.float64)
+    for i, text in enumerate(values):
+        total = 0.0
+        seen = False
+        for piece in text.split("&"):
+            if piece == "" or piece == "nan":
+                continue
+            try:
+                total += float(piece)
+            except ValueError:
+                continue
+            seen = True
+        out[i] = total if seen else np.nan
+    return pd.Series(out, index=series.index)
 
 
 def main() -> int:
