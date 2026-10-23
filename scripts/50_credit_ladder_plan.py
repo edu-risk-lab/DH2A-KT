@@ -84,7 +84,9 @@ and junyi-onset-full-fold{0,1,2} when results/tables/junyi_onset_check.json
 names a duration field, else junyi-hist-fold{1,2} and
 junyi-hist-full-fold{0,1,2}; attn-assist-fold{0,1,2};
 attn-junyi-fold{0,1,2} or attn-junyi50k-fold{0,1,2} (timing rule);
-tracer-grid, then tracer-seeds.
+tracer-grid, then tracer-seeds. Junyi attention timing run (addendum 3b,
+Section 2):
+  python scripts/50_credit_ladder_plan.py --group attn-junyi-fold0 --arm time-package --seed 42 --launch
   python scripts/62_junyi_onset_check.py
   python scripts/50_credit_ladder_plan.py --group junyi-sec --launch-all
 """
@@ -658,6 +660,7 @@ def main() -> int:
     parser.add_argument("--min-vram-mib", type=int, default=20000)
     parser.add_argument("--group", default=None, help="Restrict to one group name")
     parser.add_argument("--seed", type=int, default=None, help="Restrict to one seed")
+    parser.add_argument("--arm", default=None, help="Restrict to one arm")
     args = parser.parse_args()
     if args.launch and args.launch_all:
         raise SystemExit("use either --launch or --launch-all")
@@ -667,6 +670,8 @@ def main() -> int:
         jobs = [j for j in jobs if j["group"] == args.group]
     if args.seed is not None:
         jobs = [j for j in jobs if j["seed"] == args.seed]
+    if args.arm is not None:
+        jobs = [j for j in jobs if j["arm"] == args.arm]
     runnable = [j for j in jobs if j["cmd"] is not None]
     blocked = [j for j in jobs if j["cmd"] is None]
     payload = {
