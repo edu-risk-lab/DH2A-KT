@@ -83,6 +83,20 @@ def main() -> int:
         "held-out position to this .npz.",
     )
     parser.add_argument(
+        "--junyi-time",
+        choices=("done_s", "onset_s"),
+        default=None,
+        help="Junyi only: time gaps from completion times in seconds, or from "
+        "attempt onsets rebuilt as completion minus the raw duration "
+        "(docs/preregistration_round3.md). Row order is unchanged.",
+    )
+    parser.add_argument(
+        "--junyi-duration-field",
+        choices=("time_taken", "sum_time_taken_attempts"),
+        default="time_taken",
+        help="Raw Junyi duration used by --junyi-time onset_s.",
+    )
+    parser.add_argument(
         "--architecture",
         default=None,
         help="Override training.architecture (v2, v3, v4 or v5).",
@@ -619,6 +633,29 @@ def main() -> int:
             print(
                 f"[fold {fold}] timing join: {n_dur}/{len(splits['train'])} train rows "
                 f"with duration>0 (median={float(splits['train']['duration_sec'].median()):.3f}s)"
+            )
+        if args.junyi_time is not None:
+            from dh2a_kt.data.aux_signals import attach_junyi_gap_timestamps, junyi_raw_durations
+
+            durations = None
+            if args.junyi_time == "onset_s":
+                from dh2a_kt.hyperedge.p0_inputs import p0_path
+
+                raw_path = p0_path(p0_cfg, "raw_interactions_file")
+                if not raw_path.exists():
+                    raise SystemExit(f"Junyi raw CSV not found: {raw_path}")
+                durations = junyi_raw_durations(raw_path, args.junyi_duration_field)
+            splits["train"] = attach_junyi_gap_timestamps(splits["train"], args.junyi_time, durations)
+            eval_df = attach_junyi_gap_timestamps(eval_df, args.junyi_time, durations)
+            share = splits["train"].attrs.get("junyi_valid_duration_share")
+            if share is not None and share < 0.99:
+                raise SystemExit(
+                    f"Junyi onset: valid duration on {share:.4%} of train rows, below the "
+                    "99% rule of docs/preregistration_round3.md Section 8.2"
+                )
+            print(
+                f"[fold {fold}] Junyi gap timestamps: {args.junyi_time}"
+                + (f", valid duration on {share:.4%} of train rows" if share is not None else "")
             )
         hyperedge_spec = concept_prerequisite_spec_from_config(dh2_cfg, fold=fold)
         if args.hyperedge_source is not None:

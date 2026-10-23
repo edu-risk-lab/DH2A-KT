@@ -308,8 +308,13 @@ if _TORCH_AVAILABLE:
             if include_time_gaps:
                 from dh2a_kt.data.aux_signals import apply_time_gap_control, log_time_gaps
 
+                gap_timestamps = (
+                    sorted_df["gap_timestamp"].to_numpy(dtype=np.int64)
+                    if "gap_timestamp" in sorted_df.columns
+                    else timestamps
+                )
                 self._time_gaps = apply_time_gap_control(
-                    log_time_gaps(timestamps, user_ids),
+                    log_time_gaps(gap_timestamps, user_ids),
                     user_ids,
                     time_gap_control,
                     seed=time_gap_seed,

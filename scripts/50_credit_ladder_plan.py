@@ -77,15 +77,27 @@ Usage:
   python scripts/50_credit_ladder_plan.py --group assist-sec --launch-all
   python scripts/50_credit_ladder_plan.py --group assist-sec-fold1 --launch-all
   python scripts/50_credit_ladder_plan.py --group assist-sec-fold2 --launch-all
+
+Round 3 and 3b (docs/preregistration_round3.md Section 8,
+docs/preregistration_round3b.md): junyi-sec; junyi-onset-partial-fold{0,1,2}
+and junyi-onset-full-fold{0,1,2} when results/tables/junyi_onset_check.json
+names a duration field, else junyi-hist-fold{1,2} and
+junyi-hist-full-fold{0,1,2}; attn-assist-fold{0,1,2};
+attn-junyi-fold{0,1,2} or attn-junyi50k-fold{0,1,2} (timing rule);
+tracer-grid, then tracer-seeds.
+  python scripts/62_junyi_onset_check.py
+  python scripts/50_credit_ladder_plan.py --group junyi-sec --launch-all
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -497,7 +509,101 @@ def _jobs() -> list[dict]:
             ("t-zero-history", [*history, "--time-gap-control", "zero"]),
         ):
             add("junyi-hist", arm, seed, _dh2(junyi, seed, extra, max_users=50000))
+
+    # Round 3 (docs/preregistration_round3.md, Section 8; addendum 3b).
+    onset = _junyi_onset_decision()
+    onset_flags = ["--junyi-time", "onset_s", "--junyi-duration-field", onset["field"]] if onset["field"] else []
+    onset_block = None if onset["field"] else onset["reason"]
+    hist_block = "Junyi onset can be rebuilt; history-only fallback not run" if onset["field"] else None
+    if not onset["checked"]:
+        hist_block = onset["reason"]
+    for seed in SEEDS_10:
+        for arm, extra in (("time-package", timed), ("t-zero", [*timed, "--time-gap-control", "zero"])):
+            add("junyi-sec", arm, seed,
+                _dh2(junyi, seed, [*extra, "--junyi-time", "done_s"], max_users=50000))
+    history_arms = {
+        "time-history": history,
+        "t-zero-history": [*history, "--time-gap-control", "zero"],
+    }
+    for fold in (0, 1, 2):
+        for seed in SEEDS_10:
+            for arm, extra in (("time-package", timed), ("t-zero", [*timed, "--time-gap-control", "zero"])):
+                add(f"junyi-onset-partial-fold{fold}", arm, seed,
+                    None if onset_block else _dh2(junyi, seed, [*extra, *onset_flags], max_users=50000, fold=fold),
+                    block=onset_block)
+                add(f"junyi-onset-full-fold{fold}", arm, seed,
+                    None if onset_block else _dh2(junyi, seed, [*extra, *REF_RECIPE, *onset_flags], fold=fold),
+                    block=onset_block)
+            for arm, extra in history_arms.items():
+                if fold > 0:
+                    add(f"junyi-hist-fold{fold}", arm, seed,
+                        None if hist_block else _dh2(junyi, seed, extra, max_users=50000, fold=fold),
+                        block=hist_block)
+                add(f"junyi-hist-full-fold{fold}", arm, seed,
+                    None if hist_block else _dh2(junyi, seed, [*extra, *REF_RECIPE], fold=fold),
+                    block=hist_block)
+
+    # Attention encoder on the other corpora, reference recipe.
+    for fold in (0, 1, 2):
+        for seed in SEEDS_10:
+            for arm, extra in backbone_arms.items():
+                add(f"attn-assist-fold{fold}", arm, seed, _dh2(assist_sec, seed, [*extra, *attn], fold=fold))
+            junyi_attn_arms = (
+                {"no-time": zero_q, "time-package": [*timed, *onset_flags],
+                 "t-zero": [*timed, "--time-gap-control", "zero", *onset_flags]}
+                if onset["field"]
+                else {"no-time": zero_q, **history_arms}
+            )
+            for arm, extra in junyi_attn_arms.items():
+                for group, max_users in ((f"attn-junyi-fold{fold}", None), (f"attn-junyi50k-fold{fold}", 50000)):
+                    add(group, arm, seed,
+                        None if not onset["checked"]
+                        else _dh2(junyi, seed, [*extra, *attn], max_users=max_users, fold=fold),
+                        block=None if onset["checked"] else onset["reason"])
+
+    # Tracer grid for the contextual table only: seed-42 validation selects.
+    xes_package = [*backbone_arms["time-package"], *REF_RECIPE]
+    for name, flags in _tracer_configs().items():
+        add("tracer-grid", name, 42, _dh2("configs/xes3g5m.yaml", 42, [*xes_package, *flags]))
+    chosen, why = _tracer_selected()
+    for seed in (0, 17, 1234, 2024):
+        add("tracer-seeds", chosen or "selected", seed,
+            None if chosen is None else
+            _dh2("configs/xes3g5m.yaml", seed, [*xes_package, *_tracer_configs()[chosen]]),
+            block=why)
     return jobs
+
+
+def _tracer_configs() -> dict[str, list[str]]:
+    return {
+        f"lr{lr}-do{do}-h{h}": ["--lr", lr, "--dropout", do, "--hidden-dim", h]
+        for lr in ("1e-3", "3e-4")
+        for do in ("0.1", "0.2", "0.3")
+        for h in ("128", "256")
+    }
+
+
+def _tracer_selected() -> tuple[str | None, str | None]:
+    scored = {}
+    for name in _tracer_configs():
+        path = REPO / "results" / "tables" / f"dh2_kt_ladder_tracer-grid_{name}_s42_vs_p0.csv"
+        if not path.exists():
+            return None, "finish the tracer-grid group first"
+        with path.open(encoding="utf-8") as fh:
+            scored[name] = float(next(csv.DictReader(fh))["val_auc"])
+    return max(scored, key=scored.get), None
+
+
+def _junyi_onset_decision() -> dict:
+    path = REPO / "results" / "tables" / "junyi_onset_check.json"
+    if not path.exists():
+        return {"checked": False, "field": None, "reason": "run scripts/62_junyi_onset_check.py first"}
+    field = json.loads(path.read_text(encoding="utf-8")).get("chosen_field")
+    return {
+        "checked": True,
+        "field": field,
+        "reason": None if field else "Junyi duration below the 99% rule; history-only fallback instead",
+    }
 
 
 def _free_vram_mib() -> int | None:
@@ -532,10 +638,13 @@ def _run_job(job: dict, *, force: bool) -> int:
     log = stem.with_suffix(".log")
     print("launch:", " ".join(job["cmd"]))
     print(f"log: {log}")
+    started = time.time()
     with log.open("w", encoding="utf-8") as fh:
         proc = subprocess.run(job["cmd"], cwd=REPO, stdout=fh, stderr=subprocess.STDOUT)
     if proc.returncode == 0:
-        ok.write_text("ok\n", encoding="utf-8")
+        ok.write_text(
+            f"ok\nstarted={started:.0f}\nseconds={time.time() - started:.0f}\n", encoding="utf-8"
+        )
     else:
         print(f"FAIL  {job['group']} {job['arm']} s{job['seed']} exit={proc.returncode}")
     return proc.returncode

@@ -11,6 +11,16 @@ checkpoint it finds there), and finished rows are skipped.
     python scripts/57_baseline_grid.py --stage grid --device cuda
     python scripts/57_baseline_grid.py --stage seeds --device cuda
     python scripts/57_baseline_grid.py --stage select
+
+Round 3b (docs/preregistration_round3b.md): the simpleKT optimum sat on
+the dropout edge, so ``grid-ext`` adds dropout 0.30 and 0.40 (8 runs),
+``seeds-ext`` reselects over the union and trains the five seeds if the
+choice moved, and ``dygkt`` trains DyGKT on the same five seeds with the
+vendored defaults.
+
+    python scripts/57_baseline_grid.py --stage grid-ext --device cuda
+    python scripts/57_baseline_grid.py --stage seeds-ext --device cuda
+    python scripts/57_baseline_grid.py --stage dygkt --device cuda
 """
 
 from __future__ import annotations
@@ -29,14 +39,15 @@ MODELS = ("akt", "simplekt")
 LRS = ("1e-3", "3e-4")
 DROPOUTS = ("0.05", "0.10", "0.20")
 D_MODELS = ("128", "256")
+EXT_DROPOUTS = ("0.30", "0.40")
 SELECT_SEED = 42
 FINAL_SEEDS = (0, 17, 42, 1234, 2024)
 
 
-def _configs() -> list[dict[str, str]]:
+def _configs(dropouts: tuple[str, ...] = DROPOUTS) -> list[dict[str, str]]:
     return [
         {"lr": lr, "dropout": dr, "d_model": dm}
-        for lr, dr, dm in itertools.product(LRS, DROPOUTS, D_MODELS)
+        for lr, dr, dm in itertools.product(LRS, dropouts, D_MODELS)
     ]
 
 
@@ -50,11 +61,16 @@ def _done_tags() -> set[str]:
     return set(pd.read_csv(OUT)["tag"].astype(str))
 
 
-def _run(model: str, cfg: dict[str, str], seed: int, device: str) -> int:
-    tag = _tag(model, cfg, seed)
+def _run(model: str, cfg: dict[str, str] | None, seed: int, device: str) -> int:
+    tag = _tag(model, cfg, seed) if cfg else f"G_{model}_default_s{seed}"
     if tag in _done_tags():
         print(f"SKIP {tag}")
         return 0
+    hp = [] if cfg is None else [
+        "--hp", f"lr={cfg['lr']}",
+        "--hp", f"dropout={cfg['dropout']}",
+        "--hp", f"d_model={cfg['d_model']}",
+    ]
     cmd = [
         sys.executable,
         "scripts/24_train_baselines_clean.py",
@@ -69,20 +85,19 @@ def _run(model: str, cfg: dict[str, str], seed: int, device: str) -> int:
         "--tag", tag,
         "--output", str(OUT.relative_to(REPO)),
         "--report-valid",
-        "--hp", f"lr={cfg['lr']}",
-        "--hp", f"dropout={cfg['dropout']}",
-        "--hp", f"d_model={cfg['d_model']}",
+        *hp,
     ]
     print("launch:", " ".join(cmd), flush=True)
     return subprocess.run(cmd, cwd=REPO).returncode
 
 
-def _select() -> dict[str, dict[str, str]]:
+def _select(extended: tuple[str, ...] = ()) -> dict[str, dict[str, str]]:
     val = pd.read_csv(OUT).drop_duplicates("tag", keep="last").set_index("tag")["val_auc"]
     chosen = {}
     for model in MODELS:
         scored = {}
-        for cfg in _configs():
+        dropouts = DROPOUTS + (EXT_DROPOUTS if model in extended else ())
+        for cfg in _configs(dropouts):
             tag = _tag(model, cfg, SELECT_SEED)
             if tag not in val.index or pd.isna(val[tag]):
                 raise SystemExit(f"{model}: grid row {tag} missing; finish the grid first")
@@ -95,7 +110,11 @@ def _select() -> dict[str, dict[str, str]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("grid", "seeds", "select"), required=True)
+    parser.add_argument(
+        "--stage",
+        choices=("grid", "seeds", "select", "grid-ext", "seeds-ext", "dygkt"),
+        required=True,
+    )
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--models", default=",".join(MODELS))
     args = parser.parse_args()
@@ -103,6 +122,29 @@ def main() -> int:
 
     if args.stage == "select":
         _select()
+        return 0
+    if args.stage == "grid-ext":
+        for cfg in _configs(EXT_DROPOUTS):
+            rc = _run("simplekt", cfg, SELECT_SEED, args.device)
+            if rc:
+                return rc
+        return 0
+    if args.stage == "seeds-ext":
+        before = _select()["simplekt"]
+        after = _select(extended=("simplekt",))["simplekt"]
+        if after == before:
+            print("simplekt: selection unchanged by the dropout extension; no new seeds")
+            return 0
+        for seed in FINAL_SEEDS:
+            rc = _run("simplekt", after, seed, args.device)
+            if rc:
+                return rc
+        return 0
+    if args.stage == "dygkt":
+        for seed in FINAL_SEEDS:
+            rc = _run("dygkt", None, seed, args.device)
+            if rc:
+                return rc
         return 0
     if args.stage == "grid":
         for model in models:

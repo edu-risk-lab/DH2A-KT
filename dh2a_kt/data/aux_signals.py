@@ -170,6 +170,73 @@ def attach_assist_timing(processed: pd.DataFrame, raw_csv: Path) -> pd.DataFrame
     return out
 
 
+def junyi_raw_durations(raw_csv: Path, duration_field: str) -> pd.DataFrame:
+    """Raw Junyi duration in seconds keyed like the P0 rows (hashed user, item; time_done in us).
+
+    ``duration_field`` is ``time_taken`` or ``sum_time_taken_attempts`` (the
+    '&'-separated per-attempt seconds summed), as chosen by
+    scripts/62_junyi_onset_check.py.
+    """
+    source = "time_taken" if duration_field == "time_taken" else "time_taken_attempts"
+    raw = pd.read_csv(raw_csv, usecols=["user_id", "exercise", "time_done", source], low_memory=False)
+    raw = raw.dropna(subset=["user_id", "exercise", "time_done"])
+    if duration_field == "time_taken":
+        seconds = pd.to_numeric(raw[source], errors="coerce")
+    elif duration_field == "sum_time_taken_attempts":
+        parts = raw[source].astype(str).str.split("&", expand=True)
+        seconds = parts.apply(pd.to_numeric, errors="coerce").sum(axis=1, min_count=1)
+    else:
+        raise ValueError(f"unknown Junyi duration field {duration_field!r}")
+    out = pd.DataFrame(
+        {
+            "user_id": raw["user_id"].astype("string").str.strip().map(_stable_int64).astype("int64"),
+            "item_id": raw["exercise"].astype("string").str.strip().map(_stable_int64).astype("int64"),
+            "timestamp": pd.to_numeric(raw["time_done"], errors="coerce").astype("int64"),
+            "duration_sec": seconds.where(seconds >= 0),
+        }
+    )
+    return out.groupby(["user_id", "item_id", "timestamp"], sort=False)["duration_sec"].median().reset_index()
+
+
+def attach_junyi_gap_timestamps(
+    processed: pd.DataFrame, mode: str, durations: pd.DataFrame | None = None
+) -> pd.DataFrame:
+    """Add ``gap_timestamp`` (integer seconds) used only for the time gap.
+
+    Rows keep their ``timestamp`` (time_done, microseconds) so ordering and
+    repeat flags are unchanged. ``done_s`` is time_done // 1e6. ``onset_s`` is
+    done_s minus the raw duration; a row without a valid duration takes the
+    previous row's completion of the same learner (its own completion for a
+    learner's first row), so no row uses its own duration.
+    """
+    out = processed.copy()
+    done_s = (out["timestamp"].to_numpy(dtype=np.int64) // 1_000_000).astype(np.int64)
+    if mode == "done_s":
+        out["gap_timestamp"] = done_s
+        return out
+    if mode != "onset_s" or durations is None:
+        raise ValueError("mode must be 'done_s', or 'onset_s' with durations")
+    merged = out[["user_id", "item_id", "timestamp"]].merge(
+        durations, on=["user_id", "item_id", "timestamp"], how="left"
+    )
+    dur = merged["duration_sec"].to_numpy(dtype=np.float64)
+    order = np.lexsort((out["item_id"].to_numpy(), out["timestamp"].to_numpy(), out["user_id"].to_numpy()))
+    users = out["user_id"].to_numpy()[order]
+    done_sorted = done_s[order]
+    prev_done = np.r_[done_sorted[0], done_sorted[:-1]]
+    prev_done = np.where(np.r_[False, users[1:] == users[:-1]], prev_done, done_sorted)
+    dur_sorted = dur[order]
+    valid = np.isfinite(dur_sorted)
+    onset_sorted = np.where(
+        valid, done_sorted - np.rint(np.where(valid, dur_sorted, 0.0)).astype(np.int64), prev_done
+    )
+    onset = np.empty_like(onset_sorted)
+    onset[order] = onset_sorted
+    out["gap_timestamp"] = onset.astype(np.int64)
+    out.attrs["junyi_valid_duration_share"] = float(np.isfinite(dur).mean())
+    return out
+
+
 def attach_assist_teacher(processed: pd.DataFrame, raw_csv: Path) -> pd.DataFrame:
     """Attach ASSIST2012 ``teacher_id`` by hashed ``user_id`` (P0 blake2).
 
