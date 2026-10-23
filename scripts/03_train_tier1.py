@@ -69,6 +69,20 @@ def main() -> int:
         help="Write fold checkpoint (.pt). Default: results/checkpoints/<dataset>_fold<N>_<arch>.pt",
     )
     parser.add_argument(
+        "--eval-checkpoint",
+        type=Path,
+        default=None,
+        help="Rescore: build the run's data and model from the same flags, load "
+        "this checkpoint, skip training, and write no CSV or checkpoint.",
+    )
+    parser.add_argument(
+        "--dump-predictions",
+        type=Path,
+        default=None,
+        help="Write learner id, target, and probability of every scored "
+        "held-out position to this .npz.",
+    )
+    parser.add_argument(
         "--architecture",
         default=None,
         help="Override training.architecture (v2, v3, v4 or v5).",
@@ -730,13 +744,17 @@ def main() -> int:
             expert_edges=expert_edges,
             aux_scalar=args.aux_scalar is not None,
             aux_scalar_mode=aux_scalar_mode,
-            checkpoint_path=args.save_checkpoint
+            checkpoint_path=None
+            if args.eval_checkpoint
+            else args.save_checkpoint
             or (
                 REPO_ROOT
                 / "results"
                 / "checkpoints"
                 / f"{dh2_cfg['dataset']}_fold{fold}_{tag}.pt"
             ),
+            init_checkpoint=args.eval_checkpoint,
+            predictions_path=args.dump_predictions,
         )
         fold_result.fold = fold
         results.append(fold_result)
@@ -750,6 +768,9 @@ def main() -> int:
             f"n_predictions={fold_result.n_predictions}"
         )
 
+    if args.eval_checkpoint:
+        # Rescoring must not overwrite the run's stored comparison CSV.
+        return 0
     table = write_comparison_table(
         results,
         dataset=dh2_cfg["dataset"],

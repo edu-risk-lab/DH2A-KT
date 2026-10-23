@@ -230,3 +230,25 @@ once with the same command; a run that fails twice is printed pending.
   baseline tuning at a common budget, a wider simpleKT grid, a
   graph or prerequisite message at credit level) need a later dated
   addendum before their runs.
+
+## 10. Implementation notes (23 Oct 2026, before any bootstrap result)
+
+Added after `scripts/60_credit_primary.py` was run on the existing JSONs
+(Sections 3-4, 6 tau curve) and before any prediction was dumped.
+
+- Rescoring flag names: `--eval-checkpoint <pt>` (not
+  `--load-checkpoint`) and `--dump-predictions <npz>`. In rescoring mode
+  the script writes no CSV and no checkpoint. A run whose checkpoint
+  entity maps differ from the rebuilt data stops with an error.
+- XES3G5M fold-0 seeds 0, 17, 1234, 2024 use the checkpoints of scripts
+  34 and 38 (`qkc_cm_*`, `a1_t_zero_*`) with the `xes-ref` flags of the
+  same arm, which are the flags those scripts used; seed 42 and the new
+  seeds use the `ladder_xes-ref_*` checkpoints.
+- Bootstrap replicate AUC: per-learner positive and negative counts in
+  2000 quantile bins of each run's probabilities, ties within a bin
+  counted 1/2; replicate weights are multinomial learner counts. The
+  point estimate stays the exact AUC; the largest binned-minus-exact
+  deviation per contrast is reported. On a synthetic check (200,000
+  positions) the deviation was 3e-7.
+- The Section 5 learner component is the bootstrap variance of a single
+  seed pair's difference, averaged over the ten seeds.

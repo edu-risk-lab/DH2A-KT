@@ -932,6 +932,7 @@ def train_fold(
     expert_edges: pd.DataFrame | None = None,
     aux_scalar: bool = False,
     aux_scalar_mode: str = "query",
+    init_checkpoint: Path | None = None,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -1231,6 +1232,22 @@ def train_fold(
     train_loader = _loader(train_df, shuffle=True)
     eval_loader = _loader(eval_df, shuffle=False)
     val_loader = _loader(val_df, shuffle=False) if val_df is not None else None
+    if init_checkpoint is not None:
+        payload = torch.load(Path(init_checkpoint), map_location=device, weights_only=False)
+        if payload["kc_to_idx"] != kc_to_idx or payload["item_to_idx"] != item_to_idx:
+            raise ValueError(f"{init_checkpoint}: entity maps differ from this command's data")
+        model.load_state_dict(payload["model_state"])
+        logger.info("loaded %s; training skipped", init_checkpoint)
+        return TrainedFold(
+            model=model,
+            eval_loader=eval_loader,
+            kc_to_idx=kc_to_idx,
+            item_to_idx=item_to_idx,
+            clean_hyperedge_index={k: v.to(device) for k, v in hyperedge_index.items()},
+            clean_hyperedges=clean_hyperedges,
+            device=device,
+            val_auc=None,
+        )
     val_auc = train_one_fold(
         model,
         train_loader,
@@ -1320,6 +1337,8 @@ def train_and_evaluate_fold(
     expert_edges: pd.DataFrame | None = None,
     aux_scalar: bool = False,
     aux_scalar_mode: str = "query",
+    init_checkpoint: Path | None = None,
+    predictions_path: Path | None = None,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -1383,14 +1402,36 @@ def train_and_evaluate_fold(
         expert_edges=expert_edges,
         aux_scalar=aux_scalar,
         aux_scalar_mode=aux_scalar_mode,
+        init_checkpoint=init_checkpoint,
     )
-    auc, n_predictions = evaluate_auc(
-        trained.model,
-        trained.eval_loader,
-        trained.clean_hyperedge_index,
-        trained.device,
-        mask_repeats=mask_repeats,
-    )
+    if predictions_path is not None:
+        from sklearn.metrics import roc_auc_score
+
+        probs, labels, users = collect_predictions(
+            trained.model,
+            trained.eval_loader,
+            trained.clean_hyperedge_index,
+            trained.device,
+            mask_repeats=mask_repeats,
+            return_users=True,
+        )
+        Path(predictions_path).parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            predictions_path,
+            user_ids=users.astype(np.int64),
+            targets=labels.astype(np.int8),
+            probs=probs.astype(np.float32),
+        )
+        auc, n_predictions = float(roc_auc_score(labels, probs)), len(probs)
+        logger.info("wrote %d predictions -> %s", n_predictions, predictions_path)
+    else:
+        auc, n_predictions = evaluate_auc(
+            trained.model,
+            trained.eval_loader,
+            trained.clean_hyperedge_index,
+            trained.device,
+            mask_repeats=mask_repeats,
+        )
     if checkpoint_path is not None:
         from dh2a_kt.train.checkpoint import save_trained_fold
 
