@@ -1,0 +1,43 @@
+{
+  "prereg": "docs/preregistration_round3c.md",
+  "fold": 0,
+  "split": "train",
+  "n_rows": 18188758,
+  "n_scored": 18014708,
+  "valid_duration_share_scored": 0.9999609208209204,
+  "count_attempts_matched_share_scored": 1.0,
+  "processed_vs_raw_correct_agreement": 1.0,
+  "auc": {
+    "completion_gap": 0.3350243463744526,
+    "onset_gap_time_taken": 0.544707987467054,
+    "onset_gap_first_attempt": 0.3842359978188292,
+    "time_taken_t_unavailable": 0.22090428567559597,
+    "retried_t_unavailable": 0.09925726430023635,
+    "time_taken_t_minus_1_available": 0.3828274106937175,
+    "onset_gap_time_taken_non_overlap_rows": 0.26907877088374377
+  },
+  "overlap_share": 0.10874258966617721,
+  "overlap_share_retried": 0.6053578142954108,
+  "overlap_share_single_attempt": 0.02987600217442752,
+  "correct_rate_overlap": 0.15034921484089056,
+  "correct_rate_non_overlap": 0.9116729703304899,
+  "zero_onset_gap_share_retried": 0.2860745640219063,
+  "zero_onset_gap_share_single_attempt": 0.006808627808554941,
+  "retried_share_scored": 0.1371495446942576,
+  "correct_by_retried": {
+    "retried_correct": 46,
+    "retried_wrong": 2470663,
+    "single_correct": 14932069,
+    "single_wrong": 575461
+  },
+  "rule": {
+    "L1": false,
+    "L1_detail": {
+      "abs_onset_minus_half": 0.044707987467053956,
+      "abs_completion_minus_half": 0.1649756536255474
+    },
+    "L2": true,
+    "L2_margin": 0.1
+  },
+  "decision": "onset input unavailable at prediction time: family D (round 3c, Section 4)"
+}
