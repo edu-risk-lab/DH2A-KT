@@ -601,6 +601,16 @@ def _junyi_onset_decision() -> dict:
     if not path.exists():
         return {"checked": False, "field": None, "reason": "run scripts/62_junyi_onset_check.py first"}
     field = json.loads(path.read_text(encoding="utf-8")).get("chosen_field")
+    leak = REPO / "results" / "tables" / "junyi_onset_leak_check.json"
+    if field and leak.exists():
+        rule = json.loads(leak.read_text(encoding="utf-8")).get("rule", {})
+        if rule.get("L1") or rule.get("L2"):
+            return {
+                "checked": True,
+                "field": None,
+                "reason": "Junyi onset input unavailable at prediction time "
+                "(docs/preregistration_round3c.md); history-only fallback instead",
+            }
     return {
         "checked": True,
         "field": field,
