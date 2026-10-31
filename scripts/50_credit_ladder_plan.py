@@ -641,13 +641,22 @@ def _stamp(job: dict) -> Path:
     return log_dir / f"{job['group']}_{job['arm']}_s{job['seed']}"
 
 
+def _ok_path(job: dict) -> Path:
+    # Append ".ok"; Path.with_suffix truncates at the first "." in arm names
+    # like tracer-grid lr1e-3-do0.1-h128 (round 3b stamp collision).
+    return Path(f"{_stamp(job)}.ok")
+
+
+def _log_path(job: dict) -> Path:
+    return Path(f"{_stamp(job)}.log")
+
+
 def _run_job(job: dict, *, force: bool) -> int:
-    stem = _stamp(job)
-    ok = stem.with_suffix(".ok")
+    ok = _ok_path(job)
     if ok.exists() and not force:
         print(f"SKIP  {job['group']} {job['arm']} s{job['seed']} ({ok.name})")
         return 0
-    log = stem.with_suffix(".log")
+    log = _log_path(job)
     print("launch:", " ".join(job["cmd"]))
     print(f"log: {log}")
     started = time.time()
@@ -721,7 +730,7 @@ def main() -> int:
         return 2
     pending = [
         j for j in runnable
-        if args.force or not _stamp(j).with_suffix(".ok").exists()
+        if args.force or not _ok_path(j).exists()
     ]
     if not pending:
         print("nothing pending")
