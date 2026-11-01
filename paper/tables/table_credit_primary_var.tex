@@ -1,0 +1,25 @@
+\begin{table}[tbp]
+\caption{One-way random-effects variance components for family~C
+contrasts run on three learner folds (method of moments;
+between-fold variance truncated at 0). Pooled mean is the mean of
+the three fold means with a $t$ interval on $\mathrm{df}{=}2$; units
+$10^{-3}$ test AUC.}
+\label{tab:credit-primary-var}
+\centering
+\scriptsize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Setting & Contrast & Pooled & 95\% CI & SD$_{\mathrm{seed}}$ & SD$_{\mathrm{fold}}$ \\
+\midrule
+XES3G5M & Package, zero incidence & +2.79 & [+2.40,+3.18] & 0.28 & 0.13 \\
+XES3G5M & Aligned gap vs.\ T-zero & +1.98 & [+1.86,+2.10] & 0.29 & 0.00 \\
+XES3G5M attn. & Package, zero incidence & +1.83 & [+1.33,+2.32] & 0.52 & 0.11 \\
+XES3G5M attn. & Aligned gap vs.\ T-zero & +1.74 & [+1.13,+2.34] & 0.33 & 0.22 \\
+ASSIST2012 & Q$\leftarrow$KC incidence & +1.62 & [+1.24,+2.00] & 0.52 & 0.00 \\
+ASSIST2012 & Package, zero incidence & +2.09 & [+1.84,+2.33] & 0.60 & 0.00 \\
+ASSIST2012 & Aligned gap vs.\ T-zero & +1.50 & [+1.00,+2.00] & 0.57 & 0.09 \\
+ASSIST2012 ref. & Package, zero incidence & +2.47 & [+2.26,+2.67] & 0.69 & 0.00 \\
+ASSIST2012 ref. & Aligned gap vs.\ T-zero & +1.90 & [+1.59,+2.21] & 0.47 & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{table}

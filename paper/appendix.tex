@@ -75,29 +75,40 @@ Table~\ref{tab:attribution-summary}.
 \input{tables/table_aliases}
 \input{tables/table_module_hypothesis}
 
-\section{Multiplicity and threshold recount of the ten-seed map}
+\section{Earlier interval/seed map and primary-rule supplements}
 \label{app:ten-seed-stats}
+The main credit decisions use the primary rule on held-out test AUC
+(Section~\ref{sec:protocol-threshold},
+Table~\ref{tab:credit-primary-c}). This appendix keeps the earlier
+operating rules---validation AUC with a two-sided 95\% interval bound
+and a every-seed threshold---and the multiplicity recounts fixed with
+them.
+
+Tables~\ref{tab:credit-transfer-10seed}--\ref{tab:credit-transfer-10seed-b}
+are the full validation-AUC credit map under the earlier interval and
+seed rules (the heatmap of Fig.~\ref{fig:credit-heatmap-10seed} in the
+main text).
+
+\input{tables/table_credit_transfer_10seed}
+\FloatBarrier
+
 Table~\ref{tab:holm-all-10seed} gives a two-sided paired $t$-test of
-$\mu_\Delta{=}0$ for every contrast of the ten-seed map, with
-Holm--Bonferroni correction over all $68$; the family and the test were
-fixed in the preregistration. Holm is reported beside the credit
-outcome and is not a credit rule. Table~\ref{tab:threshold-all-10seed}
-recounts the outcome of every row at five thresholds. On the five-seed
-map the same analyses reject $43$ of $44$ contrasts and leave $14$ of
-$44$ rows stable over the threshold grid; the files are in the
-repository.
+$\mu_\Delta{=}0$ for every contrast of that map, with Holm--Bonferroni
+correction over all $68$. Holm here is not a credit rule.
+Table~\ref{tab:threshold-all-10seed} recounts the earlier interval/seed
+outcomes at five thresholds.
 
-Table~\ref{tab:credit-test-10seed} repeats the map on test-only AUC,
-which plays no part in early stopping, and lists the rows whose outcome
-changes. Of the $68$ contrasts, four change their interval-rule outcome
-and two their seed-rule outcome, all on ASSISTments~2012; every
-XES3G5M and Junyi outcome is unchanged. On test-only AUC the interval
-rule credits the ASSISTments package only on folds~1 and~2 of the
-reference recipe, and the seed rule credits no ASSISTments contrast.
-
-\input{tables/table_credit_test_10seed}
 \input{tables/table_holm_all_contrasts_10seed}
 \input{tables/table_threshold_all_corpora_10seed}
+\FloatBarrier
+
+Table~\ref{tab:credit-test-10seed} repeats that earlier map on
+test-only AUC. Table~\ref{tab:credit-primary-var} reports fold-level
+variance components for family~C contrasts run on three folds under the
+primary metric.
+
+\input{tables/table_credit_test_10seed}
+\input{tables/table_credit_primary_var}
 \FloatBarrier
 
 \section{The earlier five-seed map}
@@ -150,7 +161,7 @@ Table~\ref{tab:credit-stats}. The two package contrasts remain
 significant against $H_0{:}\,\mu_\Delta=0$ and the incidence contrast
 does not. The family was chosen after the incidence and timing controls
 existed and is not presented as fixed before any exploratory run; the
-preregistered family over all contrasts is
+repository-fixed family over all contrasts is
 Table~\ref{tab:holm-all-10seed}. The credit rules of the paper do not
 use these $p$-values.
 
@@ -287,12 +298,14 @@ was used, and how many configurations were tried
 \cite{pineau2021repro}. We do not claim a matched tuning budget. The
 tracer was selected from a validation ablation ladder (incidence on or
 off, three injection sites, and the diagnostics of
-Table~\ref{tab:negative-knowledge}) with a single optimiser vector.
-GIKT, DKT, DGEKT, and the inherited AKT and \textit{simpleKT} rows used
-one inherited hyperparameter vector each; the grid-tuned AKT and
-\textit{simpleKT} rows searched $12$ configurations each, with the
-selection fixed in the preregistration. The budgets therefore still
-differ, and the comparison stays contextual.
+Table~\ref{tab:negative-knowledge}) with a single reference optimiser
+vector for the credit map; a matched $12$-point grid on the XES3G5M
+fold-0 zero-incidence time package (round~3b) selects a higher-dropout
+edge point reported only as context. GIKT, DKT, DGEKT, and the inherited
+AKT and \textit{simpleKT} rows used one inherited hyperparameter vector
+each; the grid-tuned AKT and \textit{simpleKT} rows searched $12$
+configurations each, with the selection fixed in the preregistration.
+The budgets therefore still differ, and the comparison stays contextual.
 
 \input{tables/table_hparams}
 \input{tables/table_auc_xes3g5m_inherited}

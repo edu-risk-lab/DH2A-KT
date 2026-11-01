@@ -1,30 +1,24 @@
-\begin{table}[tbp]
-\caption{Training recipes for every model in Table~\ref{tab:auc-xes3g5m}
-and Table~\ref{tab:auc-inherited},
-including Zero$+\Delta t$ (same optimiser as QKC-T; incidence zeroed).
-``Configs tried'' counts distinct hyperparameter vectors, not seeds.
-The tracer \emph{architecture} was chosen from a validation ablation
-ladder (Table~\ref{tab:negative-knowledge} plus Q$\leftarrow$KC and three
-$\Delta t$ injection sites); its \emph{optimiser} recipe is a single
-vector. GIKT/DKT/DGEKT and the inherited AKT/\textit{simpleKT} rows each
-used one inherited \textsc{pyKT} vector \cite{liu2022pykt}. The
-grid-tuned AKT and \textit{simpleKT} rows searched $12$ configurations
-each at $L{=}400$ (batch 64, at most 30 epochs, engine patience 3),
-selected on seed-42 validation AUC only; the inherited vector is one of
-the twelve. GIKT seed~42
-restored best valid AUC at epoch~8
-and stopped by epoch~13 under patience~5 (cap~30).}
+\begin{table}[p]
+\caption{Training recipes for Table~\ref{tab:auc-xes3g5m} and
+Table~\ref{tab:auc-inherited} (Zero$+\Delta t$ shares the QKC-T
+optimiser with incidence zeroed). ``Configs tried'' counts distinct
+hyperparameter vectors, not seeds. Tracer architecture: ablation ladder;
+reference optimiser: one vector (credit map); optional $12$-point grid
+(round~3b) is contextual only. Grid-tuned AKT/\textit{simpleKT}: $12$
+configs at $L{=}400$, seed-42 validation AUC. GIKT seed~42 restored best
+valid AUC at epoch~8 and stopped by epoch~13 under patience~5.}
 \label{tab:hparams}
 \centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{0.9}
+\tiny
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{0.85}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.5cm}XXXX@{}}
 \toprule
 Model & Parameter & Range searched & Selected & How chosen ($n$ configs) \\
 \midrule
 QKC-T / Zero$+\Delta t$ & architecture & ablation ladder & LSTM; Zero$+\Delta t$ zeros incidence & credit rule \\
-QKC-T / Zero$+\Delta t$ & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & one recipe $\times$ 5 seeds \\
+QKC-T / Zero$+\Delta t$ & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & reference recipe $\times$ 5 seeds (credit map) \\
+QKC-T (grid-tuned) & lr / dropout / width & lr $\{10^{-3},3{\times}10^{-4}\}$; dropout $\{0.1,0.2,0.3\}$; width $\{128,256\}$ & $10^{-3}$ / 0.3 / 128 & seed-42 validation AUC ($n{=}12$), then 4 seeds; contextual only \\
 GIKT & batch / epochs / patience / $L$ & --- & 16 / 30 / 5 / 400 & match tracer training envelope ($n{=}1$) \\
 GIKT & remaining pyKT hparams & none & pairwise-audit / pyKT defaults & inherited ($n{=}1$) \\
 AKT (inherited) & $L$ & $\{400\}$ override & 400 & L matched; other hparams inherited ($n{=}1$) \\

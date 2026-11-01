@@ -1,8 +1,8 @@
 \begin{table}[tbp]
 \caption{What this paper claims, and what it does not infer. Rungs:
 (i)~capacity-matched message; (ii)~architecture-matched input;
-(iii)~package (Table~\ref{tab:evidence-types}); rules:
-Table~\ref{tab:terms}.}
+(iii)~package (Table~\ref{tab:evidence-types}); primary rule and
+families: Section~\ref{sec:protocol-threshold}.}
 \label{tab:claims}
 \centering
 \scriptsize
@@ -11,37 +11,30 @@ Table~\ref{tab:terms}.}
 \toprule
 Claim & Evidence & Not inferred \\
 \midrule
-Credit for the same time message depends on corpus, encoder, recipe,
-timestamp export, learner fold, and, near the threshold, the rule &
-Ten seeds; three folds for the package and aligned-gap contrasts of
-every setting except the $1{,}000$\,s export. Package credited on
-XES3G5M on every fold; on ASSISTments~2012 under the LSTM reference
-recipe by the interval rule on every fold and by the seed rule on one
-(two folds on test-only AUC); package and aligned gap on Junyi only
-with completion-time query gaps; nothing credited on the attention
-encoder or on a $1{,}000$\,s ASSISTments export; rules disagree on
-$4$ of $68$ contrasts, all on ASSISTments
-(Tables~\ref{tab:credit-transfer-10seed},
-\ref{tab:credit-assist-resolution-10seed}) & Any single map, including
-the XES3G5M one, holds for another corpus, backbone, recipe, export, or
-fold; the gap input is credited at attempt onset on any corpus \\
+Credit labels for the same time message can differ by corpus, encoder,
+and whether the gap is available at prediction time &
+Family~C ($29$ contrasts): only the XES3G5M LSTM package is credited
+(three folds); ASSISTments packages and all aligned gaps are positive,
+not credited; attention encoder credits nothing; Junyi completion-time
+and onset gaps are family~D
+(Table~\ref{tab:credit-primary-c}) & Effects are heterogeneous across
+settings; an aligned gap is credited at attempt onset on any corpus;
+next-item selection before the item opens inherits the package credit \\
 On XES3G5M the credit rests on the package rung only &
-Package $10/10$ against no-time and parameter-padded controls, on
-three learner folds; aligned gap against T-zero, T-misaligned,
-T-shuffled, and T-boundary positive on every seed, at most $3/10$ &
-Aligned gap input is credited on XES3G5M; the package credit is an
-input effect \\
+Package credited on three folds; aligned gap vs.\ T-zero positive, not
+credited after Holm, on every fold & Aligned gap input is credited on
+XES3G5M; the package credit is an input effect \\
 The question--KC incidence message is not credited on this fusion &
-Capacity-matched $0/10$; 95\% interval $[{-}0.24,{+}0.23]\times 10^{-3}$ &
+Capacity-matched unsupported (mean $-0.04\times 10^{-3}$ test AUC) &
 Question--KC relations are useless under a richer fusion \\
-The credit rules do not detect leakage; hint provenance must be audited
-before credit &
-Synthetic leaked hint $+5.40\times 10^{-3}$, $5/5$ seeds above the
-threshold; the provenance statistic is $1$ against $0$ for its clean
-control, and the data-only residual check flags a dependence only
-(Table~\ref{tab:leak-simulation}) & The simulated classes describe a
-public corpus; a cross-modal leak is harmless in general; an audit
-without provenance detects this leak \\
+The credit rules do not detect leakage; availability and hint
+provenance must be audited before credit &
+Illustrative leaked hint $+5.40\times 10^{-3}$, $5/5$ seeds above $\tau$;
+Junyi onset fails L2 ($60.5\%$ vs.\ $3.0\%$ overlap on multi- vs.\
+single-attempt rows)
+(Tables~\ref{tab:leak-simulation}; Section~\ref{sec:junyi-onset-audit}) &
+The simulated classes describe a public corpus; an audit without
+provenance detects every leak \\
 Of the inherited pairwise leakage diagnostics, only group membership
 works on hyperedge projections & Membership leak $0{\to}1$ under the
 full-log control and $0{\to}0.964$ with one held-out learner added; TBMR

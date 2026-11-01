@@ -21,7 +21,7 @@
 \node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
 \node[box, right=0.32cm of p0] (audit) {Hyperedge\\membership audit};
 \node[box, right=0.32cm of audit] (twins) {Rung and control\\(cap.\ / arch.\ / pkg)};
-\node[box, right=0.32cm of twins] (gate) {Seed and interval\\rules at $+2.0\times 10^{-3}$};
+\node[box, right=0.32cm of twins] (gate) {One-sided $t$ on test AUC\\at $+2.0\times 10^{-3}$ (Holm/BH)};
 \draw[->, thick] (p0.east) -- (audit.west);
 \draw[->, thick] (audit.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);

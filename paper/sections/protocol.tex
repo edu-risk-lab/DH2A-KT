@@ -56,97 +56,112 @@ parameters) & The timing package as a whole \\
 \end{tabularx}
 \end{table}
 
-\subsection{Outcomes and decision rules}
+\subsection{Families, metric, and the primary rule}
 \label{sec:protocol-threshold}
-For a fixed set $S$ of paired training seeds, let $\Delta_s$ be the
-validation AUC of the on arm minus that of the designated control under
-seed $s$. Two rules decide credit at a threshold $\tau$.
+Contrasts are assigned to one of three families before outcomes are
+read. The assignment, the primary metric, and the decision rule were
+fixed in a dated repository note before the reanalysis of the collected
+ten-seed runs (Data Availability Statement).
 
 \begin{itemize}
-  \item \textbf{Interval rule (primary).} The lower end of the two-sided
-  95\% interval of the mean paired difference reaches the threshold,
-  $\bar\Delta-t_{0.975,|S|-1}\,s_\Delta/\sqrt{|S|}\ge\tau$, where
-  $s_\Delta$ is the sample standard deviation of the paired
-  $\Delta_s$.
-  \item \textbf{Seed rule.} Every $\Delta_s\ge\tau$.
+  \item \textbf{Family C (confirmatory).} The primary claims of this
+  paper under attempt-onset inputs: zero-incidence package versus no
+  time; aligned gap versus T-zero; and capacity-matched question--KC
+  incidence, each on the LSTM reference recipe across corpora and
+  folds where run, plus the same three time and incidence contrasts
+  under the attention encoder on XES3G5M (second encoder, same corpus).
+  Size: $29$ contrasts after Junyi attempt-onset inputs that fail the
+  availability audit were moved to family~D
+  (Section~\ref{sec:junyi-onset-audit}).
+  \item \textbf{Family E (exploratory).} Secondary or sensitivity
+  contrasts designated before outcome reading: history-only Junyi gaps
+  (availability check after completion-time rows were blocked);
+  attention-encoder time contrasts on ASSISTments (second encoder on a
+  second corpus under the untuned LSTM recipe); observed-incidence
+  packages; the ASSISTments $1{,}000$\,s export; and other architecture-
+  matched gap variants beyond T-zero.
+  \item \textbf{Family D (diagnostic, no credit).} Contrasts that use an
+  input unavailable at prediction time: Junyi completion-time query
+  gaps, the synthetic leakage simulation, and the blocked Junyi onset
+  rebuild (Section~\ref{sec:junyi-onset-audit}).
 \end{itemize}
 
-Under either rule a message is \textbf{Credited} if the rule holds,
-\textbf{Consistent-positive (not credited)} if it fails while every
-$\Delta_s>0$, and \textbf{Unsupported} otherwise, including a negative
-mean. The middle outcome is part of the protocol: a gain that is
-positive on every seed is reported, but not credited. Under both rules
-it uses the preregistered condition that every $\Delta_s>0$. Taking it
-from the interval instead (consistent-positive when the lower bound lies
-between $0$ and $\tau$) changes one cell of the map: ASSISTments~2012
-under the corpus configuration, observed-incidence package, lower bound
-$+1.26$ with one negative seed, moves from unsupported to
-consistent-positive.
+The primary metric is held-out test AUC on the evaluation learners of
+the fold, at the checkpoint chosen by early stopping on an internal
+selection split carved from training learners
+($\mathrm{val\_frac}{=}0.1$). Validation AUC of that selection split is
+reported only as a supplementary analysis. For a fixed set $S$ of
+paired training seeds ($|S|{=}10$ in this paper), let $\Delta_s$ be the
+test AUC of the on arm minus that of the designated control under seed
+$s$, with sample mean $\bar\Delta$ and sample standard deviation
+$s_\Delta$. With $\tau{=}{+}2.0\times 10^{-3}$ and one-sided level
+$\alpha{=}0.025$:
 
-The seed rule is a minimum over seeds, so it becomes stricter as $|S|$
-grows; $|S|$ is therefore part of its definition, and maps are
-comparable only at the same $|S|$. The interval rule scales with the
-noise of the paired contrast itself, which is the relevant noise for a
-seed-paired design \cite{bouthillier2021variance}, and it narrows as
-$|S|$ grows; it has no constant fitted to any corpus. The main map uses
-$|S|{=}10$, and the interval rule is primary. These two choices,
-together with the added seeds, folds, and analyses, were fixed in a
-preregistration (\path{docs/preregistration.md}) before the new runs.
-The file was committed to the public repository as \texttt{99521c6} on
-12~October 2026, and its only later change (\texttt{fc64361}, the same
-day) adds a run command; the first new result was committed in
-\texttt{2cce76b}, after both. An earlier five-seed map is kept in
-\ref{app:five-seed}. When the two rules
-disagree, both outcomes are reported. At five seeds they agree on all
-$44$ contrasts; at ten seeds they disagree on $4$ of $68$, all
-ASSISTments package contrasts on which eight or nine of the ten seeds
-reach the threshold. The diagnostics in
-Tables~\ref{tab:a7-query-dt}, \ref{tab:leak-simulation},
-and~\ref{tab:negative-knowledge} use the five seeds of the earlier map;
-their outcomes are comparable with \ref{app:five-seed}, not with
-Table~\ref{tab:credit-transfer-10seed}.
+\begin{itemize}
+  \item \textbf{Credit test.} One-sided paired $t$-test of
+  $H_0{:}\,\mu_\Delta\le\tau$,
+  $p_\tau=1-F_{t_{|S|-1}}\bigl((\bar\Delta-\tau)/(s_\Delta/\sqrt{|S|})\bigr)$.
+  \item \textbf{Positivity test.} One-sided paired $t$-test of
+  $H_0{:}\,\mu_\Delta\le 0$,
+  $p_0=1-F_{t_{|S|-1}}\bigl(\bar\Delta/(s_\Delta/\sqrt{|S|})\bigr)$.
+  \item \textbf{Adjustment.} Family~C: Holm over the family, separately
+  for $p_\tau$ and for $p_0$. Family~E: Benjamini--Hochberg over the
+  family, separately for each. Family~D: no credit decision.
+\end{itemize}
 
-Throughout the main text, AUC differences are reported in units of
-$10^{-3}$, and $\tau{=}{+}2.0$ in that unit. On XES3G5M learner
-fold~0 this is seven to eight times the seed standard deviation of the
-two package control arms ($0.28$ and $0.25$), and about half the gap
-between the timed tracer and the closest contextual baseline in
-Table~\ref{tab:auc-xes3g5m} ($+3.7$). Recounting the unrounded per-seed
-differences shows that the XES3G5M fold-0 map holds for any seed-rule
-threshold in $(+1.53,+2.10]$ and any interval-rule threshold in
-$(+1.72,+2.38]$; Table~\ref{tab:threshold-all-10seed} repeats the
-recount for every row. The value is an operating rule, not a
-hypothesis test of $\mu_\Delta{=}0$, and not a registered public
-standard.
+Outcomes: \textbf{Credited} if the adjusted $p_\tau\le\alpha$;
+\textbf{Positive, not credited} if not credited and the adjusted
+$p_0\le\alpha$; \textbf{Unsupported} otherwise. Family~E outcomes are
+labelled exploratory. The count $k/|S|$ of seeds with
+$\Delta_s\ge\tau$ is printed as a seed-stability descriptor and is not
+a decision rule; a credited row with $k{<}|S|$ is marked seed-variable.
+When $|S|{=}1$, the credit test at this $\alpha$ reduces to the earlier
+two-sided 95\% interval rule of requiring the lower bound to reach
+$\tau$.
+
+An earlier operating rule decided credit from validation AUC by a
+two-sided 95\% interval bound and by requiring every seed to clear
+$\tau$ (the interval and seed rules). Those outcomes, and the map
+recomputed under them on test AUC, are kept in
+\ref{app:ten-seed-stats} beside the primary ones; the text names every
+family~C row whose outcome changes. The threshold $\tau$ was fixed
+before the ten-seed runs (Data Availability Statement); on XES3G5M
+fold~0 it is seven to eight times the seed standard deviation of the
+package control arms and about half the gap from the timed tracer to
+the closest contextual baseline in Table~\ref{tab:auc-xes3g5m}.
+Appendix~\ref{app:ten-seed-stats} also recounts outcomes at neighbouring
+thresholds; several ASSISTments package means sit near $\tau$, so the
+operating choice matters for those cells.
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
 Algorithm~\ref{alg:register} is the interface. A new message enters
-the ladder only with a declared rung, a designated control, a fixed
-set of paired seeds (ten in this paper), and an outcome under both
-rules. A worked example is in
-the repository file \path{docs/REGISTER_MESSAGE.md}.
+the ladder only after an availability and provenance audit, with a
+declared rung, designated control, family, fixed paired seeds (ten in
+this paper), and an outcome under the primary rule. A worked registration
+checklist is archived with the repository (Data Availability Statement).
 
 \begin{algorithm}[t]
 \caption{Register a message on the credit ladder.}
 \label{alg:register}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} message $m$; backbone; corpus; learner fold; seeds $S$, $|S|{=}10$; $\tau{=}{+}2.0\times 10^{-3}$
-\STATE Choose rung (i), (ii), or (iii) and the designated control
+\STATE Audit that every input is available at prediction time; record provenance of hint-like fields
+\STATE If any input is unavailable, assign family~D and stop (diagnostic only)
+\STATE Choose rung (i), (ii), or (iii), the designated control, and family C or E
 \STATE If rung (iii), record the number of added parameters
 \FOR{each seed $s\in S$}
   \STATE Train the on arm and the control with seed $s$ on the same fold
-  \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{val}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{val}}(\mathrm{control})$
+  \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{test}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{test}}(\mathrm{control})$
 \ENDFOR
-\FOR{each rule $R\in\{$seed, interval$\}$}
-  \IF{$R$ holds at $\tau$}
-    \STATE outcome$_R\gets$ Credited
-  \ELSIF{every $\Delta_s>0$}
-    \STATE outcome$_R\gets$ Consistent-positive (not credited)
-  \ELSE
-    \STATE outcome$_R\gets$ Unsupported
-  \ENDIF
-\ENDFOR
-\STATE Report both outcomes with corpus, backbone, and rung; a package credit does not credit the input alone
+\STATE Compute $p_\tau$ and $p_0$; adjust within the family (Holm for C, BH for E)
+\IF{adjusted $p_\tau\le 0.025$}
+  \STATE outcome $\gets$ Credited
+\ELSIF{adjusted $p_0\le 0.025$}
+  \STATE outcome $\gets$ Positive, not credited
+\ELSE
+  \STATE outcome $\gets$ Unsupported
+\ENDIF
+\STATE Report the outcome with corpus, backbone, rung, family, and $k/|S|$; a package credit does not credit the input alone
 \end{algorithmic}
 \end{algorithm}
