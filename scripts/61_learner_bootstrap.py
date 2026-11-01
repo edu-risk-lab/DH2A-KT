@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Learner bootstrap and practical quantities (docs/preregistration_round3.md, Sections 5-6).
+"""Learner bootstrap and practical quantities (docs/preregistration_primary_rule.md, Sections 5-6).
 
 Stage ``dump`` (GPU server, needs the run checkpoints): rescores every run of
 a family-C contrast from its checkpoint with the run's own command plus
@@ -65,7 +65,7 @@ PKG, GAP, INC = "Package, zero incidence", "Aligned gap vs.\\ T-zero", "Q$\\left
 
 
 def _contrasts() -> list[dict]:
-    """Family C of docs/preregistration_round3.md, Section 3."""
+    """Family C of docs/preregistration_primary_rule.md, Section 3."""
     out = []
 
     def add(setting: str, fold: int, group: str, arms: dict[str, tuple[str, str]]) -> None:
@@ -288,7 +288,7 @@ def stage_analyse() -> int:
               f"delta={np.mean(d_exact) * 1e3:+.2f} boot95=[{results[-1]['boot_ci95'][0] * 1e3:+.2f}, "
               f"{results[-1]['boot_ci95'][1] * 1e3:+.2f}] flips={np.mean(flips):.4f}")
     OUT_JSON.write_text(
-        json.dumps({"preregistration": "docs/preregistration_round3.md", "B": B, "seed": BOOT_SEED,
+        json.dumps({"preregistration": "docs/preregistration_primary_rule.md", "B": B, "seed": BOOT_SEED,
                     "n_bins": N_BINS, "rows": results}, indent=2),
         encoding="utf-8",
     )

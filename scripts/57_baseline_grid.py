@@ -12,7 +12,7 @@ checkpoint it finds there), and finished rows are skipped.
     python scripts/57_baseline_grid.py --stage seeds --device cuda
     python scripts/57_baseline_grid.py --stage select
 
-Round 3b (docs/preregistration_round3b.md): the simpleKT optimum sat on
+Round 3b (docs/preregistration_compute_and_grids.md): the simpleKT optimum sat on
 the dropout edge, so ``grid-ext`` adds dropout 0.30 and 0.40 (8 runs),
 ``seeds-ext`` reselects over the union and trains the five seeds if the
 choice moved, and ``dygkt`` trains DyGKT on the same five seeds with the

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Junyi onset input-availability check (docs/preregistration_round3c.md).
+"""Junyi onset input-availability check (docs/preregistration_junyi_onset_availability.md).
 
 The round-3b onset gap is time_done(t) - time_taken(t) minus the same for
 row t-1. It is admissible only if that is the real start of item t. This
@@ -191,7 +191,7 @@ def main() -> int:
         and overlap_retried - overlap_single > L2_MARGIN
     )
     out = {
-        "prereg": "docs/preregistration_round3c.md",
+        "prereg": "docs/preregistration_junyi_onset_availability.md",
         "fold": args.fold,
         "split": "train",
         "n_rows": int(len(train)),

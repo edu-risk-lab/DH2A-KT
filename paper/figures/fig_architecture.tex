@@ -18,17 +18,21 @@
               inner sep=4pt, text width=4.05cm, minimum height=1.85cm,
               fill=white},
 ]
-\node[box] (p0) {Train-only\\construction\\$E_{\mathrm{pre}}$ / Q--KC};
-\node[box, right=0.32cm of p0] (audit) {Hyperedge\\membership audit};
-\node[box, right=0.32cm of audit] (twins) {Rung and control\\(cap.\ / arch.\ / pkg)};
-\node[box, right=0.32cm of twins] (gate) {One-sided $t$ on test AUC\\at $+2.0\times 10^{-3}$ (Holm/BH)};
+\node[box, text width=2.35cm] (p0) {Train-only\\construction};
+\node[box, text width=2.35cm, right=0.22cm of p0] (audit) {Membership\\audit};
+\node[box, text width=2.35cm, right=0.22cm of audit] (avail) {Availability\\gate};
+\node[box, text width=2.35cm, right=0.22cm of avail] (twins) {Rung and\\control};
+\node[box, text width=2.45cm, right=0.22cm of twins] (gate) {One-sided $t$\\on test AUC};
 \draw[->, thick] (p0.east) -- (audit.west);
-\draw[->, thick] (audit.east) -- (twins.west);
+\draw[->, thick] (audit.east) -- (avail.west);
+\draw[->, thick] (avail.east) -- (twins.west);
 \draw[->, thick] (twins.east) -- (gate.west);
 \end{tikzpicture}
 \caption{The credit protocol. Auxiliary knowledge is built from training
-learners only and audited for membership leakage. Each message is then
-placed on a rung with a designated control, run on ten paired seeds,
-and assigned one of three outcomes (Figure~\ref{fig:credit-heatmap-10seed}).}
+learners only, audited for membership leakage, and checked for
+availability at prediction time. Each available message is placed on a
+rung with a designated control, run on ten paired seeds, and assigned
+one of three outcomes under the primary rule
+(Figure~\ref{fig:credit-forest}).}
 \label{fig:architecture}
 \end{figure}

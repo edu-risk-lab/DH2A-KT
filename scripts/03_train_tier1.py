@@ -88,7 +88,7 @@ def main() -> int:
         default=None,
         help="Junyi only: time gaps from completion times in seconds, or from "
         "attempt onsets rebuilt as completion minus the raw duration "
-        "(docs/preregistration_round3.md). Row order is unchanged.",
+        "(docs/preregistration_primary_rule.md). Row order is unchanged.",
     )
     parser.add_argument(
         "--junyi-duration-field",
@@ -651,7 +651,7 @@ def main() -> int:
             if share is not None and share < 0.99:
                 raise SystemExit(
                     f"Junyi onset: valid duration on {share:.4%} of train rows, below the "
-                    "99% rule of docs/preregistration_round3.md Section 8.2"
+                    "99% rule of docs/preregistration_primary_rule.md Section 8.2"
                 )
             print(
                 f"[fold {fold}] Junyi gap timestamps: {args.junyi_time}"

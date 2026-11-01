@@ -115,23 +115,52 @@ $p_0\le\alpha$; \textbf{Unsupported} otherwise. Family~E outcomes are
 labelled exploratory. The count $k/|S|$ of seeds with
 $\Delta_s\ge\tau$ is printed as a seed-stability descriptor and is not
 a decision rule; a credited row with $k{<}|S|$ is marked seed-variable.
-When $|S|{=}1$, the credit test at this $\alpha$ reduces to the earlier
-two-sided 95\% interval rule of requiring the lower bound to reach
-$\tau$.
+The one-sided $t$-tests require $|S|\ge 2$. A single-seed contrast is
+reported only as a descriptive difference; it is not assigned Credited,
+Positive, or Unsupported under this rule. Separately, before
+multiplicity adjustment, requiring the lower end of a two-sided 95\%
+interval to reach $\tau$ is numerically close to a one-sided test at
+level $0.025$ when $|S|$ is large; that interval rule is not used as the
+primary decision here.
 
-An earlier operating rule decided credit from validation AUC by a
-two-sided 95\% interval bound and by requiring every seed to clear
-$\tau$ (the interval and seed rules). Those outcomes, and the map
-recomputed under them on test AUC, are kept in
-\ref{app:ten-seed-stats} beside the primary ones; the text names every
-family~C row whose outcome changes. The threshold $\tau$ was fixed
-before the ten-seed runs (Data Availability Statement); on XES3G5M
-fold~0 it is seven to eight times the seed standard deviation of the
-package control arms and about half the gap from the timed tracer to
-the closest contextual baseline in Table~\ref{tab:auc-xes3g5m}.
-Appendix~\ref{app:ten-seed-stats} also recounts outcomes at neighbouring
-thresholds; several ASSISTments package means sit near $\tau$, so the
-operating choice matters for those cells.
+\paragraph{Rule history.}
+An earlier analysis used validation AUC with a two-sided 95\% interval
+bound and an every-seed threshold (the interval and seed rules;
+\ref{app:ten-seed-stats}). Test-only outcomes under those rules had
+already been computed and archived (Table~\ref{tab:credit-test-10seed};
+DOI \url{https://doi.org/10.5281/zenodo.23558062}) when the primary rule
+of this section was fixed in the repository (commit \texttt{bbe4a22},
+23~Oct~2026 for the written plan; commit \texttt{83d0706} for the
+reanalysis tables). The primary rule is therefore not blind to
+test-only outcomes under the earlier rules. We use it for the credit
+decisions because held-out test AUC plays no part in checkpoint
+selection and because the rule controls family-wise error.
+Table~\ref{tab:credit-primary-changes} lists every contrast whose
+outcome differs between the earlier test-interval rule and the primary
+rule; the two ASSISTments~2012 reference-recipe packages credited under
+the earlier interval rule are not credited under the primary rule.
+Validation-AUC maps under the earlier rules remain in
+\ref{app:ten-seed-stats} as archived supplements, not as the decisions
+of this paper.
+
+The threshold $\tau$ was fixed with the ten-seed design (Data
+Availability Statement); on XES3G5M fold~0 it is seven to eight times
+the seed standard deviation of the package control arms and about half
+the gap from the timed tracer to the closest contextual baseline in
+Table~\ref{tab:auc-xes3g5m}. Table~\ref{tab:credit-primary-tau}
+recounts family~C outcomes at neighbouring $\tau$ under the primary
+rule; Table~\ref{tab:credit-primary-mde} gives approximate minimum
+detectable effects. Several ASSISTments package means sit near
+$\tau{=}{+}2.0\times 10^{-3}$, so the operating choice and seed variance
+matter for those cells.
+
+\paragraph{Scope of the tests.}
+All primary tests treat the ten training seeds as replicates within one
+learner fold. They quantify variability due to optimisation, not
+variability over learners or corpora. Replication over the three
+learner folds is reported descriptively
+(Table~\ref{tab:credit-primary-var}), where the between-fold standard
+deviation is smaller than the between-seed one for every contrast shown.
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
