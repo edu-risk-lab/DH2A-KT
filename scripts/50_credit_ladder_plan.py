@@ -78,8 +78,8 @@ Usage:
   python scripts/50_credit_ladder_plan.py --group assist-sec-fold1 --launch-all
   python scripts/50_credit_ladder_plan.py --group assist-sec-fold2 --launch-all
 
-Round 3 and 3b (docs/preregistration_round3.md Section 8,
-docs/preregistration_round3b.md): junyi-sec; junyi-onset-partial-fold{0,1,2}
+Round 3 and 3b (docs/preregistration_primary_rule.md Section 8,
+docs/preregistration_compute_and_grids.md): junyi-sec; junyi-onset-partial-fold{0,1,2}
 and junyi-onset-full-fold{0,1,2} when results/tables/junyi_onset_check.json
 names a duration field, else junyi-hist-fold{1,2} and
 junyi-hist-full-fold{0,1,2}; attn-assist-fold{0,1,2};
@@ -512,7 +512,7 @@ def _jobs() -> list[dict]:
         ):
             add("junyi-hist", arm, seed, _dh2(junyi, seed, extra, max_users=50000))
 
-    # Round 3 (docs/preregistration_round3.md, Section 8; addendum 3b).
+    # Round 3 (docs/preregistration_primary_rule.md, Section 8; addendum 3b).
     onset = _junyi_onset_decision()
     onset_flags = ["--junyi-time", "onset_s", "--junyi-duration-field", onset["field"]] if onset["field"] else []
     onset_block = None if onset["field"] else onset["reason"]
@@ -609,7 +609,7 @@ def _junyi_onset_decision() -> dict:
                 "checked": True,
                 "field": None,
                 "reason": "Junyi onset input unavailable at prediction time "
-                "(docs/preregistration_round3c.md); history-only fallback instead",
+                "(docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
             }
     return {
         "checked": True,

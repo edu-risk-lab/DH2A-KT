@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Junyi attempt-onset data check (docs/preregistration_round3.md, Section 8.2).
+"""Junyi attempt-onset data check (docs/preregistration_primary_rule.md, Section 8.2).
 
 Reads the raw Junyi problem log and reports whether an attempt onset can be
 rebuilt as time_done - duration: which duration field exists, its unit, the

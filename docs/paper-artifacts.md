@@ -5,12 +5,17 @@ under `results/tables/` is allowlisted when it is a reported number.
 Headline AUC is **not** produced by `scripts/08_export_paper_tables.py`
 (that exporter writes the graph-only $L{=}200$ format).
 
-The Expert Systems submission snapshot is tag `es-submit-2026-10-08b`
-(DOI https://doi.org/10.5281/zenodo.23219471).
-Earlier freezes: `kbs-submit-2026-09-09`
-(DOI https://doi.org/10.5281/zenodo.22676635) and
+The Expert Systems submission snapshot for this round is tag
+`es-submit-2026-11-02` (Zenodo version DOI pending after deposit).
+Earlier freezes include `es-submit-2026-10-22b`
+(DOI https://doi.org/10.5281/zenodo.23558062),
+`es-submit-2026-10-08b`
+(DOI https://doi.org/10.5281/zenodo.23219471),
+`kbs-submit-2026-09-09`
+(DOI https://doi.org/10.5281/zenodo.22676635), and
 `kbs-submit-2026-09-15`
 (DOI https://doi.org/10.5281/zenodo.22772808).
+Analysis-plan notes: see `docs/preregistration_index.md`.
 
 | Paper table / figure | Script | Result file |
 |---|---|---|
@@ -22,10 +27,11 @@ Earlier freezes: `kbs-submit-2026-09-09`
 | Table Holm over all contrasts (appendix) | `scripts/55_holm_all_contrasts.py [--n-seeds 10]` | `results/tables/holm_all_contrasts{,_10seed}.json`, `paper/tables/table_holm_all_contrasts{,_10seed}.tex` |
 | Table threshold recount, every row (appendix) | `scripts/56_threshold_all_corpora.py [--n-seeds 10]` | `results/tables/threshold_sensitivity_all_corpora{,_10seed}.json`, `paper/tables/table_threshold_all_corpora{,_10seed}.tex` |
 | Grid-tuned AKT / simpleKT rows | `scripts/57_baseline_grid.py --stage grid/seeds/select` | `results/tables/baseline_grid_xes3g5m_fold0.csv` |
-| Round-3 primary credit map (family C) | `scripts/64_credit_primary_tables.py` | `results/tables/credit_primary_test.json`, `paper/tables/table_credit_primary_{c,changes,var}.tex` |
+| Primary credit map (family C) + MDE/τ | `scripts/64_credit_primary_tables.py` | `results/tables/credit_primary_test.json`, `paper/tables/table_credit_primary_{c,changes,var,mde,tau}.tex` |
+| Family-C forest plot (test AUC) | `scripts/66_credit_forest_plot.py` | `paper/figures/fig_credit_forest.tex` |
 | Junyi onset leak check (family D) | `scripts/63_junyi_onset_leak_check.py` | `results/tables/junyi_onset_leak_check.json`; Section `sec:junyi-onset-audit` |
 | Attention encoder on ASSIST (family E) | `scripts/50_credit_ladder_plan.py --group attn-assist-fold{0,1,2}`; `scripts/65_attn_assist_table.py` | `results/tables/dh2_kt_ladder_attn-assist-fold*_*.csv`, `paper/tables/table_attn_assist.tex` |
-| Tracer optimiser grid / seeds (contextual) | `scripts/50_credit_ladder_plan.py` groups `tracer-grid`, `tracer-seeds` | `results/tables/dh2_kt_ladder_tracer-grid_*.csv`, `dh2_kt_ladder_tracer-seeds_*.csv`; `docs/preregistration_round3b.md` |
+| Tracer optimiser grid / seeds (contextual) | `scripts/50_credit_ladder_plan.py` groups `tracer-grid`, `tracer-seeds` | `results/tables/dh2_kt_ladder_tracer-grid_*.csv`, `dh2_kt_ladder_tracer-seeds_*.csv`; `docs/preregistration_compute_and_grids.md` |
 | Table credit map on test-only AUC (appendix) | `scripts/51_transfer_credit_tables.py --n-seeds 10 --metric test` | `results/tables/credit_ladder_transfer_10seed_test.json`, `paper/tables/table_credit_test_10seed.tex` |
 | Table Junyi history-only check (addendum) | `scripts/50_credit_ladder_plan.py --group junyi-hist --launch-all`, then `scripts/59_junyi_history_check.py` | `results/tables/junyi_history_check.json`, `paper/tables/table_junyi_history.tex` |
 | Table leakage simulation | `scripts/58_leak_simulation_audit.py --stage audit/auc/table` | `results/tables/leak_simulation_audit.json`, `leak_simulation_auc.json`, `paper/tables/table_leak_simulation.tex` |

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Primary credit rule of docs/preregistration_round3.md (Sections 3-6).
+"""Primary credit rule of docs/preregistration_primary_rule.md (Sections 3-6).
 
 No training. Reads the ten-seed credit JSONs (held-out "test" AUC and
 validation AUC) and the Junyi history-only check, assigns each contrast to
@@ -250,7 +250,7 @@ def main() -> int:
         "seed_sd_delta_test_auc": {"median": statistics.median(sd_deltas), "max": max(sd_deltas)},
     }
     out = {
-        "preregistration": "docs/preregistration_round3.md",
+        "preregistration": "docs/preregistration_primary_rule.md",
         "metric": "held-out learner AUC (dh2_kt_auc), checkpoint chosen on the internal selection split",
         "tau": TAU,
         "alpha_one_sided": ALPHA,
