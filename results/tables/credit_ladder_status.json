@@ -38230,28 +38230,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38354,28 +38354,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38478,28 +38478,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38602,28 +38602,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38726,28 +38726,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38850,28 +38850,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -38974,28 +38974,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39098,28 +39098,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39222,28 +39222,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39346,28 +39346,28 @@
       "group": "junyi-onset-partial-fold0",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold0",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold0",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39470,28 +39470,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39666,28 +39666,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -39862,28 +39862,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -40058,28 +40058,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -40254,28 +40254,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -40450,28 +40450,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -40646,28 +40646,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -40842,28 +40842,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -41038,28 +41038,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -41234,28 +41234,28 @@
       "group": "junyi-onset-partial-fold1",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold1",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold1",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -41430,28 +41430,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 42,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -41626,28 +41626,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 17,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -41822,28 +41822,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 1234,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42018,28 +42018,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 0,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42214,28 +42214,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 2024,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42410,28 +42410,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 7,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42606,28 +42606,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 99,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42802,28 +42802,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 314,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -42998,28 +42998,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 2718,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
@@ -43194,28 +43194,28 @@
       "group": "junyi-onset-partial-fold2",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "time-package",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-partial-fold2",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
       "group": "junyi-onset-full-fold2",
       "arm": "t-zero",
       "seed": 3407,
-      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_round3c.md); history-only fallback instead",
+      "blocked": "Junyi onset input unavailable at prediction time (docs/preregistration_junyi_onset_availability.md); history-only fallback instead",
       "cmd": null
     },
     {
