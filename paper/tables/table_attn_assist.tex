@@ -1,13 +1,13 @@
-% Auto: scripts/65_attn_assist_table.py
+% Auto: scripts/65_attn_assist_table.py (from credit_primary_test.json)
 \begin{table}[tbp]
 \caption{Exploratory (family~E) attention-encoder time contrasts on
 ASSISTments~2012 one-second export, reference recipe, ten paired seeds.
-Differences are mean paired held-out test AUC in units of $10^{-3}$;
-the bracket is the lower end of a descriptive two-sided 95\% interval
-(not the one-sided credit test); $k/10$ is the seed-stability
-descriptor. Credit decisions use one-sided Benjamini--Hochberg over
-family~E: every row is Positive, not credited (none reach adjusted
-$p_\tau\le 0.025$). These rows are not in family~C.}
+Differences are mean paired pooled held-out evaluation AUC ($10^{-3}$);
+brackets are lower ends of descriptive two-sided 95\% intervals; $k/10$ is
+the seed-stability descriptor. One-sided Benjamini--Hochberg $p_\tau$
+values are taken from the full family~E in
+\texttt{credit\_primary\_test.json} (all $\ge 1.000$ here):
+every row is Positive, not credited. These rows are not in family~C.}
 \label{tab:attn-assist}
 \centering
 \footnotesize
@@ -17,17 +17,17 @@ $p_\tau\le 0.025$). These rows are not in family~C.}
 Contrast & Fold~0 & Fold~1 & Fold~2 \\
 \midrule
 Package vs.\ no-time &
-$+1.36$~$[+0.69]$ ($3/10$) &
-$+1.42$~$[+0.94]$ ($2/10$) &
-$+2.08$~$[+1.63]$ ($4/10$) \\
+$+1.36$~$[+0.69]$ (3/10) &
+$+1.42$~$[+0.94]$ (2/10) &
+$+2.08$~$[+1.63]$ (4/10) \\
 Aligned gap vs.\ T-zero &
-$+1.25$~$[+0.78]$ ($2/10$) &
-$+1.75$~$[+1.08]$ ($3/10$) &
-$+1.83$~$[+1.50]$ ($4/10$) \\
+$+1.25$~$[+0.78]$ (2/10) &
+$+1.75$~$[+1.08]$ (3/10) &
+$+1.83$~$[+1.50]$ (4/10) \\
 Aligned gap vs.\ T-misaligned &
-$+0.99$~$[+0.53]$ ($1/10$) &
-$+1.07$~$[+0.79]$ ($0/10$) &
-$+1.43$~$[+1.11]$ ($1/10$) \\
+$+0.99$~$[+0.53]$ (1/10) &
+$+1.07$~$[+0.79]$ (0/10) &
+$+1.43$~$[+1.11]$ (1/10) \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -1,0 +1,58 @@
+{
+  "rows": [
+    {
+      "name": "Package vs.\\ no time",
+      "pending": [
+        0,
+        17,
+        42,
+        1234,
+        2024,
+        7,
+        99,
+        314,
+        2718,
+        3407
+      ],
+      "p_tau_bh": 1.0,
+      "p_0_bh": 1.0,
+      "outcome": "pending"
+    },
+    {
+      "name": "T-boundary vs.\\ no time",
+      "pending": [
+        0,
+        17,
+        42,
+        1234,
+        2024,
+        7,
+        99,
+        314,
+        2718,
+        3407
+      ],
+      "p_tau_bh": 1.0,
+      "p_0_bh": 1.0,
+      "outcome": "pending"
+    },
+    {
+      "name": "Package vs.\\ T-boundary",
+      "pending": [
+        0,
+        17,
+        42,
+        1234,
+        2024,
+        7,
+        99,
+        314,
+        2718,
+        3407
+      ],
+      "p_tau_bh": 1.0,
+      "p_0_bh": 1.0,
+      "outcome": "pending"
+    }
+  ]
+}

@@ -58,44 +58,50 @@ parameters) & The timing package as a whole \\
 
 \subsection{Families, metric, and the primary rule}
 \label{sec:protocol-threshold}
-Contrasts are assigned to one of three families before outcomes are
-read. The assignment, the primary metric, and the decision rule were
-fixed in a dated repository note before the reanalysis of the collected
-ten-seed runs (Data Availability Statement).
+Contrasts are assigned to one of three analysis families recorded in a
+dated repository note
+(Data Availability Statement). Family membership and the decision rule
+were fixed for a retrospective reanalysis of the collected ten-seed
+runs after the earlier interval/seed map was already known; they are
+not an outcome-blind preregistration before data collection, and the
+family~C map is not a confirmatory test on unused data. A later dated
+note (5~November~2026) locks follow-up runs that were not used to
+choose $\tau$ or the rule.
 
 \begin{itemize}
-  \item \textbf{Family C (confirmatory).} The primary claims of this
-  paper under attempt-onset inputs: zero-incidence package versus no
-  time; aligned gap versus T-zero; and capacity-matched question--KC
-  incidence, each on the LSTM reference recipe across corpora and
-  folds where run, plus the same three time and incidence contrasts
-  under the attention encoder on XES3G5M (second encoder, same corpus).
-  Size: $29$ contrasts after Junyi attempt-onset inputs that fail the
-  availability audit were moved to family~D
+  \item \textbf{Family C (primary analysis family).} The primary claims
+  of this paper under attempt-onset inputs: zero-incidence package
+  versus no time; aligned gap versus T-zero; and capacity-matched
+  question--KC incidence, each on the LSTM reference recipe across
+  corpora and folds where run, plus the same three time and incidence
+  contrasts under the attention encoder on XES3G5M (second encoder, same
+  corpus). Size: $29$ contrasts after Junyi attempt-onset inputs that
+  fail the availability audit were moved to family~D
   (Section~\ref{sec:junyi-onset-audit}).
   \item \textbf{Family E (exploratory).} Secondary or sensitivity
-  contrasts designated before outcome reading: history-only Junyi gaps
-  (availability check after completion-time rows were blocked);
-  attention-encoder time contrasts on ASSISTments (second encoder on a
-  second corpus under the untuned LSTM recipe); observed-incidence
-  packages; the ASSISTments $1{,}000$\,s export; and other architecture-
-  matched gap variants beyond T-zero.
+  contrasts: history-only Junyi gaps on the $50{,}000$-learner subsample
+  and on all-learner folds~0--2; attention-encoder time contrasts on
+  ASSISTments (second encoder on a second corpus under the untuned LSTM
+  recipe); observed-incidence packages; the ASSISTments $1{,}000$\,s
+  export; and other architecture-matched gap variants beyond T-zero.
   \item \textbf{Family D (diagnostic, no credit).} Contrasts that use an
   input unavailable at prediction time: Junyi completion-time query
   gaps, the synthetic leakage simulation, and the blocked Junyi onset
   rebuild (Section~\ref{sec:junyi-onset-audit}).
 \end{itemize}
 
-The primary metric is held-out test AUC on the evaluation learners of
-the fold, at the checkpoint chosen by early stopping on an internal
-selection split carved from training learners
-($\mathrm{val\_frac}{=}0.1$). Validation AUC of that selection split is
-reported only as a supplementary analysis. For a fixed set $S$ of
-paired training seeds ($|S|{=}10$ in this paper), let $\Delta_s$ be the
-test AUC of the on arm minus that of the designated control under seed
-$s$, with sample mean $\bar\Delta$ and sample standard deviation
-$s_\Delta$. With $\tau{=}{+}2.0\times 10^{-3}$ and one-sided level
-$\alpha{=}0.025$:
+The primary metric is \emph{pooled held-out evaluation AUC}: AUC on the
+union of the fold's original validation and original test learners
+(field \texttt{dh2\_kt\_auc} in the run CSVs), at the checkpoint chosen
+by early stopping on an internal selection split carved from training
+learners only ($\mathrm{val\_frac}{=}0.1$). That pooled evaluation set
+is never used for checkpoint selection. Where a table reports a true
+original-test-only rescore (different $n$ of scored positions), the
+caption says so explicitly. For a fixed set $S$ of paired training seeds
+($|S|{=}10$ in this paper), let $\Delta_s$ be the pooled evaluation AUC
+of the on arm minus that of the designated control under seed $s$, with
+sample mean $\bar\Delta$ and sample standard deviation $s_\Delta$. With
+$\tau{=}{+}2.0\times 10^{-3}$ and one-sided level $\alpha{=}0.025$:
 
 \begin{itemize}
   \item \textbf{Credit test.} One-sided paired $t$-test of
@@ -104,9 +110,11 @@ $\alpha{=}0.025$:
   \item \textbf{Positivity test.} One-sided paired $t$-test of
   $H_0{:}\,\mu_\Delta\le 0$,
   $p_0=1-F_{t_{|S|-1}}\bigl(\bar\Delta/(s_\Delta/\sqrt{|S|})\bigr)$.
-  \item \textbf{Adjustment.} Family~C: Holm over the family, separately
-  for $p_\tau$ and for $p_0$. Family~E: Benjamini--Hochberg over the
-  family, separately for each. Family~D: no credit decision.
+  \item \textbf{Adjustment.} Family~C: Holm adjustment to control
+  family-wise error within the family, separately for $p_\tau$ and for
+  $p_0$. Family~E: Benjamini--Hochberg adjustment for false-discovery
+  rate within the family, separately for each; exploratory outcomes are
+  interpreted separately from family~C. Family~D: no credit decision.
 \end{itemize}
 
 Outcomes: \textbf{Credited} if the adjusted $p_\tau\le\alpha$;
@@ -118,30 +126,37 @@ a decision rule; a credited row with $k{<}|S|$ is marked seed-variable.
 The one-sided $t$-tests require $|S|\ge 2$. A single-seed contrast is
 reported only as a descriptive difference; it is not assigned Credited,
 Positive, or Unsupported under this rule. Separately, before
-multiplicity adjustment, requiring the lower end of a two-sided 95\%
-interval to reach $\tau$ is numerically close to a one-sided test at
-level $0.025$ when $|S|$ is large; that interval rule is not used as the
-primary decision here.
+multiplicity adjustment and under the same Student-$t$ model and
+standard error, requiring the lower end of a two-sided 95\% interval to
+reach $\tau$ is algebraically equivalent to a one-sided test at level
+$0.025$; that interval rule is not used as the primary decision, and
+the equivalence does not extend to decisions after Holm or
+Benjamini--Hochberg adjustment.
 
-\paragraph{Rule history.}
+\paragraph{Rule history}
 An earlier analysis used validation AUC with a two-sided 95\% interval
 bound and an every-seed threshold (the interval and seed rules;
-\ref{app:ten-seed-stats}). Test-only outcomes under those rules had
-already been computed and archived (Table~\ref{tab:credit-test-10seed};
+\ref{app:ten-seed-stats}). Pooled-evaluation and archived test-only
+outcomes under those rules had already been computed
+(Table~\ref{tab:credit-test-10seed};
 DOI \url{https://doi.org/10.5281/zenodo.23558062}) when the primary rule
 of this section was fixed in the repository (commit \texttt{bbe4a22},
 23~Oct~2026 for the written plan; commit \texttt{83d0706} for the
-reanalysis tables). The primary rule is therefore not blind to
-test-only outcomes under the earlier rules. We use it for the credit
-decisions because held-out test AUC plays no part in checkpoint
-selection and because the rule controls family-wise error.
-Table~\ref{tab:credit-primary-changes} lists every contrast whose
-outcome differs between the earlier test-interval rule and the primary
-rule; the two ASSISTments~2012 reference-recipe packages credited under
-the earlier interval rule are not credited under the primary rule.
-Validation-AUC maps under the earlier rules remain in
-\ref{app:ten-seed-stats} as archived supplements, not as the decisions
-of this paper.
+reanalysis tables). The primary rule is therefore not blind to those
+earlier outcomes, and the credit map is reported as a reanalysis of
+those runs, not as confirmation on held-out data unused to build the
+rule. We use the primary rule for the decisions in this paper because
+the pooled evaluation AUC plays no part in checkpoint selection and
+because Holm adjustment controls family-wise error within family~C
+(exploratory family~E uses FDR control separately).
+Table~\ref{tab:credit-primary-changes} places the old interval-rule
+label beside the new primary-rule label, with mean, LCB, and $k/10$,
+for every family~C row that changes; the two ASSISTments~2012
+reference-recipe packages credited under the earlier interval rule are
+Positive, not credited, under the primary rule, while the other $27$
+family~C rows keep the same outcome. Validation-AUC maps under the
+earlier rules remain in \ref{app:ten-seed-stats} as archived
+supplements, not as the decisions of this paper.
 
 The threshold $\tau$ was fixed with the ten-seed design (Data
 Availability Statement); on XES3G5M fold~0 it is seven to eight times
@@ -149,18 +164,23 @@ the seed standard deviation of the package control arms and about half
 the gap from the timed tracer to the closest contextual baseline in
 Table~\ref{tab:auc-xes3g5m}. Table~\ref{tab:credit-primary-tau}
 recounts family~C outcomes at neighbouring $\tau$ under the primary
-rule; Table~\ref{tab:credit-primary-mde} gives approximate minimum
-detectable effects. Several ASSISTments package means sit near
-$\tau{=}{+}2.0\times 10^{-3}$, so the operating choice and seed variance
-matter for those cells.
+rule; Table~\ref{tab:credit-primary-mde} gives a conservative
+Bonferroni first-step sensitivity calculation. Several ASSISTments
+package means sit near $\tau{=}{+}2.0\times 10^{-3}$, so the operating
+choice and seed variance matter for those cells.
 
-\paragraph{Scope of the tests.}
+\paragraph{Scope of the tests}
 All primary tests treat the ten training seeds as replicates within one
 learner fold. They quantify variability due to optimisation, not
 variability over learners or corpora. Replication over the three
 learner folds is reported descriptively
 (Table~\ref{tab:credit-primary-var}), where the between-fold standard
 deviation is smaller than the between-seed one for every contrast shown.
+A learner-clustered bootstrap of the same family~C pairs
+(Table~\ref{tab:learner-bootstrap}) reports sampling uncertainty over
+held-out learners; it does not replace the seed-level credit test.
+A credit on one encoder and a non-credit on the other is not a test
+that the two effects differ.
 
 \subsection{Registering a message}
 \label{sec:protocol-register}
@@ -181,9 +201,10 @@ checklist is archived with the repository (Data Availability Statement).
 \STATE If rung (iii), record the number of added parameters
 \FOR{each seed $s\in S$}
   \STATE Train the on arm and the control with seed $s$ on the same fold
-  \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{test}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{test}}(\mathrm{control})$
+  \STATE $\Delta_s\gets\mathrm{AUC}_{\mathrm{eval}}(\mathrm{on})-\mathrm{AUC}_{\mathrm{eval}}(\mathrm{control})$
+  \STATE \quad (pooled held-out evaluation AUC on original valid$\cup$test)
 \ENDFOR
-\STATE Compute $p_\tau$ and $p_0$; adjust within the family (Holm for C, BH for E)
+\STATE Compute $p_\tau$ and $p_0$; adjust within the family (Holm/FWER for C, BH/FDR for E)
 \IF{adjusted $p_\tau\le 0.025$}
   \STATE outcome $\gets$ Credited
 \ELSIF{adjusted $p_0\le 0.025$}

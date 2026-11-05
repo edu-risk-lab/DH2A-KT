@@ -1,0 +1,44 @@
+\begin{table}[H]
+\caption{Learner-clustered bootstrap for every family~C contrast
+(same method as Table~\ref{tab:learner-bootstrap}). Units
+$10^{-3}$ AUC except Flip~\%.}
+\label{tab:learner-bootstrap-all}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.0pt}
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Setting & Contrast & Mean [learner 95\%] & SD$_{\mathrm{seed}}$ & SD$_{\mathrm{learn}}$ & Acc.\ $\Delta$ & Flip~\% \\
+\midrule
+XES3G5M & Q$\leftarrow$KC incidence & -0.04 [-0.12,+0.04] & 0.25 & 0.04 & +0.03 & 3.5 \\
+XES3G5M & Package, zero incidence & +2.62 [+2.47,+2.77] & 0.19 & 0.07 & +1.07 & 3.9 \\
+XES3G5M & Aligned gap vs.\ T-zero & +1.98 [+1.85,+2.11] & 0.19 & 0.06 & +0.78 & 3.6 \\
+XES3G5M fold 1 & Package, zero incidence & +2.91 [+2.76,+3.07] & 0.28 & 0.08 & +1.21 & 4.0 \\
+XES3G5M fold 1 & Aligned gap vs.\ T-zero & +1.94 [+1.80,+2.07] & 0.29 & 0.07 & +0.80 & 3.7 \\
+XES3G5M fold 2 & Package, zero incidence & +2.85 [+2.69,+3.00] & 0.34 & 0.08 & +1.12 & 3.9 \\
+XES3G5M fold 2 & Aligned gap vs.\ T-zero & +2.03 [+1.89,+2.17] & 0.35 & 0.07 & +0.82 & 3.7 \\
+XES3G5M attn. & Package, zero incidence & +1.67 [+1.54,+1.79] & 0.48 & 0.07 & +0.46 & 4.0 \\
+XES3G5M attn. & Aligned gap vs.\ T-zero & +1.59 [+1.47,+1.71] & 0.38 & 0.06 & +0.38 & 3.7 \\
+XES3G5M attn. fold 1 & Package, zero incidence & +2.05 [+1.92,+2.17] & 0.49 & 0.06 & +1.01 & 4.0 \\
+XES3G5M attn. fold 1 & Aligned gap vs.\ T-zero & +2.02 [+1.89,+2.14] & 0.30 & 0.06 & +0.84 & 3.7 \\
+XES3G5M attn. fold 2 & Package, zero incidence & +1.76 [+1.63,+1.88] & 0.59 & 0.06 & +0.80 & 3.9 \\
+XES3G5M attn. fold 2 & Aligned gap vs.\ T-zero & +1.60 [+1.48,+1.72] & 0.31 & 0.06 & +0.63 & 3.8 \\
+ASSIST2012 & Q$\leftarrow$KC incidence & +1.45 [+1.28,+1.59] & 0.46 & 0.08 & +1.04 & 5.8 \\
+ASSIST2012 & Package, zero incidence & +2.12 [+1.87,+2.36] & 0.33 & 0.12 & +1.51 & 6.9 \\
+ASSIST2012 & Aligned gap vs.\ T-zero & +1.50 [+1.27,+1.73] & 0.35 & 0.12 & +1.08 & 6.3 \\
+ASSIST2012 fold 1 & Q$\leftarrow$KC incidence & +1.67 [+1.53,+1.80] & 0.52 & 0.07 & +1.25 & 5.6 \\
+ASSIST2012 fold 1 & Package, zero incidence & +1.98 [+1.75,+2.19] & 0.77 & 0.12 & +1.56 & 7.1 \\
+ASSIST2012 fold 1 & Aligned gap vs.\ T-zero & +1.30 [+1.09,+1.51] & 0.67 & 0.11 & +1.03 & 6.5 \\
+ASSIST2012 fold 2 & Q$\leftarrow$KC incidence & +1.74 [+1.60,+1.87] & 0.56 & 0.07 & +1.00 & 5.9 \\
+ASSIST2012 fold 2 & Package, zero incidence & +2.16 [+1.94,+2.39] & 0.63 & 0.12 & +1.45 & 6.8 \\
+ASSIST2012 fold 2 & Aligned gap vs.\ T-zero & +1.70 [+1.49,+1.90] & 0.63 & 0.11 & +1.16 & 6.0 \\
+ASSIST2012 ref. & Q$\leftarrow$KC incidence & +1.79 [+1.64,+1.93] & 0.58 & 0.07 & +1.03 & 6.2 \\
+ASSIST2012 ref. & Package, zero incidence & +2.39 [+2.13,+2.64] & 0.87 & 0.13 & +1.28 & 7.5 \\
+ASSIST2012 ref. & Aligned gap vs.\ T-zero & +1.85 [+1.62,+2.08] & 0.52 & 0.12 & +1.12 & 6.7 \\
+ASSIST2012 ref. fold 1 & Package, zero incidence & +2.56 [+2.32,+2.79] & 0.66 & 0.12 & +1.31 & 7.3 \\
+ASSIST2012 ref. fold 1 & Aligned gap vs.\ T-zero & +2.04 [+1.83,+2.25] & 0.43 & 0.11 & +1.12 & 6.6 \\
+ASSIST2012 ref. fold 2 & Package, zero incidence & +2.46 [+2.23,+2.69] & 0.49 & 0.12 & +1.10 & 7.3 \\
+ASSIST2012 ref. fold 2 & Aligned gap vs.\ T-zero & +1.81 [+1.59,+2.01] & 0.45 & 0.11 & +0.98 & 6.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

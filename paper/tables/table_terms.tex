@@ -18,11 +18,16 @@ Aligned gap input & The observed $\log(1{+}\Delta t)$, with its map held fixed \
 T-zero / T-misaligned / T-shuffled / T-boundary & Gap map with zeros; within-learner
 permutation; across-learner permutation; indicator $1[\Delta t{=}0]$ only \\
 History-only & The gap enters the recurrent input only, not the next-step query \\
-Family C / E / D & Primary (confirmatory), exploratory, or diagnostic (no credit) \\
+Family C / E / D & Primary analysis family, exploratory (FDR), or diagnostic (no credit) \\
 Credited / Positive, not credited / Unsupported & Primary-rule outcomes
 (Section~\ref{sec:protocol-threshold}) \\
-Primary rule & One-sided paired $t$ of $H_0{:}\,\mu\le\tau$ on test AUC; Holm (C) or BH (E);
-$\alpha{=}0.025$; $\tau{=}{+}2.0\times 10^{-3}$ \\
+Primary rule & One-sided paired $t$ of $H_0{:}\,\mu\le\tau$ on pooled held-out
+evaluation AUC; Holm/FWER (C) or BH/FDR (E); $\alpha{=}0.025$;
+$\tau{=}{+}2.0\times 10^{-3}$ \\
+Pooled evaluation AUC & AUC on original valid$\cup$test learners of the fold
+(\texttt{dh2\_kt\_auc}); not used for checkpoint selection \\
+QKC-T / Zero$+\Delta t$ & Timed tracer with observed Q$\leftarrow$KC incidence, or
+with zero incidence and the same time branch \\
 Seed descriptor $k/10$ & Seeds with $\Delta_s\ge\tau$; not a decision rule \\
 \bottomrule
 \end{tabularx}

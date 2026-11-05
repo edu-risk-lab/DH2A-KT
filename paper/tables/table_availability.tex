@@ -1,0 +1,22 @@
+\begin{table}[tbp]
+\caption{When each time-related input is created, and which
+decision it may enter. Prediction time is the onset of item
+$t{+}1$, when the learner opens it
+(Section~\ref{sec:protocol-threshold}). The credited XES3G5M
+LSTM package uses a query-side gap and is not a claim about
+choosing the next item before it opens. Junyi completion-time
+query gaps are family~D diagnostics.}
+\label{tab:availability}
+\centering
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{4.2cm}X@{}}
+\toprule
+Variable & Created when & Usable for \\
+\midrule
+History gap $\log(1{+}\Delta t)$ on the recurrent input & After item $t$ opens (start-to-start on XES3G5M and ASSISTments) & Scoring, or choosing item $t{+}1$ before it opens \\
+Query-side gap, XES3G5M / ASSISTments start times & After item $t{+}1$ has opened & Scoring the opened item; \textbf{not} choosing the next item \\
+Junyi completion gap (\texttt{time\_done}) & After item $t{+}1$ completes (includes its duration) & Leakage diagnostic only (family~D) \\
+Boundary indicator $1[\Delta t{=}0]$ & Same timestamp as the gap it is built from & The same decision as that gap \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,33 @@
+\begin{table}[tbp]
+\caption{Learner-clustered bootstrap of family~C contrasts
+(docs/preregistration\_primary\_rule.md Section~5;
+$B{=}2000$ resamples of held-out learners, seed 20261023).
+Mean $\Delta$ is the mean over ten seeds of pooled held-out
+evaluation AUC (on minus control), $\times 10^{-3}$. The 95\%
+percentile interval resamples learners, not training seeds.
+SD$_{\mathrm{seed}}$ is the sample SD of the ten paired
+$\Delta_s$; SD$_{\mathrm{learn}}$ is the bootstrap SD of that
+mean. Acc.\ flip is the mean paired change in accuracy at $0.5$
+($\times 10^{-3}$); Flip~\% is the share of scored positions
+whose $0.5$ decision differs between arms. These intervals do
+not decide credit. A credited LSTM package and an uncredited
+attention package is not a test that the two effects differ.}
+\label{tab:learner-bootstrap}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Setting & Contrast & Mean [learner 95\%] & SD$_{\mathrm{seed}}$ & SD$_{\mathrm{learn}}$ & Acc.\ $\Delta$ & Flip~\% \\
+\midrule
+XES3G5M & Package, zero incidence & +2.62 [+2.47,+2.77] & 0.19 & 0.07 & +1.07 & 3.9 \\
+XES3G5M fold 1 & Package, zero incidence & +2.91 [+2.76,+3.07] & 0.28 & 0.08 & +1.21 & 4.0 \\
+XES3G5M fold 2 & Package, zero incidence & +2.85 [+2.69,+3.00] & 0.34 & 0.08 & +1.12 & 3.9 \\
+XES3G5M & Aligned gap vs.\ T-zero & +1.98 [+1.85,+2.11] & 0.19 & 0.06 & +0.78 & 3.6 \\
+XES3G5M attn. & Package, zero incidence & +1.67 [+1.54,+1.79] & 0.48 & 0.07 & +0.46 & 4.0 \\
+ASSIST2012 & Package, zero incidence & +2.12 [+1.87,+2.36] & 0.33 & 0.12 & +1.51 & 6.9 \\
+ASSIST2012 ref. fold 1 & Package, zero incidence & +2.56 [+2.32,+2.79] & 0.66 & 0.12 & +1.31 & 7.3 \\
+ASSIST2012 ref. fold 2 & Package, zero incidence & +2.46 [+2.23,+2.69] & 0.49 & 0.12 & +1.10 & 7.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

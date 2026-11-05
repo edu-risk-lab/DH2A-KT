@@ -48,14 +48,15 @@ def write_family_c(rows: list[dict]) -> None:
     c_rows = [r for r in rows if r["family"] == "C"]
     lines = [
         r"\begin{table}[tbp]",
-        r"\caption{Confirmatory credit map (family~C) under the primary rule:",
-        r"held-out test AUC, one-sided paired $t$-tests of",
-        r"$H_0{:}\,\mu\le\tau$ and $H_0{:}\,\mu\le 0$ with $\tau{=}{+}2.0\times 10^{-3}$,",
-        r"Holm within the family, $\alpha{=}0.025$ one-sided. Mean and the lower",
-        r"end of the two-sided 95\% interval (LCB) are in units of $10^{-3}$ test",
-        r"AUC; $k/10$ is the seed-stability descriptor (not a decision rule).",
-        r"Outcome: C credited, P positive not credited, U unsupported. A starred",
-        r"C is credited with $k{<}10$ (seed-variable). Junyi completion-time rows",
+        r"\caption{Primary credit map (family~C) under the primary rule:",
+        r"pooled held-out evaluation AUC (original valid$\cup$test), one-sided",
+        r"paired $t$-tests of $H_0{:}\,\mu\le\tau$ and $H_0{:}\,\mu\le 0$ with",
+        r"$\tau{=}{+}2.0\times 10^{-3}$, Holm (FWER) within the family,",
+        r"$\alpha{=}0.025$ one-sided. Mean and the lower end of the two-sided",
+        r"95\% interval (LCB) are in units of $10^{-3}$ evaluation AUC; $k/10$",
+        r"is the seed-stability descriptor (not a decision rule). Outcome: C",
+        r"credited, P positive not credited, U unsupported. A starred C is",
+        r"credited with $k{<}10$ (seed-variable). Junyi completion-time rows",
         r"are family~D and are omitted; history-only Junyi and ASSISTments",
         r"attention contrasts are family~E.}",
         r"\label{tab:credit-primary-c}",
@@ -79,28 +80,40 @@ def write_family_c(rows: list[dict]) -> None:
     (OUT / "table_credit_primary_c.tex").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_changes(summary: dict) -> None:
+def write_changes(summary: dict, rows: list[dict]) -> None:
     ch = summary["changed_vs_old_test_interval"]
+    by = {(r["corpus"], r["contrast"]): r for r in rows}
+    n_c = sum(1 for r in rows if r["family"] == "C")
     lines = [
         r"\begin{table}[tbp]",
-        r"\caption{Contrasts whose primary outcome on held-out test AUC differs",
-        r"from the earlier test-only interval-rule outcome. Validation-interval",
-        r"disagreements are listed with the archived maps in",
-        r"Appendix~\ref{app:ten-seed-stats}.}",
+        r"\caption{Family~C rows whose primary-rule outcome on pooled held-out",
+        r"evaluation AUC differs from the earlier test-interval rule on the",
+        r"same field. Mean, two-sided LCB, and $k/10$ are in units of",
+        r"$10^{-3}$ AUC under the primary metric. Old~=~interval rule",
+        r"(Credited if LCB$\,\ge\tau$); New~=~primary Holm rule of",
+        r"Section~\ref{sec:protocol-threshold}. The other "
+        + str(n_c - len(ch))
+        + r" family~C rows keep the same primary-rule outcome as that",
+        r"earlier test-interval rule. This table is a reanalysis, not a",
+        r"confirmatory test. Validation-interval disagreements are archived",
+        r"in \ref{app:ten-seed-stats}.}",
         r"\label{tab:credit-primary-changes}",
         r"\centering",
-        r"\footnotesize",
-        r"\begin{tabular}{@{}llll@{}}",
+        r"\scriptsize",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\begin{tabular}{@{}llrll@{}}",
         r"\toprule",
-        r"Setting & Contrast & Family & Old test-interval $\to$ new \\",
+        r"Setting & Contrast & Mean [LCB] ($k/10$) & Old interval & New primary \\",
         r"\midrule",
     ]
     if not ch:
-        lines.append(r"\multicolumn{4}{c}{(none)} \\")
-    for r in ch:
+        lines.append(r"\multicolumn{5}{c}{(none)} \\")
+    for item in ch:
+        r = by[(item["corpus"], item["contrast"])]
         lines.append(
-            f"{r['corpus']} & {r['contrast']} & {r['family']} & "
-            f"{r['old']} $\\to$ {r['new']} \\\\"
+            f"{r['corpus']} & {r['contrast']} & "
+            f"{1e3 * r['mean']:+.2f} [{1e3 * r['lcb95_two_sided']:+.2f}] "
+            f"({r['seed_k']}/10) & {item['old']} & {item['new']} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
     (OUT / "table_credit_primary_changes.tex").write_text("\n".join(lines), encoding="utf-8")
@@ -157,26 +170,26 @@ def write_mde(rows: list[dict]) -> None:
     }
     lines = [
         r"\begin{table}[tbp]",
-        r"\caption{Approximate minimum detectable effect under the primary",
-        r"credit test with $|S|{=}10$, family~C Holm over $m{=}29$, and",
-        r"one-sided $\alpha{=}0.025$ (critical $t_{9}$ at $\alpha/m$ taken as",
-        r"$4.40$). The mean must clear $\tau{=}{+}2.0\times 10^{-3}$ by",
-        r"$t^\star s/\sqrt{10}$. Units $10^{-3}$ test AUC. ``Not credited''",
-        r"on ASSISTments packages near $+2.5$ is therefore lack of evidence",
-        r"after adjustment, not absence of an effect.}",
+        r"\caption{Conservative sensitivity under the \emph{first}",
+        r"Bonferroni step of family~C Holm ($m{=}29$, $|S|{=}10$, one-sided",
+        r"$\alpha{=}0.025$; critical $t_{9,\alpha/m}\approx 4.40$). The mean",
+        r"must clear $\tau{=}{+}2.0\times 10^{-3}$ by $t^\star s/\sqrt{10}$.",
+        r"This is not the exact power of the full Holm procedure (which",
+        r"depends on the other $p$-values). Units $10^{-3}$ evaluation AUC.",
+        r"``Not credited'' on ASSISTments packages near $+2.5$ is lack of",
+        r"evidence after adjustment, not absence of an effect.}",
         r"\label{tab:credit-primary-mde}",
         r"\centering",
         r"\footnotesize",
-        r"\begin{tabular}{@{}lrrr@{}}",
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}p{5.6cm}rr@{}}",
         r"\toprule",
-        r"Seed SD & Observed mean & Mean for $\approx$50\% power & Mean for $\approx$80\% power \\",
+        r"Seed SD ($10^{-3}$) & Observed mean & Mean to clear first Holm step \\",
         r"\midrule",
     ]
-    # 80% power: ncp ≈ t_crit + 0.84 roughly for one-sided (z0.8≈0.84)
     for label, sd in sds.items():
         margin = T_HOLM29 * sd / math.sqrt(N_SEED)
         m50 = 0.002 + margin
-        m80 = 0.002 + margin + 0.84 * sd / math.sqrt(N_SEED)
         if "Illustrative" in label:
             obs = "---"
         elif "XES" in label:
@@ -184,8 +197,7 @@ def write_mde(rows: list[dict]) -> None:
         else:
             obs = f"{1e3 * assist['mean']:+.2f}"
         lines.append(
-            f"{label} (${1e3 * sd:.2f}$) & {obs} & "
-            f"{1e3 * m50:+.2f} & {1e3 * m80:+.2f} \\\\"
+            f"{label} (${1e3 * sd:.2f}$) & {obs} & {1e3 * m50:+.2f} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
     (OUT / "table_credit_primary_mde.tex").write_text("\n".join(lines), encoding="utf-8")
@@ -198,8 +210,8 @@ def write_tau(rows: list[dict]) -> None:
     lines = [
         r"\begin{table}[tbp]",
         r"\caption{Sensitivity of family~C primary outcomes to $\tau$ on",
-        r"held-out test AUC (one-sided paired $t$, Holm within family~C,",
-        r"$\alpha{=}0.025$). Counts are over the $29$ confirmatory contrasts.",
+        r"pooled held-out evaluation AUC (one-sided paired $t$, Holm within",
+        r"family~C, $\alpha{=}0.025$). Counts are over the $29$ family~C contrasts.",
         r"The operating choice in the main text is $\tau{=}{+}2.0\times 10^{-3}$.",
         r"Earlier validation-AUC threshold recounts under the interval/seed",
         r"rules are archived as Tables~\ref{tab:threshold-all-10seed}",
@@ -240,7 +252,7 @@ def write_tau(rows: list[dict]) -> None:
 def main() -> int:
     data = json.loads(SRC.read_text(encoding="utf-8"))
     write_family_c(data["rows"])
-    write_changes(data["summary"])
+    write_changes(data["summary"], data["rows"])
     write_var(data["variance_components"])
     write_mde(data["rows"])
     write_tau(data["rows"])

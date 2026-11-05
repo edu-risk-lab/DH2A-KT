@@ -51,7 +51,8 @@
 
 \begin{center}
 {\large\bfseries Appendices to ``Validating Auxiliary Knowledge in
-Knowledge Tracing: A Credit Protocol and Its Dependence on Setting''}
+Knowledge Tracing: A Credit Protocol with Controls, Availability
+Checks, and Family-Wise Decisions''}
 \end{center}
 
 \noindent Table, figure, and section numbers without a letter refer to
@@ -68,17 +69,18 @@ list at the end, not to the list of the main document.
 Table~\ref{tab:aliases} maps the arm names of the paper to
 implementation aliases in the training logs.
 Table~\ref{tab:module-hypothesis} states the hypothesis each module
-tests. The XES3G5M outcomes are the first rows of
-Table~\ref{tab:credit-transfer-10seed}; five-seed intervals are in
-Table~\ref{tab:attribution-summary}.
+tests. Current primary XES3G5M outcomes are in
+Table~\ref{tab:credit-primary-c}; the archived earlier-rule map starts
+in Table~\ref{tab:credit-transfer-10seed}, and five-seed intervals are
+in Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_aliases}
 \input{tables/table_module_hypothesis}
 
 \section{Primary-rule supplements and archived earlier maps}
 \label{app:ten-seed-stats}
-The main credit decisions use the primary rule on held-out test AUC
-(Section~\ref{sec:protocol-threshold},
+The main credit decisions use the primary rule on pooled held-out
+evaluation AUC (Section~\ref{sec:protocol-threshold},
 Table~\ref{tab:credit-primary-c}). This appendix first adds primary-rule
 supplements, then archives the earlier operating rules---validation AUC
 with a two-sided 95\% interval bound and an every-seed
@@ -87,8 +89,8 @@ threshold---which are \emph{not} the credit decisions of this paper.
 \subsection{Primary-rule supplements}
 Table~\ref{tab:credit-primary-var} reports fold-level variance
 components for family~C contrasts run on three folds.
-Table~\ref{tab:credit-primary-mde} gives approximate minimum detectable
-effects under Holm over $29$ contrasts.
+Table~\ref{tab:credit-primary-mde} gives a conservative Bonferroni
+first-step sensitivity calculation under family~C Holm ($m{=}29$).
 Table~\ref{tab:credit-primary-tau} recounts family~C outcomes at
 neighbouring $\tau$.
 
@@ -319,14 +321,18 @@ recorded attempts in \cite{liu2023xes3g5m} is the expansion pyKT warns
 about.
 \FloatBarrier
 
-\section{Learner-resampled bootstrap on one checkpoint pair}
+\section{Learner-resampled bootstrap}
 \label{app:bootstrap}
-Table~\ref{tab:bootstrap-qkct} records a learner-resampled diagnostic
-used in Section~\ref{sec:time-result}. It resamples 3614 learners that
-appear on both sides of each contrast; it does not use the
+Table~\ref{tab:learner-bootstrap-all} reports the learner-clustered
+bootstrap of every family~C contrast (same method as
+Table~\ref{tab:learner-bootstrap} in the main text).
+Table~\ref{tab:bootstrap-qkct} is an earlier diagnostic used in
+Section~\ref{sec:time-result}: it resamples 3614 learners that appear
+on both sides of each contrast; it does not use the
 $1{,}093{,}718$-row occurrence join, is not event-aligned, and is not a
 five-seed interval.
 
+\input{tables/table_learner_bootstrap_all}
 \input{tables/table_bootstrap_qkct}
 \FloatBarrier
 

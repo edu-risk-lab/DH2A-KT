@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Primary credit rule of docs/preregistration_primary_rule.md (Sections 3-6).
 
-No training. Reads the ten-seed credit JSONs (held-out "test" AUC and
-validation AUC) and the Junyi history-only check, assigns each contrast to
-family C (confirmatory), E (exploratory), or D (diagnostic, no credit),
-and applies the one-sided credit test (H0: mu <= tau) and positivity test
-(H0: mu <= 0) on test AUC, Holm within family C and Benjamini-Hochberg
-within family E, alpha = 0.025 one-sided. Also writes the tau curve, the
-seed-stability descriptor k/10, and seed/fold variance components for
-settings with three folds.
+No training. Reads the ten-seed credit JSONs (pooled held-out evaluation
+AUC stored as dh2_kt_auc), Junyi history-only CSVs, and attention-ASSISTments
+ladder CSVs; assigns each contrast to family C (primary), E (exploratory),
+or D (diagnostic, no credit); and applies the one-sided credit test
+(H0: mu <= tau) and positivity test (H0: mu <= 0) with Holm within family C
+and Benjamini-Hochberg within family E, alpha = 0.025 one-sided.
 
     python scripts/60_credit_primary.py
 
@@ -17,6 +15,7 @@ Writes results/tables/credit_primary_test.json.
 
 from __future__ import annotations
 
+import csv
 import json
 import math
 import re
@@ -35,12 +34,43 @@ OUT_JSON = TABLES / "credit_primary_test.json"
 TAU = 0.002
 ALPHA = 0.025
 TAU_GRID = (0.0005, 0.0010, 0.0015, 0.0020, 0.0025, 0.0030, 0.0040)
+SEEDS = (0, 17, 42, 1234, 2024, 7, 99, 314, 2718, 3407)
 CONFIRMATORY_CONTRASTS = (
     "Package, zero incidence",
     "Aligned gap vs.\\ T-zero",
     "Q$\\leftarrow$KC incidence",
 )
 FOLD_RE = re.compile(r"(\\)?\s*fold\s+(\d)$")
+
+# Extra family-E contrasts not present in the transfer JSON.
+ATTN_CONTRASTS = (
+    ("Package vs.\\ no-time", "Package", "time-package", "no-time"),
+    ("Aligned gap vs.\\ T-zero", "Architecture", "time-package", "t-zero"),
+    ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-package", "t-misaligned"),
+)
+JUNYI_FULL_HIST = (
+    (
+        "Junyi (full) history-only fold 0",
+        0,
+        "junyi-hist-full-fold0_time-history",
+        "junyi-full_no-time",
+        "junyi-hist-full-fold0_t-zero-history",
+    ),
+    (
+        "Junyi (full) history-only fold 1",
+        1,
+        "junyi-hist-full-fold1_time-history",
+        "junyi-full-fold1_no-time",
+        "junyi-hist-full-fold1_t-zero-history",
+    ),
+    (
+        "Junyi (full) history-only fold 2",
+        2,
+        "junyi-hist-full-fold2_time-history",
+        "junyi-full-fold2_no-time",
+        "junyi-hist-full-fold2_t-zero-history",
+    ),
+)
 
 
 def _setting_fold(corpus: str) -> tuple[str, int]:
@@ -51,7 +81,7 @@ def _setting_fold(corpus: str) -> tuple[str, int]:
 
 
 def family(corpus: str, contrast: str) -> str:
-    if corpus.startswith("Junyi"):
+    if corpus.startswith("Junyi") and "history-only" not in corpus:
         return "D"
     if "1{,}000" in corpus:
         return "E"
@@ -122,7 +152,65 @@ def _decide(rows: list[dict], tau: float) -> list[str]:
 
 
 def _letter(label: str) -> str:
-    return {"Credited": "C", "Consistent-positive": "P", "Positive": "P", "Unsupported": "U"}[label.split(",")[0]]
+    return {"Credited": "C", "Consistent-positive": "P", "Positive": "P", "Unsupported": "U"}[
+        label.split(",")[0]
+    ]
+
+
+def _read_auc(arm: str) -> dict[int, float]:
+    out: dict[int, float] = {}
+    for seed in SEEDS:
+        path = TABLES / f"dh2_kt_ladder_{arm}_s{seed}_vs_p0.csv"
+        if not path.exists():
+            raise FileNotFoundError(path)
+        with path.open(encoding="utf-8", newline="") as fh:
+            row = next(r for r in csv.DictReader(fh) if r.get("fold", "0") != "mean")
+        out[seed] = float(row["dh2_kt_auc"])
+    return out
+
+
+def _extra_row(
+    corpus: str,
+    setting: str,
+    fold: int,
+    contrast: str,
+    rung: str,
+    fam: str,
+    on_arm: str,
+    ctrl_arm: str,
+) -> dict:
+    on, ctrl = _read_auc(on_arm), _read_auc(ctrl_arm)
+    deltas = [on[s] - ctrl[s] for s in SEEDS]
+    # Placeholder old-rule labels (not used for primary decisions).
+    mean = statistics.mean(deltas)
+    lcb = mean - stats.t.ppf(0.975, df=len(deltas) - 1) * statistics.stdev(deltas) / math.sqrt(
+        len(deltas)
+    )
+    old = "Credited" if lcb >= TAU else (
+        "Consistent-positive, not credited" if all(d > 0 for d in deltas) else "Unsupported"
+    )
+    return {
+        "corpus": corpus,
+        "setting": setting,
+        "fold": fold,
+        "contrast": contrast,
+        "rung": rung,
+        "family": fam,
+        "deltas": deltas,
+        "sd_control": None,
+        "old_test_interval": old,
+        "old_test_seed": (
+            "Credited" if all(d >= TAU for d in deltas) else (
+                "Consistent-positive, not credited"
+                if all(d > 0 for d in deltas)
+                else "Unsupported"
+            )
+        ),
+        "old_val_interval": old,
+        "old_val_seed": old,
+        "val_mean": None,
+        "source_arms": {"on": on_arm, "control": ctrl_arm},
+    }
 
 
 def variance_components(rows: list[dict]) -> list[dict]:
@@ -141,7 +229,9 @@ def variance_components(rows: list[dict]) -> list[dict]:
         fold_means = [statistics.mean(d) for d in folds]
         grand = statistics.mean(fold_means)
         ms_between = n * sum((m - grand) ** 2 for m in fold_means) / (k - 1)
-        ms_within = sum(sum((x - fm) ** 2 for x in d) for d, fm in zip(folds, fold_means)) / (k * (n - 1))
+        ms_within = sum(
+            sum((x - fm) ** 2 for x in d) for d, fm in zip(folds, fold_means)
+        ) / (k * (n - 1))
         var_fold = max(0.0, (ms_between - ms_within) / n)
         half = stats.t.ppf(0.975, df=k - 1) * statistics.stdev(fold_means) / math.sqrt(k)
         out.append(
@@ -162,7 +252,10 @@ def variance_components(rows: list[dict]) -> list[dict]:
 
 def main() -> int:
     test = json.loads(TEST_JSON.read_text(encoding="utf-8"))
-    val = {(r["corpus"], r["contrast"]): r for r in json.loads(VAL_JSON.read_text(encoding="utf-8"))["rows"]}
+    val = {
+        (r["corpus"], r["contrast"]): r
+        for r in json.loads(VAL_JSON.read_text(encoding="utf-8"))["rows"]
+    }
     rows: list[dict] = []
     for r in test["rows"]:
         setting, fold = _setting_fold(r["corpus"])
@@ -184,6 +277,8 @@ def main() -> int:
                 "val_mean": v["mean_delta_val"],
             }
         )
+
+    # 50k-subsample Junyi history-only (and query-and-history diagnostics).
     history = json.loads(HISTORY_JSON.read_text(encoding="utf-8"))
     for h in history["rows"]:
         rows.append(
@@ -193,7 +288,6 @@ def main() -> int:
                 "fold": 0,
                 "contrast": h["contrast"],
                 "rung": h["rung"],
-                # Query-and-history rows carry the completion-time query gap.
                 "family": "D" if h["contrast"].startswith("Query") else "E",
                 "deltas": h["test"]["deltas"],
                 "sd_control": None,
@@ -204,6 +298,50 @@ def main() -> int:
                 "val_mean": h["val"]["mean"],
             }
         )
+
+    # All-learner Junyi history-only folds 0–2.
+    for corpus, fold, on, no_time, t_zero in JUNYI_FULL_HIST:
+        rows.append(
+            _extra_row(
+                corpus,
+                corpus,
+                fold,
+                "History-only package",
+                "Package",
+                "E",
+                on,
+                no_time,
+            )
+        )
+        rows.append(
+            _extra_row(
+                corpus,
+                corpus,
+                fold,
+                "History-only gap vs.\\ T-zero",
+                "Architecture",
+                "E",
+                on,
+                t_zero,
+            )
+        )
+
+    # Attention encoder on ASSISTments one-second export (family E).
+    for fold in (0, 1, 2):
+        group = f"attn-assist-fold{fold}"
+        for contrast, rung, on_name, ctrl_name in ATTN_CONTRASTS:
+            rows.append(
+                _extra_row(
+                    f"ASSIST2012 sec attn fold {fold}",
+                    "ASSIST2012 sec attn",
+                    fold,
+                    contrast,
+                    rung,
+                    "E",
+                    f"{group}_{on_name}",
+                    f"{group}_{ctrl_name}",
+                )
+            )
 
     p_tau = {f: _adjust(rows, f, TAU) for f in ("C", "E")}
     p_0 = {f: _adjust(rows, f, 0.0) for f in ("C", "E")}
@@ -235,26 +373,49 @@ def main() -> int:
     summary = {
         "family_sizes": {f: sum(r["family"] == f for r in rows) for f in ("C", "E", "D")},
         "outcomes_by_family": {
-            f: {o: sum(r["family"] == f and r["outcome"] == o for r in rows) for o in sorted({r["outcome"] for r in rows})}
+            f: {
+                o: sum(r["family"] == f and r["outcome"] == o for r in rows)
+                for o in sorted({r["outcome"] for r in rows})
+            }
             for f in ("C", "E", "D")
         },
         **{
             f"changed_vs_{old}": [
-                {"corpus": r["corpus"], "contrast": r["contrast"], "family": r["family"], "old": r[old], "new": r["outcome"]}
+                {
+                    "corpus": r["corpus"],
+                    "contrast": r["contrast"],
+                    "family": r["family"],
+                    "old": r[old],
+                    "new": r["outcome"],
+                }
                 for r in rows
-                if r["family"] != "D" and _letter(r[old]) != _letter(r["outcome"])
+                if r["family"] != "D" and r.get(old) and _letter(r[old]) != _letter(r["outcome"])
             ]
             for old in ("old_test_interval", "old_test_seed", "old_val_interval", "old_val_seed")
         },
-        "seed_sd_control_test_auc": {"median": statistics.median(sd_controls), "max": max(sd_controls)},
-        "seed_sd_delta_test_auc": {"median": statistics.median(sd_deltas), "max": max(sd_deltas)},
+        "seed_sd_control_eval_auc": {
+            "median": statistics.median(sd_controls),
+            "max": max(sd_controls),
+        },
+        "seed_sd_delta_eval_auc": {
+            "median": statistics.median(sd_deltas),
+            "max": max(sd_deltas),
+        },
     }
     out = {
         "preregistration": "docs/preregistration_primary_rule.md",
-        "metric": "held-out learner AUC (dh2_kt_auc), checkpoint chosen on the internal selection split",
+        "metric": (
+            "pooled held-out evaluation AUC (dh2_kt_auc = original valid ∪ original "
+            "test learners of the fold); checkpoint chosen on the internal selection "
+            "split carved from training learners only"
+        ),
         "tau": TAU,
         "alpha_one_sided": ALPHA,
-        "adjustment": {"C": "Holm", "E": "Benjamini-Hochberg", "D": "none (diagnostic, no credit)"},
+        "adjustment": {
+            "C": "Holm (FWER within family C)",
+            "E": "Benjamini-Hochberg (FDR within family E)",
+            "D": "none (diagnostic, no credit)",
+        },
         "summary": summary,
         "variance_components": variance_components(rows),
         "rows": rows,

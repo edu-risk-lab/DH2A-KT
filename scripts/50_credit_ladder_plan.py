@@ -40,8 +40,11 @@ stamps. New groups:
   junyi-full-fold1/2      Junyi all learners, frozen XES recipe, folds 1-2
   junyi-partial-fold1/2   Junyi first 50,000 learners, corpus config, folds 1-2
   leak-sim          XES3G5M fold 0, credited time package plus a synthetic
-                    leakage scalar (crossmodal/hint, leaky/clean), 5 seeds;
+                    leakage scalar (crossmodal/hint, leaky/clean), 10 seeds;
                     scored by scripts/58_leak_simulation_audit.py
+  xes-attempt       XES3G5M fold 0, one row per attempt, 3 arms x 10 seeds
+                    (no-time / t-boundary / time-package); family E;
+                    docs/preregistration_2026-11-05.md Section 6
 
 Addendum (docs/preregistration_junyi_onset.md):
 
@@ -469,10 +472,26 @@ def _jobs() -> list[dict]:
         for arm, extra in xes_ref_arms.items():
             add("xes-ref", arm, seed, _dh2("configs/xes3g5m.yaml", seed, [*extra, *REF_RECIPE]))
 
-    for seed in SEEDS_5:
+    for seed in SEEDS_10:
         for arm in ("crossmodal-leak", "crossmodal-clean", "hint-leak", "hint-clean"):
             add("leak-sim", arm, seed,
                 _dh2("configs/xes3g5m.yaml", seed, [*timed, *REF_RECIPE, "--aux-scalar", arm]))
+
+    # One row per attempt (docs/preregistration_2026-11-05.md Section 6).
+    # Family E. Three arms, matched 256-param branch on the two timed ones.
+    attempt_arms = {
+        "no-time": zero_q,
+        "t-boundary": [*timed, "--time-gap-control", "boundary"],
+        "time-package": timed,
+    }
+    for seed in SEEDS_10:
+        for arm, extra in attempt_arms.items():
+            add(
+                "xes-attempt",
+                arm,
+                seed,
+                _dh2("configs/xes3g5m.yaml", seed, [*extra, *REF_RECIPE, "--collapse-events"]),
+            )
 
     for fold in (1, 2):
         for seed in SEEDS_10:

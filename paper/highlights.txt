@@ -1,6 +1,6 @@
 A credit protocol validates auxiliary knowledge in knowledge tracing.
 Each message gets one of three outcomes against a designated control.
-Primary rule: one-sided paired t on held-out test AUC at +0.002, Holm/BH.
+Primary rule: one-sided paired t on pooled held-out evaluation AUC at +0.002; Holm (C) / BH (E).
 XES3G5M LSTM: time package credited on three folds; aligned gap is not.
-No confirmatory ASSIST2012 or attention-encoder contrast is credited.
+No primary ASSIST2012 or attention-encoder contrast is credited.
 Availability and provenance audits catch leaks the credit rule misses.

@@ -2,11 +2,12 @@
 \caption{Each module exists to test one attribution hypothesis.
 ``Interface'' means the schema is defined and the hypothesis was not
 tested, because the required logs are absent. Outcomes for ten-seed
-contrasts follow the primary rule on held-out test AUC
+contrasts follow the primary rule on pooled held-out evaluation AUC
 (Table~\ref{tab:credit-primary-c}) unless marked as archived earlier
 rules or single-seed diagnostics. Teacher grouping and exponential
-forgetting were run on five seeds
-(Table~\ref{tab:negative-knowledge}).}
+forgetting were run on five seeds under the earlier interval/seed rules
+(Table~\ref{tab:negative-knowledge}); those cells are not primary-rule
+labels.}
 \label{tab:module-hypothesis}
 \centering
 \scriptsize
@@ -35,9 +36,9 @@ Would be credited ($5/5$); caught only with hint provenance
 HypergraphConv on chain hyperedges & Multi-way passing raises AUC on this backbone &
 Single-seed diagnostic; descriptive only \\
 Teacher grouping & A group id raises AUC &
-Unsupported ($0/5$) \\
+Unsupported under earlier 5-seed rules ($0/5$) \\
 Per-concept exponential gap & That decay form beats linear $\log(1{+}\Delta t)$ &
-Unsupported ($0/5$) \\
+Unsupported under earlier 5-seed rules ($0/5$) \\
 Teacher, forum, video nodes & Those members raise AUC when logs exist &
 Interface (logs absent) \\
 \bottomrule

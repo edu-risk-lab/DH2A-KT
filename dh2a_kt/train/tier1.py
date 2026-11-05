@@ -938,6 +938,7 @@ def train_fold(
     aux_scalar: bool = False,
     aux_scalar_mode: str = "query",
     init_checkpoint: Path | None = None,
+    collapse_events: bool = False,
 ) -> TrainedFold:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_fold requires PyTorch")
@@ -1219,7 +1220,7 @@ def train_fold(
                 item_to_idx,
                 max_seq_len=budget.max_seq_len,
                 window_mode=window_mode,
-                collapse_events=architecture == "v5",
+                collapse_events=architecture == "v5" or collapse_events,
                 max_kcs=max_kcs,
                 include_time_gaps=time_gap or concept_forget,
                 include_saw=saw_input,
@@ -1344,6 +1345,7 @@ def train_and_evaluate_fold(
     aux_scalar_mode: str = "query",
     init_checkpoint: Path | None = None,
     predictions_path: Path | None = None,
+    collapse_events: bool = False,
 ) -> FoldResult:
     if not _TORCH_AVAILABLE:
         raise ImportError("train_and_evaluate_fold requires PyTorch")
@@ -1408,6 +1410,7 @@ def train_and_evaluate_fold(
         aux_scalar=aux_scalar,
         aux_scalar_mode=aux_scalar_mode,
         init_checkpoint=init_checkpoint,
+        collapse_events=collapse_events,
     )
     if predictions_path is not None:
         from sklearn.metrics import roc_auc_score

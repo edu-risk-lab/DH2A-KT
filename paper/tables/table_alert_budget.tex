@@ -1,0 +1,21 @@
+\begin{table}[tbp]
+\caption{Matched-budget warning on XES3G5M fold~0 held-out positions
+(docs/preregistration\_2026-11-05.md Section~4). Flag the $k\%$ of
+positions with the lowest predicted correctness after the scored item
+has opened. True alerts~=~flagged and incorrect; false alerts~=~flagged
+and correct; learners~=~distinct held-out learners with at least one
+flag. Mean over ten seeds of the LSTM time package versus no-time.
+Family~E; does not decide credit. Pending until prediction dumps exist.}
+\label{tab:alert-budget}
+\centering
+\footnotesize
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+$k$ & True (pkg) & False (pkg) & Learners (pkg) & True (no time) & False (no time) & Learners (no time) \\
+\midrule
+1\% & pending & pending & pending & pending & pending & pending \\
+5\% & pending & pending & pending & pending & pending & pending \\
+10\% & pending & pending & pending & pending & pending & pending \\
+\bottomrule
+\end{tabular}
+\end{table}

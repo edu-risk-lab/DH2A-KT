@@ -1,17 +1,23 @@
 \begin{table}[tbp]
-\caption{Contrasts whose primary outcome on held-out test AUC differs
-from the earlier test-only interval-rule outcome. Validation-interval
-disagreements are listed with the archived maps in
-Appendix~\ref{app:ten-seed-stats}.}
+\caption{Family~C rows whose primary-rule outcome on pooled held-out
+evaluation AUC differs from the earlier test-interval rule on the
+same field. Mean, two-sided LCB, and $k/10$ are in units of
+$10^{-3}$ AUC under the primary metric. Old~=~interval rule
+(Credited if LCB$\,\ge\tau$); New~=~primary Holm rule of
+Section~\ref{sec:protocol-threshold}. The other 27 family~C rows keep the same primary-rule outcome as that
+earlier test-interval rule. This table is a reanalysis, not a
+confirmatory test. Validation-interval disagreements are archived
+in \ref{app:ten-seed-stats}.}
 \label{tab:credit-primary-changes}
 \centering
-\footnotesize
-\begin{tabular}{@{}llll@{}}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrll@{}}
 \toprule
-Setting & Contrast & Family & Old test-interval $\to$ new \\
+Setting & Contrast & Mean [LCB] ($k/10$) & Old interval & New primary \\
 \midrule
-ASSIST2012 ref.\ fold 1 & Package, zero incidence & C & Credited $\to$ Positive, not credited \\
-ASSIST2012 ref.\ fold 2 & Package, zero incidence & C & Credited $\to$ Positive, not credited \\
+ASSIST2012 ref.\ fold 1 & Package, zero incidence & +2.56 [+2.08] (9/10) & Credited & Positive, not credited \\
+ASSIST2012 ref.\ fold 2 & Package, zero incidence & +2.46 [+2.11] (9/10) & Credited & Positive, not credited \\
 \bottomrule
 \end{tabular}
 \end{table}

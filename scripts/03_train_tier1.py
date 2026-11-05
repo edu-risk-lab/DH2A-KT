@@ -296,6 +296,12 @@ def main() -> int:
         "across all rows and users. Requires --time-gap.",
     )
     parser.add_argument(
+        "--collapse-events",
+        action="store_true",
+        help="One row per attempt (collapse_to_events) for v4 as well as v5. "
+        "Locked for the xes-attempt group in docs/preregistration_2026-11-05.md.",
+    )
+    parser.add_argument(
         "--time-split",
         action="store_true",
         help="v4: separate Linear on log1p duration (ms_first_response) and idle "
@@ -792,6 +798,7 @@ def main() -> int:
             ),
             init_checkpoint=args.eval_checkpoint,
             predictions_path=args.dump_predictions,
+            collapse_events=bool(args.collapse_events),
         )
         fold_result.fold = fold
         results.append(fold_result)

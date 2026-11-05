@@ -82,17 +82,23 @@ full log can also leak held-out learners into training. We propose a
 credit protocol that builds auxiliary knowledge from training learners
 only, audits membership and input availability, compares each component
 with a control declared in advance, and assigns one of three outcomes
-from ten paired seeds under a family-wise test on held-out test AUC.
+from ten paired seeds under Holm (family-wise error) or
+Benjamini--Hochberg (false-discovery rate) adjustment on pooled
+held-out evaluation AUC.
 Unlike ablations that remove an input together with its weights, the
 protocol separates the input from the weights that read it. We apply it
 to one elapsed-time component on three corpora, two encoders, and three
-learner folds. Only the time package on XES3G5M with a recurrent tracer
-is credited, and only as a package: the aligned gap alone stays positive
-but is not credited. Nothing is credited with an attention encoder or on
-ASSISTments~2012. On Junyi, gaps that are not available at prediction
-time are reported as leakage diagnostics rather than credit. In a
-simulation, a hint chosen with knowledge of the next response raises
-test AUC by $0.00518$ and passes the credit tests; only a provenance
+learner folds as a reanalysis of collected ten-seed runs under a rule
+fixed after an earlier interval/seed map was known; it is not a
+confirmatory test on unused data. Only the full time package on XES3G5M
+with a recurrent tracer is credited; the aligned gap input alone stays
+positive and is not credited. Nothing is credited with an attention
+encoder or on ASSISTments~2012. On Junyi, gaps that are not available at
+prediction time are reported as leakage diagnostics rather than credit.
+In a simulation, a hint chosen with knowledge of the next response
+raises test AUC by $0.00518$ and would be labelled credited under the
+earlier five-seed interval/seed rules; that calculation is a family~D
+diagnostic, not the primary ten-seed Holm rule, and only a provenance
 audit flags it. Compared with single-AUC comparisons, the protocol
 states which component, control, and input availability a reported gain
 rests on.
@@ -147,7 +153,8 @@ control declared before the run. Each comparison receives one of three
 outcomes.
 
 When the protocol is applied to one elapsed-time message on two
-encoders, three corpora, and three learner folds, confirmatory credit
+encoders, three corpora, and three learner folds, as a reanalysis of
+the collected ten-seed runs, primary-family credit
 decisions differ by setting (Table~\ref{tab:credit-primary-c}), though
 ASSISTments package means remain close to the XES3G5M ones and are not
 shown heterogeneous here. On XES3G5M with a recurrent tracer the time
@@ -158,20 +165,21 @@ package-level ablation overstates what the gap input contributes. That
 package credit is for attempt-onset scoring with a query-side gap; a
 tutor that must choose the next item before it opens cannot claim the
 same package. On ASSISTments~2012 and under an attention encoder on
-XES3G5M, no confirmatory contrast is credited; the same attention
+XES3G5M, no primary-family contrast is credited; the same attention
 package on the ASSISTments one-second export is exploratory and
 likewise not credited. Junyi completion-time query gaps look strong but
 are family~D diagnostics: they include the duration of the scored item.
 A history-only Junyi gap, which is available at attempt onset, is
-positive on every seed and not credited (family~E), as on XES3G5M. A
-rebuilt attempt-onset gap that moves with post-response retries fails
-an availability check and is likewise excluded from credit
-(Section~\ref{sec:junyi-onset-audit}). Nothing is credited on a coarse
-timestamp export. A single-setting ablation would have credited too
+positive on every seed and not credited (family~E), as is the
+history-only package on XES3G5M. A rebuilt attempt-onset gap that moves
+with post-response retries fails an availability check and is likewise
+excluded from credit (Section~\ref{sec:junyi-onset-audit}). Nothing is
+credited on a coarse timestamp export. A single-setting ablation would have credited too
 much or too little. An illustrative simulation adds a second warning: a
-leaked hint passes the credit tests and is flagged only by an audit that
-records how each hint was chosen, so the rules are not a substitute for
-that audit.
+leaked hint would be labelled credited under the earlier five-seed
+interval/seed rules (family~D, not the primary Holm rule) and is
+flagged only by an audit that records how each hint was chosen, so the
+rules are not a substitute for that audit.
 
 \subsection{Research questions and contributions}
 Three questions organise the empirical sections.
@@ -179,27 +187,31 @@ Three questions organise the empirical sections.
   \item \textbf{RQ1.} Does a declared control separate credit for an
   input from credit for the weights that read it?
   \item \textbf{RQ2.} How do credit decisions change with corpus,
-  encoder, recipe, and control rung under one family-wise rule?
+  encoder, recipe, and control rung under the primary multiplicity rule?
   \item \textbf{RQ3.} What do availability and provenance audits catch
   that the credit rule alone does not?
 \end{itemize}
 \begin{itemize}
   \item \textbf{C1 (protocol; RQ1).} Three control rungs, three families,
   three outcomes under a one-sided paired credit test at
-  $\tau{=}{+}2.0\times 10^{-3}$ on held-out test AUC with Holm or
-  Benjamini--Hochberg adjustment, an availability gate, and an algorithm
+  $\tau{=}{+}2.0\times 10^{-3}$ on pooled held-out evaluation AUC with
+  Holm (family~C) or Benjamini--Hochberg (family~E) adjustment, an
+  availability gate, and an algorithm
   for registering a new message (Section~\ref{sec:protocol},
   Algorithm~\ref{alg:register}; Table~\ref{tab:evidence-types}).
   \item \textbf{C2 (credit map; RQ2).} On two encoders, three corpora,
-  and three learner folds, the primary family credits the time message
-  only as a package on XES3G5M with the recurrent tracer; aligned gaps,
-  ASSISTments packages, and attention-encoder time messages are not
-  credited (Section~\ref{sec:transfer-ladder},
+  and three learner folds, the primary family credits the full time
+  package on XES3G5M with the recurrent tracer; the aligned gap input
+  is not credited, nor is any primary ASSISTments or attention-encoder
+  contrast (Section~\ref{sec:transfer-ladder},
   Table~\ref{tab:credit-primary-c}, Figure~\ref{fig:credit-forest}).
+  Those labels are a reanalysis, not a test that the LSTM and attention
+  effects differ.
   \item \textbf{C3 (audit; RQ3).} Membership is the only pairwise
   hyperedge diagnostic that separates a leaky set from a clean one
-  (Section~\ref{sec:leakage-ext}). An illustrative hint simulation can
-  pass the credit tests and is flagged only by provenance
+  (Section~\ref{sec:leakage-ext}). An illustrative hint simulation would
+  be labelled credited under the earlier five-seed interval/seed rules
+  (family~D) and is flagged only by provenance
   (Section~\ref{sec:leak-sim}); a Junyi onset rebuild fails L2 and is
   excluded from credit (Section~\ref{sec:junyi-onset-audit}).
 \end{itemize}
@@ -296,14 +308,16 @@ $y\in\{0,1\}$. Three learner folds partition learners with split seeds
 $42/43/44$, as in the pairwise audit \cite{daominh2026p0}. Within each
 fold the credit runs carve an internal selection split from the training
 learners only ($\mathrm{val\_frac}{=}0.1$) for early stopping and
-checkpoint choice; held-out evaluation learners of that fold never enter
-selection. The $0.7/0.1/0.2$ ratios of the pairwise audit describe that
-external partition of learners into train/selection/evaluation pools
-and are not a second, conflicting split. Training seeds are a separate
-family that initialises models: the credit map uses the ten seeds
+checkpoint choice. The fold's original validation and original test
+learners are held out of training and of that internal selection; primary
+AUC is pooled over their union (pooled held-out evaluation AUC). The
+$0.7/0.1/0.2$ ratios of the pairwise audit describe the external
+partition into training, original-validation, and original-test learner
+pools; they are not a second selection/evaluation split inside the credit
+runs. Training seeds are a separate family that initialises models: the
+credit map uses the ten seeds
 $\{0,17,42,1234,2024,7,99,314,2718,3407\}$. The first five are the seeds
-of an earlier five-seed map and of the contextual baselines. The value
-$42$ occurs in both families by coincidence.
+of an earlier five-seed map and of the contextual baselines.
 
 \subsection{Reused train-only construction}
 \label{sec:p0-selfcontained}
@@ -494,6 +508,7 @@ the bias of the linear map can absorb; zero gaps, $0.004\%$ of Junyi
 rows, are the exception.
 
 \input{tables/table_gap_descriptives}
+\input{tables/table_availability}
 
 \subsection{Recipes and seeds}
 \label{sec:credit-gate}
@@ -513,7 +528,8 @@ aligned gap against T-zero; on the attention encoder and on
 ASSISTments~2012 under its corpus configuration they repeat every
 fold-0 contrast. The seed-42 runs of the XES3G5M reference arms were
 retrained for this map and reproduced the stored validation and test
-AUCs exactly. Primary credit outcomes use held-out test AUC; validation
+AUCs exactly. Primary credit outcomes use pooled held-out evaluation
+AUC; validation
 AUC selects the checkpoint and is reported beside the primary map. A
 matched optimiser grid for the tracer on XES3G5M fold~0
 (Section~\ref{sec:baselines-reuse}) is contextual and outside the credit
@@ -569,8 +585,7 @@ so the comparison remains contextual. The protocol credits messages
 inside one backbone; baseline rows locate that backbone and are not
 part of the credit map. DyGKT \cite{dygkt2024}, the nearest
 temporal-graph tracer, stays among the models not run under this
-evaluator (vendored forward missing or out of the pre-submit queue);
-omitting it does not change any credit outcome.
+evaluator in this study; omitting it does not change any credit outcome.
 
 % =============================================================================
 \section{Results}
@@ -580,9 +595,9 @@ omitting it does not change any credit outcome.
 
 \subsection{The credit map across settings}
 \label{sec:transfer-ladder}
-\paragraph{RQ2.}
-Table~\ref{tab:credit-primary-c} is the main result: the primary
-family under the held-out test-AUC rule. Of $29$ family~C
+\paragraph{RQ2}
+Table~\ref{tab:credit-primary-c} is the main result of this reanalysis:
+the primary family under the pooled held-out evaluation-AUC rule. Of $29$ family~C
 contrasts, three are credited---the zero-incidence time package on
 XES3G5M with the LSTM tracer, on every learner fold---and one is
 unsupported (question--KC incidence on XES3G5M). The other $25$ are
@@ -609,24 +624,34 @@ under the primary rule those Junyi rows are family~D diagnostics, and
 the ASSISTments packages are not credited. A two-sided paired $t$-test
 of $\mu_\Delta{=}0$ with Holm correction over the $68$ validation
 contrasts still rejects $67$ (Table~\ref{tab:holm-all-10seed}):
-positivity is not the issue; the primary rule asks whether the held-out
-gain clears $\tau$ after family-wise adjustment.
+positivity is not the issue; the primary rule asks whether the pooled
+held-out evaluation gain clears $\tau$ after multiplicity adjustment.
 
 \input{tables/table_credit_primary_c}
 \input{tables/table_credit_primary_changes}
+\input{tables/table_learner_bootstrap}
 \input{figures/fig_credit_forest}
+
+Learner-clustered 95\% intervals on the same pairs
+(Table~\ref{tab:learner-bootstrap}) sit inside a few ten-thousandths of
+AUC of the seed-level means: the XES3G5M LSTM package on fold~0 is
+$+2.62$ $[+2.47,+2.77]$. Seed SD remains larger than the learner-bootstrap
+SD of the mean. About $4\%$ of scored positions flip the $0.5$ decision
+between the credited package and its no-time control. These quantities
+do not change the credit labels.
 
 \paragraph{XES3G5M, LSTM tracer}
 The time package is credited on every learner fold under the primary
 rule, and the credit rests on the package rung alone
 (Table~\ref{tab:credit-primary-c}). With the map held fixed, the
 aligned gap input is positive against T-zero but not credited
-(means about $+2.0\times 10^{-3}$ test AUC; Holm-adjusted $p_\tau$ above
-$\alpha$). Against T-misaligned, T-shuffled, and T-boundary it is
-likewise positive and not credited (family~E).
-Question--KC incidence is unsupported. A no-time control that allocates
-the same 256 parameters and multiplies their output by zero is also
-beaten on every seed (family~E credited), but those weights receive no
+(means about $+2.0\times 10^{-3}$ evaluation AUC; Holm-adjusted
+$p_\tau$ above $\alpha$). Against T-misaligned, T-shuffled, and
+T-boundary it is likewise positive and not credited (family~E).
+Question--KC incidence is unsupported under family~C. A no-time control
+that allocates the same 256 parameters and multiplies their output by
+zero is also beaten on every seed and is credited under family~E
+(exploratory; not a primary claim), but those weights receive no
 gradient, so that control checks the parameter count only. T-shuffled
 removes within-learner gap structure as well as alignment, and the
 aligned gap beats it by about as much as it beats T-misaligned; a
@@ -638,38 +663,44 @@ $60\%$ of that paired mean on this export and backbone.
 These are differences between separately trained arms.
 
 \paragraph{XES3G5M, attention encoder}
-No confirmatory time message is credited on any of the three folds
-(Table~\ref{tab:credit-primary-c}). Package means on test AUC lie
-between about $+1.7$ and $+2.1\times 10^{-3}$. On fold~0 the no-time arm
-reaches validation AUC $0.824$, close to the LSTM's $0.826$, and its
-seed standard deviation is about twice the LSTM value ($0.47$ against
-$0.25$). The package credit belongs to the LSTM tracer, not to the gap
-input in general.
+No primary-family time message is credited on any of the three folds
+(Table~\ref{tab:credit-primary-c}). Package means on pooled evaluation
+AUC lie between about $+1.7$ and $+2.1\times 10^{-3}$. On fold~0 the
+no-time arm reaches validation AUC $0.824$, close to the LSTM's
+$0.826$, and its seed standard deviation is about twice the LSTM value
+($0.47\times 10^{-3}$ against $0.25\times 10^{-3}$ AUC). The package
+is credited only with the LSTM tracer. That pattern is not a test that
+the LSTM and attention effects differ; a direct contrast of the two
+paired differences is locked in a 5~November~2026 note and is not
+claimed here.
 
 \paragraph{ASSISTments 2012, attention encoder (exploratory)}
 The same attention encoder under the reference recipe on the
 ASSISTments one-second export is family~E
-(Table~\ref{tab:attn-assist}). Package and aligned-gap means on test
-AUC lie between about $+1.0$ and $+2.1\times 10^{-3}$ across three folds;
-every contrast is positive on most seeds and none is credited after
-Benjamini--Hochberg adjustment. The pattern matches the XES3G5M
-attention rows of family~C: an additive time branch helps a little and
-does not clear $\tau$.
+(Table~\ref{tab:attn-assist}). Package and aligned-gap means on pooled
+evaluation AUC lie between about $+1.0$ and $+2.1\times 10^{-3}$ across
+three folds; every contrast is positive on most seeds and none is
+credited after Benjamini--Hochberg adjustment over the full family~E.
+The pattern matches the XES3G5M attention rows of family~C: an additive
+time branch helps a little and does not clear $\tau$.
 
 \input{tables/table_attn_assist}
 
 \paragraph{ASSISTments 2012}
-Under the primary rule, no ASSISTments confirmatory contrast is
+Under the primary rule, no ASSISTments primary-family contrast is
 credited (Table~\ref{tab:credit-primary-c}). Zero-incidence package
-means on test AUC lie between about $+2.0$ and $+2.6\times 10^{-3}$ on
-the one-second ladders---at the threshold---and Holm-adjusted $p_\tau$
-stays above $\alpha$. The two reference-recipe folds that the earlier
-test-only interval rule would credit are the only family~C rows that
-change outcome (Table~\ref{tab:credit-primary-changes}). Aligned gaps
-and incidence stay positive, not credited. Early stopping selects a
-checkpoint from epochs 4--8 of~30 under the reference recipe. On the
-original export, with start times at $1{,}000$\,s resolution, the
-package remains below credit under the earlier rules as well
+means on pooled evaluation AUC lie between about $+2.0$ and
+$+2.6\times 10^{-3}$ on the one-second ladders---at the
+threshold---and Holm-adjusted $p_\tau$ stays above $\alpha$. The two
+reference-recipe folds that the earlier interval rule would credit are
+the only family~C rows that change outcome
+(Table~\ref{tab:credit-primary-changes}: mean $+2.56$ and $+2.46$ with
+LCB above $\tau$, labelled Credited by the interval rule and Positive,
+not credited, after Holm). Aligned gaps and incidence
+stay positive, not credited. Early stopping selects a checkpoint from
+epochs 4--8 of~30 under the reference recipe. On the original export,
+with start times at $1{,}000$\,s resolution, the package remains below
+credit under the earlier rules as well
 (Table~\ref{tab:credit-assist-resolution-10seed}); that export is
 family~E. The one-second re-export raises the reference-recipe no-time
 arm from $0.7645$ to $0.7776$ mean validation AUC.
@@ -679,24 +710,24 @@ arm from $0.7645$ to $0.7776$ mean validation AUC.
 \paragraph{Junyi}
 Junyi stores completion times, so a query-side gap includes the time
 spent on the scored item and is unavailable at attempt onset. Those
-contrasts are family~D: means about $+3.4$ to $+4.0\times 10^{-3}$ test
-AUC, reported only as leakage diagnostics, never as credit
-(Table~\ref{tab:credit-primary-c} omits them by construction). A check
-fixed in the repository before its runs feeds the gap to the recurrent
-input only (Table~\ref{tab:junyi-history}). On the $50{,}000$-learner
-subsample,
-fold~0, the history-only package gains $+1.94\times 10^{-3}$ test AUC
-over no time ($5/10$ seeds at $\tau$) and the history-only gap gains
-$+1.80$ over T-zero; both are positive, not credited (family~E). Folds~1
-and~2 of that subsample design give the same exploratory outcome. On
-all Junyi learners the history-only gap against T-zero is
-$+1.50\times 10^{-3}$ on fold~0 and $+1.45$ on fold~1 ($0/10$ seeds at
-$\tau$ on both folds), still positive and not credited. Without the
-query-side gap, Junyi behaves like XES3G5M: the gap is positive on
-every seed and not credited. The XES3G5M history-only
-package, run on five seeds, is likewise below the rule
-($+1.93$; Table~\ref{tab:a7-query-dt}). A rebuilt attempt-onset gap is
-blocked by the availability audit of
+contrasts are family~D: means about $+3.4$ to $+4.0\times 10^{-3}$
+pooled evaluation AUC, reported only as leakage diagnostics, never as
+credit (Table~\ref{tab:credit-primary-c} omits them by construction). A
+check fixed in the repository before its runs feeds the gap to the
+recurrent input only (Table~\ref{tab:junyi-history}). On the
+$50{,}000$-learner subsample (fold~0), the history-only package gains
+$+1.94\times 10^{-3}$ over no time ($5/10$ seeds at $\tau$) and the
+history-only gap gains $+1.80$ over T-zero; both are positive on every
+seed and not credited (family~E). On all Junyi learners, history-only
+package means are $+1.46$, $+1.49$, and $+1.38\times 10^{-3}$ on
+folds~0--2 ($0/10$ seeds at $\tau$), and history-only gaps against
+T-zero are $+1.50$, $+1.45$, and $+1.38$; all six contrasts are
+positive on every seed and not credited under Benjamini--Hochberg over
+family~E. Without the query-side gap, Junyi behaves like XES3G5M: the
+gap is positive on every seed and not credited. The XES3G5M
+history-only package, run on five seeds, is likewise below the primary
+threshold ($+1.93$; Table~\ref{tab:a7-query-dt}). A rebuilt
+attempt-onset gap is blocked by the availability audit of
 Section~\ref{sec:junyi-onset-audit}.
 
 \input{tables/table_junyi_history}
@@ -767,7 +798,7 @@ exceeds $0.05$.
 
 \subsection{Synthetic leakage simulation}
 \label{sec:leak-sim}
-\paragraph{RQ3.}
+\paragraph{RQ3}
 \paragraph{Design}
 The public corpora have no forum, video, or teacher logs, so the
 cross-modal and intervention-timing classes of
@@ -790,11 +821,13 @@ training-split rate ($4.4\%$). Neither scalar is evidence about a
 public corpus.
 
 \paragraph{Result}
-The credit rules alone do not catch the leaked hint
-(Table~\ref{tab:leak-simulation}). It raises validation AUC by $+5.40$
-(95\% interval $[+5.25,+5.55]$) and test-only AUC by $+5.18$, and every
-seed clears the threshold, so the leaky arm compared with its clean
-control would be credited by both rules. The cross-modal scalar adds
+The earlier five-seed interval and seed rules alone do not catch the
+leaked hint (Table~\ref{tab:leak-simulation}). It raises validation AUC
+by $+5.40$ (95\% interval $[+5.25,+5.55]$) and test-only AUC by $+5.18$,
+and every one of those five seeds clears $\tau$, so the leaky arm
+compared with its clean control would be labelled credited under that
+earlier rule. That calculation is a family~D diagnostic; it is not the
+primary ten-seed Holm procedure of Section~\ref{sec:protocol-threshold}. The cross-modal scalar adds
 nothing measurable ($-0.09$ validation, $-0.05$ test). A plausible
 reading, which we did not test, is that the item embedding already
 carries item difficulty, so a future item mean adds little; a richer
@@ -832,13 +865,15 @@ $60.5\%$ have a rebuilt onset before the previous completion of the
 same learner, against $3.0\%$ among single-attempt rows (margin
 $57$ points; threshold $10$). Multi-attempt rows are almost always
 first-response errors ($46$ correct out of $2.47$ million), so an onset
-that moves with retries encodes the outcome being scored. Zero onset
+that moves with retries is not a valid attempt-onset feature for credit:
+it fails the availability audit and is treated as a leakage diagnostic.
+Zero onset
 gaps are likewise concentrated on retries ($28.6\%$ against $0.7\%$).
 Gains of about $+65\times 10^{-3}$ validation AUC on the finished onset
 seeds are therefore treated as leakage. Every Junyi onset contrast
-leaves family~C and is reported in family~D; the queue stops further
-onset groups and substitutes history-only arms
-(Appendix~\ref{app:junyi-onset}).
+leaves family~C and is reported in family~D; further onset experiments
+were discontinued after the audit, and history-only arms are used for
+the availability check (\ref{app:junyi-onset}).
 
 \subsection{Messages not credited under the configurations tested}
 \label{sec:below-rule}
@@ -855,6 +890,39 @@ Intervals for the XES3G5M reference rows are in
 Table~\ref{tab:attribution-summary}.
 
 \input{tables/table_negative_knowledge}
+
+\subsection{Locked follow-up analyses (5~November~2026)}
+\label{sec:nov5-followup}
+A dated repository note locks three follow-up analyses that were not
+used to choose $\tau$ or the primary rule. They do not enter family~C.
+Until the corresponding JSON exists, the tables print pending; numbers
+are never invented.
+
+\paragraph{Matched-budget warning.}
+After the scored item has opened, flag the $k\%$ of held-out positions
+with the lowest predicted correctness and compare the credited
+XES3G5M fold-0 LSTM time package with its no-time control at the same
+$k$ (Table~\ref{tab:alert-budget}). This panel asks whether a tutor
+acting on the same alert budget would warn different learners, not
+whether the package is credited.
+
+\paragraph{LSTM versus attention.}
+A learner bootstrap of the difference of package effects,
+$\Delta_{\mathrm{LSTM}}-\Delta_{\mathrm{attn}}$ on shared held-out
+learners, is Table~\ref{tab:lstm-attn-delta}. Until it exists, a credit
+on one encoder and a non-credit on the other is not read as a test that
+the effects differ.
+
+\paragraph{Time versus record structure.}
+Three arms on one row per attempt (no time branch; boundary indicator
+with the 256-parameter branch; aligned $\log(1{+}\Delta t)$ with the
+same branch) are Table~\ref{tab:attempt-threeway}. That comparison is
+the confirmatory test of whether the KC-expanded $\approx 60\%$
+boundary share survives when each attempt is one row.
+
+\input{tables/table_alert_budget}
+\input{tables/table_lstm_attn_delta}
+\input{tables/table_attempt_threeway}
 
 % =============================================================================
 \section{Discussion}
@@ -883,8 +951,9 @@ operating threshold (Table~\ref{tab:credit-primary-tau}).
 Second, credit decisions differ by setting, but effect sizes need not.
 Under the primary rule the same message is credited as a package on
 XES3G5M with the LSTM on all three learner folds, and on no
-confirmatory ASSISTments or attention-encoder contrast. Compare
-estimates, not labels alone: XES3G5M package means are about
+primary-family ASSISTments or attention-encoder contrast. Those two
+labels are not a test that the LSTM and attention effects differ.
+Compare estimates, not labels alone: XES3G5M package means are about
 $+2.6$ to $+2.9\times 10^{-3}$ with seed SD near $0.28\times 10^{-3}$,
 while ASSISTments reference-recipe packages are about $+2.5$ with seed
 SD near $0.7\times 10^{-3}$ (Table~\ref{tab:credit-primary-c}). The C/P
@@ -939,9 +1008,11 @@ backbones, not about the value of structural knowledge in general.
 Fifth, the credit rules do not detect leakage. The synthetic hint
 simulation is an illustration, not a corpus finding: a flag chosen with
 knowledge of the next response gains $+5.18\times 10^{-3}$ test AUC
-($+5.40$ on the selection split), more than twice $\tau$, on every seed
-(Table~\ref{tab:leak-simulation}). The rules ask whether a held-out gain
-clears $\tau$ after adjustment; a leaked input can. In the simulation
+($+5.40$ on the selection split), more than twice $\tau$, on every one
+of five seeds under the earlier interval/seed rules
+(Table~\ref{tab:leak-simulation}; family~D, not the primary Holm
+procedure). Those rules ask whether a held-out gain
+clears $\tau$; a leaked input can. In the simulation
 the audit separates the leaky arm only because it records how each hint
 was chosen. The data-only residual check flags a dependence but cannot
 tell leakage from a hint that changes learning. A leak of this class is
@@ -988,22 +1059,26 @@ results suggest five practices.
   folds except the $1{,}000$\,s ASSISTments export, which is a fold-0
   sensitivity check. On XES3G5M with the LSTM and on ASSISTments under
   the reference recipe, folds~1 and~2 repeat only the package and the
-  aligned gap against T-zero. The primary rule, families, and test-AUC
-  metric were fixed in the repository after the ten-seed runs existed;
-  that note re-analyses those runs and says so (Data Availability
-  Statement). The threshold $\tau$ remains an operating choice, and
-  several package means sit near it
+  aligned gap against T-zero. The primary rule, families, and pooled
+  held-out evaluation-AUC metric were fixed in the repository after the
+  ten-seed runs existed; that note re-analyses those runs and says so
+  (Data Availability Statement). The threshold $\tau$ remains an
+  operating choice, and several package means sit near it
   (\ref{app:ten-seed-stats}). Two family~C ASSISTments rows change
   relative to the earlier test-interval rule
   (Table~\ref{tab:credit-primary-changes}). Credit labels are decisions
   under that rule; we do not report a formal setting$\times$effect
   interaction test.
   \item \textbf{Selection versus evaluation.} Checkpoints are chosen on
-  an internal validation split; primary outcomes use held-out test AUC
-  on a fixed evaluation-learner set. Inference is over training seeds,
-  not resampled learners; a learner-clustered interval appears only for
-  one checkpoint pair in the appendix. The earlier validation-AUC
-  interval/seed map is in \ref{app:ten-seed-stats}.
+  an internal selection split carved from training learners; primary
+  outcomes use pooled held-out evaluation AUC on the union of the fold's
+  original validation and original test learners. Inference for credit
+  is over training seeds, not resampled learners. A learner-clustered
+  bootstrap of every family~C pair is in
+  Table~\ref{tab:learner-bootstrap} (full 29 rows in
+  \ref{app:bootstrap}); those intervals do not decide credit. The
+  earlier validation-AUC interval/seed map is in
+  \ref{app:ten-seed-stats}.
   \item \textbf{Time versus boundary.} Zero gaps also mark later
   KC-rows of one attempt and learner starts, so the credited package
   is attempt-context timing and boundary information, not a pure
@@ -1012,22 +1087,25 @@ results suggest five practices.
   export; that share is descriptive for the KC-expanded rows used here.
   The XES3G5M schema has no end time, and a tracer that scores before
   the learner opens the next item must drop the query-side gap; the
-  credited package is therefore not a claim about next-item selection.
-  We did not rerun the ladder on a question-level (non-KC-expanded)
-  export.
+  credited package is therefore not a claim about next-item selection
+  (Table~\ref{tab:availability}). A confirmatory three-arm comparison
+  on one row per attempt, with matched parameter count on the two
+  branched arms, is locked in the 5~November~2026 note and is not
+  reported until those runs exist.
   \item \textbf{Timestamp handling.} The ASSISTments~2012 map uses a
   one-second re-export of the pairwise-audit corpus, whose reused
   pairwise results were computed on the $1{,}000$\,s export; the
   teacher-grouping diagnostic was also run on the $1{,}000$\,s export.
   Junyi stores completion times, so its query-side gap includes the
   time spent on the scored item and is not available at attempt
-  onset. The history-only check removes the credit on the
-  $50{,}000$-learner subsample and on all-learner folds~0--1; fold~2 of
-  the all-learner history-only gap and a matched no-time package on
-  those full folds were not completed before submission. Start times
-  ($\texttt{time\_done}$ minus $\texttt{time\_taken}$) were not
-  reconstructed, so the attempt-onset package with a query-side gap was
-  not run on Junyi.
+  onset. History-only gaps (available at onset) were run on the
+  $50{,}000$-learner subsample and on all-learner folds~0--2 with ten
+  seeds each and remain exploratory (family~E), not credited.
+  Candidate onset timestamps were reconstructed from completion times
+  and recorded durations ($\texttt{time\_done}$ minus
+  $\texttt{time\_taken}$). The reconstruction failed the availability
+  audit; completed onset runs are therefore reported only as leakage
+  diagnostics, and further onset experiments were discontinued.
   The Junyi gap also entered the tracer in microseconds
   (Section~\ref{sec:reuse}). For gaps of one second or more the unit
   change is hypothesised to be a near-constant offset absorbed by the
@@ -1040,10 +1118,11 @@ results suggest five practices.
   through the ladder, so credit under it remains untested.
   \item \textbf{Second encoder.} The attention encoder is a swap inside
   the tracer under the LSTM recipe, not simpleKT or AKT as published.
-  On XES3G5M it is confirmatory; on ASSISTments it is exploratory under
+  On XES3G5M it is in family~C; on ASSISTments it is exploratory under
   the same recipe (Table~\ref{tab:attn-assist}). Its larger seed
   variance may reflect less tuning; both outcomes are statements about
-  this configuration.
+  this configuration. A credit on the LSTM package and a non-credit on
+  the attention package is not a test that the two effects differ.
   \item \textbf{Fusion and forms.} The incidence null is for the shared
   $W$ of Eq.~\eqref{eq:qkc}; richer fusion, gating, or untied maps were
   not run. One exponential decay form was tested; power-law decay,
@@ -1071,32 +1150,37 @@ results suggest five practices.
 We propose a credit protocol for validating auxiliary knowledge in
 knowledge tracing: train-only construction, membership and availability
 audits, a declared control rung, ten paired seeds, and three outcomes
-under a family-wise one-sided rule on held-out test AUC. In the
-confirmatory family, only the time package on XES3G5M with a recurrent
-tracer is credited, on all three learner folds; the aligned gap stays
-positive and not credited after adjustment. That package credit is for
-attempt-onset scoring with a query-side gap, not for choosing the next
-item before it opens. No confirmatory ASSISTments or attention-encoder
-contrast is credited. Junyi completion-time and onset gaps are
-diagnostics only; history-only Junyi is exploratory and not credited,
-so no attempt-onset gap input is credited on any corpus.
-Question--concept incidence is not credited on XES3G5M. An
-indicator-only input accounts for about $60\%$ of the aligned-gap mean
-on the XES3G5M export used here, and an ASSISTments export with
-$1{,}000$\,s timestamps does not credit the package, so the export is
-part of the setting. Credit labels can differ across settings even when
-package means are similar; a single map would still misstate at least
-the rung or the Junyi availability case. In an illustrative simulation
-a leaked hint gains $+5.18\times 10^{-3}$ test AUC and passes the credit
-tests; it is flagged only by an audit that records how each hint was
-chosen, so provenance must be logged and audited before credit is
-assessed. Future work, in order:
-rerun the ladder on a question-level export; raise expert structural
-messages (Junyi DAG, KC hierarchy) to ten paired seeds; retune the
-attention encoder under a matched grid on both corpora; run DyGKT and
-recent pyKT models under this evaluator; and replace the simulated
-cross-modal and intervention-timing classes with logs that record
-content and hint provenance.
+under a one-sided primary rule on pooled held-out evaluation AUC, with
+Holm control of family-wise error in family~C and Benjamini--Hochberg
+control of false-discovery rate in family~E. The family~C map is a
+reanalysis of collected ten-seed runs under a rule fixed after an
+earlier interval/seed map was known; it is not a confirmatory test on
+unused data. In that family, only the full time package on XES3G5M with
+a recurrent tracer is credited, on all three learner folds. The aligned
+gap input---the elapsed-time variable alone, with the map held
+fixed---stays positive and is not credited after Holm adjustment. That
+package credit is for attempt-onset scoring with a query-side gap, not
+for choosing the next item before it opens. No primary ASSISTments or
+attention-encoder contrast is credited; a credit on one encoder and a
+non-credit on the other is not a test that the two effects differ.
+Junyi completion-time and onset gaps are diagnostics only; history-only
+Junyi is exploratory and not credited, so no attempt-onset gap input is
+credited on any corpus. Question--concept incidence is not credited on
+XES3G5M. An indicator-only input accounts for about $60\%$ of the
+aligned-gap mean on the KC-expanded XES3G5M export used here, and an
+ASSISTments export with $1{,}000$\,s timestamps does not credit the
+package, so the export is part of the setting. Credit labels can differ
+across settings even when package means are similar; a single map would
+still misstate at least the rung or the Junyi availability case. In an
+illustrative simulation a leaked hint gains $+5.18\times 10^{-3}$
+test AUC and would be labelled credited under the earlier five-seed
+interval/seed rules; that calculation is family~D, not the primary
+ten-seed Holm rule, and the leak is flagged only by an audit that
+records how each hint was chosen, so provenance must be logged and
+audited before credit is assessed. Follow-up runs locked on
+5~November~2026 (one-row-per-attempt time versus boundary; matched-budget
+warnings; ten-seed leak-sim) are indexed with the other repository
+notes and are not claimed here until their outcomes exist.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
@@ -1144,17 +1228,17 @@ recompute every credit outcome are at
 this submission is tag \texttt{es-submit-2026-11-02}; a Zenodo version
 DOI for that tag will be recorded here after deposit. Repository notes
 that fix the primary rule, families, compute grids, and Junyi onset
-checks, together with a table-to-script map, live under \texttt{docs/}
-(notably \texttt{preregistration\_primary\_rule.md},
-\texttt{preregistration\_compute\_and\_grids.md},
-\texttt{preregistration\_junyi\_onset\_availability.md},
-\texttt{preregistration\_index.md}, \texttt{REGISTER\_MESSAGE.md}, and
-\texttt{paper-artifacts.md}; older \texttt{preregistration\_round3*.md}
-paths are stubs). The primary rule was fixed after the ten-seed runs
-existed and re-analyses them; the ten-seed design itself was first
-committed as \texttt{99521c6}. Primary outcomes are in
-\texttt{results/tables/credit\_primary\_test.json}
-(Table~\ref{tab:credit-primary-c}). Earlier manuscript states are
+checks, together with a table-to-script map, are indexed in
+\texttt{docs/preregistration\_index.md} (older
+\texttt{preregistration\_round3*.md} paths are stubs). The 5~November~2026
+note locks follow-up runs (matched-budget warnings, ten-seed leak-sim,
+collapsed time-versus-boundary) without changing the earlier files.
+The primary rule
+was fixed after the ten-seed runs existed and re-analyses them; the
+ten-seed design itself was first committed as \texttt{99521c6}. Primary
+outcomes are in \texttt{results/tables/credit\_primary\_test.json}
+(Table~\ref{tab:credit-primary-c}; family sizes C~$=$~$29$, E~$=$~$44$,
+D~$=$~$14$). Earlier manuscript states are
 archived at \url{https://doi.org/10.5281/zenodo.23558062}
 (tag \texttt{es-submit-2026-10-22b}),
 \url{https://doi.org/10.5281/zenodo.23521413}

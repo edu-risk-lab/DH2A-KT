@@ -17,7 +17,7 @@ valid AUC at epoch~8 and stopped by epoch~13 under patience~5.}
 Model & Parameter & Range searched & Selected & How chosen ($n$ configs) \\
 \midrule
 QKC-T / Zero$+\Delta t$ & architecture & ablation ladder & LSTM; Zero$+\Delta t$ zeros incidence & credit rule \\
-QKC-T / Zero$+\Delta t$ & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & reference recipe $\times$ 5 seeds (credit map) \\
+QKC-T / Zero$+\Delta t$ & batch / epochs / lr / $L$ / patience & --- & 16 / 30 / $10^{-3}$ / 400 / 5 & reference recipe $\times$ 10 seeds (primary map; earlier baselines used 5) \\
 QKC-T (grid-tuned) & lr / dropout / width & lr $\{10^{-3},3{\times}10^{-4}\}$; dropout $\{0.1,0.2,0.3\}$; width $\{128,256\}$ & $10^{-3}$ / 0.3 / 128 & seed-42 validation AUC ($n{=}12$), then 4 seeds; contextual only \\
 GIKT & batch / epochs / patience / $L$ & --- & 16 / 30 / 5 / 400 & match tracer training envelope ($n{=}1$) \\
 GIKT & remaining pyKT hparams & none & pairwise-audit / pyKT defaults & inherited ($n{=}1$) \\
