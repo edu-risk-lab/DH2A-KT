@@ -211,7 +211,7 @@ def write_alert_tex(alert: dict | None) -> None:
     ]
     for lab, row in alert["by_k"].items():
         lines.append(
-            f"{lab} & {row['true_pkg']:.0f} & {row['false_pkg']:.0f} & {row['learners_pkg']:.0f} & "
+            f"{lab.replace('%', r'\\%')} & {row['true_pkg']:.0f} & {row['false_pkg']:.0f} & {row['learners_pkg']:.0f} & "
             f"{row['true_ctrl']:.0f} & {row['false_ctrl']:.0f} & {row['learners_ctrl']:.0f} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]

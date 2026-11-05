@@ -4,8 +4,8 @@
 positions with the lowest predicted correctness after the scored item
 has opened. True alerts~=~flagged and incorrect; false alerts~=~flagged
 and correct; learners~=~distinct held-out learners with at least one
-flag. Mean over ten seeds of the LSTM time package versus no-time.
-Family~E; does not decide credit. Pending until prediction dumps exist.}
+flag. Mean over 10 seeds of the LSTM time package versus no-time.
+Family~E; does not decide credit.}
 \label{tab:alert-budget}
 \centering
 \footnotesize
@@ -13,9 +13,9 @@ Family~E; does not decide credit. Pending until prediction dumps exist.}
 \toprule
 $k$ & True (pkg) & False (pkg) & Learners (pkg) & True (no time) & False (no time) & Learners (no time) \\
 \midrule
-1\% & pending & pending & pending & pending & pending & pending \\
-5\% & pending & pending & pending & pending & pending & pending \\
-10\% & pending & pending & pending & pending & pending & pending \\
+1\% & 15471 & 931 & 3011 & 15364 & 1038 & 3051 \\
+5\% & 65390 & 16622 & 4972 & 64916 & 17096 & 4981 \\
+10\% & 113786 & 50238 & 5345 & 112957 & 51067 & 5345 \\
 \bottomrule
 \end{tabular}
 \end{table}

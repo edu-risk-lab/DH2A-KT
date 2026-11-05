@@ -895,30 +895,35 @@ Table~\ref{tab:attribution-summary}.
 \label{sec:nov5-followup}
 A dated repository note locks three follow-up analyses that were not
 used to choose $\tau$ or the primary rule. They do not enter family~C.
-Until the corresponding JSON exists, the tables print pending; numbers
-are never invented.
 
 \paragraph{Matched-budget warning.}
 After the scored item has opened, flag the $k\%$ of held-out positions
 with the lowest predicted correctness and compare the credited
 XES3G5M fold-0 LSTM time package with its no-time control at the same
-$k$ (Table~\ref{tab:alert-budget}). This panel asks whether a tutor
+$k$ (Table~\ref{tab:alert-budget}). At $k{=}1\%$ the package yields
+$15{,}471$ true and $931$ false alerts over $3{,}011$ learners versus
+$15{,}364$, $1{,}038$, and $3{,}051$ without time (means over ten seeds);
+the same pattern holds at $5\%$ and $10\%$. This panel asks whether a tutor
 acting on the same alert budget would warn different learners, not
 whether the package is credited.
 
 \paragraph{LSTM versus attention.}
 A learner bootstrap of the difference of package effects,
-$\Delta_{\mathrm{LSTM}}-\Delta_{\mathrm{attn}}$ on shared held-out
-learners, is Table~\ref{tab:lstm-attn-delta}. Until it exists, a credit
-on one encoder and a non-credit on the other is not read as a test that
-the effects differ.
+$\Delta_{\mathrm{LSTM}}-\Delta_{\mathrm{attn}}$ on $5{,}420$ shared held-out
+learners, is $+0.94\times 10^{-3}$ AUC (95\% percentile interval
+$[+0.82,+1.07]$; Table~\ref{tab:lstm-attn-delta}). Family~E; not a
+family~C credit.
 
 \paragraph{Time versus record structure.}
 Three arms on one row per attempt (no time branch; boundary indicator
 with the 256-parameter branch; aligned $\log(1{+}\Delta t)$ with the
-same branch) are Table~\ref{tab:attempt-threeway}. That comparison is
-the confirmatory test of whether the KC-expanded $\approx 60\%$
-boundary share survives when each attempt is one row.
+same branch) are Table~\ref{tab:attempt-threeway}. All three contrasts
+are positive and not credited: package versus no time
+$+1.87$ [$+1.50$] ($4/10$), T-boundary versus no time
+$+1.35$ [$+1.02$] ($1/10$), and package versus T-boundary
+$+0.52$ [$+0.21$] ($0/10$) in $10^{-3}$ AUC. None clears $\tau$ after BH.
+That comparison is the confirmatory test of whether the KC-expanded
+$\approx 60\%$ boundary share survives when each attempt is one row.
 
 \input{tables/table_alert_budget}
 \input{tables/table_lstm_attn_delta}
@@ -1179,8 +1184,9 @@ ten-seed Holm rule, and the leak is flagged only by an audit that
 records how each hint was chosen, so provenance must be logged and
 audited before credit is assessed. Follow-up runs locked on
 5~November~2026 (one-row-per-attempt time versus boundary; matched-budget
-warnings; ten-seed leak-sim) are indexed with the other repository
-notes and are not claimed here until their outcomes exist.
+warnings; ten-seed leak-sim) are reported in
+Section~\ref{sec:nov5-followup} and Table~\ref{tab:leak-simulation};
+they do not enter family~C.
 
 \section*{CRediT authorship contribution statement}
 \textbf{Tuan Dao Minh:} Methodology, Software, Validation, Formal analysis,
