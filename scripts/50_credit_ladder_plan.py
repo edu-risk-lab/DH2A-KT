@@ -703,7 +703,8 @@ def main() -> int:
     if args.launch and args.launch_all:
         raise SystemExit("use either --launch or --launch-all")
 
-    jobs = _jobs()
+    all_jobs = _jobs()
+    jobs = all_jobs
     if args.group:
         jobs = [j for j in jobs if j["group"] == args.group]
     if args.seed is not None:
@@ -712,10 +713,14 @@ def main() -> int:
         jobs = [j for j in jobs if j["arm"] == args.arm]
     runnable = [j for j in jobs if j["cmd"] is not None]
     blocked = [j for j in jobs if j["cmd"] is None]
+    all_runnable = [j for j in all_jobs if j["cmd"] is not None]
+    all_blocked = [j for j in all_jobs if j["cmd"] is None]
+    # Always persist the full plan. Filtering --group/--seed/--arm must not
+    # truncate credit_ladder_status.json (that file is the archive of the map).
     payload = {
-        "n_jobs": len(jobs),
-        "n_runnable": len(runnable),
-        "n_blocked": len(blocked),
+        "n_jobs": len(all_jobs),
+        "n_runnable": len(all_runnable),
+        "n_blocked": len(all_blocked),
         "gpu_note": "Planned device is one RTX 3090 24GB. This script refuses a smaller GPU.",
         "jobs": [
             {
@@ -725,12 +730,17 @@ def main() -> int:
                 "blocked": j["block"],
                 "cmd": j["cmd"],
             }
-            for j in jobs
+            for j in all_jobs
         ],
     }
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"wrote {STATUS} ({len(runnable)} runnable, {len(blocked)} blocked)")
+    print(f"wrote {STATUS} ({len(all_runnable)} runnable, {len(all_blocked)} blocked)")
+    if args.group or args.seed is not None or args.arm is not None:
+        print(
+            f"filter: {len(jobs)} jobs ({len(runnable)} runnable) after "
+            "--group/--seed/--arm"
+        )
     for j in jobs:
         if j["block"]:
             print(f"BLOCK {j['group']} {j['arm']} s{j['seed']}: {j['block']}")

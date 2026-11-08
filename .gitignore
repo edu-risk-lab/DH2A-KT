@@ -298,6 +298,7 @@ temp/_diag_pykt_smask/
 !results/tables/credit_ladder_transfer_10seed.json
 !results/tables/credit_ladder_transfer_10seed_test.json
 !results/tables/junyi_history_check.json
+!results/tables/junyi_sec_check.json
 !results/tables/junyi_onset_check.json
 !results/tables/junyi_onset_leak_check.json
 !results/tables/credit_primary_test.json

@@ -1,0 +1,31 @@
+% Auto: scripts/65_attn_assist_table.py (from credit_primary_test.json)
+\begin{table}[tbp]
+\caption{Exploratory (family~E) attention-encoder history-only contrasts
+on all Junyi learners, reference recipe, ten paired seeds. The onset
+rebuild failed the availability audit, so these arms feed the completion
+gap to the recurrent input only. Differences are mean paired pooled
+held-out evaluation AUC ($10^{-3}$); brackets are lower ends of
+descriptive two-sided 95\% intervals; $k/10$ is the seed-stability
+descriptor. One-sided Benjamini--Hochberg $p_\tau$ values are taken from
+the full family~E in \texttt{credit\_primary\_test.json}
+(all $\ge 1.000$ here): row outcomes are Positive, not credited, Unsupported.
+These rows are not in family~C.}
+\label{tab:attn-junyi}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Contrast & Fold~0 & Fold~1 & Fold~2 \\
+\midrule
+History-only package &
+$-0.39$~$[-1.97]$ (0/10) &
+$+0.54$~$[+0.12]$ (0/10) &
+$-2.08$~$[-4.44]$ (0/10) \\
+History-only gap vs.\ T-zero &
+$-0.40$~$[-2.22]$ (0/10) &
+$+0.47$~$[+0.04]$ (0/10) &
+$-1.82$~$[-4.00]$ (0/10) \\
+\bottomrule
+\end{tabular}
+\end{table}

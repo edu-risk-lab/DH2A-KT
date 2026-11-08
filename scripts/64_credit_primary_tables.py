@@ -57,8 +57,9 @@ def write_family_c(rows: list[dict]) -> None:
         r"is the seed-stability descriptor (not a decision rule). Outcome: C",
         r"credited, P positive not credited, U unsupported. A starred C is",
         r"credited with $k{<}10$ (seed-variable). Junyi completion-time rows",
-        r"are family~D and are omitted; history-only Junyi and ASSISTments",
-        r"attention contrasts are family~E.}",
+        r"are family~D and are omitted; history-only Junyi (LSTM and",
+        r"attention), the Junyi seconds unit check, and ASSISTments",
+        r"attention contrasts are family~E.}"
         r"\label{tab:credit-primary-c}",
         r"\centering",
         r"\scriptsize",
@@ -81,7 +82,7 @@ def write_family_c(rows: list[dict]) -> None:
 
 
 def write_changes(summary: dict, rows: list[dict]) -> None:
-    ch = summary["changed_vs_old_test_interval"]
+    ch = [item for item in summary["changed_vs_old_test_interval"] if item["family"] == "C"]
     by = {(r["corpus"], r["contrast"]): r for r in rows}
     n_c = sum(1 for r in rows if r["family"] == "C")
     lines = [

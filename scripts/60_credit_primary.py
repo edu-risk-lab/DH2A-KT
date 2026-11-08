@@ -2,9 +2,10 @@
 """Primary credit rule of docs/preregistration_primary_rule.md (Sections 3-6).
 
 No training. Reads the ten-seed credit JSONs (pooled held-out evaluation
-AUC stored as dh2_kt_auc), Junyi history-only CSVs, and attention-ASSISTments
-ladder CSVs; assigns each contrast to family C (primary), E (exploratory),
-or D (diagnostic, no credit); and applies the one-sided credit test
+AUC stored as dh2_kt_auc), Junyi history-only CSVs, Junyi seconds unit-check
+CSVs, and attention-ASSISTments ladder CSVs; assigns each contrast to
+family C (primary), E (exploratory), or D (diagnostic, no credit); and
+applies the one-sided credit test
 (H0: mu <= tau) and positivity test (H0: mu <= 0) with Holm within family C
 and Benjamini-Hochberg within family E, alpha = 0.025 one-sided.
 
@@ -47,6 +48,40 @@ ATTN_CONTRASTS = (
     ("Package vs.\\ no-time", "Package", "time-package", "no-time"),
     ("Aligned gap vs.\\ T-zero", "Architecture", "time-package", "t-zero"),
     ("Aligned gap vs.\\ T-misaligned", "Architecture", "time-package", "t-misaligned"),
+)
+ATTN_JUNYI_HIST = (
+    ("History-only package", "Package", "time-history", "no-time"),
+    ("History-only gap vs.\\ T-zero", "Architecture", "time-history", "t-zero-history"),
+)
+JUNYI_SEC = (
+    (
+        "Seconds minus microseconds, package",
+        "Package",
+        "E",
+        "junyi-sec_time-package",
+        "junyi-partial_time-package",
+    ),
+    (
+        "Seconds minus microseconds, T-zero",
+        "Architecture",
+        "E",
+        "junyi-sec_t-zero",
+        "junyi-partial_t-zero",
+    ),
+    (
+        "Package vs.\\ no-time, seconds",
+        "Package",
+        "D",
+        "junyi-sec_time-package",
+        "junyi-partial_no-time",
+    ),
+    (
+        "Aligned gap vs.\\ T-zero, seconds",
+        "Architecture",
+        "D",
+        "junyi-sec_time-package",
+        "junyi-sec_t-zero",
+    ),
 )
 JUNYI_FULL_HIST = (
     (
@@ -323,6 +358,42 @@ def main() -> int:
                 "E",
                 on,
                 t_zero,
+            )
+        )
+
+    # Attention encoder on all-learner Junyi, history-only (family E).
+    # Onset rebuild failed L2, so these arms are time-history / t-zero-history
+    # / no-time (docs/preregistration_compute_and_grids.md Section 2).
+    for fold in (0, 1, 2):
+        group = f"attn-junyi-fold{fold}"
+        for contrast, rung, on_name, ctrl_name in ATTN_JUNYI_HIST:
+            rows.append(
+                _extra_row(
+                    f"Junyi attn. history-only fold {fold}",
+                    "Junyi attn. history-only",
+                    fold,
+                    contrast,
+                    rung,
+                    "E",
+                    f"{group}_{on_name}",
+                    f"{group}_{ctrl_name}",
+                )
+            )
+
+    # Junyi seconds unit check (docs/preregistration_primary_rule.md §8.1;
+    # docs/preregistration_2026-11-08.md). Unit rows are family E; completion-
+    # time map rows in seconds are family D. Family C is unchanged.
+    for contrast, rung, fam, on_arm, ctrl_arm in JUNYI_SEC:
+        rows.append(
+            _extra_row(
+                "Junyi (50k) seconds",
+                "Junyi (50k) seconds",
+                0,
+                contrast,
+                rung,
+                fam,
+                on_arm,
+                ctrl_arm,
             )
         )
 

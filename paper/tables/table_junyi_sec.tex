@@ -1,0 +1,29 @@
+% Auto: scripts/67_junyi_sec_check.py
+\begin{table}[tbp]
+\caption{Junyi completion-time unit check (first $50{,}000$ learners,
+fold~0, corpus configuration, ten paired seeds;
+\texttt{docs/preregistration\_primary\_rule.md} Section~8.1).
+Seconds arms use \texttt{time\_done//1e6}; microsecond arms are the
+existing \texttt{junyi-partial} runs. Differences are mean paired
+pooled held-out evaluation AUC ($10^{-3}$) with two-sided 95\%
+intervals; $k/10$ is the seed-stability descriptor at
+$\tau{=}{+}2.0\times 10^{-3}$. The two seconds-minus-microseconds
+rows are family~E (unit check); the two map rows in seconds are
+family~D (completion-time, no credit). The invariance display is the
+interval around zero, not a test of $H_0{:}\,\mu\le\tau$. These rows
+are not in family~C.}
+\label{tab:junyi-sec}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llr@{}}
+\toprule
+Contrast & Fam. & Mean [95\% CI] ($k/10$) \\
+\midrule
+Seconds minus microseconds, package & E & $-0.43$ [$-0.66$, $-0.21$] (0/10) \\
+Seconds minus microseconds, T-zero & E & $-0.01$ [$-0.25$, $+0.23$] (0/10) \\
+Package vs.\ no-time, seconds & D & $+3.55$ [$+3.31$, $+3.79$] (10/10) \\
+Aligned gap vs.\ T-zero, seconds & D & $+3.27$ [$+3.06$, $+3.49$] (10/10) \\
+\bottomrule
+\end{tabular}
+\end{table}
