@@ -3,7 +3,8 @@
 effects, $(\mathrm{AUC}_{\mathrm{pkg}}-\mathrm{AUC}_{\mathrm{no\text{-}time}})_{\mathrm{LSTM}}
 -(\mathrm{AUC}_{\mathrm{pkg}}-\mathrm{AUC}_{\mathrm{no\text{-}time}})_{\mathrm{attn}}$,
 on the intersection of held-out learners ($B{=}2000$, seed 20261023,
-5420 shared learners). Family~E. Not a family~C credit.}
+5420 shared learners). One learner-weight draw is shared across both encoders, both arms,
+and all ten seeds; histogram AUC uses 2000 quantile bins. Family~E. Not a family~C credit.}
 \label{tab:lstm-attn-delta}
 \centering
 \footnotesize
@@ -11,7 +12,7 @@ on the intersection of held-out learners ($B{=}2000$, seed 20261023,
 \toprule
 Statistic & Point & Learner 95\% CI \\
 \midrule
-$\Delta_{\mathrm{LSTM}}-\Delta_{\mathrm{attn}}$ ($10^{-3}$ AUC) & +0.94 & [+0.82,+1.07] \\
+$\Delta_{\mathrm{LSTM}}-\Delta_{\mathrm{attn}}$ ($10^{-3}$ AUC) & +0.94 & [+0.79,+1.11] \\
 \bottomrule
 \end{tabular}
 \end{table}
