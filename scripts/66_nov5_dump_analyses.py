@@ -3,9 +3,9 @@
 
 docs/preregistration_2026-11-05.md Section 4. Family E. No new training.
 
-Needs prediction npz from scripts/61_learner_bootstrap.py --stage dump.
-If dumps are missing, tries dump for XES3G5M (LSTM) and XES3G5M attn.;
-tables stay pending when files are absent.
+Needs prediction npz for xes-ref and backbone-attn fold-0 package and
+no-time arms (40 files). If dumps are missing, `--dump-first` rescores
+only those runs; tables stay pending when files are absent.
 
     python scripts/66_nov5_dump_analyses.py
     python scripts/66_nov5_dump_analyses.py --dump-first
@@ -13,7 +13,9 @@ tables stay pending when files are absent.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -28,6 +30,7 @@ OUT_JSON = TABLES / "nov5_dump_analyses.json"
 SEEDS = (0, 17, 42, 1234, 2024, 7, 99, 314, 2718, 3407)
 BOOT = 2000
 BOOT_SEED = 20261023
+N_BINS = 2000
 K_FRAC = (0.01, 0.05, 0.10)
 
 LSTM = {
@@ -46,6 +49,44 @@ ATTN = {
 
 def _npz(group: str, arm: str, seed: int) -> Path:
     return PRED / f"xes3g5m_fold0_{group}_{arm}_s{seed}.npz"
+
+
+def _needed_runs() -> list[tuple[str, str, int]]:
+    out = []
+    for spec in (LSTM, ATTN):
+        for arm in (spec["pkg"], spec["ctrl"]):
+            for seed in SEEDS:
+                out.append((spec["group"], arm, seed))
+    return out
+
+
+def dump_needed() -> int:
+    """Rescore only the 40 fold-0 package/no-time runs used by this script."""
+    spec = importlib.util.spec_from_file_location("s61", REPO / "scripts" / "61_learner_bootstrap.py")
+    s61 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(s61)
+    jobs = s61._plan_jobs()
+    s61.LOGS.mkdir(parents=True, exist_ok=True)
+    failed = 0
+    for group, arm, seed in _needed_runs():
+        files = s61._run_files(group, arm, seed, jobs)
+        if files["npz"].exists():
+            print(f"SKIP  {files['npz'].name}")
+            continue
+        if not files["ckpt"].exists():
+            print(f"MISSING checkpoint {files['ckpt']}")
+            failed += 1
+            continue
+        cmd = [*files["cmd"], "--eval-checkpoint", str(files["ckpt"]), "--dump-predictions", str(files["npz"])]
+        log = s61.LOGS / f"{files['npz'].stem}.log"
+        print("rescore:", files["npz"].name)
+        with log.open("w", encoding="utf-8") as fh:
+            proc = subprocess.run(cmd, cwd=REPO, stdout=fh, stderr=subprocess.STDOUT)
+        if proc.returncode != 0:
+            print(f"FAIL  {files['npz'].name} (see {log})")
+            failed += 1
+    print(f"dump done; {failed} missing or failed")
+    return failed
 
 
 def _load(group: str, arm: str, seed: int) -> dict | None:
@@ -118,7 +159,30 @@ def _auc(y: np.ndarray, p: np.ndarray) -> float:
     return float(roc_auc_score(y, p))
 
 
+def _binned_counts(y, p, user_idx, n_users):
+    edges = np.unique(np.quantile(p, np.linspace(0.0, 1.0, N_BINS + 1)[1:-1]))
+    b = np.searchsorted(edges, p, side="right")
+    nb = len(edges) + 1
+    pos = np.zeros((n_users, nb), dtype=np.float32)
+    neg = np.zeros((n_users, nb), dtype=np.float32)
+    np.add.at(pos, (user_idx[y == 1], b[y == 1]), 1.0)
+    np.add.at(neg, (user_idx[y == 0], b[y == 0]), 1.0)
+    return pos, neg
+
+
+def _auc_from_hist(pos, neg):
+    neg_below = np.cumsum(neg, axis=1) - neg
+    num = (pos * (neg_below + 0.5 * neg)).sum(axis=1)
+    den = pos.sum(axis=1) * neg.sum(axis=1)
+    return num / np.maximum(den, 1e-12)
+
+
 def _delta_of_deltas() -> dict | None:
+    """Learner-clustered bootstrap of mean-over-seeds (Delta_LSTM - Delta_attn).
+
+    One multinomial draw of shared held-out learners is reused for both
+    encoders, both arms, and all ten seeds (same design as script 61).
+    """
     data = {}
     for spec, tag in ((LSTM, "lstm"), (ATTN, "attn")):
         for arm in (spec["pkg"], spec["ctrl"]):
@@ -127,61 +191,74 @@ def _delta_of_deltas() -> dict | None:
                 if loaded is None:
                     return None
                 data[(tag, arm, seed)] = loaded
-    # Intersection of learners across encoders, evaluated per seed on those ids.
-    lstm_ctrl = data[("lstm", LSTM["ctrl"], SEEDS[0])]
-    attn_ctrl = data[("attn", ATTN["ctrl"], SEEDS[0])]
-    shared = np.intersect1d(np.unique(lstm_ctrl["user_ids"]), np.unique(attn_ctrl["user_ids"]))
+    ref_l = data[("lstm", LSTM["ctrl"], SEEDS[0])]
+    ref_a = data[("attn", ATTN["ctrl"], SEEDS[0])]
+    shared = np.intersect1d(np.unique(ref_l["user_ids"]), np.unique(ref_a["user_ids"]))
+    shared = np.sort(shared)
+    n_u = int(len(shared))
+    id_to_i = {int(u): i for i, u in enumerate(shared)}
+    rng = np.random.default_rng(BOOT_SEED)
+    weights = rng.multinomial(n_u, np.full(n_u, 1.0 / n_u), size=BOOT).astype(np.float32)
+
+    def subset(tag, arm, seed):
+        d = data[(tag, arm, seed)]
+        mask = np.isin(d["user_ids"], shared)
+        u = d["user_ids"][mask]
+        idx = np.fromiter((id_to_i[int(x)] for x in u), dtype=np.int32, count=len(u))
+        return d["targets"].astype(np.int8)[mask], d["probs"][mask], idx
+
+    # Alignment: pkg vs ctrl user sequences within encoder; shared-id set across encoders.
+    for seed in SEEDS:
+        for tag, spec in (("lstm", LSTM), ("attn", ATTN)):
+            u_pkg = data[(tag, spec["pkg"], seed)]["user_ids"]
+            u_ctrl = data[(tag, spec["ctrl"], seed)]["user_ids"]
+            y_pkg = data[(tag, spec["pkg"], seed)]["targets"]
+            y_ctrl = data[(tag, spec["ctrl"], seed)]["targets"]
+            if not (np.array_equal(u_pkg, u_ctrl) and np.array_equal(y_pkg, y_ctrl)):
+                raise SystemExit(f"positions differ for {tag} s{seed}")
+
     d_exact = []
     d_boot = []
-    rng = np.random.default_rng(BOOT_SEED)
+    bin_err = []
     for seed in SEEDS:
         parts = {}
         for tag, spec in (("lstm", LSTM), ("attn", ATTN)):
             for arm, name in ((spec["pkg"], "pkg"), (spec["ctrl"], "ctrl")):
-                d = data[(tag, arm, seed)]
-                mask = np.isin(d["user_ids"], shared)
-                parts[(tag, name)] = (d["targets"].astype(np.int8)[mask], d["probs"][mask], d["user_ids"][mask])
-        y_l, p_lp, u_l = parts[("lstm", "pkg")]
+                parts[(tag, name)] = subset(tag, arm, seed)
+        y_l, p_lp, i_l = parts[("lstm", "pkg")]
         _, p_lc, _ = parts[("lstm", "ctrl")]
-        y_a, p_ap, u_a = parts[("attn", "pkg")]
+        y_a, p_ap, i_a = parts[("attn", "pkg")]
         _, p_ac, _ = parts[("attn", "ctrl")]
-        # Align by requiring identical user sequences on the LSTM ctrl vs pkg (already true).
         delta_l = _auc(y_l, p_lp) - _auc(y_l, p_lc)
         delta_a = _auc(y_a, p_ap) - _auc(y_a, p_ac)
         d_exact.append(delta_l - delta_a)
-        # Learner bootstrap on LSTM positions (shared ids).
-        codes, idx = np.unique(u_l, return_inverse=True)
-        n_u = len(codes)
-        weights = rng.multinomial(n_u, np.full(n_u, 1.0 / n_u), size=BOOT).astype(np.float32)
-        # Cheap AUC via sklearn is too slow inside B=2000; use Mann-Whitney on resampled learners
-        # by aggregating per-learner pos/neg in 500 quantile bins.
-        def binned_auc(y_arr, p_arr, user_i, w):
-            edges = np.unique(np.quantile(p_arr, np.linspace(0.0, 1.0, 501)[1:-1]))
-            b = np.searchsorted(edges, p_arr, side="right")
-            nb = len(edges) + 1
-            pos = np.zeros((n_u, nb), dtype=np.float32)
-            neg = np.zeros((n_u, nb), dtype=np.float32)
-            np.add.at(pos, (user_i[y_arr == 1], b[y_arr == 1]), 1.0)
-            np.add.at(neg, (user_i[y_arr == 0], b[y_arr == 0]), 1.0)
-            pos_r, neg_r = w @ pos, w @ neg
-            neg_below = np.cumsum(neg_r, axis=1) - neg_r
-            num = (pos_r * (neg_below + 0.5 * neg_r)).sum(axis=1)
-            den = pos_r.sum(axis=1) * neg_r.sum(axis=1)
-            return num / np.maximum(den, 1e-12)
-
-        codes_a, idx_a = np.unique(u_a, return_inverse=True)
-        # Independent multinomial on attention learners with same seed stream offset.
-        n_ua = len(codes_a)
-        w_a = rng.multinomial(n_ua, np.full(n_ua, 1.0 / n_ua), size=BOOT).astype(np.float32)
-        boot_l = binned_auc(y_l, p_lp, idx, weights) - binned_auc(y_l, p_lc, idx, weights)
-        boot_a = binned_auc(y_a, p_ap, idx_a, w_a) - binned_auc(y_a, p_ac, idx_a, w_a)
+        hist = {}
+        for key, y, p, idx in (
+            ("lp", y_l, p_lp, i_l),
+            ("lc", y_l, p_lc, i_l),
+            ("ap", y_a, p_ap, i_a),
+            ("ac", y_a, p_ac, i_a),
+        ):
+            pos, neg = _binned_counts(y, p, idx, n_u)
+            hist[key] = (pos, neg)
+            binned = float(_auc_from_hist(pos.sum(axis=0, keepdims=True), neg.sum(axis=0, keepdims=True))[0])
+            bin_err.append(abs(binned - _auc(y, p)))
+        boot_l = _auc_from_hist(weights @ hist["lp"][0], weights @ hist["lp"][1]) - _auc_from_hist(
+            weights @ hist["lc"][0], weights @ hist["lc"][1]
+        )
+        boot_a = _auc_from_hist(weights @ hist["ap"][0], weights @ hist["ap"][1]) - _auc_from_hist(
+            weights @ hist["ac"][0], weights @ hist["ac"][1]
+        )
         d_boot.append(boot_l - boot_a)
     mean_boot = np.stack(d_boot).mean(axis=0)
     return {
-        "n_shared_learners": int(len(shared)),
+        "n_shared_learners": n_u,
+        "n_bins": N_BINS,
+        "shared_weights": True,
         "seeds_used": list(SEEDS),
         "mean_delta_of_deltas": float(np.mean(d_exact)),
         "boot_ci95": [float(np.quantile(mean_boot, 0.025)), float(np.quantile(mean_boot, 0.975))],
+        "max_abs_binned_minus_exact_auc": float(max(bin_err)),
         "per_seed": [float(x) for x in d_exact],
     }
 
@@ -230,7 +307,10 @@ def write_delta_tex(delta: dict | None) -> None:
         r"-(\mathrm{AUC}_{\mathrm{pkg}}-\mathrm{AUC}_{\mathrm{no\text{-}time}})_{\mathrm{attn}}$,",
         r"on the intersection of held-out learners ($B{=}2000$, seed 20261023,",
         f"{delta['n_shared_learners']} shared learners). "
-        r"Family~E. Not a family~C credit.}",
+        r"One learner-weight draw is shared across both encoders, both arms,",
+        r"and all ten seeds; histogram AUC uses "
+        + str(delta.get("n_bins", 2000))
+        + r" quantile bins. Family~E. Not a family~C credit.}",
         r"\label{tab:lstm-attn-delta}",
         r"\centering",
         r"\footnotesize",
@@ -254,15 +334,7 @@ def main() -> int:
     parser.add_argument("--dump-first", action="store_true")
     args = parser.parse_args()
     if args.dump_first:
-        import subprocess
-
-        for only in ("XES3G5M", "XES3G5M attn."):
-            print("dump", only)
-            subprocess.run(
-                [sys.executable, "scripts/61_learner_bootstrap.py", "--stage", "dump", "--only", only],
-                cwd=REPO,
-                check=False,
-            )
+        dump_needed()
     alert = _mean_alert(LSTM)
     try:
         delta = _delta_of_deltas()

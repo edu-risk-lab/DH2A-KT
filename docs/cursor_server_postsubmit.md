@@ -1,5 +1,7 @@
 # Cursor on GPU server — post-submit queue
 
+**Current job (25 Nov 2026):** recompute the paired LSTM−attention learner CI. Follow [`cursor_server_lstm_attn_ci_2026-11-25.md`](cursor_server_lstm_attn_ci_2026-11-25.md) first. Do not train new ladder groups for that job.
+
 Pull `main`, then run only the jobs below. Do **not** invent new groups or change τ / families. Manuscript edits stay on the author laptop; server work is stamps + allowlisted CSVs.
 
 ## Device
